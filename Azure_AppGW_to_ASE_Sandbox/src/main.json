@@ -1,0 +1,1427 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.18.4.5664",
+      "templateHash": "10680219635815723389"
+    }
+  },
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]"
+    },
+    "Website_Name": {
+      "type": "string",
+      "defaultValue": "[format('jamesgsite{0}', substring(uniqueString(resourceGroup().id), 0, 5))]",
+      "metadata": {
+        "description": "Name of the App Service"
+      }
+    },
+    "vm_adminUsername": {
+      "type": "string",
+      "metadata": {
+        "description": "Username for the admin account of the Virtual Machines"
+      }
+    },
+    "vm_adminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Password for the admin account of the Virtual Machines"
+      }
+    },
+    "vmSize": {
+      "type": "string",
+      "defaultValue": "Standard_B2ms",
+      "metadata": {
+        "description": "Password for the Virtual Machine Admin User"
+      }
+    },
+    "accelNet": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "True enables Accelerated Networking and False disabled it.  \r\nNot all VM sizes support Accel Net (i.e. Standard_B2ms).  \r\nI'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net.\r\n"
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "vnet",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "defaultNSG_Name": {
+            "value": "nsg"
+          },
+          "firstTwoOctetsOfVNETPrefix": {
+            "value": "10.0"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "routeTable_Name": {
+            "value": "rt"
+          },
+          "vnet_Name": {
+            "value": "vnet"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.18.4.5664",
+              "templateHash": "3106251992310503804"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string",
+              "metadata": {
+                "description": "Azure Datacenter that the resource is deployed to"
+              }
+            },
+            "vnet_Name": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the Virtual Network"
+              }
+            },
+            "vnet_AddressPrefix": {
+              "type": "string",
+              "defaultValue": "[format('{0}.0.0/16', parameters('firstTwoOctetsOfVNETPrefix'))]",
+              "metadata": {
+                "description": "Address Prefix of the Virtual Network"
+              }
+            },
+            "defaultNSG_Name": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the Network Security Group"
+              }
+            },
+            "routeTable_Name": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the Route Table"
+              }
+            },
+            "firstTwoOctetsOfVNETPrefix": {
+              "type": "string",
+              "metadata": {
+                "description": "First two octects of the vnet prefix"
+              }
+            },
+            "subnet_Gateway_Name": {
+              "type": "string",
+              "defaultValue": "GatewaySubnet",
+              "metadata": {
+                "description": "Name of the Azure Virtual Network Gateway Subnet"
+              }
+            },
+            "subnet_Gateway_AddressPrefix": {
+              "type": "string",
+              "defaultValue": "[format('{0}.0.0/24', parameters('firstTwoOctetsOfVNETPrefix'))]",
+              "metadata": {
+                "description": "Address Prefix of the Azure Virtual Network Gateway Subnet"
+              }
+            },
+            "subnet_AzFW_Name": {
+              "type": "string",
+              "defaultValue": "AzureFirewallSubnet",
+              "metadata": {
+                "description": "Name of the Azure Firewall Subnet"
+              }
+            },
+            "subnet_AzFW_AddressPrefix": {
+              "type": "string",
+              "defaultValue": "[format('{0}.1.0/24', parameters('firstTwoOctetsOfVNETPrefix'))]",
+              "metadata": {
+                "description": "Address Prefix of the Azure Firewall Subnet"
+              }
+            },
+            "subnet_AzFW_Management_Name": {
+              "type": "string",
+              "defaultValue": "AzureFirewallManagementSubnet",
+              "metadata": {
+                "description": "Name of the Azure Firewall Management Subnet"
+              }
+            },
+            "subnet_AzFW_Management_AddressPrefix": {
+              "type": "string",
+              "defaultValue": "[format('{0}.2.0/24', parameters('firstTwoOctetsOfVNETPrefix'))]",
+              "metadata": {
+                "description": "Address Prefix of the Azure Firewall Management Subnet"
+              }
+            },
+            "subnet_Bastion_Name": {
+              "type": "string",
+              "defaultValue": "AzureBastionSubnet",
+              "metadata": {
+                "description": "Name of the Azure Bastion Subnet"
+              }
+            },
+            "subnet_Bastion_AddressPrefix": {
+              "type": "string",
+              "defaultValue": "[format('{0}.3.0/24', parameters('firstTwoOctetsOfVNETPrefix'))]",
+              "metadata": {
+                "description": "Address Prefix of the Azure Bastion Subnet"
+              }
+            },
+            "subnet_General_Name": {
+              "type": "string",
+              "defaultValue": "General",
+              "metadata": {
+                "description": "Name of the General Subnet for any other resources"
+              }
+            },
+            "subnet_General_AddressPrefix": {
+              "type": "string",
+              "defaultValue": "[format('{0}.4.0/24', parameters('firstTwoOctetsOfVNETPrefix'))]",
+              "metadata": {
+                "description": "Address Prefix of the General Subnet"
+              }
+            },
+            "subnet_PrivateEndpoints_Name": {
+              "type": "string",
+              "defaultValue": "PrivateEndpoints",
+              "metadata": {
+                "description": "Name of the PrivateEndpoint Subnet"
+              }
+            },
+            "subnet_PrivateEndpoints_AddressPrefix": {
+              "type": "string",
+              "defaultValue": "[format('{0}.5.0/24', parameters('firstTwoOctetsOfVNETPrefix'))]",
+              "metadata": {
+                "description": "Address Prefix of the PrivateEndpoint Subnet"
+              }
+            },
+            "subnet_PrivateLinkService_Name": {
+              "type": "string",
+              "defaultValue": "PrivateLinkService",
+              "metadata": {
+                "description": "Name of the PrivateLinkService Subnet"
+              }
+            },
+            "subnet_PrivateLinkService_AddressPrefix": {
+              "type": "string",
+              "defaultValue": "[format('{0}.6.0/24', parameters('firstTwoOctetsOfVNETPrefix'))]",
+              "metadata": {
+                "description": "Address Prefix of the PrivateLinkService Subnet"
+              }
+            },
+            "subnet_ApplicationGatewaySubnet_Name": {
+              "type": "string",
+              "defaultValue": "ApplicationGatewaySubnet",
+              "metadata": {
+                "description": "Name of the ApplicationGateway Subnet"
+              }
+            },
+            "subnet_ApplicationGatewaySubnet_AddressPrefix": {
+              "type": "string",
+              "defaultValue": "[format('{0}.7.0/24', parameters('firstTwoOctetsOfVNETPrefix'))]",
+              "metadata": {
+                "description": "Address Prefix of the ApplicationGateway Subnet"
+              }
+            },
+            "subnet_AppServiceSubnet_Name": {
+              "type": "string",
+              "defaultValue": "AppServiceSubnet",
+              "metadata": {
+                "description": "Name of the AppService Subnet"
+              }
+            },
+            "subnet_AppServiceSubnet_AddressPrefix": {
+              "type": "string",
+              "defaultValue": "[format('{0}.8.0/24', parameters('firstTwoOctetsOfVNETPrefix'))]",
+              "metadata": {
+                "description": "Address Prefix of the AppService Subnet"
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Network/virtualNetworks",
+              "apiVersion": "2022-09-01",
+              "name": "[parameters('vnet_Name')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "addressSpace": {
+                  "addressPrefixes": [
+                    "[parameters('vnet_AddressPrefix')]"
+                  ]
+                },
+                "subnets": [
+                  {
+                    "name": "[parameters('subnet_Gateway_Name')]",
+                    "properties": {
+                      "addressPrefix": "[parameters('subnet_Gateway_AddressPrefix')]",
+                      "delegations": [],
+                      "privateEndpointNetworkPolicies": "Disabled",
+                      "privateLinkServiceNetworkPolicies": "Enabled"
+                    }
+                  },
+                  {
+                    "name": "[parameters('subnet_AzFW_Name')]",
+                    "properties": {
+                      "addressPrefix": "[parameters('subnet_AzFW_AddressPrefix')]",
+                      "delegations": [],
+                      "privateEndpointNetworkPolicies": "Disabled",
+                      "privateLinkServiceNetworkPolicies": "Enabled"
+                    }
+                  },
+                  {
+                    "name": "[parameters('subnet_AzFW_Management_Name')]",
+                    "properties": {
+                      "addressPrefix": "[parameters('subnet_AzFW_Management_AddressPrefix')]",
+                      "delegations": [],
+                      "privateEndpointNetworkPolicies": "Disabled",
+                      "privateLinkServiceNetworkPolicies": "Enabled"
+                    }
+                  },
+                  {
+                    "name": "[parameters('subnet_Bastion_Name')]",
+                    "properties": {
+                      "addressPrefix": "[parameters('subnet_Bastion_AddressPrefix')]",
+                      "delegations": [],
+                      "privateEndpointNetworkPolicies": "Disabled",
+                      "privateLinkServiceNetworkPolicies": "Enabled"
+                    }
+                  },
+                  {
+                    "name": "[parameters('subnet_General_Name')]",
+                    "properties": {
+                      "addressPrefix": "[parameters('subnet_General_AddressPrefix')]",
+                      "networkSecurityGroup": {
+                        "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('defaultNSG_Name'))]"
+                      },
+                      "routeTable": {
+                        "id": "[resourceId('Microsoft.Network/routeTables', parameters('routeTable_Name'))]"
+                      },
+                      "delegations": [],
+                      "privateEndpointNetworkPolicies": "Disabled",
+                      "privateLinkServiceNetworkPolicies": "Enabled"
+                    }
+                  },
+                  {
+                    "name": "[parameters('subnet_PrivateEndpoints_Name')]",
+                    "properties": {
+                      "addressPrefix": "[parameters('subnet_PrivateEndpoints_AddressPrefix')]",
+                      "networkSecurityGroup": {
+                        "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('defaultNSG_Name'))]"
+                      },
+                      "delegations": [],
+                      "privateEndpointNetworkPolicies": "Disabled",
+                      "privateLinkServiceNetworkPolicies": "Enabled"
+                    }
+                  },
+                  {
+                    "name": "[parameters('subnet_PrivateLinkService_Name')]",
+                    "properties": {
+                      "addressPrefix": "[parameters('subnet_PrivateLinkService_AddressPrefix')]",
+                      "networkSecurityGroup": {
+                        "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('defaultNSG_Name'))]"
+                      },
+                      "delegations": [],
+                      "privateEndpointNetworkPolicies": "Disabled",
+                      "privateLinkServiceNetworkPolicies": "Disabled"
+                    }
+                  },
+                  {
+                    "name": "[parameters('subnet_ApplicationGatewaySubnet_Name')]",
+                    "properties": {
+                      "addressPrefix": "[parameters('subnet_ApplicationGatewaySubnet_AddressPrefix')]",
+                      "networkSecurityGroup": {
+                        "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'AppGW_NSG')]"
+                      },
+                      "delegations": [],
+                      "privateEndpointNetworkPolicies": "Disabled",
+                      "privateLinkServiceNetworkPolicies": "Enabled"
+                    }
+                  },
+                  {
+                    "name": "[parameters('subnet_AppServiceSubnet_Name')]",
+                    "properties": {
+                      "addressPrefix": "[parameters('subnet_AppServiceSubnet_AddressPrefix')]",
+                      "networkSecurityGroup": {
+                        "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('defaultNSG_Name'))]"
+                      },
+                      "delegations": [
+                        {
+                          "name": "delegation",
+                          "properties": {
+                            "serviceName": "Microsoft.Web/serverfarms"
+                          },
+                          "type": "Microsoft.Network/virtualNetworks/subnets/delegations"
+                        }
+                      ],
+                      "privateEndpointNetworkPolicies": "Disabled",
+                      "privateLinkServiceNetworkPolicies": "Enabled"
+                    }
+                  }
+                ],
+                "enableDdosProtection": false
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', 'AppGW_NSG')]",
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('defaultNSG_Name'))]",
+                "[resourceId('Microsoft.Network/routeTables', parameters('routeTable_Name'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Network/routeTables",
+              "apiVersion": "2023-02-01",
+              "name": "[parameters('routeTable_Name')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "disableBgpRoutePropagation": false
+              }
+            },
+            {
+              "type": "Microsoft.Network/networkSecurityGroups",
+              "apiVersion": "2022-09-01",
+              "name": "[parameters('defaultNSG_Name')]",
+              "location": "[parameters('location')]",
+              "properties": {}
+            },
+            {
+              "type": "Microsoft.Network/networkSecurityGroups",
+              "apiVersion": "2022-11-01",
+              "name": "AppGW_NSG",
+              "location": "[parameters('location')]",
+              "properties": {
+                "securityRules": []
+              }
+            },
+            {
+              "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+              "apiVersion": "2022-11-01",
+              "name": "[format('{0}/{1}', 'AppGW_NSG', 'AllowGatewayManager')]",
+              "properties": {
+                "description": "Allow GatewayManager",
+                "protocol": "*",
+                "sourcePortRange": "*",
+                "destinationPortRange": "65200-65535",
+                "sourceAddressPrefix": "GatewayManager",
+                "destinationAddressPrefix": "*",
+                "access": "Allow",
+                "priority": 1000,
+                "direction": "Inbound",
+                "sourcePortRanges": [],
+                "destinationPortRanges": [],
+                "sourceAddressPrefixes": [],
+                "destinationAddressPrefixes": []
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', 'AppGW_NSG')]"
+              ]
+            }
+          ],
+          "outputs": {
+            "gatewaySubnetID": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('vnet_Name')), '2022-09-01').subnets[0].id]"
+            },
+            "azfwSubnetID": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('vnet_Name')), '2022-09-01').subnets[1].id]"
+            },
+            "azfwManagementSubnetID": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('vnet_Name')), '2022-09-01').subnets[2].id]"
+            },
+            "bastionSubnetID": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('vnet_Name')), '2022-09-01').subnets[3].id]"
+            },
+            "generalSubnetID": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('vnet_Name')), '2022-09-01').subnets[4].id]"
+            },
+            "privateEndpointSubnetID": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('vnet_Name')), '2022-09-01').subnets[5].id]"
+            },
+            "privateLinkServiceSubnetID": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('vnet_Name')), '2022-09-01').subnets[6].id]"
+            },
+            "applicationGatewaySubnetID": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('vnet_Name')), '2022-09-01').subnets[7].id]"
+            },
+            "applicationGatewayPrivateIP": {
+              "type": "string",
+              "value": "[format('{0}.7.254', parameters('firstTwoOctetsOfVNETPrefix'))]"
+            },
+            "appServiceSubnetID": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('vnet_Name')), '2022-09-01').subnets[8].id]"
+            },
+            "vnetName": {
+              "type": "string",
+              "value": "[parameters('vnet_Name')]"
+            },
+            "vnetID": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnet_Name'))]"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "site",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "ASP_Name": {
+            "value": "asp"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "Vnet_Name": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'vnet'), '2022-09-01').outputs.vnetName.value]"
+          },
+          "appServiceSubnetID": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'vnet'), '2022-09-01').outputs.appServiceSubnetID.value]"
+          },
+          "Website_Name": {
+            "value": "[parameters('Website_Name')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.18.4.5664",
+              "templateHash": "13076972450419858485"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string",
+              "metadata": {
+                "description": "Region that the resources are deployed to"
+              }
+            },
+            "ASP_Name": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the App Service Plan"
+              }
+            },
+            "Website_Name": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the App Service"
+              }
+            },
+            "Vnet_Name": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the Virtual Network for both the Application Gateway and App Service Environment"
+              }
+            },
+            "appServiceSubnetID": {
+              "type": "string",
+              "metadata": {
+                "description": "Subnet ID of the Subnet that the App Service will be vnet injected into"
+              }
+            }
+          },
+          "variables": {
+            "ASE_to_Vnet_Link_Name": "[format('{0}_to_{1}', parameters('Website_Name'), parameters('Vnet_Name'))]"
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Web/serverfarms",
+              "apiVersion": "2022-09-01",
+              "name": "[parameters('ASP_Name')]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "S1",
+                "tier": "Standard",
+                "size": "S1",
+                "family": "S",
+                "capacity": 1
+              },
+              "kind": "app",
+              "properties": {
+                "perSiteScaling": false,
+                "elasticScaleEnabled": false,
+                "maximumElasticWorkerCount": 1,
+                "isSpot": false,
+                "reserved": false,
+                "isXenon": false,
+                "hyperV": false,
+                "targetWorkerCount": 0,
+                "targetWorkerSizeId": 0,
+                "zoneRedundant": false
+              }
+            },
+            {
+              "type": "Microsoft.Web/sites/basicPublishingCredentialsPolicies",
+              "apiVersion": "2022-09-01",
+              "name": "[format('{0}/{1}', parameters('Website_Name'), 'ftp')]",
+              "properties": {
+                "allow": true
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('Website_Name'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Web/sites/basicPublishingCredentialsPolicies",
+              "apiVersion": "2022-09-01",
+              "name": "[format('{0}/{1}', parameters('Website_Name'), 'scm')]",
+              "properties": {
+                "allow": true
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('Website_Name'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Web/sites/config",
+              "apiVersion": "2022-09-01",
+              "name": "[format('{0}/{1}', parameters('Website_Name'), 'web')]",
+              "properties": {
+                "numberOfWorkers": 1,
+                "defaultDocuments": [
+                  "Default.htm",
+                  "Default.html",
+                  "Default.asp",
+                  "index.htm",
+                  "index.html",
+                  "iisstart.htm",
+                  "default.aspx",
+                  "index.php",
+                  "hostingstart.html"
+                ],
+                "netFrameworkVersion": "v7.0",
+                "requestTracingEnabled": false,
+                "remoteDebuggingEnabled": false,
+                "httpLoggingEnabled": false,
+                "acrUseManagedIdentityCreds": false,
+                "logsDirectorySizeLimit": 35,
+                "detailedErrorLoggingEnabled": false,
+                "publishingUsername": "$jamesgbicepwebsite",
+                "scmType": "GitHubAction",
+                "use32BitWorkerProcess": true,
+                "webSocketsEnabled": false,
+                "alwaysOn": true,
+                "managedPipelineMode": "Integrated",
+                "virtualApplications": [
+                  {
+                    "virtualPath": "/",
+                    "physicalPath": "site\\wwwroot",
+                    "preloadEnabled": true
+                  }
+                ],
+                "loadBalancing": "LeastRequests",
+                "experiments": {
+                  "rampUpRules": []
+                },
+                "autoHealEnabled": false,
+                "vnetName": "[variables('ASE_to_Vnet_Link_Name')]",
+                "vnetRouteAllEnabled": true,
+                "vnetPrivatePortsCount": 0,
+                "publicNetworkAccess": "Enabled",
+                "localMySqlEnabled": false,
+                "ipSecurityRestrictions": [
+                  {
+                    "ipAddress": "Any",
+                    "action": "Allow",
+                    "priority": 2147483647,
+                    "name": "Allow all",
+                    "description": "Allow all access"
+                  }
+                ],
+                "ipSecurityRestrictionsDefaultAction": "Allow",
+                "scmIpSecurityRestrictions": [
+                  {
+                    "ipAddress": "Any",
+                    "action": "Allow",
+                    "priority": 2147483647,
+                    "name": "Allow all",
+                    "description": "Allow all access"
+                  }
+                ],
+                "scmIpSecurityRestrictionsDefaultAction": "Allow",
+                "scmIpSecurityRestrictionsUseMain": false,
+                "http20Enabled": false,
+                "minTlsVersion": "1.2",
+                "scmMinTlsVersion": "1.2",
+                "ftpsState": "FtpsOnly",
+                "preWarmedInstanceCount": 0,
+                "elasticWebAppScaleLimit": 0,
+                "functionsRuntimeScaleMonitoringEnabled": false,
+                "minimumElasticInstanceCount": 0,
+                "azureStorageAccounts": {}
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('Website_Name'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Web/sites/hostNameBindings",
+              "apiVersion": "2022-09-01",
+              "name": "[format('{0}/{1}', parameters('Website_Name'), format('{0}.azurewebsites.net', parameters('Website_Name')))]",
+              "properties": {
+                "siteName": "jamesgbicepwebsite",
+                "hostNameType": "Verified"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('Website_Name'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Web/sites",
+              "apiVersion": "2022-09-01",
+              "name": "[parameters('Website_Name')]",
+              "location": "[parameters('location')]",
+              "kind": "app",
+              "properties": {
+                "enabled": true,
+                "hostNameSslStates": [
+                  {
+                    "name": "[format('{0}.azurewebsites.net', parameters('Website_Name'))]",
+                    "sslState": "Disabled",
+                    "hostType": "Standard"
+                  },
+                  {
+                    "name": "[format('{0}.scm.azurewebsites.net', parameters('Website_Name'))]",
+                    "sslState": "Disabled",
+                    "hostType": "Repository"
+                  }
+                ],
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('ASP_Name'))]",
+                "reserved": false,
+                "isXenon": false,
+                "hyperV": false,
+                "vnetRouteAllEnabled": true,
+                "vnetImagePullEnabled": false,
+                "vnetContentShareEnabled": false,
+                "siteConfig": {
+                  "numberOfWorkers": 1,
+                  "acrUseManagedIdentityCreds": false,
+                  "alwaysOn": true,
+                  "http20Enabled": false,
+                  "functionAppScaleLimit": 0,
+                  "minimumElasticInstanceCount": 0
+                },
+                "scmSiteAlsoStopped": false,
+                "clientAffinityEnabled": true,
+                "clientCertEnabled": false,
+                "clientCertMode": "Required",
+                "hostNamesDisabled": false,
+                "customDomainVerificationId": "3090E394E60D6B59248A348EFCDF9229D62149FBCB879BDCD211F73F69D00FFC",
+                "containerSize": 0,
+                "dailyMemoryTimeQuota": 0,
+                "httpsOnly": false,
+                "redundancyMode": "None",
+                "publicNetworkAccess": "Enabled",
+                "storageAccountRequired": false,
+                "virtualNetworkSubnetId": "[parameters('appServiceSubnetID')]",
+                "keyVaultReferenceIdentity": "SystemAssigned"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', parameters('ASP_Name'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Web/sites/virtualNetworkConnections",
+              "apiVersion": "2022-09-01",
+              "name": "[format('{0}/{1}', parameters('Website_Name'), variables('ASE_to_Vnet_Link_Name'))]",
+              "properties": {
+                "vnetResourceId": "[parameters('appServiceSubnetID')]",
+                "isSwift": true
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('Website_Name'))]"
+              ]
+            }
+          ],
+          "outputs": {
+            "websiteFQDN": {
+              "type": "string",
+              "value": "[format('{0}.azurewebsites.net', parameters('Website_Name'))]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'vnet')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "AppGW",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "AppGW_Name": {
+            "value": "AppGWv2"
+          },
+          "AppGW_PIP_Name": {
+            "value": "AppGW_PIP"
+          },
+          "AppGW_PrivateIP_Address": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'vnet'), '2022-09-01').outputs.applicationGatewayPrivateIP.value]"
+          },
+          "AppGW_WAF_Name": {
+            "value": "AppGW_WAF"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "AppGW_SubnetID": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'vnet'), '2022-09-01').outputs.applicationGatewaySubnetID.value]"
+          },
+          "backendPoolFQDN": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'site'), '2022-09-01').outputs.websiteFQDN.value]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.18.4.5664",
+              "templateHash": "3938802863542170772"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string",
+              "metadata": {
+                "description": "Region that the resources are deployed to"
+              }
+            },
+            "AppGW_Name": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the Application Gateway"
+              }
+            },
+            "AppGW_PIP_Name": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the Public IP Address resource of the Applciation Gateway"
+              }
+            },
+            "AppGW_PrivateIP_Address": {
+              "type": "string"
+            },
+            "AppGW_SubnetID": {
+              "type": "string"
+            },
+            "AppGW_WAF_Name": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the Web Application Firewall of the Application Gateway"
+              }
+            },
+            "backendPoolFQDN": {
+              "type": "string",
+              "metadata": {
+                "description": "FQDN of the website in the backend pool of the Application Gateway"
+              }
+            }
+          },
+          "variables": {
+            "frontendID": "[resourceId('Microsoft.Network/applicationGateways/frontendIPConfigurations', parameters('AppGW_Name'), 'fip_private')]",
+            "frontendPortID": "[resourceId('Microsoft.Network/applicationGateways/frontendPorts', parameters('AppGW_Name'), 'port_80')]",
+            "httpListenerID": "[resourceId('Microsoft.Network/applicationGateways/httpListeners', parameters('AppGW_Name'), 'http_listener')]",
+            "backendAddressPoolID": "[resourceId('Microsoft.Network/applicationGateways/backendAddressPools', parameters('AppGW_Name'), 'bep')]",
+            "backendHTTPSettingsID": "[resourceId('Microsoft.Network/applicationGateways/backendHttpSettingsCollection', parameters('AppGW_Name'), 'http-to-asp-settings')]"
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies",
+              "apiVersion": "2022-11-01",
+              "name": "[parameters('AppGW_WAF_Name')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "customRules": [],
+                "policySettings": {
+                  "requestBodyCheck": true,
+                  "maxRequestBodySizeInKb": 128,
+                  "fileUploadLimitInMb": 100,
+                  "state": "Enabled",
+                  "mode": "Detection",
+                  "requestBodyInspectLimitInKB": 128,
+                  "fileUploadEnforcement": true,
+                  "requestBodyEnforcement": true
+                },
+                "managedRules": {
+                  "managedRuleSets": [
+                    {
+                      "ruleSetType": "OWASP",
+                      "ruleSetVersion": "3.2",
+                      "ruleGroupOverrides": []
+                    },
+                    {
+                      "ruleSetType": "Microsoft_BotManagerRuleSet",
+                      "ruleSetVersion": "0.1",
+                      "ruleGroupOverrides": []
+                    }
+                  ],
+                  "exclusions": []
+                }
+              }
+            },
+            {
+              "type": "Microsoft.Network/publicIPAddresses",
+              "apiVersion": "2022-11-01",
+              "name": "[parameters('AppGW_PIP_Name')]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Standard",
+                "tier": "Regional"
+              },
+              "properties": {
+                "publicIPAddressVersion": "IPv4",
+                "publicIPAllocationMethod": "Static",
+                "idleTimeoutInMinutes": 4,
+                "ipTags": []
+              }
+            },
+            {
+              "type": "Microsoft.Network/applicationGateways",
+              "apiVersion": "2022-11-01",
+              "name": "[parameters('AppGW_Name')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "sku": {
+                  "name": "WAF_v2",
+                  "tier": "WAF_v2"
+                },
+                "gatewayIPConfigurations": [
+                  {
+                    "name": "appGatewayIpConfig",
+                    "properties": {
+                      "subnet": {
+                        "id": "[parameters('AppGW_SubnetID')]"
+                      }
+                    }
+                  }
+                ],
+                "sslCertificates": [],
+                "trustedRootCertificates": [],
+                "trustedClientCertificates": [],
+                "sslProfiles": [],
+                "frontendIPConfigurations": [
+                  {
+                    "name": "fip_pub",
+                    "properties": {
+                      "privateIPAllocationMethod": "Dynamic",
+                      "publicIPAddress": {
+                        "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('AppGW_PIP_Name'))]"
+                      }
+                    }
+                  },
+                  {
+                    "name": "fip_private",
+                    "properties": {
+                      "privateIPAddress": "[parameters('AppGW_PrivateIP_Address')]",
+                      "privateIPAllocationMethod": "Static",
+                      "subnet": {
+                        "id": "[parameters('AppGW_SubnetID')]"
+                      }
+                    }
+                  }
+                ],
+                "frontendPorts": [
+                  {
+                    "name": "port_80",
+                    "properties": {
+                      "port": 80
+                    }
+                  }
+                ],
+                "backendAddressPools": [
+                  {
+                    "name": "bep",
+                    "properties": {
+                      "backendAddresses": [
+                        {
+                          "fqdn": "[parameters('backendPoolFQDN')]"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "loadDistributionPolicies": [],
+                "backendHttpSettingsCollection": [
+                  {
+                    "name": "http-to-asp-settings",
+                    "properties": {
+                      "port": 80,
+                      "protocol": "Http",
+                      "cookieBasedAffinity": "Disabled",
+                      "pickHostNameFromBackendAddress": true,
+                      "requestTimeout": 20
+                    }
+                  }
+                ],
+                "httpListeners": [
+                  {
+                    "name": "http_listener",
+                    "properties": {
+                      "frontendIPConfiguration": {
+                        "id": "[variables('frontendID')]"
+                      },
+                      "frontendPort": {
+                        "id": "[variables('frontendPortID')]"
+                      },
+                      "protocol": "Http",
+                      "hostNames": [],
+                      "requireServerNameIndication": false
+                    }
+                  }
+                ],
+                "listeners": [],
+                "urlPathMaps": [],
+                "requestRoutingRules": [
+                  {
+                    "name": "http-to-asp",
+                    "properties": {
+                      "ruleType": "Basic",
+                      "priority": 100,
+                      "httpListener": {
+                        "id": "[variables('httpListenerID')]"
+                      },
+                      "backendAddressPool": {
+                        "id": "[variables('backendAddressPoolID')]"
+                      },
+                      "backendHttpSettings": {
+                        "id": "[variables('backendHTTPSettingsID')]"
+                      }
+                    }
+                  }
+                ],
+                "routingRules": [],
+                "probes": [],
+                "rewriteRuleSets": [],
+                "redirectConfigurations": [],
+                "privateLinkConfigurations": [],
+                "enableHttp2": true,
+                "autoscaleConfiguration": {
+                  "minCapacity": 0,
+                  "maxCapacity": 2
+                },
+                "firewallPolicy": {
+                  "id": "[resourceId('Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies', parameters('AppGW_WAF_Name'))]"
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', parameters('AppGW_PIP_Name'))]",
+                "[resourceId('Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies', parameters('AppGW_WAF_Name'))]"
+              ]
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'vnet')]",
+        "[resourceId('Microsoft.Resources/deployments', 'site')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "clientVMWindows",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "accelNet": {
+            "value": "[parameters('accelNet')]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "nic_Name": {
+            "value": "clientVMWindows_NIC"
+          },
+          "subnetID": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'vnet'), '2022-09-01').outputs.generalSubnetID.value]"
+          },
+          "vm_AdminPassword": {
+            "value": "[parameters('vm_adminPassword')]"
+          },
+          "vm_AdminUserName": {
+            "value": "[parameters('vm_adminUsername')]"
+          },
+          "vm_Name": {
+            "value": "clientVMWindows"
+          },
+          "vmSize": {
+            "value": "[parameters('vmSize')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.18.4.5664",
+              "templateHash": "17656567703793400280"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string"
+            },
+            "vm_Name": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the Virtual Machine"
+              }
+            },
+            "vmSize": {
+              "type": "string",
+              "metadata": {
+                "description": "Size of the VM"
+              }
+            },
+            "vm_AdminUserName": {
+              "type": "string",
+              "metadata": {
+                "description": "Admin Username for the Virtual Machine"
+              }
+            },
+            "vm_AdminPassword": {
+              "type": "securestring",
+              "metadata": {
+                "description": "Password for the Virtual Machine Admin User"
+              }
+            },
+            "nic_Name": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the Virtual Machines Network Interface"
+              }
+            },
+            "accelNet": {
+              "type": "bool",
+              "metadata": {
+                "description": "True enables Accelerated Networking and False disabled it.  Not all VM sizes support Accel Net"
+              }
+            },
+            "subnetID": {
+              "type": "string"
+            },
+            "vm_ScriptFileUri": {
+              "type": "string",
+              "defaultValue": "https://mainjamesgstorage.blob.core.windows.net/scripts/InitScript.ps1"
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Network/networkInterfaces",
+              "apiVersion": "2022-09-01",
+              "name": "[parameters('nic_Name')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "ipConfigurations": [
+                  {
+                    "name": "ipconfig1",
+                    "type": "Microsoft.Network/networkInterfaces/ipConfigurations",
+                    "properties": {
+                      "privateIPAllocationMethod": "Dynamic",
+                      "subnet": {
+                        "id": "[parameters('subnetID')]"
+                      },
+                      "primary": true,
+                      "privateIPAddressVersion": "IPv4"
+                    }
+                  }
+                ],
+                "enableAcceleratedNetworking": "[parameters('accelNet')]",
+                "enableIPForwarding": false,
+                "disableTcpStateTracking": false,
+                "nicType": "Standard"
+              }
+            },
+            {
+              "type": "Microsoft.Compute/virtualMachines",
+              "apiVersion": "2022-11-01",
+              "name": "[parameters('vm_Name')]",
+              "location": "[parameters('location')]",
+              "identity": {
+                "type": "SystemAssigned"
+              },
+              "properties": {
+                "hardwareProfile": {
+                  "vmSize": "[parameters('vmSize')]"
+                },
+                "storageProfile": {
+                  "imageReference": {
+                    "publisher": "MicrosoftWindowsServer",
+                    "offer": "WindowsServer",
+                    "sku": "2022-datacenter-azure-edition",
+                    "version": "latest"
+                  },
+                  "osDisk": {
+                    "osType": "Windows",
+                    "name": "[format('{0}_OsDisk_1', parameters('vm_Name'))]",
+                    "createOption": "FromImage",
+                    "caching": "ReadWrite",
+                    "managedDisk": {
+                      "storageAccountType": "Standard_LRS"
+                    },
+                    "deleteOption": "Delete",
+                    "diskSizeGB": 127
+                  },
+                  "dataDisks": [],
+                  "diskControllerType": "SCSI"
+                },
+                "osProfile": {
+                  "computerName": "[parameters('vm_Name')]",
+                  "adminUsername": "[parameters('vm_AdminUserName')]",
+                  "adminPassword": "[parameters('vm_AdminPassword')]",
+                  "windowsConfiguration": {
+                    "provisionVMAgent": true,
+                    "enableAutomaticUpdates": true,
+                    "patchSettings": {
+                      "patchMode": "AutomaticByOS",
+                      "assessmentMode": "ImageDefault",
+                      "enableHotpatching": false
+                    },
+                    "enableVMAgentPlatformUpdates": false
+                  },
+                  "secrets": [],
+                  "allowExtensionOperations": true
+                },
+                "networkProfile": {
+                  "networkInterfaces": [
+                    {
+                      "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('nic_Name'))]",
+                      "properties": {
+                        "deleteOption": "Delete"
+                      }
+                    }
+                  ]
+                },
+                "diagnosticsProfile": {
+                  "bootDiagnostics": {
+                    "enabled": true
+                  }
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', parameters('nic_Name'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Compute/virtualMachines/extensions",
+              "apiVersion": "2022-11-01",
+              "name": "[format('{0}/{1}', parameters('vm_Name'), 'AzureNetworkWatcherExtension')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "autoUpgradeMinorVersion": true,
+                "publisher": "Microsoft.Azure.NetworkWatcher",
+                "type": "NetworkWatcherAgentWindows",
+                "typeHandlerVersion": "1.4"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', parameters('vm_Name'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Compute/virtualMachines/extensions",
+              "apiVersion": "2021-11-01",
+              "name": "[format('{0}/{1}', parameters('vm_Name'), 'installcustomscript')]",
+              "location": "[parameters('location')]",
+              "tags": {
+                "displayName": "install software for Windows VM"
+              },
+              "properties": {
+                "publisher": "Microsoft.Compute",
+                "type": "CustomScriptExtension",
+                "typeHandlerVersion": "1.9",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                  "fileUris": [
+                    "[parameters('vm_ScriptFileUri')]"
+                  ]
+                },
+                "protectedSettings": {
+                  "commandToExecute": "powershell -ExecutionPolicy Unrestricted -File InitScript.ps1"
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', parameters('vm_Name'))]"
+              ]
+            }
+          ],
+          "outputs": {
+            "nicName": {
+              "type": "string",
+              "value": "[parameters('nic_Name')]"
+            },
+            "nicIPConfig0Name": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Network/networkInterfaces', parameters('nic_Name')), '2022-09-01').ipConfigurations[0].name]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'vnet')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "hubBastion",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "bastionSubnetID": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'vnet'), '2022-09-01').outputs.bastionSubnetID.value]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.18.4.5664",
+              "templateHash": "10733409533458567780"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string",
+              "metadata": {
+                "description": "Azure Datacenter location that the main resouces will be deployed to."
+              }
+            },
+            "bastion_name": {
+              "type": "string",
+              "defaultValue": "bastion",
+              "metadata": {
+                "description": "Name of the Azure Bastion"
+              }
+            },
+            "bastion_vip_name": {
+              "type": "string",
+              "defaultValue": "bastion_vip",
+              "metadata": {
+                "description": "Name of the Public IP Address attached to the Azure Bastion"
+              }
+            },
+            "bastionSubnetID": {
+              "type": "string",
+              "metadata": {
+                "description": "Resource ID of the subnet the Azure Bastion will be placed in.  The name of the subnet must be \"AzureBastionSubnet\""
+              }
+            },
+            "bastionSKU": {
+              "type": "string",
+              "defaultValue": "Basic",
+              "allowedValues": [
+                "Basic",
+                "Standard"
+              ],
+              "metadata": {
+                "description": "SKU of the Azure Bastion"
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Network/bastionHosts",
+              "apiVersion": "2022-09-01",
+              "name": "[parameters('bastion_name')]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "[parameters('bastionSKU')]"
+              },
+              "properties": {
+                "scaleUnits": 2,
+                "enableTunneling": false,
+                "enableIpConnect": false,
+                "disableCopyPaste": false,
+                "enableShareableLink": false,
+                "ipConfigurations": [
+                  {
+                    "name": "IpConf",
+                    "properties": {
+                      "privateIPAllocationMethod": "Dynamic",
+                      "publicIPAddress": {
+                        "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('bastion_vip_name'))]"
+                      },
+                      "subnet": {
+                        "id": "[parameters('bastionSubnetID')]"
+                      }
+                    }
+                  }
+                ]
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', parameters('bastion_vip_name'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Network/publicIPAddresses",
+              "apiVersion": "2022-09-01",
+              "name": "[parameters('bastion_vip_name')]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Standard",
+                "tier": "Regional"
+              },
+              "properties": {
+                "publicIPAddressVersion": "IPv4",
+                "publicIPAllocationMethod": "Static",
+                "idleTimeoutInMinutes": 4,
+                "ipTags": []
+              }
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'vnet')]"
+      ]
+    }
+  ]
+}

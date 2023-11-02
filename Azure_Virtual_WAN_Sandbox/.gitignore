@@ -1,0 +1,5 @@
+decompile.ps1
+src/main.parameters.json
+DeploymentParameters.json
+subscriptionDeployment.ps1
+testing
