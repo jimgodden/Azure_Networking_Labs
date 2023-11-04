@@ -1,12 +1,23 @@
 # Chocolatey installation
 Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
 
-choco install powershell-core -y
-choco install python311 -y
-choco install vscode -y
-choco install wireshark -y
-choco install pstools -y
+# Install PowerShell Core
+Start-Job -ScriptBlock { choco install powershell-core }
 
+# Install Python 3.11
+Start-Job -ScriptBlock { choco install python311 }
+
+# Install Visual Studio Code
+Start-Job -ScriptBlock { choco install vscode }
+
+# Install Wireshark
+Start-Job -ScriptBlock { choco install wireshark }
+
+# Install PsTools
+Start-Job -ScriptBlock { choco install pstools }
+
+# Wait for all jobs to finish
+Get-Job | Wait-Job
 # npcap for using Wireshark for taking packet captures
 Invoke-WebRequest -Uri "https://npcap.com/dist/npcap-1.75.exe" -OutFile "c:\npcap-1.75.exe"
 
