@@ -1,28 +1,28 @@
 param location string
 
 @description('Name of the Virtual Machine')
-param vm_Name string
+param virtualMachine_Name string
 
-@description('Size of the VM')
-param vmSize string
+@description('Size of the virtualMachine')
+param virtualMachine_Size string
 
 @description('Admin Username for the Virtual Machine')
-param vm_AdminUserName string
+param virtualMachine_AdminUserName string
 
 @description('Password for the Virtual Machine Admin User')
 @secure()
-param vm_AdminPassword string
+param virtualMachine_AdminPassword string
 
 @description('Name of the Virtual Machines Network Interface')
-param nic_Name string
+param networkInterface_Name string
 
-@description('True enables Accelerated Networking and False disabled it.  Not all VM sizes support Accel Net')
-param accelNet bool
+@description('True enables Accelerated Networking and False disabled it.  Not all virtualMachine sizes support Accel Net')
+param acceleratedNetworking bool
 
-param subnetID string
+param subnet_ID string
 
-resource nic 'Microsoft.Network/networkInterfaces@2022-09-01' = {
-  name: nic_Name
+resource networkInterface 'Microsoft.Network/networkInterfaces@2022-09-01' = {
+  name: networkInterface_Name
   location: location
   properties: {
     ipConfigurations: [
@@ -32,26 +32,26 @@ resource nic 'Microsoft.Network/networkInterfaces@2022-09-01' = {
         properties: {
           privateIPAllocationMethod: 'Dynamic'
           subnet: {
-            id: subnetID
+            id: subnet_ID
           }
           primary: true
           privateIPAddressVersion: 'IPv4'
         }
       }
     ]
-    enableAcceleratedNetworking: accelNet
+    enableAcceleratedNetworking: acceleratedNetworking
     enableIPForwarding: false
     disableTcpStateTracking: false
     nicType: 'Standard'
   }
 }
 
-resource linuxVM 'Microsoft.Compute/virtualMachines@2023-03-01' = {
-  name: vm_Name
+resource virtualMachine_Linux 'Microsoft.Compute/virtualMachines@2023-03-01' = {
+  name: virtualMachine_Name
   location: location
   properties: {
     hardwareProfile: {
-      vmSize: vmSize
+      vmSize: virtualMachine_Size
     }
     storageProfile: {
       imageReference: {
@@ -62,7 +62,7 @@ resource linuxVM 'Microsoft.Compute/virtualMachines@2023-03-01' = {
       }
       osDisk: {
         osType: 'Linux'
-        name: '${vm_Name}_OsDisk_1'
+        name: '${virtualMachine_Name}_OsDisk_1'
         createOption: 'FromImage'
         caching: 'ReadWrite'
         deleteOption: 'Delete'
@@ -70,9 +70,9 @@ resource linuxVM 'Microsoft.Compute/virtualMachines@2023-03-01' = {
       dataDisks: []
     }
     osProfile: {
-      computerName: vm_Name
-      adminUsername: vm_AdminUserName
-      adminPassword: vm_AdminPassword
+      computerName: virtualMachine_Name
+      adminUsername: virtualMachine_AdminUserName
+      adminPassword: virtualMachine_AdminPassword
       linuxConfiguration: {
         disablePasswordAuthentication: false
         provisionVMAgent: true
@@ -87,7 +87,7 @@ resource linuxVM 'Microsoft.Compute/virtualMachines@2023-03-01' = {
     networkProfile: {
       networkInterfaces: [
         {
-          id: nic.id
+          id: networkInterface.id
           properties: {
             deleteOption: 'Delete'
           }
@@ -102,8 +102,8 @@ resource linuxVM 'Microsoft.Compute/virtualMachines@2023-03-01' = {
   }
 }
 
-resource vm_NetworkWatcherExtension 'Microsoft.Compute/virtualMachines/extensions@2022-11-01' = {
-  parent: linuxVM
+resource virtualMachine_NetworkWatcherExtension 'Microsoft.Compute/virtualMachines/extensions@2022-11-01' = {
+  parent: virtualMachine_Linux
   name: 'AzureNetworkWatcherExtension'
   location: location
   properties: {

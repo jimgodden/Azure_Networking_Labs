@@ -36,6 +36,18 @@ param subnet_PrivateLinkService_Name string = 'PrivateLinkService'
 @description('Address Prefix of the PrivateEndpoint Subnet')
 param subnet_PrivateLinkService_AddressPrefix string = '${firstTwoOctetsOfVirtualNetworkPrefix}.2.0/24'
 
+@description('Name of the ApplicationGateway Subnet')
+param subnet_ApplicationGatewaySubnet_Name string = 'ApplicationGatewaySubnet'
+
+@description('Address Prefix of the ApplicationGateway Subnet')
+// Any changes to this value need to be replicated to the output applicationGatewayPrivateIP
+param subnet_ApplicationGatewaySubnet_AddressPrefix string = '${firstTwoOctetsOfVirtualNetworkPrefix}.3.0/24'
+
+@description('Name of the AppService Subnet')
+param subnet_AppServiceSubnet_Name string = 'AppServiceSubnet'
+
+@description('Address Prefix of the AppService Subnet')
+param subnet_AppServiceSubnet_AddressPrefix string = '${firstTwoOctetsOfVirtualNetworkPrefix}.4.0/24'
 
 
 resource virtualNetwork 'Microsoft.Network/virtualNetworks@2022-09-01' = {
@@ -93,6 +105,38 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2022-09-01' = {
           privateLinkServiceNetworkPolicies: 'Disabled' // This has to be disabled for Private Link Service to be used in the subnet
         }
       }
+      {
+        name: subnet_ApplicationGatewaySubnet_Name
+        properties: {
+          addressPrefix: subnet_ApplicationGatewaySubnet_AddressPrefix
+          networkSecurityGroup: {
+            id: networkSecurityGroup_ApplicationGateway.id
+          }
+          delegations: []
+          privateEndpointNetworkPolicies: 'Disabled'
+          privateLinkServiceNetworkPolicies: 'Enabled' 
+        }
+      }
+      {
+        name: subnet_AppServiceSubnet_Name
+        properties: {
+          addressPrefix: subnet_AppServiceSubnet_AddressPrefix
+          networkSecurityGroup: {
+            id: networkSecurityGroup.id
+          }
+          delegations: [
+            {
+              name: 'delegation'
+              properties: {
+                serviceName: 'Microsoft.Web/serverfarms'
+              }
+              type: 'Microsoft.Network/virtualNetworks/subnets/delegations'
+            }
+          ]
+          privateEndpointNetworkPolicies: 'Disabled'
+          privateLinkServiceNetworkPolicies: 'Enabled'
+        }
+      }
     ]
     enableDdosProtection: false
   }
@@ -110,6 +154,34 @@ resource networkSecurityGroup 'Microsoft.Network/networkSecurityGroups@2022-09-0
   name: networkSecurityGroup_Default_Name
   location: location
   properties: {
+  }
+}
+
+resource networkSecurityGroup_ApplicationGateway 'Microsoft.Network/networkSecurityGroups@2022-11-01' = {
+  name: 'networkSecurityGroup_ApplicationGateway'
+  location: location
+  properties: {
+    securityRules: []
+  }
+}
+
+resource networkSecurityGroup_ApplicationGateway_AppGWSpecificRule 'Microsoft.Network/networkSecurityGroups/securityRules@2022-11-01' = {
+  parent: networkSecurityGroup_ApplicationGateway
+  name: 'AllowGatewayManager'
+  properties: {
+    description: 'Allow GatewayManager'
+    protocol: '*'
+    sourcePortRange: '*'
+    destinationPortRange: '65200-65535'
+    sourceAddressPrefix: 'GatewayManager'
+    destinationAddressPrefix: '*'
+    access: 'Allow'
+    priority: 1000
+    direction: 'Inbound'
+    sourcePortRanges: []
+    destinationPortRanges: []
+    sourceAddressPrefixes: []
+    destinationAddressPrefixes: []
   }
 }
 
@@ -136,6 +208,11 @@ resource networkSecurityGroup 'Microsoft.Network/networkSecurityGroups@2022-09-0
 output general_SubnetID string = virtualNetwork.properties.subnets[0].id
 output privateEndpoint_SubnetID string = virtualNetwork.properties.subnets[1].id
 output privateLinkService_SubnetID string = virtualNetwork.properties.subnets[2].id
+output applicationGatewaySubnetID string = virtualNetwork.properties.subnets[3].id 
+output appServiceSubnetID string = virtualNetwork.properties.subnets[4].id
+
+// Should be one of the last IPs in the subnet range.  This is for the appgw frontend private ip.
+output applicationGateway_PrivateIP string = '${firstTwoOctetsOfVirtualNetworkPrefix}.3.254' 
 
 output virtualNetwork_Name string = virtualNetwork.name
 output virtualNetwork_ID string = virtualNetwork.id

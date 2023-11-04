@@ -1,35 +1,35 @@
 param location string
 
 @description('Name of the Virtual Machine')
-param vm_Name string
+param virtualMachine_Name string
 
-@description('Size of the VM')
-param vmSize string
+@description('Size of the virtualMachine')
+param virtualMachine_Size string
 
 // param hardwareProfile object
 
 @description('Admin Username for the Virtual Machine')
-param vm_AdminUserName string
+param virtualMachine_AdminUserName string
 
 @description('Password for the Virtual Machine Admin User')
 @secure()
-param vm_AdminPassword string
+param virtualMachine_AdminPassword string
 
 @description('Name of the Virtual Machines Network Interface')
-param nic_Name string
+param networkInterface_Name string
 
-@description('True enables Accelerated Networking and False disabled it.  Not all VM sizes support Accel Net')
-param accelNet bool
+@description('True enables Accelerated Networking and False disabled it.  Not all virtualMachine sizes support Accel Net')
+param acceleratedNetworking bool
 
-param subnetID string
+param subnet_ID string
 
-param vm_ScriptFileUri string = 'https://mainjamesgstorage.blob.core.windows.net/scripts/InitScript.ps1'
-
-
+param virtualMachine_ScriptFileUri string = 'https://mainjamesgstorage.blob.core.windows.net/scripts/InitScript.ps1'
 
 
-resource nic 'Microsoft.Network/networkInterfaces@2022-09-01' = {
-  name: nic_Name
+
+
+resource networkInterface 'Microsoft.Network/networkInterfaces@2022-09-01' = {
+  name: networkInterface_Name
   location: location
   properties: {
     ipConfigurations: [
@@ -39,29 +39,29 @@ resource nic 'Microsoft.Network/networkInterfaces@2022-09-01' = {
         properties: {
           privateIPAllocationMethod: 'Dynamic'
           subnet: {
-            id: subnetID
+            id: subnet_ID
           }
           primary: true
           privateIPAddressVersion: 'IPv4'
         }
       }
     ]
-    enableAcceleratedNetworking: accelNet
+    enableAcceleratedNetworking: acceleratedNetworking
     enableIPForwarding: false
     disableTcpStateTracking: false
     nicType: 'Standard'
   }
 }
 
-resource vm 'Microsoft.Compute/virtualMachines@2022-11-01' = {
-  name: vm_Name
+resource virtualMachine_Windows 'Microsoft.Compute/virtualMachines@2022-11-01' = {
+  name: virtualMachine_Name
   location: location
   identity: {
     type: 'SystemAssigned'
   }
   properties: {
     hardwareProfile: {
-      vmSize: vmSize
+      vmSize: virtualMachine_Size
     }
     storageProfile: {
       imageReference: {
@@ -72,7 +72,7 @@ resource vm 'Microsoft.Compute/virtualMachines@2022-11-01' = {
       }
       osDisk: {
         osType: 'Windows'
-        name: '${vm_Name}_OsDisk_1'
+        name: '${virtualMachine_Name}_OsDisk_1'
         createOption: 'FromImage'
         caching: 'ReadWrite'
         managedDisk: {
@@ -85,9 +85,9 @@ resource vm 'Microsoft.Compute/virtualMachines@2022-11-01' = {
       diskControllerType: 'SCSI'
     }
     osProfile: {
-      computerName: vm_Name
-      adminUsername: vm_AdminUserName
-      adminPassword: vm_AdminPassword
+      computerName: virtualMachine_Name
+      adminUsername: virtualMachine_AdminUserName
+      adminPassword: virtualMachine_AdminPassword
       windowsConfiguration: {
         provisionVMAgent: true
         enableAutomaticUpdates: true
@@ -104,7 +104,7 @@ resource vm 'Microsoft.Compute/virtualMachines@2022-11-01' = {
     networkProfile: {
       networkInterfaces: [
         {
-          id: nic.id
+          id: networkInterface.id
           properties: {
             deleteOption: 'Delete'
           }
@@ -119,8 +119,8 @@ resource vm 'Microsoft.Compute/virtualMachines@2022-11-01' = {
   }
 }
 
-resource vm_NetworkWatcherExtension 'Microsoft.Compute/virtualMachines/extensions@2022-11-01' = {
-  parent: vm
+resource virtualMachine_NetworkWatcherExtension 'Microsoft.Compute/virtualMachines/extensions@2022-11-01' = {
+  parent: virtualMachine_Windows
   name: 'AzureNetworkWatcherExtension'
   location: location
   properties: {
@@ -131,12 +131,12 @@ resource vm_NetworkWatcherExtension 'Microsoft.Compute/virtualMachines/extension
   }
 }
 
-resource vm_CustomScriptExtension 'Microsoft.Compute/virtualMachines/extensions@2021-11-01' = {
-  parent: vm
+resource virtualMachine_CustomScriptExtension 'Microsoft.Compute/virtualMachines/extensions@2021-11-01' = {
+  parent: virtualMachine_Windows
   name: 'installcustomscript'
   location: location
   tags: {
-    displayName: 'install software for Windows VM'
+    displayName: 'install software for Windows virtualMachine'
   }
   properties: {
     publisher: 'Microsoft.Compute'
@@ -145,7 +145,7 @@ resource vm_CustomScriptExtension 'Microsoft.Compute/virtualMachines/extensions@
     autoUpgradeMinorVersion: true
     settings: {
       fileUris: [
-        vm_ScriptFileUri
+        virtualMachine_ScriptFileUri
       ]
     }
     protectedSettings: {
@@ -155,5 +155,5 @@ resource vm_CustomScriptExtension 'Microsoft.Compute/virtualMachines/extensions@
 }
 
 
-output nicName string = nic.name
-output nicIPConfig0Name string = nic.properties.ipConfigurations[0].name
+output networkInterface_Name string = networkInterface.name
+output networkInterface_IPConfig0_Name string = networkInterface.properties.ipConfigurations[0].name
