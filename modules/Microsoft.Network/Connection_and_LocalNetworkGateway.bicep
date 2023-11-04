@@ -1,14 +1,17 @@
-@description('Azure Datacenter that the resources are deployed to')
+@description('Azure Datacenter to which the resources will be deployed')
 param location string
 
-@description('Unique prefix to the names of each resource (i.e. src to dst)')
-param resourceNamePrefix string
+@description('Friendly name for the destination VPN device')
+param vpn_Destination_Name string
 
-@description('Public IP Address of the VPN Gateway Instance')
-param gatewayIPAddress string
+@description('Public IP Address of the Destination VPN')
+param vpn_Destination_PublicIPAddress string
 
-@description('BGP Peering Address of the VPN Gateway Instance')
-param bgpPeeringAddress string
+@description('BGP Peering Address of the Destination VPN')
+param vpn_Destination_BGPIPAddress string
+
+@description('ASN of the Destination VPN')
+param vpn_Destination_ASN int
 
 @description('VPN Shared Key used for authenticating VPN connections')
 @secure()
@@ -17,11 +20,11 @@ param vpn_SharedKey string
 @description('Existing Virtual Network Gateway ID')
 param virtualNetworkGateway_ID string
 
-@description('ASN of the Destination VPN')
-param destination_ASN int
+var virtualNetworkGateway_ID_Split = split(virtualNetworkGateway_ID, '/')
+var virtualNetworkGateway_Name = virtualNetworkGateway_ID_Split[8]  // Needs to be tested.  Might be 7 instead.
 
 resource connection 'Microsoft.Network/connections@2022-11-01' = {
-    name: '${resourceNamePrefix}_conn'
+    name: 'Connection_for_${virtualNetworkGateway_Name}_to_${vpn_Destination_Name}'
     location: location
     properties: {
       virtualNetworkGateway1: {
@@ -45,6 +48,7 @@ resource connection 'Microsoft.Network/connections@2022-11-01' = {
       usePolicyBasedTrafficSelectors: false
     //                      Default is used with the following commented out
     // ipsecPolicies: [
+    // // These settings will work for connecting to Azure Virtual WAN.  Default will not.
     //   {
     //     saLifeTimeSeconds: 3600
     //     saDataSizeKilobytes: 102400000
@@ -62,13 +66,13 @@ resource connection 'Microsoft.Network/connections@2022-11-01' = {
 }
 
 resource localNetworkGateway 'Microsoft.Network/localNetworkGateways@2022-11-01' = {
-  name: '${resourceNamePrefix}_localNetworkGateway'
+  name: 'localNetworkGateway_for_${vpn_Destination_Name}'
   location: location
   properties: {
-    gatewayIpAddress: gatewayIPAddress
+    gatewayIpAddress: vpn_Destination_PublicIPAddress
     bgpSettings: {
-      asn: destination_ASN
-      bgpPeeringAddress: bgpPeeringAddress
+      asn: vpn_Destination_ASN
+      bgpPeeringAddress: vpn_Destination_BGPIPAddress
     }
   }
 }

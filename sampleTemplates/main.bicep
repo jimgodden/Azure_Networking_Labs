@@ -9,7 +9,7 @@ param numberOfLinuxVMs int
 
 param numberOfWindowsVMs int
 
-// Compute
+// Start Compute
 
 module virtualMachine_Linux '../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.bicep' = [ for i in range(1, numberOfLinuxVMs): {
   name: 'linuxVM${i}'
@@ -37,7 +37,9 @@ module virtualMachine_Windows '../modules/Microsoft.Compute/WindowsServer2022/Vi
   }
 } ]
 
-// Network
+// End Compute
+
+// Start Network
 
 module virtualNetwork_Hub '../modules/Microsoft.Network/VirtualNetworkHub.bicep' = {
   name: 'hubVNet'
@@ -123,3 +125,96 @@ module privateLink '../modules/Microsoft.Network/PrivateLink.bicep' = {
     privateLink_SubnetID: virtualNetwork_SpokeA.outputs.privateLinkService_SubnetID
   }
 }
+
+//
+// The following modules should be used in conjuction when creating a Virtual WAN
+//
+module virtualWAN '../modules/Microsoft.Network/VirtualWAN.bicep' = {
+  name: 'virtualWAN'
+  params: {
+    location: location
+    virtualWAN_Name: 'vwan'
+  }
+}
+
+module virtualHubA '../modules/Microsoft.Network/VirtualHub.bicep' = {
+  name: 'vhubA'
+  params: {
+    location: location
+    virtualHub_AddressPrefix: '10.100.0.0/16'
+    virtualHub_Name: 'vhubA'
+    virtualWAN_ID: virtualWAN.outputs.virtualWAN_ID
+    usingAzureFirewall: true
+    azureFirewall_SKU: 'Basic'
+    usingVPN: true
+  }
+}
+
+module virtualHubAToVirtualNetworkSpokeAConn '../modules/Microsoft.Network/hubVirtualNetworkConnections.bicep' = {
+  name: 'vhubA_to_spokeA_Conn'
+  params: {
+    virtualHub_Name: virtualHubA.outputs.virtualHub_Name
+    virtualHub_RouteTable_Default_ID: virtualHubA.outputs.virtualHub_RouteTable_Default_ID
+    virtualNetwork_ID: virtualNetwork_SpokeA.outputs.virtualNetwork_ID
+    virtualNetwork_Name: virtualNetwork_SpokeA.outputs.virtualNetwork_Name
+  }
+}
+//
+// End Virtual WAN required resources
+//
+
+module virtualNetworkGateway '../modules/Microsoft.Network/VirtualNetworkGateway.bicep' = {
+  name: 'virtualNetworkGateway'
+  params: {
+    location: location
+    virtualNetworkGateway_ASN: 65000
+    virtualNetworkGateway_Name: 'vng'
+    virtualNetworkGateway_Subnet_ResourceID: virtualNetwork_Hub.outputs.gateway_SubnetID
+  }
+}
+
+module virtualNetworkGatewayConnection '../modules/Microsoft.Network/Connection_and_LocalNetworkGateway.bicep' = {
+  name: 'vng_to_destination'
+  params: {
+    location: location 
+    virtualNetworkGateway_ID: virtualNetworkGateway.outputs.virtualNetworkGateway_ResourceID
+    vpn_Destination_ASN: 65001
+    vpn_Destination_BGPIPAddress: '10.0.0.1'
+    vpn_Destination_Name: 'Home'
+    vpn_Destination_PublicIPAddress: '1.2.3.4'
+    vpn_SharedKey: '99999999'
+  }
+}
+
+// End Networking
+
+// Start Storage
+
+module storageAccount '../modules/Microsoft.Storage/StorageAccount.bicep' = {
+  name: 'storageAccount'
+  params: {
+    location: location
+    privateDNSZoneLinkedVnetIDList: [virtualNetwork_Hub.outputs.virtualNetwork_ID, virtualNetwork_SpokeA.outputs.virtualNetwork_ID]
+    privateDNSZoneLinkedVnetNamesList: [virtualNetwork_Hub.outputs.virtualNetwork_Name, virtualNetwork_SpokeA.outputs.virtualNetwork_Name]
+    privateEndpoint_VirtualNetwork_Name: virtualNetwork_SpokeA.outputs.virtualNetwork_Name
+    privateEndpoints_Blob_Name: 'storageAccount_Name_Blob_PE'
+    privateEndpointSubnetID: virtualNetwork_SpokeA.outputs.privateEndpoint_SubnetID
+    storageAccount_Name: 'readdescfornamingreq'
+  }
+}
+
+// End Storage
+
+// Start Web
+
+module webApp '../modules/Microsoft.Web/site.bicep' = {
+  name: 'webApp'
+  params: {
+    appServiceSubnet_ID: virtualNetwork_SpokeA.outputs.appServiceSubnetID
+    appServicePlan_Name: 'asp'
+    location: location
+    virtualNetwork_Name: virtualNetwork_SpokeA.outputs.virtualNetwork_Name
+    site_Name: 'readdescfornamingreq'
+  }
+}
+

@@ -7,11 +7,12 @@ param virtualWAN_ID string
 @description('Name of the Virtual Hub')
 param virtualHub_Name string
 
-@description('Address Prefix of the first Virtual Hub')
+@description('''Address Prefix of the first Virtual Hub
+Example: 10.0.0.0/16''')
 param virtualHub_AddressPrefix string
 
-@description('Deploys a Az FW if true')
-param usingAzureFirewall bool = false
+@description('Deploys a Azure Firewall to the Virtual Hub if true')
+param usingAzureFirewall bool
 
 @description('Name of the Azure Firewall within the virtualHub A')
 param azureFirewall_Name string = '${virtualHub_Name}_AzFW'
@@ -27,8 +28,8 @@ param azureFirewall_SKU string = 'Basic'
 @description('Name of the Azure Firewall Policy')
 param azureFirewallPolicy_Name string = '${virtualHub_Name}_AzFWPolicy'
 
-@description('Deploys a S2S VPN if true')
-param usingVPN bool = false
+@description('Deploys a VPN Gateway to the Virtual Hub if true')
+param usingVPN bool
 
 @description('Name of the Azure Virtual Network Gateway in the virtualHub')
 param vpnGateway_Name string = '${virtualHub_Name}_vpnGateway'
@@ -120,3 +121,7 @@ resource azureFirewall 'Microsoft.Network/azureFirewalls@2022-07-01' = if (using
     }
   }
 }
+
+
+output virtualHub_Name string = virtualHub.name
+output virtualHub_RouteTable_Default_ID string = virtualHub_RouteTable_Default.id

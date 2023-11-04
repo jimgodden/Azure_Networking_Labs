@@ -2,22 +2,23 @@
 param location string
 
 @description('Name of the App Service Plan')
-param ASP_Name string
+param appServicePlan_Name string
 
-@description('Name of the App Service')
-param Website_Name string
+@description('''Name of the App Service.
+App names only allow alphanumeric characters and hyphens, cannot start or end in a hyphen, and must be less than 60 chars.''')
+param site_Name string
 
 @description('Name of the link between App Service Enviornment and Virtual Network')
-var ASE_to_Vnet_Link_Name = '${Website_Name}_to_${Vnet_Name}'
+var appService_to_VirtualNetwork_Link_Name = '${site_Name}_to_${virtualNetwork_Name}'
 
 @description('Name of the Virtual Network for both the Application Gateway and App Service Environment')
-param Vnet_Name string
+param virtualNetwork_Name string
 
 @description('Subnet ID of the Subnet that the App Service will be vnet injected into')
-param appServiceSubnetID string
+param appServiceSubnet_ID string
 
-resource ASP 'Microsoft.Web/serverfarms@2022-09-01' = {
-  name: ASP_Name
+resource appServicePlan 'Microsoft.Web/serverfarms@2022-09-01' = {
+  name: appServicePlan_Name
   location: location
   sku: {
     name: 'S1'
@@ -99,7 +100,7 @@ resource site_config 'Microsoft.Web/sites/config@2022-09-01' = {
       rampUpRules: []
     }
     autoHealEnabled: false
-    vnetName: ASE_to_Vnet_Link_Name
+    vnetName: appService_to_VirtualNetwork_Link_Name
     vnetRouteAllEnabled: true
     vnetPrivatePortsCount: 0
     publicNetworkAccess: 'Enabled'
@@ -139,7 +140,7 @@ resource site_config 'Microsoft.Web/sites/config@2022-09-01' = {
 
 resource site_hostnameBinding 'Microsoft.Web/sites/hostNameBindings@2022-09-01' = {
   parent: site
-  name: '${Website_Name}.azurewebsites.net'
+  name: '${site_Name}.azurewebsites.net'
   // location: location
   properties: {
     siteName: 'jamesgbicepwebsite'
@@ -149,24 +150,24 @@ resource site_hostnameBinding 'Microsoft.Web/sites/hostNameBindings@2022-09-01' 
 
 
 resource site 'Microsoft.Web/sites@2022-09-01' = {
-  name: Website_Name
+  name: site_Name
   location: location
   kind: 'app'
   properties: {
     enabled: true
     hostNameSslStates: [
       {
-        name: '${Website_Name}.azurewebsites.net'
+        name: '${site_Name}.azurewebsites.net'
         sslState: 'Disabled'
         hostType: 'Standard'
       }
       {
-        name: '${Website_Name}.scm.azurewebsites.net'
+        name: '${site_Name}.scm.azurewebsites.net'
         sslState: 'Disabled'
         hostType: 'Repository'
       }
     ]
-    serverFarmId: ASP.id
+    serverFarmId: appServicePlan.id
     reserved: false
     isXenon: false
     hyperV: false
@@ -193,18 +194,18 @@ resource site 'Microsoft.Web/sites@2022-09-01' = {
     redundancyMode: 'None'
     publicNetworkAccess: 'Enabled'
     storageAccountRequired: false
-    virtualNetworkSubnetId: appServiceSubnetID // might not need this one since
+    virtualNetworkSubnetId: appServiceSubnet_ID // might not need this one since
     keyVaultReferenceIdentity: 'SystemAssigned'
   }
 }
 
-resource ASE_Subnet_Link 'Microsoft.Web/sites/virtualNetworkConnections@2022-09-01' = {
+resource appServiceEnvironment_Subnet_Link 'Microsoft.Web/sites/virtualNetworkConnections@2022-09-01' = {
   parent: site
-  name: ASE_to_Vnet_Link_Name
+  name: appService_to_VirtualNetwork_Link_Name
   properties: {
-    vnetResourceId: appServiceSubnetID
+    vnetResourceId: appServiceSubnet_ID
     isSwift: true
   }
 }
 
-output websiteFQDN string = site_hostnameBinding.name
+output website_FQDN string = site_hostnameBinding.name
