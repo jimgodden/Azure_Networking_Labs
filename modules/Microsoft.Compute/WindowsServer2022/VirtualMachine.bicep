@@ -9,8 +9,6 @@ B2ms - 2 Core 8GB Ram - Cannot use Accelerated Networking
 D2as_v5 2 Core 8GB Ram - Uses Accelerated Networking''')
 param virtualMachine_Size string
 
-// param hardwareProfile object
-
 @description('Admin Username for the Virtual Machine')
 param virtualMachine_AdminUserName string
 
@@ -19,9 +17,9 @@ param virtualMachine_AdminUserName string
 param virtualMachine_AdminPassword string
 
 @description('Name of the Virtual Machines Network Interface')
-param networkInterface_Name string
+param networkInterface_Name string = '${virtualMachine_Name}_NetworkInterface'
 
-@description('True enables Accelerated Networking and False disabled it.  Not all virtualMachine sizes support Accel Net')
+@description('True enables Accelerated Networking and False disabled it.  Not all sizes support Accel Net')
 param acceleratedNetworking bool
 
 @description('The Resource ID of the subnet to which the Network Interface will be assigned.')
