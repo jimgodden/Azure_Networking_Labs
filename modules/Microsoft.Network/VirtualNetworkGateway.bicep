@@ -2,19 +2,19 @@
 param location string
 
 @description('Name of the Azure Virtual Network Gateway')
-param VNG_Name string
+param virtualNetworkGateway_Name string
 
 @description('SKU of the Virtual Network Gateway')
-param VNG_SKU string = 'VpnGw1'
+param virtualNetworkGateway_SKU string = 'VpnGw1'
 
 @description('Virtul Network Gateway ASN for BGP')
-param VNG_ASN int
+param virtualNetworkGateway_ASN int
  
 @description('Virtual Network Resource ID')
-param VNG_Subnet_ResourceID string
+param virtualNetworkGateway_Subnet_ResourceID string
 
-resource VNG_PIP 'Microsoft.Network/publicIPAddresses@2022-11-01' = {
-  name: '${VNG_Name}_PIP'
+resource virtualNetworkGateway_PIP 'Microsoft.Network/publicIPAddresses@2022-11-01' = {
+  name: '${virtualNetworkGateway_Name}_PIP'
   location: location
   sku: {
     name: 'Standard'
@@ -28,8 +28,8 @@ resource VNG_PIP 'Microsoft.Network/publicIPAddresses@2022-11-01' = {
   }
 }
 
-resource VNG 'Microsoft.Network/virtualNetworkGateways@2023-02-01' = {
-  name: VNG_Name
+resource virtualNetworkGateway 'Microsoft.Network/virtualNetworkGateways@2023-02-01' = {
+  name: virtualNetworkGateway_Name
   location: location
   properties: {
     enablePrivateIpAddress: false
@@ -39,10 +39,10 @@ resource VNG 'Microsoft.Network/virtualNetworkGateways@2023-02-01' = {
         properties: {
           privateIPAllocationMethod: 'Dynamic'
           publicIPAddress: {
-            id: VNG_PIP.id
+            id: virtualNetworkGateway_PIP.id
           }
           subnet: {
-            id: VNG_Subnet_ResourceID
+            id: virtualNetworkGateway_Subnet_ResourceID
           }
         }
       }
@@ -52,15 +52,15 @@ resource VNG 'Microsoft.Network/virtualNetworkGateways@2023-02-01' = {
     enableBgpRouteTranslationForNat: false
     disableIPSecReplayProtection: false
     sku: {
-      name: VNG_SKU
-      tier: VNG_SKU
+      name: virtualNetworkGateway_SKU
+      tier: virtualNetworkGateway_SKU
     }
     gatewayType: 'Vpn'
     vpnType: 'RouteBased'
     enableBgp: true
     activeActive: false
     bgpSettings: {
-      asn: VNG_ASN
+      asn: virtualNetworkGateway_ASN
       peerWeight: 0
     }
     vpnGatewayGeneration: 'Generation1'
@@ -69,9 +69,9 @@ resource VNG 'Microsoft.Network/virtualNetworkGateways@2023-02-01' = {
   }
 }
 
-output VNGResourceID string = VNG.id
-output VNGName string = VNG.name
-output VNGPIP string = VNG_PIP.properties.ipAddress
-output VNGBGPAddress string = VNG.properties.bgpSettings.bgpPeeringAddress
-output VNGASN int = VNG.properties.bgpSettings.asn
+output virtualNetworkGateway_ResourceID string = virtualNetworkGateway.id
+output virtualNetworkGateway_Name string = virtualNetworkGateway.name
+output virtualNetworkGateway_PIP string = virtualNetworkGateway_PIP.properties.ipAddress
+output virtualNetworkGateway_BGPAddress string = virtualNetworkGateway.properties.bgpSettings.bgpPeeringAddress
+output virtualNetworkGateway_ASN int = virtualNetworkGateway.properties.bgpSettings.asn
 

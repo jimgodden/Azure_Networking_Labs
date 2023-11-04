@@ -1,11 +1,11 @@
-@description('Azure Datacenter location that the main resouces will be deployed to.')
+@description('Azure Datacenter location that Virtual WAN')
 param location string
 
 @description('Name of the Virtual WAN resource')
-param VWAN_Name string
+param virtualWAN_Name string
 
-resource VWAN 'Microsoft.Network/virtualWans@2022-07-01' = {
-  name: VWAN_Name
+resource virtualWAN 'Microsoft.Network/virtualWans@2022-07-01' = {
+  name: virtualWAN_Name
   location: location
   properties: {
     disableVpnEncryption: false
@@ -14,4 +14,4 @@ resource VWAN 'Microsoft.Network/virtualWans@2022-07-01' = {
   }
 }
 
-output vwanID string = VWAN.id
+output virtualWANID string = virtualWAN.id

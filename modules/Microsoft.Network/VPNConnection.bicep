@@ -15,7 +15,7 @@ param bgpPeeringAddress string
 param vpn_SharedKey string
 
 @description('Existing Virtual Network Gateway ID')
-param VNGResourceID string
+param virtualNetworkGateway_ID string
 
 @description('ASN of the Destination VPN')
 param destination_ASN int
@@ -25,13 +25,13 @@ resource connection 'Microsoft.Network/connections@2022-11-01' = {
     location: location
     properties: {
       virtualNetworkGateway1: {
-        id: VNGResourceID
+        id: virtualNetworkGateway_ID
         properties: {
           
         }
       }
       localNetworkGateway2: {
-        id: lng.id
+        id: localNetworkGateway.id
         properties: {
           
         }
@@ -61,8 +61,8 @@ resource connection 'Microsoft.Network/connections@2022-11-01' = {
   }
 }
 
-resource lng 'Microsoft.Network/localNetworkGateways@2022-11-01' = {
-  name: '${resourceNamePrefix}_lng'
+resource localNetworkGateway 'Microsoft.Network/localNetworkGateways@2022-11-01' = {
+  name: '${resourceNamePrefix}_localNetworkGateway'
   location: location
   properties: {
     gatewayIpAddress: gatewayIPAddress
