@@ -2,10 +2,10 @@
 param location string
 
 @description('Name of the Azure Load Balancer')
-param slb_Name string = 'slb'
+param internalLoadBalancer_Name string = 'internalLoadBalancer'
 
 @description('Subnet ID that the Load Balancer will be deployed to')
-param slb_SubnetID string
+param internalLoadBalancer_SubnetID string
 
 @description('Name of the Private Endpoint')
 param privateEndpoint_name string = 'pe_to_pl'
@@ -20,32 +20,32 @@ param privateLink_Name string = 'pl'
 param privateLink_SubnetID string
 
 @description('Name of the NIC of the Virtual Machine that will be put behind the Private Link Service and Load Balancer')
-param virtualMachineNIC_Name string
+param networkInterface_Name string
 
 @description('Subnet ID of the NIC of the Virtual Machine that will be put behind the Private Link Service and Load Balancer')
-param virtualMachineNIC_SubnetID string
+param networkInterface_SubnetID string
 
 @description('Name of the ipconfig of the NIC of the Virtual Machine that will be put behind the Private Link Service and Load Balancer')
-param virtualMachineNIC_IPConfig_Name string
+param networkInterface_IPConfig_Name string
 
 @description('TCP Port that will be used for connecting to the Virtual Machine behind the Private Link Service and Load Balancer')
 param tcpPort int = 443
 
 // Modifies the existing Virtual Machine NIC to add it to the backend pool of the Load Balancer behind the Private Link Service
-resource virtualMachineNIC 'Microsoft.Network/networkInterfaces@2023-04-01' = {
-  name: virtualMachineNIC_Name
+resource networkInterface 'Microsoft.Network/networkInterfaces@2023-04-01' = {
+  name: networkInterface_Name
   location: location
   properties: {
     ipConfigurations: [
       {
-        name: virtualMachineNIC_IPConfig_Name
+        name: networkInterface_IPConfig_Name
         properties: {
           subnet: {
-            id: virtualMachineNIC_SubnetID
+            id: networkInterface_SubnetID
           }
           loadBalancerBackendAddressPools: [
             {
-              id: slb.properties.backendAddressPools[0].id
+              id: internalLoadBalancer.properties.backendAddressPools[0].id
             }
           ]
         }
@@ -54,8 +54,8 @@ resource virtualMachineNIC 'Microsoft.Network/networkInterfaces@2023-04-01' = {
   }
 }
 
-resource slb 'Microsoft.Network/loadBalancers@2022-09-01' = {
-  name: slb_Name
+resource internalLoadBalancer 'Microsoft.Network/loadBalancers@2022-09-01' = {
+  name: internalLoadBalancer_Name
   location: location
   sku: {
     name: 'Standard'
@@ -68,7 +68,7 @@ resource slb 'Microsoft.Network/loadBalancers@2022-09-01' = {
         properties: {
           privateIPAllocationMethod: 'Dynamic'
           subnet: {
-            id: slb_SubnetID
+            id: internalLoadBalancer_SubnetID
           }
           privateIPAddressVersion: 'IPv4'
         }
@@ -84,7 +84,7 @@ resource slb 'Microsoft.Network/loadBalancers@2022-09-01' = {
         name: 'forwardAll'
         properties: {
           frontendIPConfiguration: {
-            id: resourceId('Microsoft.Network/loadBalancers/frontendIpConfigurations', slb_Name, 'fip')
+            id: resourceId('Microsoft.Network/loadBalancers/frontendIpConfigurations', internalLoadBalancer_Name, 'fip')
           }
           frontendPort: 0
           backendPort: 0
@@ -95,10 +95,10 @@ resource slb 'Microsoft.Network/loadBalancers@2022-09-01' = {
           loadDistribution: 'Default'
           disableOutboundSnat: true
           backendAddressPool: {
-            id: resourceId('Microsoft.Network/loadBalancers/backendAddressPools', slb_Name, 'bep')
+            id: resourceId('Microsoft.Network/loadBalancers/backendAddressPools', internalLoadBalancer_Name, 'bep')
           }
           probe: {
-            id: resourceId('Microsoft.Network/loadBalancers/probes', slb_Name, 'probe${tcpPort}')
+            id: resourceId('Microsoft.Network/loadBalancers/probes', internalLoadBalancer_Name, 'probe${tcpPort}')
           }
         }
       }
@@ -149,7 +149,7 @@ resource privateLink 'Microsoft.Network/privateLinkServices@2022-09-01' = {
     enableProxyProtocol: false
     loadBalancerFrontendIpConfigurations: [
       {
-        id: '${slb.id}/frontendIPConfigurations/fip'
+        id: '${internalLoadBalancer.id}/frontendIPConfigurations/fip'
       }
     ]
     ipConfigurations: [

@@ -17,47 +17,26 @@ param routeTable_Name string
 Example: for a network address of '10.0.0.0/16' you would enter '10.0' here''')
 param firstTwoOctetsOfVirtualNetworkPrefix string
 
-@description('Name of the Azure Virtual Network Gateway Subnet')
-param subnet_Gateway_Name string = 'GatewaySubnet'
-
-@description('Address Prefix of the Azure Virtual Network Gateway Subnet')
-param subnet_Gateway_AddressPrefix string = '${firstTwoOctetsOfVirtualNetworkPrefix}.0.0/24'
-
-@description('Name of the Azure Firewall Subnet')
-param subnet_azureFirewall_Name string = 'AzureFirewallSubnet'
-
-@description('Address Prefix of the Azure Firewall Subnet')
-param subnet_azureFirewall_AddressPrefix string = '${firstTwoOctetsOfVirtualNetworkPrefix}.1.0/24'
-
-@description('Name of the Azure Firewall Management Subnet')
-param subnet_azureFirewall_Management_Name string = 'AzureFirewallManagementSubnet'
-
-@description('Address Prefix of the Azure Firewall Management Subnet')
-param subnet_azureFirewall_Management_AddressPrefix string = '${firstTwoOctetsOfVirtualNetworkPrefix}.2.0/24'
-
-@description('Name of the Azure Bastion Subnet')
-param subnet_Bastion_Name string = 'AzureBastionSubnet'
-
-@description('Address Prefix of the Azure Bastion Subnet')
-param subnet_Bastion_AddressPrefix string = '${firstTwoOctetsOfVirtualNetworkPrefix}.3.0/24'
-
+// Subnets
 @description('Name of the General Subnet for any other resources')
 param subnet_General_Name string = 'General'
 
 @description('Address Prefix of the General Subnet')
-param subnet_General_AddressPrefix string = '${firstTwoOctetsOfVirtualNetworkPrefix}.4.0/24'
+param subnet_General_AddressPrefix string = '${firstTwoOctetsOfVirtualNetworkPrefix}.0.0/24'
 
 @description('Name of the PrivateEndpoint Subnet')
 param subnet_PrivateEndpoints_Name string = 'PrivateEndpoints'
 
 @description('Address Prefix of the PrivateEndpoint Subnet')
-param subnet_PrivateEndpoints_AddressPrefix string = '${firstTwoOctetsOfVirtualNetworkPrefix}.5.0/24'
+param subnet_PrivateEndpoints_AddressPrefix string = '${firstTwoOctetsOfVirtualNetworkPrefix}.1.0/24'
 
 @description('Name of the PrivateEndpoint Subnet')
 param subnet_PrivateLinkService_Name string = 'PrivateLinkService'
 
 @description('Address Prefix of the PrivateEndpoint Subnet')
-param subnet_PrivateLinkService_AddressPrefix string = '${firstTwoOctetsOfVirtualNetworkPrefix}.6.0/24'
+param subnet_PrivateLinkService_AddressPrefix string = '${firstTwoOctetsOfVirtualNetworkPrefix}.2.0/24'
+
+
 
 resource virtualNetwork 'Microsoft.Network/virtualNetworks@2022-09-01' = {
   name: virtualNetwork_Name
@@ -69,42 +48,6 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2022-09-01' = {
       ]
     }
     subnets: [
-      {
-        name: subnet_Gateway_Name
-        properties: {
-          addressPrefix: subnet_Gateway_AddressPrefix
-          delegations: []
-          privateEndpointNetworkPolicies: 'Disabled'
-          privateLinkServiceNetworkPolicies: 'Enabled'
-        }
-      }
-      {
-        name: subnet_azureFirewall_Name
-        properties: {
-          addressPrefix: subnet_azureFirewall_AddressPrefix
-          delegations: []
-          privateEndpointNetworkPolicies: 'Disabled'
-          privateLinkServiceNetworkPolicies: 'Enabled'
-        }
-      }
-      {
-        name: subnet_azureFirewall_Management_Name
-        properties: {
-          addressPrefix: subnet_azureFirewall_Management_AddressPrefix
-          delegations: []
-          privateEndpointNetworkPolicies: 'Disabled'
-          privateLinkServiceNetworkPolicies: 'Enabled'
-        }
-      }
-      {
-        name: subnet_Bastion_Name
-        properties: {
-          addressPrefix: subnet_Bastion_AddressPrefix
-          delegations: []
-          privateEndpointNetworkPolicies: 'Disabled'
-          privateLinkServiceNetworkPolicies: 'Enabled'
-        }
-      }
       {
         name: subnet_General_Name
         properties: {
@@ -190,14 +133,9 @@ resource networkSecurityGroup 'Microsoft.Network/networkSecurityGroups@2022-09-0
 //   }
 // }
 
-output gateway_SubnetID string = virtualNetwork.properties.subnets[0].id
-output azureFirewall_SubnetID string = virtualNetwork.properties.subnets[1].id
-output azureFirewallManagement_SubnetID string = virtualNetwork.properties.subnets[2].id
-output bastion_SubnetID string = virtualNetwork.properties.subnets[3].id
-output general_SubnetID string = virtualNetwork.properties.subnets[4].id
-output privateEndpoint_SubnetID string = virtualNetwork.properties.subnets[5].id
-output privateLinkService_SubnetID string = virtualNetwork.properties.subnets[6].id
-
+output general_SubnetID string = virtualNetwork.properties.subnets[0].id
+output privateEndpoint_SubnetID string = virtualNetwork.properties.subnets[1].id
+output privateLinkService_SubnetID string = virtualNetwork.properties.subnets[2].id
 
 output virtualNetwork_Name string = virtualNetwork.name
 output virtualNetwork_ID string = virtualNetwork.id

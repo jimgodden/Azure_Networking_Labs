@@ -2,7 +2,7 @@
 param location string
 
 @description('Name of the Azure Firewall within the vHub A')
-param AzFW_Name string
+param azureFirewall_Name string
 
 @description('Sku name of the Azure Firewall.  Allowed values are Basic, Standard, and Premium')
 @allowed([
@@ -10,19 +10,19 @@ param AzFW_Name string
   'Standard'
   'Premium'
 ])
-param AzFW_SKU string
+param azureFirewall_SKU string
 
 @description('Name of the Azure Firewall Policy')
-param AzFWPolicy_Name string
+param azureFirewallPolicy_Name string
 
 @description('Resource ID of the Azure Firewall Subnet.  Note: The subnet name must be "AzureFirewallSubnet')
-param azfwSubnetID string
+param azureFirewall_Subnet_ID string
 
 @description('Resource ID of the Azure Firewall Management Subnet.  Note: The subnet name must be "AzureFirewallManagementSubnet')
-param azfwManagementSubnetID string
+param azureFirewall_ManagementSubnet_ID string
 
-resource AzFW_PIP 'Microsoft.Network/publicIPAddresses@2022-11-01' = {
-  name: '${AzFW_Name}_PIP'
+resource azureFirewall_PIP 'Microsoft.Network/publicIPAddresses@2022-11-01' = {
+  name: '${azureFirewall_Name}_PIP'
   location: location
   sku: {
     name: 'Standard'
@@ -36,8 +36,8 @@ resource AzFW_PIP 'Microsoft.Network/publicIPAddresses@2022-11-01' = {
   }
 }
 
-resource AzFW_Management_PIP 'Microsoft.Network/publicIPAddresses@2022-11-01' = {
-  name: '${AzFW_Name}_Management_PIP'
+resource azureFirewall_Management_PIP 'Microsoft.Network/publicIPAddresses@2022-11-01' = {
+  name: '${azureFirewall_Name}_Management_PIP'
   location: location
   sku: {
     name: 'Standard'
@@ -51,33 +51,33 @@ resource AzFW_Management_PIP 'Microsoft.Network/publicIPAddresses@2022-11-01' = 
   }
 }
 
-resource AzFW_Policy 'Microsoft.Network/firewallPolicies@2022-07-01' = {
-  name: AzFWPolicy_Name
+resource azureFirewallPolicy 'Microsoft.Network/firewallPolicies@2022-07-01' = {
+  name: azureFirewallPolicy_Name
   location: location
   properties: {
     sku: {
-      tier: AzFW_SKU
+      tier: azureFirewall_SKU
     }
   }
 }
 
-resource AzFW 'Microsoft.Network/azureFirewalls@2022-11-01' = {
-  name: AzFW_Name
+resource azureFirewall 'Microsoft.Network/azureFirewalls@2022-11-01' = {
+  name: azureFirewall_Name
   location: location
   properties: {
     sku: {
       name: 'AZFW_VNet'
-      tier: AzFW_SKU
+      tier: azureFirewall_SKU
     }
     additionalProperties: {}
     managementIpConfiguration: {
       name: 'managementipconfig'
       properties: {
         publicIPAddress: {
-          id: AzFW_Management_PIP.id
+          id: azureFirewall_Management_PIP.id
         }
         subnet: {
-          id: azfwManagementSubnetID
+          id: azureFirewall_ManagementSubnet_ID
         }
       }
      }
@@ -86,16 +86,16 @@ resource AzFW 'Microsoft.Network/azureFirewalls@2022-11-01' = {
          name: 'ipconfiguration'
          properties: {
           publicIPAddress: {
-            id: AzFW_PIP.id
+            id: azureFirewall_PIP.id
           }
            subnet: {
-            id: azfwSubnetID
+            id: azureFirewall_Subnet_ID
            }
          }
        }
     ]
     firewallPolicy: {
-      id: AzFW_Policy.id
+      id: azureFirewallPolicy.id
     }
   }
 }

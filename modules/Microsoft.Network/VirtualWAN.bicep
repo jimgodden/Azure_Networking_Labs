@@ -14,4 +14,4 @@ resource virtualWAN 'Microsoft.Network/virtualWans@2022-07-01' = {
   }
 }
 
-output virtualWANID string = virtualWAN.id
+output virtualWAN_ID string = virtualWAN.id

@@ -2,7 +2,7 @@
 param location string
 
 @description('Name of the Virtual Network that the Private Endpoint will be deployed to.')
-param privateEndpointVnetName string
+param privateEndpoint_VirtualNetwork_Name string
 
 param privateDNSZoneLinkedVnetNamesList array
 
@@ -109,7 +109,7 @@ resource privateEndpoints_Blob 'Microsoft.Network/privateEndpoints@2023-04-01' =
   properties: {
     privateLinkServiceConnections: [
       {
-        name: '${privateEndpoints_Blob_Name}_in_${privateEndpointVnetName}_to_${storageAccount_Name}'
+        name: '${privateEndpoints_Blob_Name}_in_${privateEndpoint_VirtualNetwork_Name}_to_${storageAccount_Name}'
         properties: {
           privateLinkServiceId: storageAccount.id
           groupIds: [

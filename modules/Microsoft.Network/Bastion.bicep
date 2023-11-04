@@ -8,20 +8,20 @@ param bastion_name string = 'bastion'
 param bastion_vip_name string = 'bastion_vip'
 
 @description('Resource ID of the subnet the Azure Bastion will be placed in.  The name of the subnet must be "AzureBastionSubnet"')
-param bastionSubnetID string
+param bastion_Subnet_ID string
 
 @description('SKU of the Azure Bastion')
 @allowed([
   'Basic'
   'Standard'
 ])
-param bastionSKU string = 'Basic'
+param bastion_SKU string = 'Basic'
 
 resource bastion 'Microsoft.Network/bastionHosts@2022-09-01' = {
   name: bastion_name
   location: location
   sku: {
-    name: bastionSKU
+    name: bastion_SKU
   }
   properties: {
     scaleUnits: 2
@@ -38,7 +38,7 @@ resource bastion 'Microsoft.Network/bastionHosts@2022-09-01' = {
             id: bastion_vip.id
           }
           subnet: {
-            id: bastionSubnetID
+            id: bastion_Subnet_ID
           }
         }
       }
