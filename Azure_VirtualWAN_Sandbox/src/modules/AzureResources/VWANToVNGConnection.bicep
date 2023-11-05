@@ -1,11 +1,28 @@
+@description('Azure Datacenter region to which these resources will be deployed.')
 param location string
-param vwanID string
-param vwan_VPN_Name string
-param vHub_RouteTable_Default_ResourceID string
-param vhub_name string
-param destinationVPN_Name string 
+
+@description('Resource ID of the Virtual WAN to which the Virtual Hub is connected.')
+param virtualWAN_ID string
+
+@description('Name of the Virtual Hub')
+param virtualHub_Name string
+
+@description('Resource ID of the Default Route Table in the Virtual Hub.')
+param virtualHub_RouteTable_Default_ResourceID string
+
+@description('Name of the VPN Gateway in the Virtual Hub.')
+param virtualWAN_VPNGateway_Name string
+
+@description('Friendly Name of the destination VPN.')
+param destinationVPN_Name string
+
+@description('Public IP Address of the destination VPN.')
 param destinationVPN_PublicAddress string 
+
+@description('ASN of the destination VPN for BGP connectivity.')
 param destinationVPN_ASN int 
+
+@description('BGP Address of the destination VPN.')
 param destinationVPN_BGPAddress string
 
 @description('VPN Shared Key used for authenticating VPN connections.  This Shared Key must be the same key that is used on the Virtual Network Gateway that is being connected to the vWAN\'s S2S VPNs.')
@@ -13,11 +30,11 @@ param destinationVPN_BGPAddress string
 param vpn_SharedKey string
 
 resource vwan_VPN 'Microsoft.Network/vpnGateways@2023-02-01' existing = {
-  name: vwan_VPN_Name
+  name: virtualWAN_VPNGateway_Name
 }
 
 resource vpn_Site 'Microsoft.Network/vpnSites@2022-11-01' = {
-  name: '${vhub_name}_to_${destinationVPN_Name}'
+  name: '${virtualHub_Name}_to_${destinationVPN_Name}'
   location: location
   properties: {
     deviceProperties: {
@@ -25,7 +42,7 @@ resource vpn_Site 'Microsoft.Network/vpnSites@2022-11-01' = {
       linkSpeedInMbps: 0
     }
     virtualWan: {
-      id: vwanID
+      id: virtualWAN_ID
     }
     isSecuritySite: false
     o365Policy: {
@@ -61,7 +78,7 @@ resource vpn_Connection 'Microsoft.Network/vpnGateways/vpnConnections@2022-11-01
   properties: {
     routingConfiguration: {
       associatedRouteTable: {
-        id: vHub_RouteTable_Default_ResourceID
+        id: virtualHub_RouteTable_Default_ResourceID
       }
       propagatedRouteTables: {
         labels: [
@@ -69,7 +86,7 @@ resource vpn_Connection 'Microsoft.Network/vpnGateways/vpnConnections@2022-11-01
         ]
         ids: [
           {
-            id: vHub_RouteTable_Default_ResourceID
+            id: virtualHub_RouteTable_Default_ResourceID
           }
         ]
       }
@@ -80,7 +97,7 @@ resource vpn_Connection 'Microsoft.Network/vpnGateways/vpnConnections@2022-11-01
     }
     vpnLinkConnections: [
       {
-        name: '${vhub_name}_to_OnPrem'
+        name: '${virtualHub_Name}_to_OnPrem'
         properties: {
           vpnSiteLink: {
             id: vpn_Site.properties.vpnSiteLinks[0].id

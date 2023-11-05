@@ -14,9 +14,6 @@ param virtualHub_AddressPrefix string
 @description('Deploys a Azure Firewall to the Virtual Hub if true')
 param usingAzureFirewall bool
 
-@description('Name of the Azure Firewall within the virtualHub A')
-param azureFirewall_Name string = '${virtualHub_Name}_AzFW'
-
 @description('Sku name of the Azure Firewall.  Allowed values are Basic, Standard, and Premium')
 @allowed([
   'Basic'
@@ -25,16 +22,8 @@ param azureFirewall_Name string = '${virtualHub_Name}_AzFW'
 ])
 param azureFirewall_SKU string = 'Basic'
 
-@description('Name of the Azure Firewall Policy')
-param azureFirewallPolicy_Name string = '${virtualHub_Name}_AzFWPolicy'
-
 @description('Deploys a VPN Gateway to the Virtual Hub if true')
 param usingVPN bool
-
-@description('Name of the Azure Virtual Network Gateway in the virtualHub')
-param vpnGateway_Name string = '${virtualHub_Name}_vpnGateway'
-
-
 
 
 
@@ -50,7 +39,6 @@ resource virtualHub 'Microsoft.Network/virtualHubs@2022-07-01' = {
     hubRoutingPreference: 'VpnGateway'
   }
 }
-
 
 resource virtualHub_RouteTable_Default 'Microsoft.Network/virtualHubs/hubRouteTables@2022-07-01' = {
   parent: virtualHub
@@ -75,7 +63,7 @@ resource virtualHub_RouteTable_None 'Microsoft.Network/virtualHubs/hubRouteTable
 }
 
 resource vpnGateway 'Microsoft.Network/vpnGateways@2022-07-01' = if (usingVPN) {
-  name: vpnGateway_Name
+  name: '${virtualHub_Name}_vpnGateway'
   location: location
   properties: {
     connections: []
@@ -90,7 +78,7 @@ resource vpnGateway 'Microsoft.Network/vpnGateways@2022-07-01' = if (usingVPN) {
 }
 
 resource azureFirewall_Policy 'Microsoft.Network/firewallPolicies@2022-07-01' = if (usingAzureFirewall) {
-  name: azureFirewallPolicy_Name
+  name: '${virtualHub_Name}_AzFWPolicy'
   location: location
   properties: {
     sku: {
@@ -100,7 +88,7 @@ resource azureFirewall_Policy 'Microsoft.Network/firewallPolicies@2022-07-01' = 
 }
 
 resource azureFirewall 'Microsoft.Network/azureFirewalls@2022-07-01' = if (usingAzureFirewall) {
-  name: azureFirewall_Name
+  name: '${virtualHub_Name}_AzFW'
   location: location
   properties: {
     sku: {
@@ -125,3 +113,4 @@ resource azureFirewall 'Microsoft.Network/azureFirewalls@2022-07-01' = if (using
 
 output virtualHub_Name string = virtualHub.name
 output virtualHub_RouteTable_Default_ID string = virtualHub_RouteTable_Default.id
+output vpnGateway_Name string = vpnGateway.name

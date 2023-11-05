@@ -1,28 +1,14 @@
-targetScope = 'subscription'
-
 @description('Deploys a vHub in another location for multi region connectivity if set to True.')
 param multiRegion bool = true
-
-@description('Name of the Resource Group that the MainHub will be deployed to.')
-param mainRG_Name string = 'VWAN_Sandbox_Main_RG'
 
 @description('Azure Datacenter location that the main resouces will be deployed to.')
 param mainLocation string = 'eastus2'
 
-@description('Name of the Resource Group that the MainHub will be deployed to.')
-param branchRG_Name string = 'VWAN_Sandbox_Branch_RG'
-
 @description('Azure Datacenter location that the branch resouces will be deployed to.  This can be left blank if you are not deploying the hub in multiple regions')
 param branchLocation string = 'westus2'
 
-@description('Name of the Resource Group that the MainHub will be deployed to.')
-param onPremRG_Name string = 'VWAN_Sandbox_OnPrem_RG'
-
 @description('Azure Datacenter location that the "OnPrem" resouces will be deployed to.')
 param onPremLocation string = 'eastus'
-
-@description('Name of the Virtual WAN resource')
-param VWAN_Name string = 'vwan'
 
 @description('Admin Username for the Virtual Machines that gets placed in each Virtual Network')
 param virtualMachine_adminUsername string
@@ -35,129 +21,107 @@ param virtualMachine_adminPassword string
 @secure()
 param vpn_SharedKey string
 
-@description('ASN of the On Prem VPN')
-param OnPrem_ASN int = 65200
-
 @description('ASN of the VWAN VPN')
 var VWAN_ASN = 65515
 
-resource MainRG 'Microsoft.Resources/resourceGroups@2022-09-01' = {
-  name: mainRG_Name
-  location: mainLocation
-}
-
-resource BranchRG 'Microsoft.Resources/resourceGroups@2022-09-01' = if (multiRegion) {
-  name: branchRG_Name
-  location: branchLocation
-}
-
-resource OnPremRG 'Microsoft.Resources/resourceGroups@2022-09-01' = {
-  name: onPremRG_Name
-  location: onPremLocation
-}
-
-module vWAN 'modules/Networking/vwan.bicep' = {
-  scope: MainRG
+module virtualWAN '../../modules/Microsoft.Network/VirtualWAN.bicep' = {
   name: 'virtualWAN'
   params: {
     location: mainLocation
-    VWAN_Name: VWAN_Name
+    virtualWAN_Name: 'vwan'
   }
 }
 
-module mainHub './modules/Networking/hubAndContents.bicep' = {
-  name: 'mainHub'
-  scope: MainRG
+//
+// Virtual Hub A Start
+//
+
+module virtualHubA_and_Contents 'modules/AzureResources/VirtualHub_and_Contents.bicep' = {
+  name: 'vHubA'
   params: {
+    firstTwoOctetsOfVirtualHubNetworkPrefix: '10.110'
+    firstTwoOctetsOfVirtualNetworkPrefix: ['10.111', '10.112']
     location: mainLocation
-    vwanID: vWAN.outputs.vwanID
-    virtualMachine_adminUsername: virtualMachine_adminUsername
-    virtualMachine_adminPassword: virtualMachine_adminPassword
-    vHub_Iteration: 1
+    usingAzureFirewall: true
     usingVPN: true
-    usingAzFW: true
+    virtualHub_UniquePrefix: 'A'
+    virtualMachine_AdminPassword: virtualMachine_adminPassword
+    virtualMachine_AdminUsername: virtualMachine_adminUsername
+    virtualWAN_ID: virtualWAN.outputs.virtualWAN_ID
   }
 }
 
-module MainvHubVNetConn_1 './modules/Networking/hubVirtualNetworkConnections.bicep' = {
-  name: 'Main_vHub_to_vnet1_Conn'
-  scope: MainRG
+module vHubA_to_OnPrem 'modules/AzureResources/VWANToVNGConnection.bicep' = {
+  name: 'vhubA_to_OnPrem'
   params: {
-    vHubName: mainHub.outputs.vHubName
-    vHubRouteTableDefaultID: mainHub.outputs.vHubRouteTableDefaultID
-    vnetID: mainHub.outputs.vnetID1
-    vnetName: mainHub.outputs.vnetName1
-  }
-}
-
-module MainHub_To_OnPrem 'modules/Networking/VWANToVNGConnection.bicep' = {
-  name: 'MainHub_To_OnPrem'
-  scope: MainRG
-  params: {
-    destinationVPN_ASN: OnPremResources.outputs.onpremVNGASN
-    destinationVPN_BGPAddress: OnPremResources.outputs.onPremVNGBGPAddress
-    destinationVPN_Name: OnPremResources.outputs.onpremVNGName
-    destinationVPN_PublicAddress: OnPremResources.outputs.onpremVNGPIP
+    destinationVPN_ASN: OnPremResources.outputs.virtualNetworkGateway_ASN
+    destinationVPN_BGPAddress: OnPremResources.outputs.virtualNetworkGateway_BGPAddress
+    destinationVPN_Name: OnPremResources.outputs.virtualNetworkGateway_Name
+    destinationVPN_PublicAddress: OnPremResources.outputs.virtualNetworkGateway_PublicIPAddress
     location: mainLocation
-    vhub_name: mainHub.outputs.vHubName
-    vHub_RouteTable_Default_ResourceID: mainHub.outputs.vHubRouteTableDefaultID
+    virtualHub_Name: virtualHubA_and_Contents.outputs.virtualHub_Name
+    virtualHub_RouteTable_Default_ResourceID: virtualHubA_and_Contents.outputs.virtualHub_RouteTable_Default_ResourceID
+    virtualWAN_ID: virtualHubA_and_Contents.outputs.virtualWAN_ID
+    virtualWAN_VPNGateway_Name: virtualHubA_and_Contents.outputs.virtualWAN_ID
     vpn_SharedKey: vpn_SharedKey
-    vwan_VPN_Name: mainHub.outputs.vpnName
-    vwanID: vWAN.outputs.vwanID
   }
 }
 
-module branchHub './modules/Networking/hubAndContents.bicep' = if (multiRegion) {
-  name: 'branchHub1'
-  scope: BranchRG
+module virtualHubB_and_Contents 'modules/AzureResources/VirtualHub_and_Contents.bicep' = if (multiRegion) {
+  name: 'vHubB'
   params: {
+    firstTwoOctetsOfVirtualHubNetworkPrefix: '10.120'
+    firstTwoOctetsOfVirtualNetworkPrefix: ['10.121', '10.122']
     location: branchLocation
-    vwanID: vWAN.outputs.vwanID
-    virtualMachine_adminUsername: virtualMachine_adminUsername
-    virtualMachine_adminPassword: virtualMachine_adminPassword
-    vHub_Iteration: 2
-    usingVPN: true
-    usingAzFW: false
+    usingAzureFirewall: false
+    usingVPN: false
+    virtualHub_UniquePrefix: 'B'
+    virtualMachine_AdminPassword: virtualMachine_adminPassword
+    virtualMachine_AdminUsername: virtualMachine_adminUsername
+    virtualWAN_ID: virtualWAN.outputs.virtualWAN_ID
   }
 }
 
-module BranchvHubVNetConn_1_1 './modules/Networking/hubVirtualNetworkConnections.bicep' = if (multiRegion) {
-  name: 'Branch1_vHub_to_vnet1_Conn'
-  scope: BranchRG
+module vHubB_to_OnPrem 'modules/AzureResources/VWANToVNGConnection.bicep' = {
+  name: 'vhubB_to_OnPrem'
   params: {
-    vHubName: branchHub.outputs.vHubName
-    vHubRouteTableDefaultID: branchHub.outputs.vHubRouteTableDefaultID
-    vnetID: branchHub.outputs.vnetID1
-    vnetName: branchHub.outputs.vnetName1
-  }
-}
-
-module BranchHub_To_OnPrem 'modules/Networking/VWANToVNGConnection.bicep' = if (multiRegion) {
-  name: 'BranchHub_To_OnPrem'
-  scope: BranchRG
-  params: {
-    destinationVPN_ASN: OnPremResources.outputs.onpremVNGASN
-    destinationVPN_BGPAddress: OnPremResources.outputs.onPremVNGBGPAddress
-    destinationVPN_Name: OnPremResources.outputs.onpremVNGName
-    destinationVPN_PublicAddress: OnPremResources.outputs.onpremVNGPIP
+    destinationVPN_ASN: OnPremResources.outputs.virtualNetworkGateway_ASN
+    destinationVPN_BGPAddress: OnPremResources.outputs.virtualNetworkGateway_BGPAddress
+    destinationVPN_Name: OnPremResources.outputs.virtualNetworkGateway_Name
+    destinationVPN_PublicAddress: OnPremResources.outputs.virtualNetworkGateway_PublicIPAddress
     location: branchLocation
-    vhub_name: branchHub.outputs.vHubName
-    vHub_RouteTable_Default_ResourceID: branchHub.outputs.vHubRouteTableDefaultID
+    virtualHub_Name: virtualHubB_and_Contents.outputs.virtualHub_Name
+    virtualHub_RouteTable_Default_ResourceID: virtualHubB_and_Contents.outputs.virtualHub_RouteTable_Default_ResourceID
+    virtualWAN_ID: virtualHubB_and_Contents.outputs.virtualWAN_ID
+    virtualWAN_VPNGateway_Name: virtualHubB_and_Contents.outputs.virtualWAN_ID
     vpn_SharedKey: vpn_SharedKey
-    vwan_VPN_Name: branchHub.outputs.vpnName
-    vwanID: vWAN.outputs.vwanID
   }
 }
 
-module OnPremResources 'modules/OnPremResources/main_OnPremResources.bicep' = {
+module OnPremResources 'modules/OnPremResources/OnPremResources.bicep' = {
   name: 'OnPremResources'
-  scope: OnPremRG
   params: {
     location: onPremLocation
-    virtualMachine_adminPassword: virtualMachine_adminPassword
-    virtualMachine_adminUsername: virtualMachine_adminUsername
-    OnPrem_VNG_ASN: OnPrem_ASN
-    usingAzFW: false
+    virtualMachine_AdminPassword: virtualMachine_adminPassword
+    virtualMachine_AdminUsername: virtualMachine_adminUsername
+    usingAzureFirewall: false
+    firstTwoOctetsOfVirtualNetworkPrefix: '10.200'
+    azureFirewall_SKU: 'Basic'
+  }
+}
+
+module OnPrem_to_VHubA 'modules/OnPremResources/VNGToVWANConnection.bicep' = {
+  name: 
+  params: {
+    bgpPeeringAddress_0: 
+    bgpPeeringAddress_1: 
+    gatewayIPAddress_0: 
+    gatewayIPAddress_1: 
+    location: 
+    onPremVNGResourceID: 
+    vhubIteration: 
+    vpn_SharedKey: 
+    VWAN_ASN: 
   }
 }
 

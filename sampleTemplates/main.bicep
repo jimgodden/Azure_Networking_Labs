@@ -1,6 +1,6 @@
 param location string 
 
-param virtualMachine_AdminUserName string
+param virtualMachine_AdminUsername string
 
 @secure()
 param virtualMachine_AdminPassword string
@@ -18,7 +18,7 @@ module virtualMachine_Linux '../modules/Microsoft.Compute/Ubuntu20/VirtualMachin
     location: location
     subnet_ID: virtualNetwork_SpokeA.outputs.general_SubnetID
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
-    virtualMachine_AdminUsername: virtualMachine_AdminUserName
+    virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'linuxVM${i}'
     virtualMachine_Size: 'B2ms'
     virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
@@ -33,7 +33,7 @@ module virtualMachine_Windows '../modules/Microsoft.Compute/WindowsServer2022/Vi
     location: location
     subnet_ID: virtualNetwork_SpokeA.outputs.general_SubnetID
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
-    virtualMachine_AdminUsername: virtualMachine_AdminUserName
+    virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'windowsVM${i}'
     virtualMachine_Size: 'B2ms'
     virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'

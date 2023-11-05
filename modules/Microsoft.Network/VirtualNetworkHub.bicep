@@ -7,11 +7,11 @@ param virtualNetwork_Name string
 @description('Address Prefix of the Virtual Network')
 param virtualNetwork_AddressPrefix string = '${firstTwoOctetsOfVirtualNetworkPrefix}.0.0/16'
 
-@description('Name of the Network Security Group')
-param networkSecurityGroup_Default_Name string
+@description('Name of the General Network Security Group')
+param networkSecurityGroup_Default_Name string = '${virtualNetwork_Name}_NSG_General'
 
-@description('Name of the Route Table')
-param routeTable_Name string
+@description('Name of the General Route Table')
+param routeTable_Name string = '${virtualNetwork_Name}_RT_General'
 
 @description('''First two octects of the Virtual Network address prefix
 Example: for a network address of '10.0.0.0/16' you would enter '10.0' here''')
