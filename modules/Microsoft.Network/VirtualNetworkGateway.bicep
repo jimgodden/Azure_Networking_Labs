@@ -13,7 +13,7 @@ param virtualNetworkGateway_ASN int
 @description('Virtual Network Resource ID')
 param virtualNetworkGateway_Subnet_ResourceID string
 
-resource virtualNetworkGateway_PIP 'Microsoft.Network/publicIPAddresses@2022-11-01' = {
+resource virtualNetworkGateway_PublicIPAddress 'Microsoft.Network/publicIPAddresses@2022-11-01' = {
   name: '${virtualNetworkGateway_Name}_PIP'
   location: location
   sku: {
@@ -39,7 +39,7 @@ resource virtualNetworkGateway 'Microsoft.Network/virtualNetworkGateways@2023-02
         properties: {
           privateIPAllocationMethod: 'Dynamic'
           publicIPAddress: {
-            id: virtualNetworkGateway_PIP.id
+            id: virtualNetworkGateway_PublicIPAddress.id
           }
           subnet: {
             id: virtualNetworkGateway_Subnet_ResourceID
@@ -71,7 +71,7 @@ resource virtualNetworkGateway 'Microsoft.Network/virtualNetworkGateways@2023-02
 
 output virtualNetworkGateway_ResourceID string = virtualNetworkGateway.id
 output virtualNetworkGateway_Name string = virtualNetworkGateway.name
-output virtualNetworkGateway_PIP string = virtualNetworkGateway_PIP.properties.ipAddress
+output virtualNetworkGateway_PublicIPAddress string = virtualNetworkGateway_PublicIPAddress.properties.ipAddress
 output virtualNetworkGateway_BGPAddress string = virtualNetworkGateway.properties.bgpSettings.bgpPeeringAddress
 output virtualNetworkGateway_ASN int = virtualNetworkGateway.properties.bgpSettings.asn
 

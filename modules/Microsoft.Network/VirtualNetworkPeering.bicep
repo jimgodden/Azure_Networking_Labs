@@ -21,3 +21,13 @@ resource virtualNetworkPeering_Source_to_Destination 'Microsoft.Network/virtualN
     }
   }
 }
+
+resource virtualNetworkPeering_Destination_to_Source 'Microsoft.Network/virtualNetworks/virtualNetworkPeerings@2022-09-01' = {
+  parent: virtualNetwork_Source
+  name: '${virtualNetwork_Destination_Name}to${virtualNetwork_Source_Name}'
+  properties: {
+    remoteVirtualNetwork: {
+      id: virtualNetwork_Source.id
+    }
+  }
+}

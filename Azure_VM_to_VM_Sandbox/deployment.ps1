@@ -1,8 +1,8 @@
 # This file will be used for testing purposes until a proper CI/CD pipeline is in place.
 
-$mainBicepFile = ".\src\main.bicep"
-$mainJSONFile = ".\src\main.json"
-$mainParameterFile = ".\src\main.parameters.json"
+$mainBicepFile = ".\Azure_VM_to_VM_Sandbox\src\main.bicep"
+$mainJSONFile = ".\Azure_VM_to_VM_Sandbox\src\main.json"
+$mainParameterFile = ".\main.parameters.json"
 
 $start = get-date -UFormat "%s"
 

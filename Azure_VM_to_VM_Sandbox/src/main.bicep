@@ -12,16 +12,16 @@ param virtualMachine_adminUsername string
 param virtualMachine_adminPassword string
 
 @description('Size of the Virtual Machines')
-param vmSize string = 'Standard_B2ms' // 'Standard_D2s_v3' // 'Standard_D16lds_v5'
+param virtualMachine_Size string = 'Standard_B2ms' // 'Standard_D2s_v3' // 'Standard_D16lds_v5'
 
 @description('''True enables Accelerated Networking and False disabled it.  
 Not all VM sizes support Accel Net (i.e. Standard_B2ms).  
 I'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net.
 ''')
-param accelNet bool = false
+param acceleratedNetworking bool = false
 
 @description('SKU of the Virtual Network Gateway')
-param VNG_SKU string = 'VpnGw1'
+param virtualNetworkGateway_SKU string = 'VpnGw1'
 
 @description('VPN Shared Key used for authenticating VPN connections')
 @secure()
@@ -33,7 +33,7 @@ param vpn_SharedKey string
   'Standard'
   'Premium'
 ])
-param AzFW_SKU string
+param azureFirewall_SKU string
 
 @description('If true, Virtual Networks will be connected via Virtual Network Gateway S2S connection.  If false, Virtual Network Peering will be used instead.')
 param isUsingVPN bool = true
@@ -44,110 +44,99 @@ param isUsingAzureFirewall bool = true
 @description('If true, a Windows VM will be deployed in both source and destination')
 param isUsingWindows bool = true
 
-@description('Amount of Windows Virtual Machines to deploy in the source side.  This number is irrelevant if not deploying Windows Virtual Machines')
-param amountOfSourceSideWindowsVMs int = 1
+@description('Number of Windows Virtual Machines to deploy in the source side.  This number is irrelevant if not deploying Windows Virtual Machines')
+param numberOfSourceSideWindowsVMs int = 1
 
-@description('Amount of Windows Virtual Machines to deploy in the destination side.  This number is irrelevant if not deploying Windows Virtual Machines')
-param amountOfDestinationSideWindowsVMs int = 1
+@description('Number of Windows Virtual Machines to deploy in the destination side.  This number is irrelevant if not deploying Windows Virtual Machines')
+param numberOfDestinationSideWindowsVMs int = 1
 
 @description('If true, a Linux VM will be deployed in both source and destination')
 param isUsingLinux bool = true
 
-@description('Amount of Linux Virtual Machines to deploy in the source side.  This number is irrelevant if not deploying Linux Virtual Machines')
-param amountOfSourceSideLinuxVMs  int = 1
+@description('Number of Linux Virtual Machines to deploy in the source side.  This number is irrelevant if not deploying Linux Virtual Machines')
+param numberOfSourceSideLinuxVMs  int = 1
 
-@description('Amount of Linux Virtual Machines to deploy in the destination side.  This number is irrelevant if not deploying Linux Virtual Machines')
-param amountOfDestinationSideLinuxVMs  int = 1
+@description('Number of Linux Virtual Machines to deploy in the destination side.  This number is irrelevant if not deploying Linux Virtual Machines')
+param numberOfDestinationSideLinuxVMs  int = 1
 
 // Virtual Networks
-module sourceVNET './Modules/VirtualNetwork.bicep' = {
+module virtualNetwork_Source '../../Modules/Microsoft.Network/VirtualNetworkHub.bicep' = {
   name: 'srcVNET'
   params: {
-    defaultNSG_Name: 'srcNSG'
-    firstTwoOctetsOfVNETPrefix: '10.0'
+    networkSecurityGroup_Default_Name: 'srcNSG'
+    firstTwoOctetsOfVirtualNetworkPrefix: '10.0'
     location: srcLocation
     routeTable_Name: 'srcRT'
-    vnet_Name: 'srcVNET'
+    virtualNetwork_Name: 'srcVNET'
   }
 }
 
-module destinationVNET './Modules/VirtualNetwork.bicep' = {
+module virtualNetwork_Destination '../../Modules/Microsoft.Network/VirtualNetworkHub.bicep' = {
   name: 'dstVNET'
   params: {
-    defaultNSG_Name: 'dstNSG'
-    firstTwoOctetsOfVNETPrefix: '10.1'
+    networkSecurityGroup_Default_Name: 'dstNSG'
+    firstTwoOctetsOfVirtualNetworkPrefix: '10.1'
     location: dstLocation
     routeTable_Name: 'dstRT'
-    vnet_Name: 'dstVNET'
+    virtualNetwork_Name: 'dstVNET'
   }
 }
 
 // Virtual Network Gateways
-module sourceVNG 'Modules/VirtualNetworkGateway.bicep' = if (isUsingVPN) {
+module sourceVirtualNetworkGateway '../../modules/Microsoft.Network/VirtualNetworkGateway.bicep' = if (isUsingVPN) {
   name: 'srcVNG'
   params: {
     location: srcLocation
-    VNG_ASN: 65530
-    VNG_Name: 'srcVNG'
-    VNG_Subnet_ResourceID: sourceVNET.outputs.gatewaySubnetID
-    VNG_SKU: VNG_SKU
+    virtualNetworkGateway_ASN: 65530
+    virtualNetworkGateway_Name: 'srcVNG'
+    virtualNetworkGateway_Subnet_ResourceID: virtualNetwork_Source.outputs.gateway_SubnetID
+    virtualNetworkGateway_SKU: virtualNetworkGateway_SKU
   }
 }
 
-module destinationVNG 'Modules/VirtualNetworkGateway.bicep' = if (isUsingVPN) {
+module destinationVirtualNetworkGateway '../../modules/Microsoft.Network/VirtualNetworkGateway.bicep' = if (isUsingVPN) {
   name: 'dstVNG'
   params: {
     location: dstLocation
-    VNG_ASN: 65531
-    VNG_Name: 'dstVNG'
-    VNG_Subnet_ResourceID: destinationVNET.outputs.gatewaySubnetID
-    VNG_SKU: VNG_SKU
+    virtualNetworkGateway_ASN: 65531
+    virtualNetworkGateway_Name: 'dstVNG'
+    virtualNetworkGateway_Subnet_ResourceID: virtualNetwork_Destination.outputs.gateway_SubnetID
+    virtualNetworkGateway_SKU: virtualNetworkGateway_SKU
   }
 }
 // Connections to the other Virtual Network Gateway
-module sourceVNG_Conn 'Modules/VPNConnection.bicep' = if (isUsingVPN) {
+module sourceVNG_Conn '../../modules/Microsoft.Network/Connection_and_LocalNetworkGateway.bicep' = if (isUsingVPN) {
   name: 'srcVNG_conn'
   params: {
-    bgpPeeringAddress: destinationVNG.outputs.VNGBGPAddress
-    destination_ASN: destinationVNG.outputs.VNGASN
-    gatewayIPAddress: destinationVNG.outputs.VNGPIP
+    vpn_Destination_BGPIPAddress: destinationVirtualNetworkGateway.outputs.virtualNetworkGateway_BGPAddress
+    vpn_Destination_ASN: destinationVirtualNetworkGateway.outputs.virtualNetworkGateway_ASN
+    virtualNetworkGateway_ID: sourceVirtualNetworkGateway.outputs.virtualNetworkGateway_ResourceID
     location: srcLocation
-    resourceNamePrefix: 'src_to_dst'
-    VNGResourceID: sourceVNG.outputs.VNGResourceID
+    vpn_Destination_Name: 'dst'
     vpn_SharedKey: vpn_SharedKey
+    vpn_Destination_PublicIPAddress: destinationVirtualNetworkGateway.outputs.virtualNetworkGateway_PublicIPAddress
   }
 }
 
-module destinationVNG_Conn 'Modules/VPNConnection.bicep' = if (isUsingVPN) {
+module destinationVNG_Conn '../../modules/Microsoft.Network/Connection_and_LocalNetworkGateway.bicep' = if (isUsingVPN) {
   name: 'dstVNG_conn'
   params: {
-    bgpPeeringAddress: sourceVNG.outputs.VNGBGPAddress
-    destination_ASN: sourceVNG.outputs.VNGASN
-    gatewayIPAddress: sourceVNG.outputs.VNGPIP
+    vpn_Destination_BGPIPAddress: sourceVirtualNetworkGateway.outputs.virtualNetworkGateway_BGPAddress
+    vpn_Destination_ASN: sourceVirtualNetworkGateway.outputs.virtualNetworkGateway_ASN
+    virtualNetworkGateway_ID: destinationVirtualNetworkGateway.outputs.virtualNetworkGateway_ResourceID
     location: dstLocation
-    resourceNamePrefix: 'dst_to_src'
-    VNGResourceID: destinationVNG.outputs.VNGResourceID
+    vpn_Destination_Name: 'src'
     vpn_SharedKey: vpn_SharedKey
+    vpn_Destination_PublicIPAddress: sourceVirtualNetworkGateway.outputs.virtualNetworkGateway_PublicIPAddress
   }
 }
 
 // Virtual Network Peerings
-module sourceVNETPeering './Modules/VirtualNetworkPeering.bicep' = if (!isUsingVPN) {
-  name: 'srctodstPeering'
+module virtualNetworkPeering_Source_to_Destination '../../modules/Microsoft.Network/VirtualNetworkPeering.bicep' = {
+  name: 'Source_to_Destination_Peering'
   params: {
-    dstVNET_Name: destinationVNET.outputs.vnetName
-    originVNET_Name: sourceVNET.outputs.vnetName
-  }
-  dependsOn: [
-    sourceBastion
-  ]
-}
-
-module destinationVNETPeering './Modules/VirtualNetworkPeering.bicep' = if (!isUsingVPN) {
-  name: 'dsttosrcPeering'
-  params: {
-    dstVNET_Name: sourceVNET.outputs.vnetName
-    originVNET_Name: destinationVNET.outputs.vnetName
+    virtualNetwork_Destination_Name: virtualNetwork_Source.outputs.virtualNetwork_Name
+    virtualNetwork_Source_Name: virtualNetwork_Destination.outputs.virtualNetwork_Name
   }
   dependsOn: [
     sourceBastion
@@ -155,93 +144,101 @@ module destinationVNETPeering './Modules/VirtualNetworkPeering.bicep' = if (!isU
 }
 
 // Windows Virtual Machines
-module sourceVM_Windows './Modules/NetTestVM.bicep' = [ for i in range(1, amountOfSourceSideWindowsVMs):  if (isUsingWindows) {
+module sourceVM_Windows '../../Modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = [ for i in range(1, numberOfSourceSideWindowsVMs):  if (isUsingWindows) {
   name: 'srcVMWindows${i}'
   params: {
-    accelNet: accelNet
+    acceleratedNetworking: acceleratedNetworking
     location: srcLocation
-    nic_Name: 'srcVM-Windows_NIC${i}'
-    subnetID: sourceVNET.outputs.generalSubnetID
-    virtualMachine_adminPassword: virtualMachine_adminPassword
-    virtualMachine_adminUsername: virtualMachine_adminUsername
-    vm_Name: 'srcVM-Windows${i}'
-    vmSize: vmSize
+    networkInterface_Name: 'srcVM-Windows_NIC${i}'
+    subnet_ID: virtualNetwork_Source.outputs.general_SubnetID
+    virtualMachine_AdminPassword: virtualMachine_adminPassword
+    virtualMachine_AdminUsername: virtualMachine_adminUsername
+    virtualMachine_Name: 'srcVM-Windows${i}'
+    virtualMachine_Size: virtualMachine_Size
+    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
+    virtualMachine_ScriptFileName: 'WinServ2022_WebServer_InitScript.ps1'
   }
 } ]
 
-module destinationVM_Windows './Modules/NetTestVM.bicep' = [ for i in range(1, amountOfDestinationSideWindowsVMs):  if (isUsingWindows) {
+module destinationVM_Windows '../../Modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = [ for i in range(1, numberOfDestinationSideWindowsVMs):  if (isUsingWindows) {
   name: 'dstVMWindows${i}'
   params: {
-    accelNet: accelNet
+    acceleratedNetworking: acceleratedNetworking
     location: dstLocation
-    nic_Name: 'dstVM-Windows_NIC${i}'
-    subnetID: destinationVNET.outputs.generalSubnetID
-    virtualMachine_adminPassword: virtualMachine_adminPassword
-    virtualMachine_adminUsername: virtualMachine_adminUsername
-    vm_Name: 'dstVM-Windows${i}'
-    vmSize: vmSize
+    networkInterface_Name: 'dstVM-Windows_NIC${i}'
+    subnet_ID: virtualNetwork_Destination.outputs.general_SubnetID
+    virtualMachine_AdminPassword: virtualMachine_adminPassword
+    virtualMachine_AdminUsername: virtualMachine_adminUsername
+    virtualMachine_Name: 'dstVM-Windows${i}'
+    virtualMachine_Size: virtualMachine_Size
+    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
+    virtualMachine_ScriptFileName: 'WinServ2022_WebServer_InitScript.ps1'
   }
 } ]
 
 // Linux Virtual Machines
-module sourceVM_Linx 'Modules/LinuxNetTestVM.bicep' = [ for i in range(1, amountOfSourceSideLinuxVMs):  if (isUsingLinux) {
+module sourceVM_Linx '../../Modules/Microsoft.Compute/Ubuntu20/VirtualMachine.bicep' = [ for i in range(1, numberOfSourceSideLinuxVMs):  if (isUsingLinux) {
   name: 'srcVMLinux${i}'
   params: {
-    accelNet: accelNet
+    acceleratedNetworking: acceleratedNetworking
     location: srcLocation
-    nic_Name: 'srcVM-Linux_NIC${i}'
-    subnetID: sourceVNET.outputs.generalSubnetID
-    virtualMachine_adminPassword: virtualMachine_adminPassword
-    virtualMachine_adminUsername: virtualMachine_adminUsername
-    vm_Name: 'srcVM-Linux${i}'
-    vmSize: vmSize
+    networkInterface_Name: 'srcVM-Linux_NIC${i}'
+    subnet_ID: virtualNetwork_Source.outputs.general_SubnetID
+    virtualMachine_AdminPassword: virtualMachine_adminPassword
+    virtualMachine_AdminUsername: virtualMachine_adminUsername
+    virtualMachine_Name: 'srcVM-Linux${i}'
+    virtualMachine_Size: virtualMachine_Size
+    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
+    virtualMachine_ScriptFileName: 'Ubuntu20_WebServer_Config.sh'
   }
 } ]
 
-module destinationVMLinx 'Modules/LinuxNetTestVM.bicep' = [ for i in range(1, amountOfDestinationSideLinuxVMs):  if (isUsingLinux) {
+module destinationVMLinx '../../Modules/Microsoft.Compute/Ubuntu20/VirtualMachine.bicep' = [ for i in range(1, numberOfDestinationSideLinuxVMs):  if (isUsingLinux) {
   name: 'dstVMLinux${i}'
   params: {
-    accelNet: accelNet
+    acceleratedNetworking: acceleratedNetworking
     location: dstLocation
-    nic_Name: 'dstVM-Linux_NIC${i}'
-    subnetID: destinationVNET.outputs.generalSubnetID
-    virtualMachine_adminPassword: virtualMachine_adminPassword
-    virtualMachine_adminUsername: virtualMachine_adminUsername
-    vm_Name: 'dstVM-Linux${i}'
-    vmSize: vmSize
+    networkInterface_Name: 'dstVM-Linux_NIC${i}'
+    subnet_ID: virtualNetwork_Destination.outputs.general_SubnetID
+    virtualMachine_AdminPassword: virtualMachine_adminPassword
+    virtualMachine_AdminUsername: virtualMachine_adminUsername
+    virtualMachine_Name: 'dstVM-Linux${i}'
+    virtualMachine_Size: virtualMachine_Size
+    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
+    virtualMachine_ScriptFileName: 'Ubuntu20_WebServer_Config.sh'
   }
 } ]
 
 // Azure Firewall
-module sourceAzFW 'Modules/AzureFirewall.bicep' = if (isUsingAzureFirewall) {
+module sourceAzFW '../../modules/Microsoft.Network/AzureFirewall.bicep' = if (isUsingAzureFirewall) {
   name: 'srcAzFW'
   params: {
-    AzFW_Name: 'srcAzFW'
-    AzFW_SKU: AzFW_SKU
-    azfwManagementSubnetID: sourceVNET.outputs.azfwManagementSubnetID
-    AzFWPolicy_Name: 'srcAzFW_Policy'
-    azfwSubnetID: sourceVNET.outputs.azfwSubnetID
+    azureFirewall_Name: 'srcAzFW'
+    azureFirewall_SKU: azureFirewall_SKU
+    azureFirewall_ManagementSubnet_ID: virtualNetwork_Source.outputs.azureFirewallManagement_SubnetID
+    azureFirewallPolicy_Name: 'srcAzFW_Policy'
+    azureFirewall_Subnet_ID: virtualNetwork_Source.outputs.azureFirewall_SubnetID
     location: srcLocation
   }
 }
 
-module destinationAzFW 'Modules/AzureFirewall.bicep' = if (isUsingAzureFirewall) {
+module destinationAzFW '../../modules/Microsoft.Network/AzureFirewall.bicep' = if (isUsingAzureFirewall) {
   name: 'dstAzFW'
   params: {
-    AzFW_Name: 'dstAzFW'
-    AzFW_SKU: AzFW_SKU
-    azfwManagementSubnetID: destinationVNET.outputs.azfwManagementSubnetID
-    AzFWPolicy_Name: 'dstAzFW_Policy'
-    azfwSubnetID: destinationVNET.outputs.azfwSubnetID
+    azureFirewall_Name: 'dstAzFW'
+    azureFirewall_SKU: azureFirewall_SKU
+    azureFirewall_ManagementSubnet_ID: virtualNetwork_Destination.outputs.azureFirewallManagement_SubnetID
+    azureFirewallPolicy_Name: 'dstAzFW_Policy'
+    azureFirewall_Subnet_ID: virtualNetwork_Destination.outputs.azureFirewall_SubnetID
     location: dstLocation
   }
 }
 
 // Azure Bastion for connecting to the Virtual Machines
-module sourceBastion './Modules/Bastion.bicep' = {
+module sourceBastion '../../modules/Microsoft.Network/Bastion.bicep' = {
   name: 'srcBastion'
   params: {
-    bastionSubnetID: sourceVNET.outputs.bastionSubnetID
+    bastion_SubnetID: virtualNetwork_Source.outputs.bastion_SubnetID
     location: srcLocation
   }
 }
