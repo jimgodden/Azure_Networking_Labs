@@ -1,7 +1,7 @@
 # This file will be used for testing purposes until a proper CI/CD pipeline is in place.
 
-$mainBicepFile = ".\Azure_Private_Link_Sandbox\src\main.bicep"
-$mainJSONFile = ".\Azure_Private_Link_Sandbox\src\main.json"
+$mainBicepFile = ".\Azure_PrivateLink_Sandbox\src\main.bicep"
+$mainJSONFile = ".\Azure_PrivateLink_Sandbox\src\main.json"
 $mainParameterFile = ".\main.parameters.json"
 
 $start = get-date -UFormat "%s"
