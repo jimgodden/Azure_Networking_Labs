@@ -70,4 +70,9 @@ output virtualHub_Name string = virtualHub.outputs.virtualHub_Name
 output virtualHub_RouteTable_Default_ResourceID string = virtualHub.outputs.virtualHub_RouteTable_Default_ID
 output virtualWAN_VPNGateway_Name string = virtualHub.outputs.vpnGateway_Name
 
+output virtualHub_VPNGateway_Name_Array array = virtualHub.outputs.vpnGateway_Name_Array
+output virtualHub_VPNGateway_PublicIPAddresses array = virtualHub.outputs.vpnGateway_PublicIPAddresses
+output virtualHub_VPNGateway_BGPAddresses array = virtualHub.outputs.vpnGateway_BGPAddresses
+output virtualHub_VPNGateway_ASN array = virtualHub.outputs.vpnGateway_ASN
+
 

@@ -1,9 +1,8 @@
 # This file will be used for testing purposes until a proper CI/CD pipeline is in place.
 
-$mainBicepFile = ".\src\main.bicep"
-$mainJSONFile = ".\src\main.json"
-$mainParameterFile = ".\src\main.parameters.json"
-# $deploymentParametersFile = ".\DeploymentParameters.json"
+$mainBicepFile = ".\Azure_VirtualWAN_Sandbox\src\main.bicep"
+$mainJSONFile = ".\Azure_VirtualWAN_Sandbox\src\main.json"
+$mainParameterFile = ".\main.parameters.json"
 
 # Sets the Environment for either Prod or Dev depending on what is in the DeploymentParameters.json file
 # $deploymentParameters = Get-Content -raw $deploymentParametersFile | ConvertFrom-Json
@@ -23,11 +22,10 @@ if (!$subID) {
 }
 Set-AzContext -Subscription $subID
 
-# $vnggateway = Get-AzVirtualNetworkGateway -ResourceGroupName 'Main' -ResourceName Main_Hub_VNG
-
-$rgName = "Bicep_VWAN_Prod"
-$location_Main = "eastus2"
-$location_Branch1 = "westus2"
+$rgName = "Bicep_VirtualWAN_Sandbox"
+$location_vhubA = "eastus2"
+$location_vhubB = "westus2"
+$location_OnPrem = "eastus"
 
 Write-Host "Creating ${rgName}"
 New-AzResourceGroup -Name $rgName -Location $location_Main
@@ -35,7 +33,9 @@ New-AzResourceGroup -Name $rgName -Location $location_Main
 Write-Host "`nStarting Bicep Deployment.."
 New-AzResourceGroupDeployment -ResourceGroupName $rgName `
 -TemplateParameterFile $mainParameterFile -TemplateFile $mainBicepFile `
--mainLocation $location_Main -branchLocation $location_Branch1
+-mainLocation $location_vhubA `
+-branchLocation $location_vhubB `
+-onPremLocation $location_OnPrem
 
 $vms = Get-AzVM -ResourceGroupName $rgName
 
