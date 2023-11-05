@@ -8,11 +8,11 @@ param locationA string = resourceGroup().location
 // param locationB string
 
 @description('Username for the admin account of the Virtual Machines')
-param vm_adminUsername string
+param virtualMachine_adminUsername string
 
 @description('Password for the admin account of the Virtual Machines')
 @secure()
-param vm_adminPassword string
+param virtualMachine_adminPassword string
 
 @description('Password for the Virtual Machine Admin User')
 param vmSize string = 'Standard_B2ms' // 'Standard_D2s_v3' // 'Standard_D16lds_v5'
@@ -94,8 +94,8 @@ module hubVM_Windows './Modules/Compute/NetTestVM.bicep' = {
     location: locationA
     nic_Name: 'hubNICWindows'
     subnetID: hubVNET.outputs.generalSubnetID
-    vm_AdminPassword: vm_adminPassword
-    vm_AdminUserName: vm_adminUsername
+    virtualMachine_adminPassword: virtualMachine_adminPassword
+    virtualMachine_adminUsername: virtualMachine_adminUsername
     vm_Name: 'hubVMWindows'
     vmSize: vmSize
   }
@@ -109,8 +109,8 @@ module spokeAVM_Windows './Modules/Compute/NetTestVM.bicep' = {
     location: locationA
     nic_Name: 'spokeANICWindows'
     subnetID: spokeAVNET.outputs.generalSubnetID
-    vm_AdminPassword: vm_adminPassword
-    vm_AdminUserName: vm_adminUsername
+    virtualMachine_adminPassword: virtualMachine_adminPassword
+    virtualMachine_adminUsername: virtualMachine_adminUsername
     vm_Name: 'spokeAVMWindows'
     vmSize: vmSize
   }
@@ -125,8 +125,8 @@ module spokeBVM_Windows './Modules/Compute/NetTestVM.bicep' = {
 
     nic_Name: 'spokeBNICWindows'
     subnetID: spokeBVNET.outputs.generalSubnetID
-    vm_AdminPassword: vm_adminPassword
-    vm_AdminUserName: vm_adminUsername
+    virtualMachine_adminPassword: virtualMachine_adminPassword
+    virtualMachine_adminUsername: virtualMachine_adminUsername
     vm_Name: 'spokeBVMWindows'
     vmSize: vmSize
   }

@@ -22,13 +22,13 @@
         "description": "Azure Datacenter location for the destination resources"
       }
     },
-    "vm_adminUsername": {
+    "virtualMachine_adminUsername": {
       "type": "string",
       "metadata": {
         "description": "Username for the admin account of the Virtual Machines"
       }
     },
-    "vm_adminPassword": {
+    "virtualMachine_adminPassword": {
       "type": "securestring",
       "metadata": {
         "description": "Password for the admin account of the Virtual Machines"
@@ -1543,11 +1543,11 @@
           "subnetID": {
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'srcVNET'), '2022-09-01').outputs.generalSubnetID.value]"
           },
-          "vm_AdminPassword": {
-            "value": "[parameters('vm_adminPassword')]"
+          "virtualMachine_adminPassword": {
+            "value": "[parameters('virtualMachine_adminPassword')]"
           },
-          "vm_AdminUserName": {
-            "value": "[parameters('vm_adminUsername')]"
+          "virtualMachine_adminUsername": {
+            "value": "[parameters('virtualMachine_adminUsername')]"
           },
           "vm_Name": {
             "value": "[format('srcVM-Windows{0}', range(1, parameters('amountOfSourceSideWindowsVMs'))[copyIndex()])]"
@@ -1582,13 +1582,13 @@
                 "description": "Size of the VM"
               }
             },
-            "vm_AdminUserName": {
+            "virtualMachine_adminUsername": {
               "type": "string",
               "metadata": {
                 "description": "Admin Username for the Virtual Machine"
               }
             },
-            "vm_AdminPassword": {
+            "virtualMachine_adminPassword": {
               "type": "securestring",
               "metadata": {
                 "description": "Password for the Virtual Machine Admin User"
@@ -1676,8 +1676,8 @@
                 },
                 "osProfile": {
                   "computerName": "[parameters('vm_Name')]",
-                  "adminUsername": "[parameters('vm_AdminUserName')]",
-                  "adminPassword": "[parameters('vm_AdminPassword')]",
+                  "adminUsername": "[parameters('virtualMachine_adminUsername')]",
+                  "adminPassword": "[parameters('virtualMachine_adminPassword')]",
                   "windowsConfiguration": {
                     "provisionVMAgent": true,
                     "enableAutomaticUpdates": true,
@@ -1796,11 +1796,11 @@
           "subnetID": {
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'dstVNET'), '2022-09-01').outputs.generalSubnetID.value]"
           },
-          "vm_AdminPassword": {
-            "value": "[parameters('vm_adminPassword')]"
+          "virtualMachine_adminPassword": {
+            "value": "[parameters('virtualMachine_adminPassword')]"
           },
-          "vm_AdminUserName": {
-            "value": "[parameters('vm_adminUsername')]"
+          "virtualMachine_adminUsername": {
+            "value": "[parameters('virtualMachine_adminUsername')]"
           },
           "vm_Name": {
             "value": "[format('dstVM-Windows{0}', range(1, parameters('amountOfDestinationSideWindowsVMs'))[copyIndex()])]"
@@ -1835,13 +1835,13 @@
                 "description": "Size of the VM"
               }
             },
-            "vm_AdminUserName": {
+            "virtualMachine_adminUsername": {
               "type": "string",
               "metadata": {
                 "description": "Admin Username for the Virtual Machine"
               }
             },
-            "vm_AdminPassword": {
+            "virtualMachine_adminPassword": {
               "type": "securestring",
               "metadata": {
                 "description": "Password for the Virtual Machine Admin User"
@@ -1929,8 +1929,8 @@
                 },
                 "osProfile": {
                   "computerName": "[parameters('vm_Name')]",
-                  "adminUsername": "[parameters('vm_AdminUserName')]",
-                  "adminPassword": "[parameters('vm_AdminPassword')]",
+                  "adminUsername": "[parameters('virtualMachine_adminUsername')]",
+                  "adminPassword": "[parameters('virtualMachine_adminPassword')]",
                   "windowsConfiguration": {
                     "provisionVMAgent": true,
                     "enableAutomaticUpdates": true,
@@ -2049,11 +2049,11 @@
           "subnetID": {
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'srcVNET'), '2022-09-01').outputs.generalSubnetID.value]"
           },
-          "vm_AdminPassword": {
-            "value": "[parameters('vm_adminPassword')]"
+          "virtualMachine_adminPassword": {
+            "value": "[parameters('virtualMachine_adminPassword')]"
           },
-          "vm_AdminUserName": {
-            "value": "[parameters('vm_adminUsername')]"
+          "virtualMachine_adminUsername": {
+            "value": "[parameters('virtualMachine_adminUsername')]"
           },
           "vm_Name": {
             "value": "[format('srcVM-Linux{0}', range(1, parameters('amountOfSourceSideLinuxVMs'))[copyIndex()])]"
@@ -2088,13 +2088,13 @@
                 "description": "Size of the VM"
               }
             },
-            "vm_AdminUserName": {
+            "virtualMachine_adminUsername": {
               "type": "string",
               "metadata": {
                 "description": "Admin Username for the Virtual Machine"
               }
             },
-            "vm_AdminPassword": {
+            "virtualMachine_adminPassword": {
               "type": "securestring",
               "metadata": {
                 "description": "Password for the Virtual Machine Admin User"
@@ -2170,8 +2170,8 @@
                 },
                 "osProfile": {
                   "computerName": "[parameters('vm_Name')]",
-                  "adminUsername": "[parameters('vm_AdminUserName')]",
-                  "adminPassword": "[parameters('vm_AdminPassword')]",
+                  "adminUsername": "[parameters('virtualMachine_adminUsername')]",
+                  "adminPassword": "[parameters('virtualMachine_adminPassword')]",
                   "linuxConfiguration": {
                     "disablePasswordAuthentication": false,
                     "provisionVMAgent": true,
@@ -2252,11 +2252,11 @@
           "subnetID": {
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'dstVNET'), '2022-09-01').outputs.generalSubnetID.value]"
           },
-          "vm_AdminPassword": {
-            "value": "[parameters('vm_adminPassword')]"
+          "virtualMachine_adminPassword": {
+            "value": "[parameters('virtualMachine_adminPassword')]"
           },
-          "vm_AdminUserName": {
-            "value": "[parameters('vm_adminUsername')]"
+          "virtualMachine_adminUsername": {
+            "value": "[parameters('virtualMachine_adminUsername')]"
           },
           "vm_Name": {
             "value": "[format('dstVM-Linux{0}', range(1, parameters('amountOfDestinationSideLinuxVMs'))[copyIndex()])]"
@@ -2291,13 +2291,13 @@
                 "description": "Size of the VM"
               }
             },
-            "vm_AdminUserName": {
+            "virtualMachine_adminUsername": {
               "type": "string",
               "metadata": {
                 "description": "Admin Username for the Virtual Machine"
               }
             },
-            "vm_AdminPassword": {
+            "virtualMachine_adminPassword": {
               "type": "securestring",
               "metadata": {
                 "description": "Password for the Virtual Machine Admin User"
@@ -2373,8 +2373,8 @@
                 },
                 "osProfile": {
                   "computerName": "[parameters('vm_Name')]",
-                  "adminUsername": "[parameters('vm_AdminUserName')]",
-                  "adminPassword": "[parameters('vm_AdminPassword')]",
+                  "adminUsername": "[parameters('virtualMachine_adminUsername')]",
+                  "adminPassword": "[parameters('virtualMachine_adminPassword')]",
                   "linuxConfiguration": {
                     "disablePasswordAuthentication": false,
                     "provisionVMAgent": true,

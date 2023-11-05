@@ -7,11 +7,11 @@ param vm_Name string
 param vmSize string
 
 @description('Admin Username for the Virtual Machine')
-param vm_AdminUserName string
+param virtualMachine_adminUsername string
 
 @description('Password for the Virtual Machine Admin User')
 @secure()
-param vm_AdminPassword string
+param virtualMachine_adminPassword string
 
 @description('Name of the Virtual Machines Network Interface')
 param nic_Name string
@@ -74,8 +74,8 @@ resource linuxVM 'Microsoft.Compute/virtualMachines@2023-03-01' = {
     }
     osProfile: {
       computerName: vm_Name
-      adminUsername: vm_AdminUserName
-      adminPassword: vm_AdminPassword
+      adminUsername: virtualMachine_adminUsername
+      adminPassword: virtualMachine_adminPassword
       linuxConfiguration: {
         disablePasswordAuthentication: false
         // ssh: {

@@ -65,13 +65,13 @@
         "description": "Name of the Virtual WAN resource"
       }
     },
-    "vm_AdminUserName": {
+    "virtualMachine_adminUsername": {
       "type": "string",
       "metadata": {
         "description": "Admin Username for the Virtual Machines that gets placed in each Virtual Network"
       }
     },
-    "vm_AdminPassword": {
+    "virtualMachine_adminPassword": {
       "type": "securestring",
       "metadata": {
         "description": "Password for the Admin User of the Virtual Machines that gets placed in each Virtual Network"
@@ -198,11 +198,11 @@
           "vwanID": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('mainRG_Name')), 'Microsoft.Resources/deployments', 'virtualWAN'), '2022-09-01').outputs.vwanID.value]"
           },
-          "vm_AdminUserName": {
-            "value": "[parameters('vm_AdminUserName')]"
+          "virtualMachine_adminUsername": {
+            "value": "[parameters('virtualMachine_adminUsername')]"
           },
-          "vm_AdminPassword": {
-            "value": "[parameters('vm_AdminPassword')]"
+          "virtualMachine_adminPassword": {
+            "value": "[parameters('virtualMachine_adminPassword')]"
           },
           "vHub_Iteration": {
             "value": 1
@@ -363,13 +363,13 @@
                 "description": "Name of the Virtual Machine"
               }
             },
-            "vm_AdminUserName": {
+            "virtualMachine_adminUsername": {
               "type": "string",
               "metadata": {
                 "description": "Admin Username for the Virtual Machine"
               }
             },
-            "vm_AdminPassword": {
+            "virtualMachine_adminPassword": {
               "type": "securestring",
               "metadata": {
                 "description": "Password for the Virtual Machine Admin User"
@@ -662,11 +662,11 @@
                   "subnetID": {
                     "value": "[reference(resourceId('Microsoft.Resources/deployments', format('vnet{0}', parameters('vHub_Iteration'))), '2022-09-01').outputs.generalSubnetID.value]"
                   },
-                  "vm_AdminPassword": {
-                    "value": "[parameters('vm_AdminPassword')]"
+                  "virtualMachine_adminPassword": {
+                    "value": "[parameters('virtualMachine_adminPassword')]"
                   },
-                  "vm_AdminUserName": {
-                    "value": "[parameters('vm_AdminUserName')]"
+                  "virtualMachine_adminUsername": {
+                    "value": "[parameters('virtualMachine_adminUsername')]"
                   },
                   "vm_Name": {
                     "value": "[parameters('vm_Name')]"
@@ -692,13 +692,13 @@
                         "description": "Name of the Virtual Machine"
                       }
                     },
-                    "vm_AdminUserName": {
+                    "virtualMachine_adminUsername": {
                       "type": "string",
                       "metadata": {
                         "description": "Admin Username for the Virtual Machine"
                       }
                     },
-                    "vm_AdminPassword": {
+                    "virtualMachine_adminPassword": {
                       "type": "securestring",
                       "metadata": {
                         "description": "Password for the Virtual Machine Admin User"
@@ -780,8 +780,8 @@
                         },
                         "osProfile": {
                           "computerName": "[parameters('vm_Name')]",
-                          "adminUsername": "[parameters('vm_AdminUserName')]",
-                          "adminPassword": "[parameters('vm_AdminPassword')]",
+                          "adminUsername": "[parameters('virtualMachine_adminUsername')]",
+                          "adminPassword": "[parameters('virtualMachine_adminPassword')]",
                           "windowsConfiguration": {
                             "provisionVMAgent": true,
                             "enableAutomaticUpdates": true,
@@ -1216,11 +1216,11 @@
           "vwanID": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('mainRG_Name')), 'Microsoft.Resources/deployments', 'virtualWAN'), '2022-09-01').outputs.vwanID.value]"
           },
-          "vm_AdminUserName": {
-            "value": "[parameters('vm_AdminUserName')]"
+          "virtualMachine_adminUsername": {
+            "value": "[parameters('virtualMachine_adminUsername')]"
           },
-          "vm_AdminPassword": {
-            "value": "[parameters('vm_AdminPassword')]"
+          "virtualMachine_adminPassword": {
+            "value": "[parameters('virtualMachine_adminPassword')]"
           },
           "vHub_Iteration": {
             "value": 2
@@ -1381,13 +1381,13 @@
                 "description": "Name of the Virtual Machine"
               }
             },
-            "vm_AdminUserName": {
+            "virtualMachine_adminUsername": {
               "type": "string",
               "metadata": {
                 "description": "Admin Username for the Virtual Machine"
               }
             },
-            "vm_AdminPassword": {
+            "virtualMachine_adminPassword": {
               "type": "securestring",
               "metadata": {
                 "description": "Password for the Virtual Machine Admin User"
@@ -1680,11 +1680,11 @@
                   "subnetID": {
                     "value": "[reference(resourceId('Microsoft.Resources/deployments', format('vnet{0}', parameters('vHub_Iteration'))), '2022-09-01').outputs.generalSubnetID.value]"
                   },
-                  "vm_AdminPassword": {
-                    "value": "[parameters('vm_AdminPassword')]"
+                  "virtualMachine_adminPassword": {
+                    "value": "[parameters('virtualMachine_adminPassword')]"
                   },
-                  "vm_AdminUserName": {
-                    "value": "[parameters('vm_AdminUserName')]"
+                  "virtualMachine_adminUsername": {
+                    "value": "[parameters('virtualMachine_adminUsername')]"
                   },
                   "vm_Name": {
                     "value": "[parameters('vm_Name')]"
@@ -1710,13 +1710,13 @@
                         "description": "Name of the Virtual Machine"
                       }
                     },
-                    "vm_AdminUserName": {
+                    "virtualMachine_adminUsername": {
                       "type": "string",
                       "metadata": {
                         "description": "Admin Username for the Virtual Machine"
                       }
                     },
-                    "vm_AdminPassword": {
+                    "virtualMachine_adminPassword": {
                       "type": "securestring",
                       "metadata": {
                         "description": "Password for the Virtual Machine Admin User"
@@ -1798,8 +1798,8 @@
                         },
                         "osProfile": {
                           "computerName": "[parameters('vm_Name')]",
-                          "adminUsername": "[parameters('vm_AdminUserName')]",
-                          "adminPassword": "[parameters('vm_AdminPassword')]",
+                          "adminUsername": "[parameters('virtualMachine_adminUsername')]",
+                          "adminPassword": "[parameters('virtualMachine_adminPassword')]",
                           "windowsConfiguration": {
                             "provisionVMAgent": true,
                             "enableAutomaticUpdates": true,
@@ -2232,11 +2232,11 @@
           "location": {
             "value": "[parameters('onPremLocation')]"
           },
-          "vm_AdminPassword": {
-            "value": "[parameters('vm_AdminPassword')]"
+          "virtualMachine_adminPassword": {
+            "value": "[parameters('virtualMachine_adminPassword')]"
           },
-          "vm_AdminUserName": {
-            "value": "[parameters('vm_AdminUserName')]"
+          "virtualMachine_adminUsername": {
+            "value": "[parameters('virtualMachine_adminUsername')]"
           },
           "OnPrem_VNG_ASN": {
             "value": "[parameters('OnPrem_ASN')]"
@@ -2434,13 +2434,13 @@
                 "description": "Name of the Virtual Machines Network Interface"
               }
             },
-            "vm_AdminUserName": {
+            "virtualMachine_adminUsername": {
               "type": "string",
               "metadata": {
                 "description": "Admin Username for the Virtual Machine"
               }
             },
-            "vm_AdminPassword": {
+            "virtualMachine_adminPassword": {
               "type": "securestring",
               "metadata": {
                 "description": "Password for the Virtual Machine Admin User"
@@ -3207,11 +3207,11 @@
                   "subnetID": {
                     "value": "[reference(resourceId('Microsoft.Resources/deployments', 'OnPrem_VNET'), '2022-09-01').outputs.generalSubnetID.value]"
                   },
-                  "vm_AdminPassword": {
-                    "value": "[parameters('vm_AdminPassword')]"
+                  "virtualMachine_adminPassword": {
+                    "value": "[parameters('virtualMachine_adminPassword')]"
                   },
-                  "vm_AdminUserName": {
-                    "value": "[parameters('vm_AdminUserName')]"
+                  "virtualMachine_adminUsername": {
+                    "value": "[parameters('virtualMachine_adminUsername')]"
                   },
                   "vm_Name": {
                     "value": "[parameters('vm_Name')]"
@@ -3237,13 +3237,13 @@
                         "description": "Name of the Virtual Machine"
                       }
                     },
-                    "vm_AdminUserName": {
+                    "virtualMachine_adminUsername": {
                       "type": "string",
                       "metadata": {
                         "description": "Admin Username for the Virtual Machine"
                       }
                     },
-                    "vm_AdminPassword": {
+                    "virtualMachine_adminPassword": {
                       "type": "securestring",
                       "metadata": {
                         "description": "Password for the Virtual Machine Admin User"
@@ -3325,8 +3325,8 @@
                         },
                         "osProfile": {
                           "computerName": "[parameters('vm_Name')]",
-                          "adminUsername": "[parameters('vm_AdminUserName')]",
-                          "adminPassword": "[parameters('vm_AdminPassword')]",
+                          "adminUsername": "[parameters('virtualMachine_adminUsername')]",
+                          "adminPassword": "[parameters('virtualMachine_adminPassword')]",
                           "windowsConfiguration": {
                             "provisionVMAgent": true,
                             "enableAutomaticUpdates": true,

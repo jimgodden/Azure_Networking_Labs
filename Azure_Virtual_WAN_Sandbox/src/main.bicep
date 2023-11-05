@@ -25,11 +25,11 @@ param onPremLocation string = 'eastus'
 param VWAN_Name string = 'vwan'
 
 @description('Admin Username for the Virtual Machines that gets placed in each Virtual Network')
-param vm_AdminUserName string
+param virtualMachine_adminUsername string
 
 @description('Password for the Admin User of the Virtual Machines that gets placed in each Virtual Network')
 @secure()
-param vm_AdminPassword string
+param virtualMachine_adminPassword string
 
 @description('VPN Shared Key used for authenticating VPN connections.  This Shared Key must be the same key that is used on the Virtual Network Gateway that is being connected to the vWAN\'s S2S VPNs.')
 @secure()
@@ -71,8 +71,8 @@ module mainHub './modules/Networking/hubAndContents.bicep' = {
   params: {
     location: mainLocation
     vwanID: vWAN.outputs.vwanID
-    vm_AdminUserName: vm_AdminUserName
-    vm_AdminPassword: vm_AdminPassword
+    virtualMachine_adminUsername: virtualMachine_adminUsername
+    virtualMachine_adminPassword: virtualMachine_adminPassword
     vHub_Iteration: 1
     usingVPN: true
     usingAzFW: true
@@ -113,8 +113,8 @@ module branchHub './modules/Networking/hubAndContents.bicep' = if (multiRegion) 
   params: {
     location: branchLocation
     vwanID: vWAN.outputs.vwanID
-    vm_AdminUserName: vm_AdminUserName
-    vm_AdminPassword: vm_AdminPassword
+    virtualMachine_adminUsername: virtualMachine_adminUsername
+    virtualMachine_adminPassword: virtualMachine_adminPassword
     vHub_Iteration: 2
     usingVPN: true
     usingAzFW: false
@@ -154,8 +154,8 @@ module OnPremResources 'modules/OnPremResources/main_OnPremResources.bicep' = {
   scope: OnPremRG
   params: {
     location: onPremLocation
-    vm_AdminPassword: vm_AdminPassword
-    vm_AdminUserName: vm_AdminUserName
+    virtualMachine_adminPassword: virtualMachine_adminPassword
+    virtualMachine_adminUsername: virtualMachine_adminUsername
     OnPrem_VNG_ASN: OnPrem_ASN
     usingAzFW: false
   }

@@ -79,11 +79,11 @@ param vm_Name string = 'OnPrem-VM'
 param nic_Name string = '${vm_Name}_nic1'
 
 @description('Admin Username for the Virtual Machine')
-param vm_AdminUserName string
+param virtualMachine_adminUsername string
 
 @description('Password for the Virtual Machine Admin User')
 @secure()
-param vm_AdminPassword string
+param virtualMachine_adminPassword string
 
 module vnetHub 'Networking/VirtualNetworkHub.bicep' = {
   name: 'OnPrem_VNET'
@@ -148,8 +148,8 @@ module vm '../Compute/NetTestVM.bicep' = {
     location: location
     nic_Name: nic_Name
     subnetID: vnetHub.outputs.generalSubnetID
-    vm_AdminPassword: vm_AdminPassword
-    vm_AdminUserName: vm_AdminUserName
+    virtualMachine_adminPassword: virtualMachine_adminPassword
+    virtualMachine_adminUsername: virtualMachine_adminUsername
     vm_Name: vm_Name
   }
 }

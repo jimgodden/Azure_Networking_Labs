@@ -18,9 +18,11 @@ module virtualMachine_Linux '../modules/Microsoft.Compute/Ubuntu20/VirtualMachin
     location: location
     subnet_ID: virtualNetwork_SpokeA.outputs.general_SubnetID
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
-    virtualMachine_AdminUserName: virtualMachine_AdminUserName
+    virtualMachine_AdminUsername: virtualMachine_AdminUserName
     virtualMachine_Name: 'linuxVM${i}'
     virtualMachine_Size: 'B2ms'
+    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
+    virtualMachine_ScriptFileName: 'Ubuntu20_DNS_Config.sh'
   }
 } ]
 
@@ -31,9 +33,11 @@ module virtualMachine_Windows '../modules/Microsoft.Compute/WindowsServer2022/Vi
     location: location
     subnet_ID: virtualNetwork_SpokeA.outputs.general_SubnetID
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
-    virtualMachine_AdminUserName: virtualMachine_AdminUserName
+    virtualMachine_AdminUsername: virtualMachine_AdminUserName
     virtualMachine_Name: 'windowsVM${i}'
     virtualMachine_Size: 'B2ms'
+    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
+    virtualMachine_ScriptFileName: 'WinServ2022_General_InitScript.ps1'
   }
 } ]
 
@@ -84,7 +88,7 @@ module applicationGateway '../modules/Microsoft.Network/ApplicationGateway_v2.bi
   params: {
     applicationGateway_Name: 'applicationGateway'
     applicationGateway_PrivateIP_Address: virtualNetwork_SpokeA.outputs.applicationGateway_PrivateIP
-    applicationGateway_SubnetID: virtualNetwork_SpokeA.outputs.applicationGatewaySubnetID
+    applicationGateway_SubnetID: virtualNetwork_SpokeA.outputs.applicationGateway_SubnetID
     applicationGatewayWAF_Name: 'applicationGatewayWAF'
     backendPoolFQDN: 'www.example.com'
     location: location
@@ -210,7 +214,7 @@ module storageAccount '../modules/Microsoft.Storage/StorageAccount.bicep' = {
 module webApp '../modules/Microsoft.Web/site.bicep' = {
   name: 'webApp'
   params: {
-    appServiceSubnet_ID: virtualNetwork_SpokeA.outputs.appServiceSubnetID
+    appServiceSubnet_ID: virtualNetwork_SpokeA.outputs.appService_SubnetID
     appServicePlan_Name: 'asp'
     location: location
     virtualNetwork_Name: virtualNetwork_SpokeA.outputs.virtualNetwork_Name

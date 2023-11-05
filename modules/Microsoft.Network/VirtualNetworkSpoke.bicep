@@ -208,8 +208,8 @@ resource networkSecurityGroup_ApplicationGateway_AppGWSpecificRule 'Microsoft.Ne
 output general_SubnetID string = virtualNetwork.properties.subnets[0].id
 output privateEndpoint_SubnetID string = virtualNetwork.properties.subnets[1].id
 output privateLinkService_SubnetID string = virtualNetwork.properties.subnets[2].id
-output applicationGatewaySubnetID string = virtualNetwork.properties.subnets[3].id 
-output appServiceSubnetID string = virtualNetwork.properties.subnets[4].id
+output applicationGateway_SubnetID string = virtualNetwork.properties.subnets[3].id 
+output appService_SubnetID string = virtualNetwork.properties.subnets[4].id
 
 // Should be one of the last IPs in the subnet range.  This is for the appgw frontend private ip.
 output applicationGateway_PrivateIP string = '${firstTwoOctetsOfVirtualNetworkPrefix}.3.254' 

@@ -83,11 +83,11 @@ param routeTable_Name string = 'General_RouteTable_vhub_${vHub_Iteration}'
 param vm_Name string = 'NetTestVM${vHub_Iteration}'
 
 @description('Admin Username for the Virtual Machine')
-param vm_AdminUserName string
+param virtualMachine_adminUsername string
 
 @description('Password for the Virtual Machine Admin User')
 @secure()
-param vm_AdminPassword string
+param virtualMachine_adminPassword string
 
 @description('Name of the Virtual Machines Network Interface')
 param nic_Name string = '${vm_Name}_nic1'
@@ -195,8 +195,8 @@ module vm1 '../Compute/NetTestVM.bicep' = {
     location: location
     nic_Name: nic_Name
     subnetID: vnet1.outputs.generalSubnetID
-    vm_AdminPassword: vm_AdminPassword
-    vm_AdminUserName: vm_AdminUserName
+    virtualMachine_adminPassword: virtualMachine_adminPassword
+    virtualMachine_adminUsername: virtualMachine_adminUsername
     vm_Name: vm_Name
   }
 }

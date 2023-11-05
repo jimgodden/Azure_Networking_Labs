@@ -20,13 +20,13 @@
         "description": "Name of the App Service"
       }
     },
-    "vm_adminUsername": {
+    "virtualMachine_adminUsername": {
       "type": "string",
       "metadata": {
         "description": "Username for the admin account of the Virtual Machines"
       }
     },
-    "vm_adminPassword": {
+    "virtualMachine_adminPassword": {
       "type": "securestring",
       "metadata": {
         "description": "Password for the admin account of the Virtual Machines"
@@ -1074,11 +1074,11 @@
           "subnetID": {
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'vnet'), '2022-09-01').outputs.generalSubnetID.value]"
           },
-          "vm_AdminPassword": {
-            "value": "[parameters('vm_adminPassword')]"
+          "virtualMachine_adminPassword": {
+            "value": "[parameters('virtualMachine_adminPassword')]"
           },
-          "vm_AdminUserName": {
-            "value": "[parameters('vm_adminUsername')]"
+          "virtualMachine_adminUsername": {
+            "value": "[parameters('virtualMachine_adminUsername')]"
           },
           "vm_Name": {
             "value": "clientVMWindows"
@@ -1113,13 +1113,13 @@
                 "description": "Size of the VM"
               }
             },
-            "vm_AdminUserName": {
+            "virtualMachine_adminUsername": {
               "type": "string",
               "metadata": {
                 "description": "Admin Username for the Virtual Machine"
               }
             },
-            "vm_AdminPassword": {
+            "virtualMachine_adminPassword": {
               "type": "securestring",
               "metadata": {
                 "description": "Password for the Virtual Machine Admin User"
@@ -1207,8 +1207,8 @@
                 },
                 "osProfile": {
                   "computerName": "[parameters('vm_Name')]",
-                  "adminUsername": "[parameters('vm_AdminUserName')]",
-                  "adminPassword": "[parameters('vm_AdminPassword')]",
+                  "adminUsername": "[parameters('virtualMachine_adminUsername')]",
+                  "adminPassword": "[parameters('virtualMachine_adminPassword')]",
                   "windowsConfiguration": {
                     "provisionVMAgent": true,
                     "enableAutomaticUpdates": true,

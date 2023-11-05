@@ -10,7 +10,7 @@ D2as_v5 2 Core 8GB Ram - Uses Accelerated Networking''')
 param virtualMachine_Size string
 
 @description('Admin Username for the Virtual Machine')
-param virtualMachine_AdminUserName string
+param virtualMachine_AdminUsername string
 
 @description('Password for the Virtual Machine Admin User')
 @secure()
@@ -87,7 +87,7 @@ resource virtualMachine_Linux 'Microsoft.Compute/virtualMachines@2023-03-01' = {
     }
     osProfile: {
       computerName: virtualMachine_Name
-      adminUsername: virtualMachine_AdminUserName
+      adminUsername: virtualMachine_AdminUsername
       adminPassword: virtualMachine_AdminPassword
       linuxConfiguration: {
         disablePasswordAuthentication: false

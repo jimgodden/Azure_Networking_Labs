@@ -1,79 +1,81 @@
 param location string = resourceGroup().location
 
 @description('Name of the App Service')
-param Website_Name string =  'jamesgsite${substring(uniqueString(resourceGroup().id), 0, 5)}'
+param site_Name string =  'jamesgsite${substring(uniqueString(resourceGroup().id), 0, 5)}'
 
 @description('Username for the admin account of the Virtual Machines')
-param vm_adminUsername string
+param virtualMachine_adminUsername string
 
 @description('Password for the admin account of the Virtual Machines')
 @secure()
-param vm_adminPassword string
+param virtualMachine_adminPassword string
 
 @description('Password for the Virtual Machine Admin User')
-param vmSize string = 'Standard_B2ms' // 'Standard_D2s_v3' // 'Standard_D16lds_v5'
+param virtualMachine_Size string = 'Standard_B2ms' // 'Standard_D2s_v3' // 'Standard_D16lds_v5'
 
 @description('''True enables Accelerated Networking and False disabled it.  
 Not all VM sizes support Accel Net (i.e. Standard_B2ms).  
 I'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net.
 ''')
-param accelNet bool = false
+param acceleratedNetworking bool = false
 
-module network './modules/Network/VirtualNetwork.bicep' = {
-  name: 'vnet'
+module virtualNetwork_Hub '../../modules/Microsoft.Network/VirtualNetworkHub.bicep' = {
+  name: 'VirtualNetworkHub'
   params: {
-    defaultNSG_Name: 'nsg'
-    firstTwoOctetsOfVNETPrefix: '10.0'
+    firstTwoOctetsOfVirtualNetworkPrefix: '10.0'
     location: location
-    routeTable_Name: 'rt'
-    vnet_Name: 'vnet'
+    networkSecurityGroup_Default_Name: 'nsg_General'
+    routeTable_Name: 'rt_General'
+    virtualNetwork_Name: 'VirutalNetworkHub'
   }
 }
 
-module site './modules/site/site.bicep' = {
+module site '../../modules/Microsoft.Web/site.bicep' = {
   name: 'site'
   params: {
-    ASP_Name: 'asp'
+    appServicePlan_Name: 'asp'
+    appServiceSubnet_ID: virtualNetwork_Hub.outputs.appService_SubnetID
     location: location
-    Vnet_Name: network.outputs.vnetName
-    appServiceSubnetID: network.outputs.appServiceSubnetID
-    Website_Name: Website_Name
+    site_Name: site_Name
+    virtualNetwork_Name: virtualNetwork_Hub.outputs.virtualNetwork_Name 
   }
 }
 
-module AppGW './modules/Network/ApplicationGateway.bicep' = {
+module AppGW '../../modules/Microsoft.Network/ApplicationGateway_v2.bicep' = {
   name: 'AppGW'
   params: {
-    AppGW_Name: 'AppGWv2'
-    AppGW_PIP_Name: 'AppGW_PIP'
-    AppGW_PrivateIP_Address: network.outputs.applicationGatewayPrivateIP
-    AppGW_WAF_Name: 'AppGW_WAF'
+    applicationGateway_Name: 'AppGWv2'
+    publicIP_ApplicationGateway_Name: 'AppGW_PIP'
+    applicationGateway_PrivateIP_Address: virtualNetwork_Hub.outputs.applicationGateway_PrivateIP
+    applicationGatewayWAF_Name: 'AppGW_WAF'
     location: location
-    AppGW_SubnetID: network.outputs.applicationGatewaySubnetID
-    backendPoolFQDN: site.outputs.websiteFQDN
+    applicationGateway_SubnetID: virtualNetwork_Hub.outputs.applicationGateway_SubnetID
+    backendPoolFQDN: site.outputs.website_FQDN
   }
 }
 
 // Windows Virtual Machines
-module clientVMWindows './Modules/Compute/NetTestVM.bicep' = {
+module clientVMWindows '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
   name: 'clientVMWindows'
   params: {
-    accelNet: accelNet
+    acceleratedNetworking: acceleratedNetworking
     location: location
-    nic_Name: 'clientVMWindows_NIC'
-    subnetID: network.outputs.generalSubnetID
-    vm_AdminPassword: vm_adminPassword
-    vm_AdminUserName: vm_adminUsername
-    vm_Name: 'clientVMWindows'
-    vmSize: vmSize
+    networkInterface_Name: 'clientVMWindows_NetworkInterface'
+    subnet_ID: virtualNetwork_Hub.outputs.general_SubnetID
+    virtualMachine_AdminPassword: virtualMachine_adminPassword
+    virtualMachine_AdminUsername: virtualMachine_adminUsername
+    virtualMachine_Name: 'clientVMWindows'
+    virtualMachine_Size: virtualMachine_Size
+    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
+    virtualMachine_ScriptFileName: 'WinServ2022_General_InitScript.ps1'
   }
 }
 
 
-module hubBastion 'modules/Network/Bastion.bicep' = {
+module hubBastion '../../modules/Microsoft.Network/Bastion.bicep' = {
   name: 'hubBastion'
   params: {
-    bastionSubnetID: network.outputs.bastionSubnetID
+    bastion_Subnet_ID: virtualNetwork_Hub.outputs.bastion_SubnetID
     location: location
   }
 }

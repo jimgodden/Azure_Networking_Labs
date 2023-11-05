@@ -5,11 +5,11 @@ param srcLocation string = resourceGroup().location
 param dstLocation string
 
 @description('Username for the admin account of the Virtual Machines')
-param vm_adminUsername string
+param virtualMachine_adminUsername string
 
 @description('Password for the admin account of the Virtual Machines')
 @secure()
-param vm_adminPassword string
+param virtualMachine_adminPassword string
 
 @description('Size of the Virtual Machines')
 param vmSize string = 'Standard_B2ms' // 'Standard_D2s_v3' // 'Standard_D16lds_v5'
@@ -162,8 +162,8 @@ module sourceVM_Windows './Modules/NetTestVM.bicep' = [ for i in range(1, amount
     location: srcLocation
     nic_Name: 'srcVM-Windows_NIC${i}'
     subnetID: sourceVNET.outputs.generalSubnetID
-    vm_AdminPassword: vm_adminPassword
-    vm_AdminUserName: vm_adminUsername
+    virtualMachine_adminPassword: virtualMachine_adminPassword
+    virtualMachine_adminUsername: virtualMachine_adminUsername
     vm_Name: 'srcVM-Windows${i}'
     vmSize: vmSize
   }
@@ -176,8 +176,8 @@ module destinationVM_Windows './Modules/NetTestVM.bicep' = [ for i in range(1, a
     location: dstLocation
     nic_Name: 'dstVM-Windows_NIC${i}'
     subnetID: destinationVNET.outputs.generalSubnetID
-    vm_AdminPassword: vm_adminPassword
-    vm_AdminUserName: vm_adminUsername
+    virtualMachine_adminPassword: virtualMachine_adminPassword
+    virtualMachine_adminUsername: virtualMachine_adminUsername
     vm_Name: 'dstVM-Windows${i}'
     vmSize: vmSize
   }
@@ -191,8 +191,8 @@ module sourceVM_Linx 'Modules/LinuxNetTestVM.bicep' = [ for i in range(1, amount
     location: srcLocation
     nic_Name: 'srcVM-Linux_NIC${i}'
     subnetID: sourceVNET.outputs.generalSubnetID
-    vm_AdminPassword: vm_adminPassword
-    vm_AdminUserName: vm_adminUsername
+    virtualMachine_adminPassword: virtualMachine_adminPassword
+    virtualMachine_adminUsername: virtualMachine_adminUsername
     vm_Name: 'srcVM-Linux${i}'
     vmSize: vmSize
   }
@@ -205,8 +205,8 @@ module destinationVMLinx 'Modules/LinuxNetTestVM.bicep' = [ for i in range(1, am
     location: dstLocation
     nic_Name: 'dstVM-Linux_NIC${i}'
     subnetID: destinationVNET.outputs.generalSubnetID
-    vm_AdminPassword: vm_adminPassword
-    vm_AdminUserName: vm_adminUsername
+    virtualMachine_adminPassword: virtualMachine_adminPassword
+    virtualMachine_adminUsername: virtualMachine_adminUsername
     vm_Name: 'dstVM-Linux${i}'
     vmSize: vmSize
   }

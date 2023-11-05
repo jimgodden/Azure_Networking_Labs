@@ -271,8 +271,8 @@ resource networkSecurityGroup_ApplicationGateway_AppGWSpecificRule 'Microsoft.Ne
 output general_SubnetID string = virtualNetwork.properties.subnets[0].id
 output privateEndpoint_SubnetID string = virtualNetwork.properties.subnets[1].id
 output privateLinkService_SubnetID string = virtualNetwork.properties.subnets[2].id
-output applicationGatewaySubnetID string = virtualNetwork.properties.subnets[3].id 
-output appServiceSubnetID string = virtualNetwork.properties.subnets[4].id
+output applicationGateway_SubnetID string = virtualNetwork.properties.subnets[3].id 
+output appService_SubnetID string = virtualNetwork.properties.subnets[4].id
 output gateway_SubnetID string = virtualNetwork.properties.subnets[5].id
 output azureFirewall_SubnetID string = virtualNetwork.properties.subnets[6].id
 output azureFirewallManagement_SubnetID string = virtualNetwork.properties.subnets[7].id
