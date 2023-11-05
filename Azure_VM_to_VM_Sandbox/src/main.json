@@ -443,7 +443,7 @@
               "type": "string",
               "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('vnet_Name')), '2022-09-01').subnets[4].id]"
             },
-            "privateEndpointSubnetID": {
+            "privateEndpoint_SubnetID": {
               "type": "string",
               "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('vnet_Name')), '2022-09-01').subnets[5].id]"
             },
@@ -776,7 +776,7 @@
               "type": "string",
               "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('vnet_Name')), '2022-09-01').subnets[4].id]"
             },
-            "privateEndpointSubnetID": {
+            "privateEndpoint_SubnetID": {
               "type": "string",
               "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('vnet_Name')), '2022-09-01').subnets[5].id]"
             },

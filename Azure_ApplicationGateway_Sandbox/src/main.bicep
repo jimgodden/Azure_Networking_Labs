@@ -75,7 +75,7 @@ module clientVMWindows '../../modules/Microsoft.Compute/WindowsServer2022/Virtua
 module hubBastion '../../modules/Microsoft.Network/Bastion.bicep' = {
   name: 'hubBastion'
   params: {
-    bastion_Subnet_ID: virtualNetwork_Hub.outputs.bastion_SubnetID
+    bastion_SubnetID: virtualNetwork_Hub.outputs.bastion_SubnetID
     location: location
   }
 }

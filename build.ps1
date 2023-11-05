@@ -1,6 +1,6 @@
 bicep build .\main.bicep
 
-$originalURL = "https://github.com/jimgodden/Azure_Networking_Labs/blob/main/Azure_AppGW_to_ASE_Sandbox/src/main.json"
+$originalURL = "https://github.com/jimgodden/Azure_Networking_Labs/blob/main/Azure_ApplicationGateway_Sandbox/src/main.json"
 $removeBlob = $originalURL.Remove($originalURL.IndexOf("/blob"), 5)
 $shortURL = $removeBlob.Substring(14)
 $rawURL = "https://raw.githubusercontent${shortURL}"

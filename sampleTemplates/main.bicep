@@ -111,7 +111,7 @@ module azureFirewall '../modules/Microsoft.Network/AzureFirewall.bicep' = {
 module bastion '../modules/Microsoft.Network/Bastion.bicep' = {
   name: 'bastion'
   params: {
-    bastion_Subnet_ID: virtualNetwork_Hub.outputs.bastion_SubnetID
+    bastion_SubnetID: virtualNetwork_Hub.outputs.bastion_SubnetID
     location: location
   }
 }
@@ -202,7 +202,7 @@ module storageAccount '../modules/Microsoft.Storage/StorageAccount.bicep' = {
     privateDNSZoneLinkedVnetNamesList: [virtualNetwork_Hub.outputs.virtualNetwork_Name, virtualNetwork_SpokeA.outputs.virtualNetwork_Name]
     privateEndpoint_VirtualNetwork_Name: virtualNetwork_SpokeA.outputs.virtualNetwork_Name
     privateEndpoints_Blob_Name: 'storageAccount_Name_Blob_PE'
-    privateEndpointSubnetID: virtualNetwork_SpokeA.outputs.privateEndpoint_SubnetID
+    privateEndpoint_SubnetID: virtualNetwork_SpokeA.outputs.privateEndpoint_SubnetID
     storageAccount_Name: 'readdescfornamingreq'
   }
 }

@@ -8,7 +8,7 @@ param privateDNSZoneLinkedVnetNamesList array
 
 param privateDNSZoneLinkedVnetIDList array
 
-param privateEndpointSubnetID string
+param privateEndpoint_SubnetID string
 
 @description('''
 Storage account name restrictions:
@@ -120,7 +120,7 @@ resource privateEndpoints_Blob 'Microsoft.Network/privateEndpoints@2023-04-01' =
     ]
     manualPrivateLinkServiceConnections: []
     subnet: {
-      id: privateEndpointSubnetID
+      id: privateEndpoint_SubnetID
     }
     ipConfigurations: []
     customDnsConfigs: [

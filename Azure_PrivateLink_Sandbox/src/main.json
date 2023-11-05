@@ -372,7 +372,7 @@
               "type": "string",
               "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('vnet_Name')), '2022-09-01').subnets[4].id]"
             },
-            "privateEndpointSubnetID": {
+            "privateEndpoint_SubnetID": {
               "type": "string",
               "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('vnet_Name')), '2022-09-01').subnets[5].id]"
             },
@@ -705,7 +705,7 @@
               "type": "string",
               "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('vnet_Name')), '2022-09-01').subnets[4].id]"
             },
-            "privateEndpointSubnetID": {
+            "privateEndpoint_SubnetID": {
               "type": "string",
               "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('vnet_Name')), '2022-09-01').subnets[5].id]"
             },
@@ -1108,7 +1108,7 @@
               "type": "string",
               "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('vnet_Name')), '2022-09-01').subnets[4].id]"
             },
-            "privateEndpointSubnetID": {
+            "privateEndpoint_SubnetID": {
               "type": "string",
               "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('vnet_Name')), '2022-09-01').subnets[5].id]"
             },
@@ -1956,7 +1956,7 @@
             "value": "[parameters('locationA')]"
           },
           "privateEndpoint_SubnetID": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'hubVNET'), '2022-09-01').outputs.privateEndpointSubnetID.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'hubVNET'), '2022-09-01').outputs.privateEndpoint_SubnetID.value]"
           },
           "privateLink_SubnetID": {
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'spokeBVNET'), '2022-09-01').outputs.privateLinkServiceSubnetID.value]"
@@ -2233,8 +2233,8 @@
           "storageAccount_Name": {
             "value": "[parameters('storageAccount_Name')]"
           },
-          "privateEndpointSubnetID": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'spokeAVNET'), '2022-09-01').outputs.privateEndpointSubnetID.value]"
+          "privateEndpoint_SubnetID": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'spokeAVNET'), '2022-09-01').outputs.privateEndpoint_SubnetID.value]"
           },
           "privateDNSZoneLinkedVnetIDList": {
             "value": [
@@ -2283,7 +2283,7 @@
             "privateDNSZoneLinkedVnetIDList": {
               "type": "array"
             },
-            "privateEndpointSubnetID": {
+            "privateEndpoint_SubnetID": {
               "type": "string"
             },
             "storageAccount_Name": {
@@ -2396,7 +2396,7 @@
                 ],
                 "manualPrivateLinkServiceConnections": [],
                 "subnet": {
-                  "id": "[parameters('privateEndpointSubnetID')]"
+                  "id": "[parameters('privateEndpoint_SubnetID')]"
                 },
                 "ipConfigurations": [],
                 "customDnsConfigs": [

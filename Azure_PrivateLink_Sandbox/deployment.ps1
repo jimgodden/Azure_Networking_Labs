@@ -1,7 +1,7 @@
 # This file will be used for testing purposes until a proper CI/CD pipeline is in place.
 
-$mainBicepFile = ".\src\main.bicep"
-$mainJSONFile = ".\src\main.json"
+$mainBicepFile = ".\Azure_Private_Link_Sandbox\src\main.bicep"
+$mainJSONFile = ".\Azure_Private_Link_Sandbox\src\main.json"
 $mainParameterFile = ".\main.parameters.json"
 
 $start = get-date -UFormat "%s"
@@ -19,7 +19,7 @@ if (!$subID) {
 Set-AzContext -Subscription $subID
 
 
-$rgName = "Bicep_Private_Link_Sandbox"
+$rgName = "Bicep_PrivateLink_Sandbox"
 $locationA = "eastus2"
 # $locationB = "eastus2"
 

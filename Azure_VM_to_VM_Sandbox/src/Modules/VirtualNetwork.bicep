@@ -194,7 +194,7 @@ output azfwSubnetID string = vnet.properties.subnets[1].id
 output azfwManagementSubnetID string = vnet.properties.subnets[2].id
 output bastionSubnetID string = vnet.properties.subnets[3].id
 output generalSubnetID string = vnet.properties.subnets[4].id
-output privateEndpointSubnetID string = vnet.properties.subnets[5].id
+output privateEndpoint_SubnetID string = vnet.properties.subnets[5].id
 output privateLinkServiceSubnetID string = vnet.properties.subnets[6].id
 
 
