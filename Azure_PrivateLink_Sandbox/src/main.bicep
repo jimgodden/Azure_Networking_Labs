@@ -89,7 +89,7 @@ module hubToSpokeBPeering '../../modules/Microsoft.Network/VirtualNetworkPeering
 module hubVM_Windows '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
   name: 'hubVM_Windows'
   params: {
-    acceleratedNetworking: false
+    acceleratedNetworking: acceleratedNetworking
     location: locationA
     subnet_ID: virtualNetwork_Hub.outputs.general_SubnetID
     virtualMachine_AdminPassword: virtualMachine_adminPassword
@@ -104,7 +104,7 @@ module hubVM_Windows '../../modules/Microsoft.Compute/WindowsServer2022/VirtualM
 module spokeAVM_Windows '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
   name: 'spokeAVM_Windows'
   params: {
-    acceleratedNetworking: false
+    acceleratedNetworking: acceleratedNetworking
     location: locationA
     subnet_ID: virtualNetwork_Spoke_A.outputs.general_SubnetID
     virtualMachine_AdminPassword: virtualMachine_adminPassword
@@ -119,7 +119,7 @@ module spokeAVM_Windows '../../modules/Microsoft.Compute/WindowsServer2022/Virtu
 module spokeBVM_Windows '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
   name: 'spokeBVM_Windows'
   params: {
-    acceleratedNetworking: false
+    acceleratedNetworking: acceleratedNetworking
     location: locationB
     subnet_ID: virtualNetwork_Spoke_B.outputs.general_SubnetID
     virtualMachine_AdminPassword: virtualMachine_adminPassword
