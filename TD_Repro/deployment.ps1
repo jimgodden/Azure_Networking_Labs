@@ -18,7 +18,7 @@ if (!$subID) {
 }
 Set-AzContext -Subscription $subID
 
-$rgName = "TD_Sandbox"
+$rgName = "TD5_Sandbox"
 $locationA = 'eastus'
 
 Write-Host "Creating ${rgName}"

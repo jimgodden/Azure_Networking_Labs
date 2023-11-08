@@ -20,7 +20,7 @@ param networkInterface_IPConfig_Name array
 param tcpPort int = 443
 
 // Modifies the existing Virtual Machine NIC to add it to the backend pool of the Load Balancer behind the Private Link Service
-resource networkInterface 'Microsoft.Network/networkInterfaces@2023-04-01' = [ for i in range(1, length(networkInterface_Name)): {
+resource networkInterface 'Microsoft.Network/networkInterfaces@2023-04-01' = [ for i in range(0, length(networkInterface_Name)): {
   name: networkInterface_Name[i]
   location: location
   properties: {

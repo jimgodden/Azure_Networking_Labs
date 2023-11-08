@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.18.4.5664",
-      "templateHash": "5438735289172634143"
+      "templateHash": "12624439234233696920"
     }
   },
   "parameters": {
@@ -1740,7 +1740,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.18.4.5664",
-              "templateHash": "13322129241195164855"
+              "templateHash": "11709490327657848240"
             }
           },
           "parameters": {
@@ -1793,19 +1793,19 @@
             {
               "copy": {
                 "name": "networkInterface",
-                "count": "[length(range(1, length(parameters('networkInterface_Name'))))]"
+                "count": "[length(range(0, length(parameters('networkInterface_Name'))))]"
               },
               "type": "Microsoft.Network/networkInterfaces",
               "apiVersion": "2023-04-01",
-              "name": "[parameters('networkInterface_Name')[range(1, length(parameters('networkInterface_Name')))[copyIndex()]]]",
+              "name": "[parameters('networkInterface_Name')[range(0, length(parameters('networkInterface_Name')))[copyIndex()]]]",
               "location": "[parameters('location')]",
               "properties": {
                 "ipConfigurations": [
                   {
-                    "name": "[parameters('networkInterface_IPConfig_Name')[range(1, length(parameters('networkInterface_Name')))[copyIndex()]]]",
+                    "name": "[parameters('networkInterface_IPConfig_Name')[range(0, length(parameters('networkInterface_Name')))[copyIndex()]]]",
                     "properties": {
                       "subnet": {
-                        "id": "[parameters('networkInterface_SubnetID')[range(1, length(parameters('networkInterface_Name')))[copyIndex()]]]"
+                        "id": "[parameters('networkInterface_SubnetID')[range(0, length(parameters('networkInterface_Name')))[copyIndex()]]]"
                       },
                       "loadBalancerBackendAddressPools": [
                         {
