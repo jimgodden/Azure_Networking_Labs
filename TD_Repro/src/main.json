@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.18.4.5664",
-      "templateHash": "12128431960787959711"
+      "templateHash": "5438735289172634143"
     }
   },
   "parameters": {
@@ -927,6 +927,15 @@
           },
           "virtualMachine_Size": {
             "value": "[parameters('virtualMachine_Size')]"
+          },
+          "virtualMachine_ScriptFileLocation": {
+            "value": "https://github.com/jimgodden/Azure_Networking_Labs/tree/main/scripts/"
+          },
+          "virtualMachine_ScriptFileName": {
+            "value": "conntest"
+          },
+          "commandToExecute": {
+            "value": "[format('nohup ./conntest -c {0} -p 5001 &', reference(resourceId('Microsoft.Resources/deployments', 'ilb'), '2022-09-01').outputs.frontendIPAddress.value)]"
           }
         },
         "template": {
@@ -936,7 +945,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.18.4.5664",
-              "templateHash": "9020593515112018069"
+              "templateHash": "14259563526309051240"
             }
           },
           "parameters": {
@@ -989,7 +998,7 @@
             },
             "virtualMachine_ScriptFileLocation": {
               "type": "string",
-              "defaultValue": "https://mainjamesgstorage.blob.core.windows.net/scripts/",
+              "defaultValue": "https://github.com/jimgodden/Azure_Networking_Labs/tree/main/scripts/",
               "metadata": {
                 "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\r\nExample: https://example.com/scripts/"
               }
@@ -1000,6 +1009,10 @@
               "metadata": {
                 "description": "Name of the file to be ran while the Virtual Machine is being created\r\nExample: InitScript.ps1"
               }
+            },
+            "commandToExecute": {
+              "type": "string",
+              "defaultValue": "Ubuntu20_DNS_Config.sh"
             }
           },
           "variables": {
@@ -1091,6 +1104,47 @@
               "dependsOn": [
                 "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name'))]"
               ]
+            },
+            {
+              "type": "Microsoft.Compute/virtualMachines/extensions",
+              "apiVersion": "2022-11-01",
+              "name": "[format('{0}/{1}', parameters('virtualMachine_Name'), 'AzureNetworkWatcherExtension')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "autoUpgradeMinorVersion": true,
+                "publisher": "Microsoft.Azure.NetworkWatcher",
+                "type": "NetworkWatcherAgentLinux",
+                "typeHandlerVersion": "1.4"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachine_Name'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Compute/virtualMachines/extensions",
+              "apiVersion": "2021-11-01",
+              "name": "[format('{0}/{1}', parameters('virtualMachine_Name'), 'installcustomscript')]",
+              "location": "[parameters('location')]",
+              "tags": {
+                "displayName": "install software for Linux VM"
+              },
+              "properties": {
+                "publisher": "Microsoft.Azure.Extensions",
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.1",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                  "fileUris": [
+                    "[variables('virtualMachine_ScriptFileUri')]"
+                  ]
+                },
+                "protectedSettings": {
+                  "commandToExecute": "[parameters('commandToExecute')]"
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachine_Name'))]"
+              ]
             }
           ],
           "outputs": {
@@ -1106,6 +1160,9 @@
         }
       },
       "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'ilb')]",
+        "[resourceId('Microsoft.Resources/deployments', 'spokebVMlin1')]",
+        "[resourceId('Microsoft.Resources/deployments', 'spokebVMlin2')]",
         "[resourceId('Microsoft.Resources/deployments', 'hubVNet')]"
       ]
     },
@@ -1139,6 +1196,15 @@
           },
           "virtualMachine_Size": {
             "value": "[parameters('virtualMachine_Size')]"
+          },
+          "virtualMachine_ScriptFileLocation": {
+            "value": "https://github.com/jimgodden/Azure_Networking_Labs/tree/main/scripts/"
+          },
+          "virtualMachine_ScriptFileName": {
+            "value": "conntest"
+          },
+          "commandToExecute": {
+            "value": "nohup ./contest -s -p 5001 &"
           }
         },
         "template": {
@@ -1148,7 +1214,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.18.4.5664",
-              "templateHash": "9020593515112018069"
+              "templateHash": "14259563526309051240"
             }
           },
           "parameters": {
@@ -1201,7 +1267,7 @@
             },
             "virtualMachine_ScriptFileLocation": {
               "type": "string",
-              "defaultValue": "https://mainjamesgstorage.blob.core.windows.net/scripts/",
+              "defaultValue": "https://github.com/jimgodden/Azure_Networking_Labs/tree/main/scripts/",
               "metadata": {
                 "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\r\nExample: https://example.com/scripts/"
               }
@@ -1212,6 +1278,10 @@
               "metadata": {
                 "description": "Name of the file to be ran while the Virtual Machine is being created\r\nExample: InitScript.ps1"
               }
+            },
+            "commandToExecute": {
+              "type": "string",
+              "defaultValue": "Ubuntu20_DNS_Config.sh"
             }
           },
           "variables": {
@@ -1302,6 +1372,47 @@
               },
               "dependsOn": [
                 "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Compute/virtualMachines/extensions",
+              "apiVersion": "2022-11-01",
+              "name": "[format('{0}/{1}', parameters('virtualMachine_Name'), 'AzureNetworkWatcherExtension')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "autoUpgradeMinorVersion": true,
+                "publisher": "Microsoft.Azure.NetworkWatcher",
+                "type": "NetworkWatcherAgentLinux",
+                "typeHandlerVersion": "1.4"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachine_Name'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Compute/virtualMachines/extensions",
+              "apiVersion": "2021-11-01",
+              "name": "[format('{0}/{1}', parameters('virtualMachine_Name'), 'installcustomscript')]",
+              "location": "[parameters('location')]",
+              "tags": {
+                "displayName": "install software for Linux VM"
+              },
+              "properties": {
+                "publisher": "Microsoft.Azure.Extensions",
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.1",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                  "fileUris": [
+                    "[variables('virtualMachine_ScriptFileUri')]"
+                  ]
+                },
+                "protectedSettings": {
+                  "commandToExecute": "[parameters('commandToExecute')]"
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachine_Name'))]"
               ]
             }
           ],
@@ -1351,6 +1462,15 @@
           },
           "virtualMachine_Size": {
             "value": "[parameters('virtualMachine_Size')]"
+          },
+          "virtualMachine_ScriptFileLocation": {
+            "value": "https://github.com/jimgodden/Azure_Networking_Labs/tree/main/scripts/"
+          },
+          "virtualMachine_ScriptFileName": {
+            "value": "conntest"
+          },
+          "commandToExecute": {
+            "value": "nohup ./contest -s -p 5001 &"
           }
         },
         "template": {
@@ -1360,7 +1480,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.18.4.5664",
-              "templateHash": "9020593515112018069"
+              "templateHash": "14259563526309051240"
             }
           },
           "parameters": {
@@ -1413,7 +1533,7 @@
             },
             "virtualMachine_ScriptFileLocation": {
               "type": "string",
-              "defaultValue": "https://mainjamesgstorage.blob.core.windows.net/scripts/",
+              "defaultValue": "https://github.com/jimgodden/Azure_Networking_Labs/tree/main/scripts/",
               "metadata": {
                 "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\r\nExample: https://example.com/scripts/"
               }
@@ -1424,6 +1544,10 @@
               "metadata": {
                 "description": "Name of the file to be ran while the Virtual Machine is being created\r\nExample: InitScript.ps1"
               }
+            },
+            "commandToExecute": {
+              "type": "string",
+              "defaultValue": "Ubuntu20_DNS_Config.sh"
             }
           },
           "variables": {
@@ -1514,6 +1638,47 @@
               },
               "dependsOn": [
                 "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Compute/virtualMachines/extensions",
+              "apiVersion": "2022-11-01",
+              "name": "[format('{0}/{1}', parameters('virtualMachine_Name'), 'AzureNetworkWatcherExtension')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "autoUpgradeMinorVersion": true,
+                "publisher": "Microsoft.Azure.NetworkWatcher",
+                "type": "NetworkWatcherAgentLinux",
+                "typeHandlerVersion": "1.4"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachine_Name'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Compute/virtualMachines/extensions",
+              "apiVersion": "2021-11-01",
+              "name": "[format('{0}/{1}', parameters('virtualMachine_Name'), 'installcustomscript')]",
+              "location": "[parameters('location')]",
+              "tags": {
+                "displayName": "install software for Linux VM"
+              },
+              "properties": {
+                "publisher": "Microsoft.Azure.Extensions",
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.1",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                  "fileUris": [
+                    "[variables('virtualMachine_ScriptFileUri')]"
+                  ]
+                },
+                "protectedSettings": {
+                  "commandToExecute": "[parameters('commandToExecute')]"
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachine_Name'))]"
               ]
             }
           ],
@@ -1575,7 +1740,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.18.4.5664",
-              "templateHash": "13506013745891689869"
+              "templateHash": "13322129241195164855"
             }
           },
           "parameters": {
@@ -1723,7 +1888,13 @@
                 "inboundNatPools": []
               }
             }
-          ]
+          ],
+          "outputs": {
+            "frontendIPAddress": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Network/loadBalancers', parameters('internalLoadBalancer_Name')), '2022-09-01').frontendIPConfigurations[0].properties.privateIPAddress]"
+            }
+          }
         }
       },
       "dependsOn": [

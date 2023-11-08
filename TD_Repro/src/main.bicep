@@ -65,7 +65,14 @@ module hubVM_Linux '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.bice
     virtualMachine_AdminUsername: virtualMachine_adminUsername
     virtualMachine_Name: 'hubVM-Linux'
     virtualMachine_Size: virtualMachine_Size
+    virtualMachine_ScriptFileLocation: 'https://github.com/jimgodden/Azure_Networking_Labs/tree/main/scripts/'
+    virtualMachine_ScriptFileName: 'conntest'
+    commandToExecute: 'nohup ./conntest -c ${ilb.outputs.frontendIPAddress} -p 5001 &'
   }
+  dependsOn: [
+    SpokeBVM_Linux1
+    SpokeBVM_Linux2
+  ]
 }
 
 module SpokeBVM_Linux1 '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.bicep' = {
@@ -78,6 +85,9 @@ module SpokeBVM_Linux1 '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.
     virtualMachine_AdminUsername: virtualMachine_adminUsername
     virtualMachine_Name: 'destVM1'
     virtualMachine_Size: virtualMachine_Size
+    virtualMachine_ScriptFileLocation: 'https://github.com/jimgodden/Azure_Networking_Labs/tree/main/scripts/'
+    virtualMachine_ScriptFileName: 'conntest'
+    commandToExecute: 'nohup ./contest -s -p 5001 &'
   }
 }
 
@@ -91,6 +101,9 @@ module SpokeBVM_Linux2 '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.
     virtualMachine_AdminUsername: virtualMachine_adminUsername
     virtualMachine_Name: 'destvm2'
     virtualMachine_Size: virtualMachine_Size
+    virtualMachine_ScriptFileLocation: 'https://github.com/jimgodden/Azure_Networking_Labs/tree/main/scripts/'
+    virtualMachine_ScriptFileName: 'conntest'
+    commandToExecute: 'nohup ./contest -s -p 5001 &'
   }
 }
 

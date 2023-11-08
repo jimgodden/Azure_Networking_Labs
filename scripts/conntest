@@ -1,0 +1,217 @@
+#!/usr/bin/python3
+
+import argparse
+import logging
+import threading
+import selectors
+import socket
+import time
+
+from random import randrange
+
+__version__ = '1.00'
+
+
+def parse_arguments() -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-p', '--port',
+                        help='Port to listen on or connect too',
+                        type=int
+                        )
+    parser.add_argument('-c', '--client',
+                        help='Client mode',
+                        type=str,
+                        )
+    parser.add_argument('-s', '--server',
+                        help='Server mode',
+                        action='store_true'
+                        )
+    parser.add_argument('-v', '--version',
+                        action='version',
+                        version=__version__
+                        )
+
+    args = parser.parse_args()
+    return args
+
+
+def accept(sock) -> None:
+    """
+    Accept socket connections.
+
+    Args:
+        sock: Socket to accept connection on.
+    """
+
+    global connection_count
+
+    try:
+        # addr is a tuple of where the connection came from e.g. ('10.25.163.99', 53699)
+        conn, addr = sock.accept()
+    except socket.error as ex:
+        log_file.error(f'Accept {ex}')
+        return
+
+    log_file.info(f'Accept  {addr} {conn.getsockname()}')
+    conn.setblocking(False)
+    sel.register(conn, selectors.EVENT_READ, read)
+    connection_count += 1
+
+
+def read(conn) -> None:
+    """
+    Read data on a connection.
+
+    Args:
+        conn: Connection to read from.
+    """
+
+    global connection_count
+
+    try:
+        sockname = conn.getsockname()
+        peername = conn.getpeername()
+    except socket.error as ex:
+        log_file.error(f'getpeername {ex} {sockname}')
+        sel.unregister(conn)
+        conn.close()
+        connection_count -= 1
+        return
+
+    try:
+        data = conn.recv(65536)
+    except socket.error as ex:
+        log_file.error(f'Receive {ex} {peername} {sockname}')
+        return
+
+    if not data:
+        log_file.info(f'Close   {peername} {sockname}')
+        sel.unregister(conn)
+        conn.close()
+        connection_count -= 1
+        return
+    else:
+        log_file.info(f'Receive {peername} {sockname} {len(data)} {hex(data[0])}')
+
+
+def connect(duration, send_delay, send_bytes):
+
+    # Stagger startup of the streams in a set
+    sleep_secs = randrange(0, 300, 60)
+    log_file.info(f'Connect Sleep {sleep_secs} {duration} secs every {send_delay} secs send {send_bytes}')
+    time.sleep(sleep_secs)
+
+    while True:
+
+        try:
+            sock = socket.create_connection((args.client, args.port), timeout=60)
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+        except socket.error as ex:
+            log_file.error(f'Connect {ex} {args.client} {args.port}')
+            time.sleep(10)
+            continue
+
+        sockname = sock.getsockname()
+        peername = sock.getpeername()
+        byte_to_send = randrange(0, 255, 1)
+        log_file.info(f'Connect {sockname} {peername} {duration} secs every {send_delay} secs send {send_bytes} buffer of {hex(byte_to_send)}')
+        now = time.time()
+        end = now + duration
+        buf = bytearray([byte_to_send] * send_bytes)
+
+        while end > now:
+            if send_delay > 0:
+                time.sleep(send_delay)
+                log_file.info(f'Send    {sockname} {peername} {send_bytes} buffer of {hex(byte_to_send)}')
+                try:
+                    sock.sendall(buf)
+                except socket.error as ex:
+                    log_file.error(f'Send    {ex} {sockname} {peername} {send_bytes} buffer of {hex(byte_to_send)}')
+                    break
+            else:
+                sleep_hrs = randrange(1, 12, 1)
+                log_file.info(f'Sleep   {sockname} {peername} {sleep_hrs} hrs')
+                time.sleep(sleep_hrs * 60 * 60)
+                for i in range(10):
+                    try:
+                        log_file.info(f'Send    {sockname} {peername} {send_bytes} after idle {sleep_hrs} hrs')
+                        sock.sendall(buf)
+                    except socket.error as ex:
+                        log_file.error(f'Send    {ex} {sockname} {peername} {send_bytes} after idle {sleep_hrs} hrs')
+                        end = 0
+                        break
+
+            now = time.time()
+
+        sock.close()
+
+
+if __name__ == '__main__':
+
+    args = parse_arguments()
+
+    if args.server:
+        log_filename = 'conntest_server.log'
+    else:
+        log_filename = 'conntest_client.log'
+
+    # I will make the config a json file later
+    #with open(config.iperfc, 'r') as iperf_config_file:
+    #    iperf_config = json.load(iperf_config_file)
+    #    port = iperf_config['port']
+
+    log_file_handler = logging.FileHandler(log_filename, mode='w')
+    log_file_handler.setLevel(logging.INFO)
+
+    log_file = logging.getLogger(log_filename)
+    log_file.setLevel(logging.INFO)
+    log_file.addHandler(log_file_handler)
+
+    log_format = logging.Formatter('%(asctime)s %(levelname)-5s: %(message)s')
+    logging.Formatter.converter = time.gmtime
+    log_file_handler.setFormatter(log_format)
+
+    #stdout_handler = logging.StreamHandler(sys.stdout)
+    #stdout_handler.setLevel(logging.INFO)
+    #log_file.addHandler(stdout_handler)
+
+    log_file.info('Timestamps are in UTC')
+
+    if args.server:
+        connection_count = 0
+        sel = selectors.DefaultSelector()
+        sock = socket.socket()
+        sock.bind(('', args.port))
+        sock.listen(1000)
+        sock.setblocking(False)
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+        sel.register(sock, selectors.EVENT_READ, accept)
+
+        while True:
+            events = sel.select()
+            for key, mask in events:
+                callback = key.data
+                callback(key.fileobj)
+
+    if args.client:
+        # (number of connections, duration to keep it open, time delay in secs to send data, number of bytes to send)
+        #   3,600 secs =  1 hour
+        #   7,200 secs =  2 hour
+        #  86,400 secs = 24 hours
+        # 432,000 secs =  5 days
+        sixty4k = 65536
+        connections = [(100, 432000, 0, sixty4k), (100, 432000, 300, sixty4k*2), (50, 600, 10, sixty4k), (50, 3600, 2, 1024), (50, 30, 1, sixty4k)]
+        #connections = [(2, 20, 2, 1024)]
+        #connections = [(2, 432000, 0, sixty4k)]
+        #connections = [(1, 432000, 10, sixty4k*2)]
+        #connections = [(10, 60, 2, 1024), (12, 30, 1, sixty4k)]
+        thread_list = []
+
+        for num_connections, duration, send_delay, send_bytes in connections:
+            for i in range(num_connections):
+                thread = threading.Thread(target=connect, args=(duration, send_delay, send_bytes))
+                thread_list.append(thread)
+                thread.start()
+        for i in thread_list:
+            i.join()
