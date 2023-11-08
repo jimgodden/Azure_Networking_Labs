@@ -1,5 +1,5 @@
 param location string
-
+@maxLength(15)
 @description('Name of the Virtual Machine')
 param virtualMachine_Name string
 
@@ -152,3 +152,6 @@ resource vm_CustomScriptExtension 'Microsoft.Compute/virtualMachines/extensions@
     }
   }
 }
+
+output networkInterface_Name string = networkInterface.name
+output networkInterface_IPConfig0_Name string = networkInterface.properties.ipConfigurations[0].name

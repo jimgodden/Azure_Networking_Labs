@@ -109,7 +109,7 @@ module spokeAVM_Windows '../../modules/Microsoft.Compute/WindowsServer2022/Virtu
     subnet_ID: virtualNetwork_Spoke_A.outputs.general_SubnetID
     virtualMachine_AdminPassword: virtualMachine_adminPassword
     virtualMachine_AdminUsername: virtualMachine_adminUsername
-    virtualMachine_Name: 'spokeAVM-Windows'
+    virtualMachine_Name: 'spokeA-WinVM'
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
     virtualMachine_ScriptFileName: 'WinServ2022_General_InitScript.ps1'
@@ -124,7 +124,7 @@ module spokeBVM_Windows '../../modules/Microsoft.Compute/WindowsServer2022/Virtu
     subnet_ID: virtualNetwork_Spoke_B.outputs.general_SubnetID
     virtualMachine_AdminPassword: virtualMachine_adminPassword
     virtualMachine_AdminUsername: virtualMachine_adminUsername
-    virtualMachine_Name: 'spokeBVM-Windows'
+    virtualMachine_Name: 'spokeB-WinVM'
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
     virtualMachine_ScriptFileName: 'WinServ2022_WebServer_InitScript.ps1'
@@ -136,8 +136,8 @@ module privateLink '../../modules/Microsoft.Network/PrivateLink.bicep' = {
   params: {
     internalLoadBalancer_SubnetID: virtualNetwork_Spoke_B.outputs.general_SubnetID
     location: locationB
-    networkInterface_IPConfig_Name: spokeAVM_Windows.outputs.networkInterface_IPConfig0_Name
-    networkInterface_Name: spokeAVM_Windows.outputs.networkInterface_Name
+    networkInterface_IPConfig_Name: spokeBVM_Windows.outputs.networkInterface_IPConfig0_Name
+    networkInterface_Name: spokeBVM_Windows.outputs.networkInterface_Name
     networkInterface_SubnetID: virtualNetwork_Spoke_B.outputs.general_SubnetID
     privateEndpoint_SubnetID: virtualNetwork_Spoke_B.outputs.privateEndpoint_SubnetID
     privateLink_SubnetID: virtualNetwork_Spoke_B.outputs.privateLinkService_SubnetID

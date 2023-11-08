@@ -1,5 +1,6 @@
 param location string
 
+@maxLength(15)
 @description('Name of the Virtual Machine')
 param virtualMachine_Name string
 

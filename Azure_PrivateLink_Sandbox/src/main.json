@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.23.1.45101",
-      "templateHash": "12951836699045863055"
+      "version": "0.18.4.5664",
+      "templateHash": "937265797523501029"
     }
   },
   "parameters": {
@@ -51,8 +51,8 @@
     },
     "storageAccount_Name": {
       "type": "string",
-      "minLength": 3,
       "maxLength": 24,
+      "minLength": 3,
       "metadata": {
         "description": "Storage account name restrictions:\r\n- Storage account names must be between 3 and 24 characters in length and may contain numbers and lowercase letters only.\r\n- Your storage account name must be unique within Azure. No two storage accounts can have the same name.\r\n"
       }
@@ -98,8 +98,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.23.1.45101",
-              "templateHash": "1625371762635262083"
+              "version": "0.18.4.5664",
+              "templateHash": "3744235354043724398"
             }
           },
           "parameters": {
@@ -124,14 +124,16 @@
             },
             "networkSecurityGroup_Default_Name": {
               "type": "string",
+              "defaultValue": "[format('{0}_NSG_General', parameters('virtualNetwork_Name'))]",
               "metadata": {
-                "description": "Name of the Network Security Group"
+                "description": "Name of the General Network Security Group"
               }
             },
             "routeTable_Name": {
               "type": "string",
+              "defaultValue": "[format('{0}_RT_General', parameters('virtualNetwork_Name'))]",
               "metadata": {
-                "description": "Name of the Route Table"
+                "description": "Name of the General Route Table"
               }
             },
             "firstTwoOctetsOfVirtualNetworkPrefix": {
@@ -536,8 +538,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.23.1.45101",
-              "templateHash": "16553324199730317996"
+              "version": "0.18.4.5664",
+              "templateHash": "8836630964023613312"
             }
           },
           "parameters": {
@@ -562,14 +564,16 @@
             },
             "networkSecurityGroup_Default_Name": {
               "type": "string",
+              "defaultValue": "[format('{0}_NSG_General', parameters('virtualNetwork_Name'))]",
               "metadata": {
-                "description": "Name of the Network Security Group"
+                "description": "Name of the General Network Security Group"
               }
             },
             "routeTable_Name": {
               "type": "string",
+              "defaultValue": "[format('{0}_RT_General', parameters('virtualNetwork_Name'))]",
               "metadata": {
-                "description": "Name of the Route Table"
+                "description": "Name of the General Route Table"
               }
             },
             "firstTwoOctetsOfVirtualNetworkPrefix": {
@@ -857,8 +861,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.23.1.45101",
-              "templateHash": "6928007075767709949"
+              "version": "0.18.4.5664",
+              "templateHash": "3947245623130731918"
             }
           },
           "parameters": {
@@ -889,7 +893,7 @@
             {
               "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
               "apiVersion": "2022-09-01",
-              "name": "[format('{0}/{1}', parameters('virtualNetwork_Source_Name'), format('{0}to{1}', parameters('virtualNetwork_Destination_Name'), parameters('virtualNetwork_Source_Name')))]",
+              "name": "[format('{0}/{1}', parameters('virtualNetwork_Destination_Name'), format('{0}to{1}', parameters('virtualNetwork_Destination_Name'), parameters('virtualNetwork_Source_Name')))]",
               "properties": {
                 "remoteVirtualNetwork": {
                   "id": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Source_Name'))]"
@@ -936,8 +940,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.23.1.45101",
-              "templateHash": "16553324199730317996"
+              "version": "0.18.4.5664",
+              "templateHash": "8836630964023613312"
             }
           },
           "parameters": {
@@ -962,14 +966,16 @@
             },
             "networkSecurityGroup_Default_Name": {
               "type": "string",
+              "defaultValue": "[format('{0}_NSG_General', parameters('virtualNetwork_Name'))]",
               "metadata": {
-                "description": "Name of the Network Security Group"
+                "description": "Name of the General Network Security Group"
               }
             },
             "routeTable_Name": {
               "type": "string",
+              "defaultValue": "[format('{0}_RT_General', parameters('virtualNetwork_Name'))]",
               "metadata": {
-                "description": "Name of the Route Table"
+                "description": "Name of the General Route Table"
               }
             },
             "firstTwoOctetsOfVirtualNetworkPrefix": {
@@ -1257,8 +1263,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.23.1.45101",
-              "templateHash": "6928007075767709949"
+              "version": "0.18.4.5664",
+              "templateHash": "3947245623130731918"
             }
           },
           "parameters": {
@@ -1289,7 +1295,7 @@
             {
               "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
               "apiVersion": "2022-09-01",
-              "name": "[format('{0}/{1}', parameters('virtualNetwork_Source_Name'), format('{0}to{1}', parameters('virtualNetwork_Destination_Name'), parameters('virtualNetwork_Source_Name')))]",
+              "name": "[format('{0}/{1}', parameters('virtualNetwork_Destination_Name'), format('{0}to{1}', parameters('virtualNetwork_Destination_Name'), parameters('virtualNetwork_Source_Name')))]",
               "properties": {
                 "remoteVirtualNetwork": {
                   "id": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Source_Name'))]"
@@ -1315,7 +1321,7 @@
         "mode": "Incremental",
         "parameters": {
           "acceleratedNetworking": {
-            "value": false
+            "value": "[parameters('acceleratedNetworking')]"
           },
           "location": {
             "value": "[parameters('locationA')]"
@@ -1348,8 +1354,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.23.1.45101",
-              "templateHash": "9565490235744967650"
+              "version": "0.18.4.5664",
+              "templateHash": "6668336143675951799"
             }
           },
           "parameters": {
@@ -1360,7 +1366,8 @@
               "type": "string",
               "metadata": {
                 "description": "Name of the Virtual Machine"
-              }
+              },
+              "maxLength": 15
             },
             "virtualMachine_Size": {
               "type": "string",
@@ -1583,7 +1590,7 @@
         "mode": "Incremental",
         "parameters": {
           "acceleratedNetworking": {
-            "value": false
+            "value": "[parameters('acceleratedNetworking')]"
           },
           "location": {
             "value": "[parameters('locationA')]"
@@ -1598,7 +1605,7 @@
             "value": "[parameters('virtualMachine_adminUsername')]"
           },
           "virtualMachine_Name": {
-            "value": "spokeAVM-Windows"
+            "value": "spokeA-WinVM"
           },
           "virtualMachine_Size": {
             "value": "[parameters('virtualMachine_Size')]"
@@ -1616,8 +1623,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.23.1.45101",
-              "templateHash": "9565490235744967650"
+              "version": "0.18.4.5664",
+              "templateHash": "6668336143675951799"
             }
           },
           "parameters": {
@@ -1628,7 +1635,8 @@
               "type": "string",
               "metadata": {
                 "description": "Name of the Virtual Machine"
-              }
+              },
+              "maxLength": 15
             },
             "virtualMachine_Size": {
               "type": "string",
@@ -1851,7 +1859,7 @@
         "mode": "Incremental",
         "parameters": {
           "acceleratedNetworking": {
-            "value": false
+            "value": "[parameters('acceleratedNetworking')]"
           },
           "location": {
             "value": "[parameters('locationB')]"
@@ -1866,7 +1874,7 @@
             "value": "[parameters('virtualMachine_adminUsername')]"
           },
           "virtualMachine_Name": {
-            "value": "spokeBVM-Windows"
+            "value": "spokeB-WinVM"
           },
           "virtualMachine_Size": {
             "value": "[parameters('virtualMachine_Size')]"
@@ -1884,8 +1892,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.23.1.45101",
-              "templateHash": "9565490235744967650"
+              "version": "0.18.4.5664",
+              "templateHash": "6668336143675951799"
             }
           },
           "parameters": {
@@ -1896,7 +1904,8 @@
               "type": "string",
               "metadata": {
                 "description": "Name of the Virtual Machine"
-              }
+              },
+              "maxLength": 15
             },
             "virtualMachine_Size": {
               "type": "string",
@@ -2125,10 +2134,10 @@
             "value": "[parameters('locationB')]"
           },
           "networkInterface_IPConfig_Name": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'spokeAVM_Windows'), '2022-09-01').outputs.networkInterface_IPConfig0_Name.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'spokeBVM_Windows'), '2022-09-01').outputs.networkInterface_IPConfig0_Name.value]"
           },
           "networkInterface_Name": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'spokeAVM_Windows'), '2022-09-01').outputs.networkInterface_Name.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'spokeBVM_Windows'), '2022-09-01').outputs.networkInterface_Name.value]"
           },
           "networkInterface_SubnetID": {
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'spokeBVNet'), '2022-09-01').outputs.general_SubnetID.value]"
@@ -2146,8 +2155,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.23.1.45101",
-              "templateHash": "5367702314434482565"
+              "version": "0.18.4.5664",
+              "templateHash": "234360634068216663"
             }
           },
           "parameters": {
@@ -2375,7 +2384,7 @@
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Resources/deployments', 'spokeAVM_Windows')]",
+        "[resourceId('Microsoft.Resources/deployments', 'spokeBVM_Windows')]",
         "[resourceId('Microsoft.Resources/deployments', 'spokeBVNet')]"
       ]
     },
@@ -2425,8 +2434,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.23.1.45101",
-              "templateHash": "12166774064514275268"
+              "version": "0.18.4.5664",
+              "templateHash": "4581081155936991236"
             }
           },
           "parameters": {
@@ -2453,8 +2462,8 @@
             },
             "storageAccount_Name": {
               "type": "string",
-              "minLength": 3,
               "maxLength": 24,
+              "minLength": 3,
               "metadata": {
                 "description": "Storage account name restrictions:\r\n- Storage account names must be between 3 and 24 characters in length and may contain numbers and lowercase letters only.\r\n- Your storage account name must be unique within Azure. No two storage accounts can have the same name.\r\n"
               }
@@ -2668,8 +2677,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.23.1.45101",
-              "templateHash": "17110888497674305527"
+              "version": "0.18.4.5664",
+              "templateHash": "10210758033548125500"
             }
           },
           "parameters": {
@@ -2834,8 +2843,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.23.1.45101",
-              "templateHash": "16363490596801265941"
+              "version": "0.18.4.5664",
+              "templateHash": "16807152716578717234"
             }
           },
           "parameters": {

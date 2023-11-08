@@ -1,7 +1,7 @@
 # This file will be used for testing purposes until a proper CI/CD pipeline is in place.
 
-$mainBicepFile = ".\Azure_PrivateLink_Sandbox\src\main.bicep"
-$mainJSONFile = ".\Azure_PrivateLink_Sandbox\src\main.json"
+$mainBicepFile = ".\TD_Repro\src\main.bicep"
+$mainJSONFile = ".\TD_Repro\src\main.json"
 $mainParameterFile = ".\virtualMachines.parameters.json"
 
 $start = get-date -UFormat "%s"
@@ -18,18 +18,14 @@ if (!$subID) {
 }
 Set-AzContext -Subscription $subID
 
-$rgName = "Bicep_PrivateLink_Sandbox"
-$locationA = "eastus2"
-# $locationB = "eastus2"
-$randomFiveLetterString = .\scripts\deployment_Scripts\Get-LetterGUID.ps1
+$rgName = "TD_Sandbox"
+$locationA = 'eastus'
 
 Write-Host "Creating ${rgName}"
 New-AzResourceGroup -Name $rgName -Location $locationA
 
 Write-Host "`nStarting Bicep Deployment.."
 New-AzResourceGroupDeployment -ResourceGroupName $rgName -TemplateFile $mainBicepFile -TemplateParameterFile $mainParameterFile `
-    -storageAccount_Name "jamesgsa${randomFiveLetterString}" `
-    -locationA $locationA # -locationB $locationB
 
 $end = get-date -UFormat "%s"
 $timeTotalSeconds = $end - $start
