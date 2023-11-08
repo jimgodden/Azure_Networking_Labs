@@ -118,40 +118,40 @@ resource virtualMachine_Linux 'Microsoft.Compute/virtualMachines@2023-03-01' = {
   }
 }
 
-resource virtualMachine_NetworkWatcherExtension 'Microsoft.Compute/virtualMachines/extensions@2022-11-01' = {
-  parent: virtualMachine_Linux
-  name: 'AzureNetworkWatcherExtension'
-  location: location
-  properties: {
-    autoUpgradeMinorVersion: true
-    publisher: 'Microsoft.Azure.NetworkWatcher'
-    type: 'NetworkWatcherAgentLinux'
-    typeHandlerVersion: '1.4'
-  }
-}
+// resource virtualMachine_NetworkWatcherExtension 'Microsoft.Compute/virtualMachines/extensions@2022-11-01' = {
+//   parent: virtualMachine_Linux
+//   name: 'AzureNetworkWatcherExtension'
+//   location: location
+//   properties: {
+//     autoUpgradeMinorVersion: true
+//     publisher: 'Microsoft.Azure.NetworkWatcher'
+//     type: 'NetworkWatcherAgentLinux'
+//     typeHandlerVersion: '1.4'
+//   }
+// }
 
-resource vm_CustomScriptExtension 'Microsoft.Compute/virtualMachines/extensions@2021-11-01' = {
-  parent: virtualMachine_Linux
-  name: 'installcustomscript'
-  location: location
-  tags: {
-    displayName: 'install software for Linux VM'
-  }
-  properties: {
-    publisher: 'Microsoft.Azure.Extensions'
-    type: 'CustomScript'
-    typeHandlerVersion: '2.1'
-    autoUpgradeMinorVersion: true
-    settings: {
-      fileUris: [
-        virtualMachine_ScriptFileUri
-      ]
-    }
-    protectedSettings: {
-      commandToExecute: 'sh bind9install.sh'
-    }
-  }
-}
+// resource vm_CustomScriptExtension 'Microsoft.Compute/virtualMachines/extensions@2021-11-01' = {
+//   parent: virtualMachine_Linux
+//   name: 'installcustomscript'
+//   location: location
+//   tags: {
+//     displayName: 'install software for Linux VM'
+//   }
+//   properties: {
+//     publisher: 'Microsoft.Azure.Extensions'
+//     type: 'CustomScript'
+//     typeHandlerVersion: '2.1'
+//     autoUpgradeMinorVersion: true
+//     settings: {
+//       fileUris: [
+//         virtualMachine_ScriptFileUri
+//       ]
+//     }
+//     protectedSettings: {
+//       commandToExecute: 'sh bind9install.sh'
+//     }
+//   }
+// }
 
 output networkInterface_Name string = networkInterface.name
 output networkInterface_IPConfig0_Name string = networkInterface.properties.ipConfigurations[0].name
