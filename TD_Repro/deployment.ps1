@@ -18,10 +18,13 @@ if (!$subID) {
 }
 Set-AzContext -Subscription $subID
 
-$rgName = "Connection_twentyms_Sandbox"
-$locationA = 'northeurope'
+$rgName = "Connection_westeurope_Sandbox"
+$locationA = 'westeurope'
 $locationB = 'westeurope'
 $randomFiveLetterString = .\scripts\deployment_Scripts\Get-LetterGUID.ps1
+
+# Might have to test with the same size VM the customer uses.
+$virtualMachine_Size = 'Standard_E48s_v5'
      
 
 

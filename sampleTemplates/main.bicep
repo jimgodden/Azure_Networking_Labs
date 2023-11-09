@@ -200,10 +200,11 @@ module storageAccount '../modules/Microsoft.Storage/StorageAccount.bicep' = {
     location: location
     privateDNSZoneLinkedVnetIDList: [virtualNetwork_Hub.outputs.virtualNetwork_ID, virtualNetwork_SpokeA.outputs.virtualNetwork_ID]
     privateDNSZoneLinkedVnetNamesList: [virtualNetwork_Hub.outputs.virtualNetwork_Name, virtualNetwork_SpokeA.outputs.virtualNetwork_Name]
-    privateEndpoint_VirtualNetwork_Name: virtualNetwork_SpokeA.outputs.virtualNetwork_Name
+    privateEndpoint_VirtualNetwork_Name: [virtualNetwork_SpokeA.outputs.virtualNetwork_Name]
     privateEndpoints_Blob_Name: 'storageAccount_Name_Blob_PE'
-    privateEndpoint_SubnetID: virtualNetwork_SpokeA.outputs.privateEndpoint_SubnetID
+    privateEndpoint_SubnetID: [virtualNetwork_SpokeA.outputs.privateEndpoint_SubnetID]
     storageAccount_Name: 'readdescfornamingreq'
+    privateEndpoints_File_Name: 'storageAccount_Name_File_PE'
   }
 }
 
