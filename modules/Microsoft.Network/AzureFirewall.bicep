@@ -101,29 +101,41 @@ resource azureFirewall 'Microsoft.Network/azureFirewalls@2022-11-01' = {
 }
 
 
-// resource azureFirewallPolicy_Rule 'Microsoft.Network/firewallPolicies/ruleCollectionGroups@2023-05-01' = {
-//   parent: azureFirewallPolicy
-//   name: 'allowall'
-//   properties: {
-//     priority: 100
-//     ruleCollections: [
-//        {
-//         name: 'allowall'
-//         priority: 100
-//         ruleCollectionType: 'FirewallPolicyFilterRuleCollection'
-//         action: {
-//           type: 'Allow'
-//         }
-//         rules: [
-//            {
-//              ruleType: 'NetworkRule'
-             
-//            }
-//         ]
-//        }
-//     ]
-//   }
-// }
+resource azureFirewallPolicy_Rule 'Microsoft.Network/firewallPolicies/ruleCollectionGroups@2023-05-01' = {
+  parent: azureFirewallPolicy
+  name: 'DefaultNetworkRuleCollectionGroup'
+  properties: {
+    priority: 200
+    ruleCollections: [
+       {
+        name: 'allowall'
+        priority: 100
+        ruleCollectionType: 'FirewallPolicyFilterRuleCollection'
+        action: {
+          type: 'Allow'
+        }
+        rules: [
+           {
+            ruleType: 'NetworkRule'
+            name: 'any'
+            ipProtocols: [
+              'any'
+            ]
+            sourceAddresses: [
+              '*'
+            ]
+            destinationAddresses: [
+              '*'
+            ]
+            destinationPorts: [
+              '*'
+            ]
+           }
+        ]
+       }
+    ]
+  }
+}
 
 
 output azureFirewall_PrivateIPAddress string = azureFirewall.properties.ipConfigurations[0].properties.privateIPAddress

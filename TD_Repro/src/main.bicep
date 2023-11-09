@@ -1,5 +1,5 @@
 @description('Azure Datacenter location for the Hub and Spoke A resources')
-param locationA string = 'eastus'
+param locationA string = 'westeurope'
 
 @description('''
 Azure Datacenter location for the Spoke B resources.  
@@ -22,6 +22,15 @@ Not all VM sizes support Accel Net (i.e. Standard_B2ms).
 I'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net.
 ''')
 param acceleratedNetworking bool = true
+
+@description('''
+Storage account name restrictions:
+- Storage account names must be between 3 and 24 characters in length and may contain numbers and lowercase letters only.
+- Your storage account name must be unique within Azure. No two storage accounts can have the same name.
+''')
+@minLength(3)
+@maxLength(24)
+param storageAccount_Name string
 
 // param aaron bool = false
 
@@ -116,6 +125,7 @@ module ilb '../../modules/Microsoft.Network/InternalLoadBalancer.bicep' = {
     networkInterface_Name: [SpokeBVM_Linux1.outputs.networkInterface_Name, SpokeBVM_Linux2.outputs.networkInterface_Name]
     networkInterface_SubnetID: [virtualNetwork_Spoke_B.outputs.general_SubnetID, virtualNetwork_Spoke_B.outputs.general_SubnetID]
     tcpPort: 5001
+    enableTcpReset: true
   }
   dependsOn: [
     hubBastion
@@ -173,6 +183,20 @@ module hubBastion '../../modules/Microsoft.Network/Bastion.bicep' = {
   params: {
     bastion_SubnetID: virtualNetwork_Hub.outputs.bastion_SubnetID
     location: locationA
+  }
+}
+
+module storageAccount '../../modules/Microsoft.Storage/StorageAccount.bicep' = {
+  name: 'storageAccount'
+  params: {
+    location: locationA
+    privateDNSZoneLinkedVnetIDList: [virtualNetwork_Hub.outputs.virtualNetwork_ID, virtualNetwork_Spoke_B.outputs.virtualNetwork_ID]
+    privateDNSZoneLinkedVnetNamesList: [virtualNetwork_Hub.outputs.virtualNetwork_Name, virtualNetwork_Spoke_B.outputs.virtualNetwork_Name]
+    privateEndpoint_SubnetID: [virtualNetwork_Hub.outputs.privateEndpoint_SubnetID, virtualNetwork_Spoke_B.outputs.privateEndpoint_SubnetID]
+    privateEndpoint_VirtualNetwork_Name: [virtualNetwork_Hub.outputs.virtualNetwork_Name, virtualNetwork_Spoke_B.outputs.virtualNetwork_Name]
+    privateEndpoints_Blob_Name: 'blob_pe'
+    privateEndpoints_File_Name: 'fileshare_pe'
+    storageAccount_Name: storageAccount_Name
   }
 }
 

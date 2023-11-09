@@ -18,14 +18,20 @@ if (!$subID) {
 }
 Set-AzContext -Subscription $subID
 
-$rgName = "Connection_Test_Sandbox"
-$locationA = 'eastus'
+$rgName = "Connection_twentyms_Sandbox"
+$locationA = 'northeurope'
+$locationB = 'westeurope'
+$randomFiveLetterString = .\scripts\deployment_Scripts\Get-LetterGUID.ps1
+     
+
 
 Write-Host "Creating ${rgName}"
 New-AzResourceGroup -Name $rgName -Location $locationA
 
 Write-Host "`nStarting Bicep Deployment.."
 New-AzResourceGroupDeployment -ResourceGroupName $rgName -TemplateFile $mainBicepFile -TemplateParameterFile $mainParameterFile `
+    -locationA $locationA -locationB $locationB `
+    -storageAccount_Name "jamesgsa${randomFiveLetterString}"
 
 $end = get-date -UFormat "%s"
 $timeTotalSeconds = $end - $start
