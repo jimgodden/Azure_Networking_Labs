@@ -23,7 +23,7 @@ I'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net.
 ''')
 param acceleratedNetworking bool = true
 
-param aaron bool = false
+// param aaron bool = false
 
 
 module virtualNetwork_Hub '../../modules/Microsoft.Network/VirtualNetworkHub.bicep' = {
@@ -65,7 +65,7 @@ module hubVM_Linux '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.bice
     virtualMachine_AdminUsername: virtualMachine_adminUsername
     virtualMachine_Name: 'hubVM-Linux'
     virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: 'https://github.com/jimgodden/Azure_Networking_Labs/tree/main/scripts/'
+    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
     virtualMachine_ScriptFileName: 'conntest'
     commandToExecute: 'nohup ./conntest -c ${ilb.outputs.frontendIPAddress} -p 5001 &'
   }
@@ -85,9 +85,9 @@ module SpokeBVM_Linux1 '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.
     virtualMachine_AdminUsername: virtualMachine_adminUsername
     virtualMachine_Name: 'destVM1'
     virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: 'https://github.com/jimgodden/Azure_Networking_Labs/tree/main/scripts/'
+    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
     virtualMachine_ScriptFileName: 'conntest'
-    commandToExecute: 'nohup ./contest -s -p 5001 &'
+    commandToExecute: 'nohup ./conntest -s -p 5001 &'
   }
 }
 
@@ -101,9 +101,9 @@ module SpokeBVM_Linux2 '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.
     virtualMachine_AdminUsername: virtualMachine_adminUsername
     virtualMachine_Name: 'destvm2'
     virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: 'https://github.com/jimgodden/Azure_Networking_Labs/tree/main/scripts/'
+    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
     virtualMachine_ScriptFileName: 'conntest'
-    commandToExecute: 'nohup ./contest -s -p 5001 &'
+    commandToExecute: 'nohup ./conntest -s -p 5001 &'
   }
 }
 
@@ -115,10 +115,14 @@ module ilb '../../modules/Microsoft.Network/InternalLoadBalancer.bicep' = {
     networkInterface_IPConfig_Name: [SpokeBVM_Linux1.outputs.networkInterface_IPConfig0_Name, SpokeBVM_Linux2.outputs.networkInterface_IPConfig0_Name ]
     networkInterface_Name: [SpokeBVM_Linux1.outputs.networkInterface_Name, SpokeBVM_Linux2.outputs.networkInterface_Name]
     networkInterface_SubnetID: [virtualNetwork_Spoke_B.outputs.general_SubnetID, virtualNetwork_Spoke_B.outputs.general_SubnetID]
+    tcpPort: 5001
   }
+  dependsOn: [
+    hubBastion
+  ]
 }
 
-module firewall '../../modules/Microsoft.Network/AzureFirewall.bicep' = if (!aaron) {
+module firewall '../../modules/Microsoft.Network/AzureFirewall.bicep' = {
   name: 'azfw'
   params: {
     azureFirewall_ManagementSubnet_ID: virtualNetwork_Hub.outputs.azureFirewallManagement_SubnetID
@@ -130,15 +134,37 @@ module firewall '../../modules/Microsoft.Network/AzureFirewall.bicep' = if (!aar
   }
 }
 
-module firewallAaron '../../modules/Microsoft.Network/AzureFirewall.bicep' =  if (aaron)  {
-  name: 'azfwAaron'
+// module firewallAaron '../../modules/Microsoft.Network/AzureFirewall.bicep' =  if (aaron)  {
+//   name: 'azfwAaron'
+//   params: {
+//     azureFirewall_ManagementSubnet_ID: '/subscriptions/e155f4a6-30c5-486c-8195-ef8d969f45ae/resourceGroups/rg0002_scus/providers/Microsoft.Network/virtualNetworks/SCUS-HUBVNET/subnets/AzureFirewallManagementSubnet'
+//     azureFirewall_Name: 'azfw'
+//     azureFirewall_SKU: 'Basic'
+//     azureFirewall_Subnet_ID: '/subscriptions/e155f4a6-30c5-486c-8195-ef8d969f45ae/resourceGroups/rg0002_scus/providers/Microsoft.Network/virtualNetworks/SCUS-HUBVNET/subnets/AzureFirewallSubnet'
+//     azureFirewallPolicy_Name: 'azfw_policy'
+//     location: locationA
+//   }
+// }
+
+module udrToAzFW_Hub '../../modules/Microsoft.Network/RouteTable.bicep' = {
+  name: 'udrToAzFW_Hub'
   params: {
-    azureFirewall_ManagementSubnet_ID: '/subscriptions/e155f4a6-30c5-486c-8195-ef8d969f45ae/resourceGroups/rg0002_scus/providers/Microsoft.Network/virtualNetworks/SCUS-HUBVNET/subnets/AzureFirewallManagementSubnet'
-    azureFirewall_Name: 'azfw'
-    azureFirewall_SKU: 'Basic'
-    azureFirewall_Subnet_ID: '/subscriptions/e155f4a6-30c5-486c-8195-ef8d969f45ae/resourceGroups/rg0002_scus/providers/Microsoft.Network/virtualNetworks/SCUS-HUBVNET/subnets/AzureFirewallSubnet'
-    azureFirewallPolicy_Name: 'azfw_policy'
-    location: locationA
+    addressPrefix: '10.101.0.0/24'
+    nextHopType: 'VirtualAppliance'
+    routeTable_Name: virtualNetwork_Hub.outputs.routeTable_Name
+    routeTableRoute_Name: 'toAzFW'
+    nextHopIpAddress: firewall.outputs.azureFirewall_PrivateIPAddress
+  }
+}
+
+module udrToAzFW_SpokeB '../../modules/Microsoft.Network/RouteTable.bicep' = {
+  name: 'udrToAzFW_SpokeB'
+  params: {
+    addressPrefix: '10.100.0.0/24'
+    nextHopType: 'VirtualAppliance'
+    routeTable_Name: virtualNetwork_Spoke_B.outputs.routeTable_Name
+    routeTableRoute_Name: 'toAzFW'
+    nextHopIpAddress: firewall.outputs.azureFirewall_PrivateIPAddress
   }
 }
 

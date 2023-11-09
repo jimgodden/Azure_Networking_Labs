@@ -158,7 +158,7 @@ resource networkSecurityGroup 'Microsoft.Network/networkSecurityGroups@2022-09-0
 }
 
 resource networkSecurityGroup_ApplicationGateway 'Microsoft.Network/networkSecurityGroups@2022-11-01' = {
-  name: 'networkSecurityGroup_ApplicationGateway'
+  name: '${virtualNetwork_Name}_networkSecurityGroup_ApplicationGateway'
   location: location
   properties: {
     securityRules: []
@@ -216,3 +216,5 @@ output applicationGateway_PrivateIP string = '${firstTwoOctetsOfVirtualNetworkPr
 
 output virtualNetwork_Name string = virtualNetwork.name
 output virtualNetwork_ID string = virtualNetwork.id
+
+output routeTable_Name string = routeTable.name
