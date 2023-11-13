@@ -23,6 +23,8 @@ I'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net.
 ''')
 param acceleratedNetworking bool = true
 
+param scenario_Name string
+
 // param usingAzureFirewall bool = true
 
 // @description('''
@@ -78,7 +80,7 @@ module hubVM_Linux '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.bice
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
     virtualMachine_ScriptFileName: 'conntestClient.sh'
-    commandToExecute: './conntestClient.sh ${privateEndpoint_NIC.outputs.privateEndpoint_IPAddress} privateLink'
+    commandToExecute: './conntestClient.sh ${privateEndpoint_NIC.outputs.privateEndpoint_IPAddress} ${scenario_Name}'
     // virtualMachine_ScriptFileName: 'conntest'
     // commandToExecute: 'nohup ./conntest -c ${ilb.outputs.frontendIPAddress} -p 5001 &'
     // commandToExecute: 'nohup ./conntest -c ${privateEndpoint_NIC.outputs.privateEndpoint_IPAddress} -p 5001 &'
@@ -100,9 +102,12 @@ module SpokeBVM_Linux1 '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.
     virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
     virtualMachine_ScriptFileName: 'conntestServer.sh'
     // virtualMachine_ScriptFileName: 'conntest'
-    commandToExecute: './conntestServer.sh privateLink'
+    commandToExecute: './conntestServer.sh ${scenario_Name}'
     // commandToExecute: 'nohup ./conntest -s -p 5001 &'
   }
+  dependsOn: [
+    mainfilesharePrivateEndpoints
+  ]
 }
 
 // module SpokeBVM_Linux2 '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.bicep' = {
@@ -220,6 +225,17 @@ module mainfilesharePrivateEndpoints '../../modules/filesystemPE.bicep' = {
   name: 'mainfilesharePEs'
   params: {
     location: locationA
+    groupID: 'file'
+    privateDNSZoneLinkedVnetIDs: [virtualNetwork_Hub.outputs.virtualNetwork_ID, virtualNetwork_Spoke_B.outputs.virtualNetwork_ID]
+    privateEndpoint_SubnetID: virtualNetwork_Hub.outputs.privateEndpoint_SubnetID
+  }
+}
+
+module mainblobsharePrivateEndpoints '../../modules/filesystemPE.bicep' = {
+  name: 'mainblobsharePEs'
+  params: {
+    location: locationA
+    groupID: 'blob'
     privateDNSZoneLinkedVnetIDs: [virtualNetwork_Hub.outputs.virtualNetwork_ID, virtualNetwork_Spoke_B.outputs.virtualNetwork_ID]
     privateEndpoint_SubnetID: virtualNetwork_Hub.outputs.privateEndpoint_SubnetID
   }

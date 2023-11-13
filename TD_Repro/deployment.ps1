@@ -18,7 +18,10 @@ if (!$subID) {
 }
 Set-AzContext -Subscription $subID
 
-$rgName = "Connection_Test_PL_Sandbox"
+
+$iteration = "3"
+$scenario_Name = "privatelink${3}"
+$rgName = "Connection_${scenario_Name}_${iteration}_Sandbox"
 $locationA = 'westeurope'
 $locationB = 'westeurope'
 $randomFiveLetterString = .\scripts\deployment_Scripts\Get-LetterGUID.ps1
@@ -29,17 +32,15 @@ $randomFiveLetterString = .\scripts\deployment_Scripts\Get-LetterGUID.ps1
 
 $virtualMachine_Size = 'Standard_E4d_v5'
 
-
-
 Write-Host "Creating ${rgName}"
 New-AzResourceGroup -Name $rgName -Location $locationA
 
 Write-Host "`nStarting Bicep Deployment.."
 New-AzResourceGroupDeployment -ResourceGroupName $rgName -TemplateFile $mainBicepFile -TemplateParameterFile $mainParameterFile `
     -locationA $locationA -locationB $locationB `
-    -virtualMachine_Size $virtualMachine_Size
+    -virtualMachine_Size $virtualMachine_Size `
+    -scenario_Name $scenario_Name
     # -usingAzureFirewall $false
-    
     # -storageAccount_Name "jamesgsa${randomFiveLetterString}"
 
 $end = get-date -UFormat "%s"
