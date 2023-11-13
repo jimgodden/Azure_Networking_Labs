@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.18.4.5664",
-      "templateHash": "18210609811282081304"
+      "templateHash": "5033185060292316141"
     }
   },
   "parameters": {
@@ -47,14 +47,6 @@
       "defaultValue": true,
       "metadata": {
         "description": "True enables Accelerated Networking and False disabled it.  \r\nNot all VM sizes support Accel Net (i.e. Standard_B2ms).  \r\nI'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net.\r\n"
-      }
-    },
-    "storageAccount_Name": {
-      "type": "string",
-      "maxLength": 24,
-      "minLength": 3,
-      "metadata": {
-        "description": "Storage account name restrictions:\r\n- Storage account names must be between 3 and 24 characters in length and may contain numbers and lowercase letters only.\r\n- Your storage account name must be unique within Azure. No two storage accounts can have the same name.\r\n"
       }
     }
   },
@@ -947,7 +939,7 @@
             "value": "conntest"
           },
           "commandToExecute": {
-            "value": "[format('nohup ./conntest -c {0} -p 5001 &', reference(resourceId('Microsoft.Resources/deployments', 'ilb'), '2022-09-01').outputs.frontendIPAddress.value)]"
+            "value": "[format('nohup ./conntest -c {0} -p 5001 &', reference(resourceId('Microsoft.Resources/deployments', 'pl'), '2022-09-01').outputs.internalLoadBalancer_FrontendIPAddress.value)]"
           }
         },
         "template": {
@@ -1172,9 +1164,8 @@
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Resources/deployments', 'ilb')]",
+        "[resourceId('Microsoft.Resources/deployments', 'pl')]",
         "[resourceId('Microsoft.Resources/deployments', 'spokebVMlin1')]",
-        "[resourceId('Microsoft.Resources/deployments', 'spokebVMlin2')]",
         "[resourceId('Microsoft.Resources/deployments', 'hubVNet')]"
       ]
     },
@@ -1447,896 +1438,6 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2022-09-01",
-      "name": "spokebVMlin2",
-      "properties": {
-        "expressionEvaluationOptions": {
-          "scope": "inner"
-        },
-        "mode": "Incremental",
-        "parameters": {
-          "acceleratedNetworking": {
-            "value": "[parameters('acceleratedNetworking')]"
-          },
-          "location": {
-            "value": "[parameters('locationB')]"
-          },
-          "subnet_ID": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'spokeBVNet'), '2022-09-01').outputs.general_SubnetID.value]"
-          },
-          "virtualMachine_AdminPassword": {
-            "value": "[parameters('virtualMachine_adminPassword')]"
-          },
-          "virtualMachine_AdminUsername": {
-            "value": "[parameters('virtualMachine_adminUsername')]"
-          },
-          "virtualMachine_Name": {
-            "value": "destvm2"
-          },
-          "virtualMachine_Size": {
-            "value": "[parameters('virtualMachine_Size')]"
-          },
-          "virtualMachine_ScriptFileLocation": {
-            "value": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/"
-          },
-          "virtualMachine_ScriptFileName": {
-            "value": "conntest"
-          },
-          "commandToExecute": {
-            "value": "nohup ./conntest -s -p 5001 &"
-          }
-        },
-        "template": {
-          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0.0",
-          "metadata": {
-            "_generator": {
-              "name": "bicep",
-              "version": "0.18.4.5664",
-              "templateHash": "14259563526309051240"
-            }
-          },
-          "parameters": {
-            "location": {
-              "type": "string"
-            },
-            "virtualMachine_Name": {
-              "type": "string",
-              "metadata": {
-                "description": "Name of the Virtual Machine"
-              },
-              "maxLength": 15
-            },
-            "virtualMachine_Size": {
-              "type": "string",
-              "metadata": {
-                "description": "Size of the Virtual Machine\r\nExamples:\r\nB2ms - 2 Core 8GB Ram - Cannot use Accelerated Networking\r\nD2as_v5 2 Core 8GB Ram - Uses Accelerated Networking"
-              }
-            },
-            "virtualMachine_AdminUsername": {
-              "type": "string",
-              "metadata": {
-                "description": "Admin Username for the Virtual Machine"
-              }
-            },
-            "virtualMachine_AdminPassword": {
-              "type": "securestring",
-              "metadata": {
-                "description": "Password for the Virtual Machine Admin User"
-              }
-            },
-            "networkInterface_Name": {
-              "type": "string",
-              "defaultValue": "[format('{0}_NetworkInterface', parameters('virtualMachine_Name'))]",
-              "metadata": {
-                "description": "Name of the Virtual Machines Network Interface"
-              }
-            },
-            "acceleratedNetworking": {
-              "type": "bool",
-              "metadata": {
-                "description": "True enables Accelerated Networking and False disabled it.  Not all virtualMachine sizes support Accel Net"
-              }
-            },
-            "subnet_ID": {
-              "type": "string",
-              "metadata": {
-                "description": "The Resource ID of the subnet to which the Network Interface will be assigned."
-              }
-            },
-            "virtualMachine_ScriptFileLocation": {
-              "type": "string",
-              "defaultValue": "https://github.com/jimgodden/Azure_Networking_Labs/tree/main/scripts/",
-              "metadata": {
-                "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\r\nExample: https://example.com/scripts/"
-              }
-            },
-            "virtualMachine_ScriptFileName": {
-              "type": "string",
-              "defaultValue": "Ubuntu20_DNS_Config.sh",
-              "metadata": {
-                "description": "Name of the file to be ran while the Virtual Machine is being created\r\nExample: InitScript.ps1"
-              }
-            },
-            "commandToExecute": {
-              "type": "string",
-              "defaultValue": "Ubuntu20_DNS_Config.sh"
-            }
-          },
-          "variables": {
-            "virtualMachine_ScriptFileUri": "[format('{0}{1}', parameters('virtualMachine_ScriptFileLocation'), parameters('virtualMachine_ScriptFileName'))]"
-          },
-          "resources": [
-            {
-              "type": "Microsoft.Network/networkInterfaces",
-              "apiVersion": "2022-09-01",
-              "name": "[parameters('networkInterface_Name')]",
-              "location": "[parameters('location')]",
-              "properties": {
-                "ipConfigurations": [
-                  {
-                    "name": "ipconfig1",
-                    "type": "Microsoft.Network/networkInterfaces/ipConfigurations",
-                    "properties": {
-                      "privateIPAllocationMethod": "Dynamic",
-                      "subnet": {
-                        "id": "[parameters('subnet_ID')]"
-                      },
-                      "primary": true,
-                      "privateIPAddressVersion": "IPv4"
-                    }
-                  }
-                ],
-                "enableAcceleratedNetworking": "[parameters('acceleratedNetworking')]",
-                "enableIPForwarding": false,
-                "disableTcpStateTracking": false,
-                "nicType": "Standard"
-              }
-            },
-            {
-              "type": "Microsoft.Compute/virtualMachines",
-              "apiVersion": "2023-03-01",
-              "name": "[parameters('virtualMachine_Name')]",
-              "location": "[parameters('location')]",
-              "properties": {
-                "hardwareProfile": {
-                  "vmSize": "[parameters('virtualMachine_Size')]"
-                },
-                "storageProfile": {
-                  "imageReference": {
-                    "publisher": "canonical",
-                    "offer": "0001-com-ubuntu-server-focal",
-                    "sku": "20_04-lts-gen2",
-                    "version": "latest"
-                  },
-                  "osDisk": {
-                    "osType": "Linux",
-                    "name": "[format('{0}_OsDisk_1', parameters('virtualMachine_Name'))]",
-                    "createOption": "FromImage",
-                    "caching": "ReadWrite",
-                    "deleteOption": "Delete"
-                  },
-                  "dataDisks": []
-                },
-                "osProfile": {
-                  "computerName": "[parameters('virtualMachine_Name')]",
-                  "adminUsername": "[parameters('virtualMachine_AdminUsername')]",
-                  "adminPassword": "[parameters('virtualMachine_AdminPassword')]",
-                  "linuxConfiguration": {
-                    "disablePasswordAuthentication": false,
-                    "provisionVMAgent": true,
-                    "patchSettings": {
-                      "patchMode": "ImageDefault",
-                      "assessmentMode": "ImageDefault"
-                    }
-                  },
-                  "secrets": [],
-                  "allowExtensionOperations": true
-                },
-                "networkProfile": {
-                  "networkInterfaces": [
-                    {
-                      "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name'))]",
-                      "properties": {
-                        "deleteOption": "Delete"
-                      }
-                    }
-                  ]
-                },
-                "diagnosticsProfile": {
-                  "bootDiagnostics": {
-                    "enabled": true
-                  }
-                }
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name'))]"
-              ]
-            },
-            {
-              "type": "Microsoft.Compute/virtualMachines/extensions",
-              "apiVersion": "2022-11-01",
-              "name": "[format('{0}/{1}', parameters('virtualMachine_Name'), 'AzureNetworkWatcherExtension')]",
-              "location": "[parameters('location')]",
-              "properties": {
-                "autoUpgradeMinorVersion": true,
-                "publisher": "Microsoft.Azure.NetworkWatcher",
-                "type": "NetworkWatcherAgentLinux",
-                "typeHandlerVersion": "1.4"
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachine_Name'))]"
-              ]
-            },
-            {
-              "type": "Microsoft.Compute/virtualMachines/extensions",
-              "apiVersion": "2021-11-01",
-              "name": "[format('{0}/{1}', parameters('virtualMachine_Name'), 'installcustomscript')]",
-              "location": "[parameters('location')]",
-              "tags": {
-                "displayName": "install software for Linux VM"
-              },
-              "properties": {
-                "publisher": "Microsoft.Azure.Extensions",
-                "type": "CustomScript",
-                "typeHandlerVersion": "2.1",
-                "autoUpgradeMinorVersion": true,
-                "settings": {
-                  "fileUris": [
-                    "[variables('virtualMachine_ScriptFileUri')]"
-                  ]
-                },
-                "protectedSettings": {
-                  "commandToExecute": "[parameters('commandToExecute')]"
-                }
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachine_Name'))]"
-              ]
-            }
-          ],
-          "outputs": {
-            "networkInterface_Name": {
-              "type": "string",
-              "value": "[parameters('networkInterface_Name')]"
-            },
-            "networkInterface_IPConfig0_Name": {
-              "type": "string",
-              "value": "[reference(resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name')), '2022-09-01').ipConfigurations[0].name]"
-            }
-          }
-        }
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Resources/deployments', 'spokeBVNet')]"
-      ]
-    },
-    {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
-      "name": "ilb",
-      "properties": {
-        "expressionEvaluationOptions": {
-          "scope": "inner"
-        },
-        "mode": "Incremental",
-        "parameters": {
-          "internalLoadBalancer_SubnetID": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'spokeBVNet'), '2022-09-01').outputs.general_SubnetID.value]"
-          },
-          "location": {
-            "value": "[parameters('locationB')]"
-          },
-          "networkInterface_IPConfig_Name": {
-            "value": [
-              "[reference(resourceId('Microsoft.Resources/deployments', 'spokebVMlin1'), '2022-09-01').outputs.networkInterface_IPConfig0_Name.value]",
-              "[reference(resourceId('Microsoft.Resources/deployments', 'spokebVMlin2'), '2022-09-01').outputs.networkInterface_IPConfig0_Name.value]"
-            ]
-          },
-          "networkInterface_Name": {
-            "value": [
-              "[reference(resourceId('Microsoft.Resources/deployments', 'spokebVMlin1'), '2022-09-01').outputs.networkInterface_Name.value]",
-              "[reference(resourceId('Microsoft.Resources/deployments', 'spokebVMlin2'), '2022-09-01').outputs.networkInterface_Name.value]"
-            ]
-          },
-          "networkInterface_SubnetID": {
-            "value": [
-              "[reference(resourceId('Microsoft.Resources/deployments', 'spokeBVNet'), '2022-09-01').outputs.general_SubnetID.value]",
-              "[reference(resourceId('Microsoft.Resources/deployments', 'spokeBVNet'), '2022-09-01').outputs.general_SubnetID.value]"
-            ]
-          },
-          "tcpPort": {
-            "value": 5001
-          },
-          "enableTcpReset": {
-            "value": true
-          }
-        },
-        "template": {
-          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0.0",
-          "metadata": {
-            "_generator": {
-              "name": "bicep",
-              "version": "0.18.4.5664",
-              "templateHash": "11150301581070995180"
-            }
-          },
-          "parameters": {
-            "location": {
-              "type": "string",
-              "metadata": {
-                "description": "Azure Datacenter that the resource is deployed to"
-              }
-            },
-            "internalLoadBalancer_Name": {
-              "type": "string",
-              "defaultValue": "internalLoadBalancer",
-              "metadata": {
-                "description": "Name of the Azure Load Balancer"
-              }
-            },
-            "internalLoadBalancer_SubnetID": {
-              "type": "string",
-              "metadata": {
-                "description": "Subnet ID that the Load Balancer will be deployed to"
-              }
-            },
-            "networkInterface_Name": {
-              "type": "array",
-              "metadata": {
-                "description": "Name of the NIC of the Virtual Machine that will be put behind the Private Link Service and Load Balancer"
-              }
-            },
-            "networkInterface_SubnetID": {
-              "type": "array",
-              "metadata": {
-                "description": "Subnet ID of the NIC of the Virtual Machine that will be put behind the Private Link Service and Load Balancer"
-              }
-            },
-            "networkInterface_IPConfig_Name": {
-              "type": "array",
-              "metadata": {
-                "description": "Name of the ipconfig of the NIC of the Virtual Machine that will be put behind the Private Link Service and Load Balancer"
-              }
-            },
-            "tcpPort": {
-              "type": "int",
-              "defaultValue": 443,
-              "metadata": {
-                "description": "TCP Port that will be used for connecting to the Virtual Machine behind the Private Link Service and Load Balancer"
-              }
-            },
-            "enableTcpReset": {
-              "type": "bool",
-              "defaultValue": false,
-              "metadata": {
-                "description": "Set to true to enable TCP Resets from the Load Balancer for idle connections"
-              }
-            }
-          },
-          "resources": [
-            {
-              "copy": {
-                "name": "networkInterface",
-                "count": "[length(range(0, length(parameters('networkInterface_Name'))))]"
-              },
-              "type": "Microsoft.Network/networkInterfaces",
-              "apiVersion": "2023-04-01",
-              "name": "[parameters('networkInterface_Name')[range(0, length(parameters('networkInterface_Name')))[copyIndex()]]]",
-              "location": "[parameters('location')]",
-              "properties": {
-                "ipConfigurations": [
-                  {
-                    "name": "[parameters('networkInterface_IPConfig_Name')[range(0, length(parameters('networkInterface_Name')))[copyIndex()]]]",
-                    "properties": {
-                      "subnet": {
-                        "id": "[parameters('networkInterface_SubnetID')[range(0, length(parameters('networkInterface_Name')))[copyIndex()]]]"
-                      },
-                      "loadBalancerBackendAddressPools": [
-                        {
-                          "id": "[reference(resourceId('Microsoft.Network/loadBalancers', parameters('internalLoadBalancer_Name')), '2022-09-01').backendAddressPools[0].id]"
-                        }
-                      ]
-                    }
-                  }
-                ]
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.Network/loadBalancers', parameters('internalLoadBalancer_Name'))]"
-              ]
-            },
-            {
-              "type": "Microsoft.Network/loadBalancers",
-              "apiVersion": "2022-09-01",
-              "name": "[parameters('internalLoadBalancer_Name')]",
-              "location": "[parameters('location')]",
-              "sku": {
-                "name": "Standard",
-                "tier": "Regional"
-              },
-              "properties": {
-                "frontendIPConfigurations": [
-                  {
-                    "name": "fip",
-                    "properties": {
-                      "privateIPAllocationMethod": "Dynamic",
-                      "subnet": {
-                        "id": "[parameters('internalLoadBalancer_SubnetID')]"
-                      },
-                      "privateIPAddressVersion": "IPv4"
-                    }
-                  }
-                ],
-                "backendAddressPools": [
-                  {
-                    "name": "bep"
-                  }
-                ],
-                "loadBalancingRules": [
-                  {
-                    "name": "forwardAll",
-                    "properties": {
-                      "frontendIPConfiguration": {
-                        "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIpConfigurations', parameters('internalLoadBalancer_Name'), 'fip')]"
-                      },
-                      "frontendPort": 0,
-                      "backendPort": 0,
-                      "enableFloatingIP": false,
-                      "idleTimeoutInMinutes": 4,
-                      "protocol": "All",
-                      "enableTcpReset": "[parameters('enableTcpReset')]",
-                      "loadDistribution": "Default",
-                      "disableOutboundSnat": true,
-                      "backendAddressPool": {
-                        "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('internalLoadBalancer_Name'), 'bep')]"
-                      },
-                      "probe": {
-                        "id": "[resourceId('Microsoft.Network/loadBalancers/probes', parameters('internalLoadBalancer_Name'), format('probe{0}', parameters('tcpPort')))]"
-                      }
-                    }
-                  }
-                ],
-                "probes": [
-                  {
-                    "name": "[format('probe{0}', parameters('tcpPort'))]",
-                    "properties": {
-                      "protocol": "Tcp",
-                      "port": "[parameters('tcpPort')]",
-                      "intervalInSeconds": 5,
-                      "numberOfProbes": 1,
-                      "probeThreshold": 1
-                    }
-                  }
-                ],
-                "inboundNatRules": [],
-                "outboundRules": [],
-                "inboundNatPools": []
-              }
-            }
-          ],
-          "outputs": {
-            "frontendIPAddress": {
-              "type": "string",
-              "value": "[reference(resourceId('Microsoft.Network/loadBalancers', parameters('internalLoadBalancer_Name')), '2022-09-01').frontendIPConfigurations[0].properties.privateIPAddress]"
-            }
-          }
-        }
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Resources/deployments', 'hubBastion')]",
-        "[resourceId('Microsoft.Resources/deployments', 'spokebVMlin1')]",
-        "[resourceId('Microsoft.Resources/deployments', 'spokebVMlin2')]",
-        "[resourceId('Microsoft.Resources/deployments', 'spokeBVNet')]"
-      ]
-    },
-    {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
-      "name": "azfw",
-      "properties": {
-        "expressionEvaluationOptions": {
-          "scope": "inner"
-        },
-        "mode": "Incremental",
-        "parameters": {
-          "azureFirewall_ManagementSubnet_ID": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'hubVNet'), '2022-09-01').outputs.azureFirewallManagement_SubnetID.value]"
-          },
-          "azureFirewall_Name": {
-            "value": "azfw"
-          },
-          "azureFirewall_SKU": {
-            "value": "Basic"
-          },
-          "azureFirewall_Subnet_ID": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'hubVNet'), '2022-09-01').outputs.azureFirewall_SubnetID.value]"
-          },
-          "azureFirewallPolicy_Name": {
-            "value": "azfw_policy"
-          },
-          "location": {
-            "value": "[parameters('locationA')]"
-          }
-        },
-        "template": {
-          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0.0",
-          "metadata": {
-            "_generator": {
-              "name": "bicep",
-              "version": "0.18.4.5664",
-              "templateHash": "4283712892023480457"
-            }
-          },
-          "parameters": {
-            "location": {
-              "type": "string",
-              "metadata": {
-                "description": "Azure Datacenter location that the main resouces will be deployed to."
-              }
-            },
-            "azureFirewall_Name": {
-              "type": "string",
-              "metadata": {
-                "description": "Name of the Azure Firewall within the vHub A"
-              }
-            },
-            "azureFirewall_SKU": {
-              "type": "string",
-              "allowedValues": [
-                "Basic",
-                "Standard",
-                "Premium"
-              ],
-              "metadata": {
-                "description": "Sku name of the Azure Firewall.  Allowed values are Basic, Standard, and Premium"
-              }
-            },
-            "azureFirewallPolicy_Name": {
-              "type": "string",
-              "metadata": {
-                "description": "Name of the Azure Firewall Policy"
-              }
-            },
-            "azureFirewall_Subnet_ID": {
-              "type": "string",
-              "metadata": {
-                "description": "Resource ID of the Azure Firewall Subnet.  Note: The subnet name must be \"AzureFirewallSubnet"
-              }
-            },
-            "azureFirewall_ManagementSubnet_ID": {
-              "type": "string",
-              "metadata": {
-                "description": "Resource ID of the Azure Firewall Management Subnet.  Note: The subnet name must be \"AzureFirewallManagementSubnet"
-              }
-            }
-          },
-          "resources": [
-            {
-              "type": "Microsoft.Network/publicIPAddresses",
-              "apiVersion": "2022-11-01",
-              "name": "[format('{0}_PIP', parameters('azureFirewall_Name'))]",
-              "location": "[parameters('location')]",
-              "sku": {
-                "name": "Standard",
-                "tier": "Regional"
-              },
-              "properties": {
-                "publicIPAddressVersion": "IPv4",
-                "publicIPAllocationMethod": "Static",
-                "idleTimeoutInMinutes": 4,
-                "ipTags": []
-              }
-            },
-            {
-              "type": "Microsoft.Network/publicIPAddresses",
-              "apiVersion": "2022-11-01",
-              "name": "[format('{0}_Management_PIP', parameters('azureFirewall_Name'))]",
-              "location": "[parameters('location')]",
-              "sku": {
-                "name": "Standard",
-                "tier": "Regional"
-              },
-              "properties": {
-                "publicIPAddressVersion": "IPv4",
-                "publicIPAllocationMethod": "Static",
-                "idleTimeoutInMinutes": 4,
-                "ipTags": []
-              }
-            },
-            {
-              "type": "Microsoft.Network/firewallPolicies",
-              "apiVersion": "2022-07-01",
-              "name": "[parameters('azureFirewallPolicy_Name')]",
-              "location": "[parameters('location')]",
-              "properties": {
-                "sku": {
-                  "tier": "[parameters('azureFirewall_SKU')]"
-                }
-              }
-            },
-            {
-              "type": "Microsoft.Network/azureFirewalls",
-              "apiVersion": "2022-11-01",
-              "name": "[parameters('azureFirewall_Name')]",
-              "location": "[parameters('location')]",
-              "properties": {
-                "sku": {
-                  "name": "AZFW_VNet",
-                  "tier": "[parameters('azureFirewall_SKU')]"
-                },
-                "additionalProperties": {},
-                "managementIpConfiguration": {
-                  "name": "managementipconfig",
-                  "properties": {
-                    "publicIPAddress": {
-                      "id": "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_Management_PIP', parameters('azureFirewall_Name')))]"
-                    },
-                    "subnet": {
-                      "id": "[parameters('azureFirewall_ManagementSubnet_ID')]"
-                    }
-                  }
-                },
-                "ipConfigurations": [
-                  {
-                    "name": "ipconfiguration",
-                    "properties": {
-                      "publicIPAddress": {
-                        "id": "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP', parameters('azureFirewall_Name')))]"
-                      },
-                      "subnet": {
-                        "id": "[parameters('azureFirewall_Subnet_ID')]"
-                      }
-                    }
-                  }
-                ],
-                "firewallPolicy": {
-                  "id": "[resourceId('Microsoft.Network/firewallPolicies', parameters('azureFirewallPolicy_Name'))]"
-                }
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_Management_PIP', parameters('azureFirewall_Name')))]",
-                "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP', parameters('azureFirewall_Name')))]",
-                "[resourceId('Microsoft.Network/firewallPolicies', parameters('azureFirewallPolicy_Name'))]"
-              ]
-            },
-            {
-              "type": "Microsoft.Network/firewallPolicies/ruleCollectionGroups",
-              "apiVersion": "2023-05-01",
-              "name": "[format('{0}/{1}', parameters('azureFirewallPolicy_Name'), 'DefaultNetworkRuleCollectionGroup')]",
-              "properties": {
-                "priority": 200,
-                "ruleCollections": [
-                  {
-                    "name": "allowall",
-                    "priority": 100,
-                    "ruleCollectionType": "FirewallPolicyFilterRuleCollection",
-                    "action": {
-                      "type": "Allow"
-                    },
-                    "rules": [
-                      {
-                        "ruleType": "NetworkRule",
-                        "name": "any",
-                        "ipProtocols": [
-                          "any"
-                        ],
-                        "sourceAddresses": [
-                          "*"
-                        ],
-                        "destinationAddresses": [
-                          "*"
-                        ],
-                        "destinationPorts": [
-                          "*"
-                        ]
-                      }
-                    ]
-                  }
-                ]
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.Network/firewallPolicies', parameters('azureFirewallPolicy_Name'))]"
-              ]
-            }
-          ],
-          "outputs": {
-            "azureFirewall_PrivateIPAddress": {
-              "type": "string",
-              "value": "[reference(resourceId('Microsoft.Network/azureFirewalls', parameters('azureFirewall_Name')), '2022-11-01').ipConfigurations[0].properties.privateIPAddress]"
-            }
-          }
-        }
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Resources/deployments', 'hubVNet')]"
-      ]
-    },
-    {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
-      "name": "udrToAzFW_Hub",
-      "properties": {
-        "expressionEvaluationOptions": {
-          "scope": "inner"
-        },
-        "mode": "Incremental",
-        "parameters": {
-          "addressPrefix": {
-            "value": "10.101.0.0/24"
-          },
-          "nextHopType": {
-            "value": "VirtualAppliance"
-          },
-          "routeTable_Name": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'hubVNet'), '2022-09-01').outputs.routeTable_Name.value]"
-          },
-          "routeTableRoute_Name": {
-            "value": "toAzFW"
-          },
-          "nextHopIpAddress": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'azfw'), '2022-09-01').outputs.azureFirewall_PrivateIPAddress.value]"
-          }
-        },
-        "template": {
-          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0.0",
-          "metadata": {
-            "_generator": {
-              "name": "bicep",
-              "version": "0.18.4.5664",
-              "templateHash": "10611522189333570940"
-            }
-          },
-          "parameters": {
-            "routeTable_Name": {
-              "type": "string"
-            },
-            "routeTableRoute_Name": {
-              "type": "string"
-            },
-            "addressPrefix": {
-              "type": "string"
-            },
-            "nextHopIpAddress": {
-              "type": "string",
-              "defaultValue": ""
-            },
-            "nextHopType": {
-              "type": "string",
-              "allowedValues": [
-                "None",
-                "VirtualAppliance",
-                "Internet",
-                "VirtualNetworkGateway",
-                "VnetLocal"
-              ]
-            }
-          },
-          "resources": [
-            {
-              "condition": "[equals(parameters('nextHopType'), 'VirtualAppliance')]",
-              "type": "Microsoft.Network/routeTables/routes",
-              "apiVersion": "2023-05-01",
-              "name": "[format('{0}/{1}', parameters('routeTable_Name'), parameters('routeTableRoute_Name'))]",
-              "properties": {
-                "addressPrefix": "[parameters('addressPrefix')]",
-                "nextHopType": "[parameters('nextHopType')]",
-                "nextHopIpAddress": "[parameters('nextHopIpAddress')]"
-              }
-            },
-            {
-              "condition": "[not(equals(parameters('nextHopType'), 'VirtualAppliance'))]",
-              "type": "Microsoft.Network/routeTables/routes",
-              "apiVersion": "2023-05-01",
-              "name": "[format('{0}/{1}', parameters('routeTable_Name'), parameters('routeTableRoute_Name'))]",
-              "properties": {
-                "addressPrefix": "[parameters('addressPrefix')]",
-                "nextHopType": "[parameters('nextHopType')]"
-              }
-            }
-          ]
-        }
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Resources/deployments', 'azfw')]",
-        "[resourceId('Microsoft.Resources/deployments', 'hubVNet')]"
-      ]
-    },
-    {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
-      "name": "udrToAzFW_SpokeB",
-      "properties": {
-        "expressionEvaluationOptions": {
-          "scope": "inner"
-        },
-        "mode": "Incremental",
-        "parameters": {
-          "addressPrefix": {
-            "value": "10.100.0.0/24"
-          },
-          "nextHopType": {
-            "value": "VirtualAppliance"
-          },
-          "routeTable_Name": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'spokeBVNet'), '2022-09-01').outputs.routeTable_Name.value]"
-          },
-          "routeTableRoute_Name": {
-            "value": "toAzFW"
-          },
-          "nextHopIpAddress": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'azfw'), '2022-09-01').outputs.azureFirewall_PrivateIPAddress.value]"
-          }
-        },
-        "template": {
-          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0.0",
-          "metadata": {
-            "_generator": {
-              "name": "bicep",
-              "version": "0.18.4.5664",
-              "templateHash": "10611522189333570940"
-            }
-          },
-          "parameters": {
-            "routeTable_Name": {
-              "type": "string"
-            },
-            "routeTableRoute_Name": {
-              "type": "string"
-            },
-            "addressPrefix": {
-              "type": "string"
-            },
-            "nextHopIpAddress": {
-              "type": "string",
-              "defaultValue": ""
-            },
-            "nextHopType": {
-              "type": "string",
-              "allowedValues": [
-                "None",
-                "VirtualAppliance",
-                "Internet",
-                "VirtualNetworkGateway",
-                "VnetLocal"
-              ]
-            }
-          },
-          "resources": [
-            {
-              "condition": "[equals(parameters('nextHopType'), 'VirtualAppliance')]",
-              "type": "Microsoft.Network/routeTables/routes",
-              "apiVersion": "2023-05-01",
-              "name": "[format('{0}/{1}', parameters('routeTable_Name'), parameters('routeTableRoute_Name'))]",
-              "properties": {
-                "addressPrefix": "[parameters('addressPrefix')]",
-                "nextHopType": "[parameters('nextHopType')]",
-                "nextHopIpAddress": "[parameters('nextHopIpAddress')]"
-              }
-            },
-            {
-              "condition": "[not(equals(parameters('nextHopType'), 'VirtualAppliance'))]",
-              "type": "Microsoft.Network/routeTables/routes",
-              "apiVersion": "2023-05-01",
-              "name": "[format('{0}/{1}', parameters('routeTable_Name'), parameters('routeTableRoute_Name'))]",
-              "properties": {
-                "addressPrefix": "[parameters('addressPrefix')]",
-                "nextHopType": "[parameters('nextHopType')]"
-              }
-            }
-          ]
-        }
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Resources/deployments', 'azfw')]",
-        "[resourceId('Microsoft.Resources/deployments', 'spokeBVNet')]"
-      ]
-    },
-    {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
       "name": "hubBastion",
       "properties": {
         "expressionEvaluationOptions": {
@@ -2460,48 +1561,36 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2022-09-01",
-      "name": "storageAccount",
+      "name": "pl",
       "properties": {
         "expressionEvaluationOptions": {
           "scope": "inner"
         },
         "mode": "Incremental",
         "parameters": {
+          "internalLoadBalancer_SubnetID": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'spokeBVNet'), '2022-09-01').outputs.general_SubnetID.value]"
+          },
           "location": {
-            "value": "[parameters('locationA')]"
+            "value": "[parameters('locationB')]"
           },
-          "privateDNSZoneLinkedVnetIDList": {
-            "value": [
-              "[reference(resourceId('Microsoft.Resources/deployments', 'hubVNet'), '2022-09-01').outputs.virtualNetwork_ID.value]",
-              "[reference(resourceId('Microsoft.Resources/deployments', 'spokeBVNet'), '2022-09-01').outputs.virtualNetwork_ID.value]"
-            ]
+          "networkInterface_IPConfig_Name": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'spokebVMlin1'), '2022-09-01').outputs.networkInterface_IPConfig0_Name.value]"
           },
-          "privateDNSZoneLinkedVnetNamesList": {
-            "value": [
-              "[reference(resourceId('Microsoft.Resources/deployments', 'hubVNet'), '2022-09-01').outputs.virtualNetwork_Name.value]",
-              "[reference(resourceId('Microsoft.Resources/deployments', 'spokeBVNet'), '2022-09-01').outputs.virtualNetwork_Name.value]"
-            ]
+          "networkInterface_Name": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'spokebVMlin1'), '2022-09-01').outputs.networkInterface_Name.value]"
+          },
+          "networkInterface_SubnetID": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'spokeBVNet'), '2022-09-01').outputs.general_SubnetID.value]"
           },
           "privateEndpoint_SubnetID": {
-            "value": [
-              "[reference(resourceId('Microsoft.Resources/deployments', 'hubVNet'), '2022-09-01').outputs.privateEndpoint_SubnetID.value]",
-              "[reference(resourceId('Microsoft.Resources/deployments', 'spokeBVNet'), '2022-09-01').outputs.privateEndpoint_SubnetID.value]"
-            ]
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'hubVNet'), '2022-09-01').outputs.privateEndpoint_SubnetID.value]"
           },
-          "privateEndpoint_VirtualNetwork_Name": {
-            "value": [
-              "[reference(resourceId('Microsoft.Resources/deployments', 'hubVNet'), '2022-09-01').outputs.virtualNetwork_Name.value]",
-              "[reference(resourceId('Microsoft.Resources/deployments', 'spokeBVNet'), '2022-09-01').outputs.virtualNetwork_Name.value]"
-            ]
+          "privateLink_SubnetID": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'spokeBVNet'), '2022-09-01').outputs.privateLinkService_SubnetID.value]"
           },
-          "privateEndpoints_Blob_Name": {
-            "value": "blob_pe"
-          },
-          "privateEndpoints_File_Name": {
-            "value": "fileshare_pe"
-          },
-          "storageAccount_Name": {
-            "value": "[parameters('storageAccount_Name')]"
+          "tcpPort": {
+            "value": 5001
           }
         },
         "template": {
@@ -2511,7 +1600,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.18.4.5664",
-              "templateHash": "4440961789018696564"
+              "templateHash": "14330810641649174020"
             }
           },
           "parameters": {
@@ -2521,328 +1610,279 @@
                 "description": "Azure Datacenter that the resource is deployed to"
               }
             },
-            "privateEndpoint_VirtualNetwork_Name": {
-              "type": "array",
+            "internalLoadBalancer_Name": {
+              "type": "string",
+              "defaultValue": "internalLoadBalancer",
               "metadata": {
-                "description": "Name of the Virtual Network that the Private Endpoint will be deployed to."
+                "description": "Name of the Azure Load Balancer"
               }
             },
-            "privateDNSZoneLinkedVnetNamesList": {
-              "type": "array"
+            "internalLoadBalancer_SubnetID": {
+              "type": "string",
+              "metadata": {
+                "description": "Subnet ID that the Load Balancer will be deployed to"
+              }
             },
-            "privateDNSZoneLinkedVnetIDList": {
-              "type": "array"
+            "privateEndpoint_name": {
+              "type": "string",
+              "defaultValue": "pe_to_pl",
+              "metadata": {
+                "description": "Name of the Private Endpoint"
+              }
             },
             "privateEndpoint_SubnetID": {
-              "type": "array"
-            },
-            "storageAccount_Name": {
               "type": "string",
-              "maxLength": 24,
-              "minLength": 3,
               "metadata": {
-                "description": "Storage account name restrictions:\r\n- Storage account names must be between 3 and 24 characters in length and may contain numbers and lowercase letters only.\r\n- Your storage account name must be unique within Azure. No two storage accounts can have the same name.\r\n"
+                "description": "Subnet ID that the Private Endpoint will be deployed to"
               }
             },
-            "usingBlobPrivateEndpoints": {
-              "type": "bool",
-              "defaultValue": true
+            "privateLink_Name": {
+              "type": "string",
+              "defaultValue": "pl",
+              "metadata": {
+                "description": "Name of the Private Link Service"
+              }
             },
-            "usingFilePrivateEndpoints": {
-              "type": "bool",
-              "defaultValue": true
+            "privateLink_SubnetID": {
+              "type": "string",
+              "metadata": {
+                "description": "Subnet ID that the Private Link Service will be deployed to"
+              }
             },
-            "privateEndpoints_Blob_Name": {
-              "type": "string"
+            "networkInterface_Name": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the NIC of the Virtual Machine that will be put behind the Private Link Service and Load Balancer"
+              }
             },
-            "privateEndpoints_File_Name": {
-              "type": "string"
+            "networkInterface_SubnetID": {
+              "type": "string",
+              "metadata": {
+                "description": "Subnet ID of the NIC of the Virtual Machine that will be put behind the Private Link Service and Load Balancer"
+              }
+            },
+            "networkInterface_IPConfig_Name": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the ipconfig of the NIC of the Virtual Machine that will be put behind the Private Link Service and Load Balancer"
+              }
+            },
+            "tcpPort": {
+              "type": "int",
+              "defaultValue": 443,
+              "metadata": {
+                "description": "TCP Port that will be used for connecting to the Virtual Machine behind the Private Link Service and Load Balancer"
+              }
             }
-          },
-          "variables": {
-            "privateDNSZone_Blob_Name": "privatelink.blob.core.windows.net",
-            "privateDNSZone_File_Name": "privatelink.file.core.windows.net"
           },
           "resources": [
             {
-              "type": "Microsoft.Storage/storageAccounts",
-              "apiVersion": "2023-01-01",
-              "name": "[parameters('storageAccount_Name')]",
+              "type": "Microsoft.Network/networkInterfaces",
+              "apiVersion": "2023-04-01",
+              "name": "[parameters('networkInterface_Name')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "ipConfigurations": [
+                  {
+                    "name": "[parameters('networkInterface_IPConfig_Name')]",
+                    "properties": {
+                      "subnet": {
+                        "id": "[parameters('networkInterface_SubnetID')]"
+                      },
+                      "loadBalancerBackendAddressPools": [
+                        {
+                          "id": "[reference(resourceId('Microsoft.Network/loadBalancers', parameters('internalLoadBalancer_Name')), '2022-09-01').backendAddressPools[0].id]"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/loadBalancers', parameters('internalLoadBalancer_Name'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Network/loadBalancers",
+              "apiVersion": "2022-09-01",
+              "name": "[parameters('internalLoadBalancer_Name')]",
               "location": "[parameters('location')]",
               "sku": {
-                "name": "Standard_LRS"
+                "name": "Standard",
+                "tier": "Regional"
               },
-              "kind": "StorageV2",
               "properties": {
-                "dnsEndpointType": "Standard",
-                "defaultToOAuthAuthentication": false,
-                "publicNetworkAccess": "Disabled",
-                "allowCrossTenantReplication": true,
-                "minimumTlsVersion": "TLS1_2",
-                "allowBlobPublicAccess": true,
-                "allowSharedKeyAccess": true,
-                "networkAcls": {
-                  "bypass": "AzureServices",
-                  "virtualNetworkRules": [],
-                  "ipRules": [],
-                  "defaultAction": "Deny"
-                },
-                "supportsHttpsTrafficOnly": true,
-                "encryption": {
-                  "requireInfrastructureEncryption": false,
-                  "services": {
-                    "file": {
-                      "keyType": "Account",
-                      "enabled": true
-                    },
-                    "blob": {
-                      "keyType": "Account",
-                      "enabled": true
+                "frontendIPConfigurations": [
+                  {
+                    "name": "fip",
+                    "properties": {
+                      "privateIPAllocationMethod": "Dynamic",
+                      "subnet": {
+                        "id": "[parameters('internalLoadBalancer_SubnetID')]"
+                      },
+                      "privateIPAddressVersion": "IPv4"
                     }
-                  },
-                  "keySource": "Microsoft.Storage"
-                },
-                "accessTier": "Hot"
+                  }
+                ],
+                "backendAddressPools": [
+                  {
+                    "name": "bep"
+                  }
+                ],
+                "loadBalancingRules": [
+                  {
+                    "name": "forwardAll",
+                    "properties": {
+                      "frontendIPConfiguration": {
+                        "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIpConfigurations', parameters('internalLoadBalancer_Name'), 'fip')]"
+                      },
+                      "frontendPort": 0,
+                      "backendPort": 0,
+                      "enableFloatingIP": false,
+                      "idleTimeoutInMinutes": 4,
+                      "protocol": "All",
+                      "enableTcpReset": false,
+                      "loadDistribution": "Default",
+                      "disableOutboundSnat": true,
+                      "backendAddressPool": {
+                        "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('internalLoadBalancer_Name'), 'bep')]"
+                      },
+                      "probe": {
+                        "id": "[resourceId('Microsoft.Network/loadBalancers/probes', parameters('internalLoadBalancer_Name'), format('probe{0}', parameters('tcpPort')))]"
+                      }
+                    }
+                  }
+                ],
+                "probes": [
+                  {
+                    "name": "[format('probe{0}', parameters('tcpPort'))]",
+                    "properties": {
+                      "protocol": "Tcp",
+                      "port": "[parameters('tcpPort')]",
+                      "intervalInSeconds": 5,
+                      "numberOfProbes": 1,
+                      "probeThreshold": 1
+                    }
+                  }
+                ],
+                "inboundNatRules": [],
+                "outboundRules": [],
+                "inboundNatPools": []
               }
             },
             {
-              "type": "Microsoft.Storage/storageAccounts/blobServices",
-              "apiVersion": "2023-01-01",
-              "name": "[format('{0}/{1}', parameters('storageAccount_Name'), 'default')]",
-              "properties": {
-                "changeFeed": {
-                  "enabled": false
-                },
-                "restorePolicy": {
-                  "enabled": false
-                },
-                "containerDeleteRetentionPolicy": {
-                  "enabled": true,
-                  "days": 7
-                },
-                "cors": {
-                  "corsRules": []
-                },
-                "deleteRetentionPolicy": {
-                  "allowPermanentDelete": false,
-                  "enabled": true,
-                  "days": 7
-                },
-                "isVersioningEnabled": false
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccount_Name'))]"
-              ]
-            },
-            {
-              "copy": {
-                "name": "privateEndpoints_Blob",
-                "count": "[length(range(0, length(parameters('privateEndpoint_SubnetID'))))]"
-              },
-              "condition": "[parameters('usingBlobPrivateEndpoints')]",
               "type": "Microsoft.Network/privateEndpoints",
-              "apiVersion": "2023-04-01",
-              "name": "[format('{0}{1}', parameters('privateEndpoints_Blob_Name'), range(0, length(parameters('privateEndpoint_SubnetID')))[copyIndex()])]",
+              "apiVersion": "2022-09-01",
+              "name": "[parameters('privateEndpoint_name')]",
               "location": "[parameters('location')]",
               "properties": {
                 "privateLinkServiceConnections": [
                   {
-                    "name": "[format('{0}_in_{1}_to_{2}', parameters('privateEndpoints_Blob_Name'), parameters('privateEndpoint_VirtualNetwork_Name'), parameters('storageAccount_Name'))]",
+                    "name": "[parameters('privateEndpoint_name')]",
                     "properties": {
-                      "privateLinkServiceId": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccount_Name'))]",
-                      "groupIds": [
-                        "blob"
-                      ]
+                      "privateLinkServiceId": "[resourceId('Microsoft.Network/privateLinkServices', parameters('privateLink_Name'))]"
                     }
                   }
                 ],
                 "manualPrivateLinkServiceConnections": [],
+                "customNetworkInterfaceName": "[format('{0}-nic', parameters('privateEndpoint_name'))]",
                 "subnet": {
-                  "id": "[parameters('privateEndpoint_SubnetID')[range(0, length(parameters('privateEndpoint_SubnetID')))[copyIndex()]]]"
-                },
-                "ipConfigurations": [],
-                "customDnsConfigs": [
-                  {
-                    "fqdn": "[take(substring(reference(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccount_Name')), '2023-01-01').primaryEndpoints.blob, 7, 8), sub(length(substring(reference(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccount_Name')), '2023-01-01').primaryEndpoints.blob, 7, 8)), 1))]"
-                  }
-                ]
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccount_Name'))]"
-              ]
-            },
-            {
-              "condition": "[parameters('usingBlobPrivateEndpoints')]",
-              "type": "Microsoft.Network/privateDnsZones",
-              "apiVersion": "2018-09-01",
-              "name": "[variables('privateDNSZone_Blob_Name')]",
-              "location": "global"
-            },
-            {
-              "copy": {
-                "name": "privateDNSZone_StorageAccount_Blob_Group",
-                "count": "[length(range(0, length(parameters('privateEndpoint_SubnetID'))))]"
-              },
-              "type": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups",
-              "apiVersion": "2023-04-01",
-              "name": "[format('{0}/{1}', format('{0}{1}', parameters('privateEndpoints_Blob_Name'), range(0, length(parameters('privateEndpoint_SubnetID')))[range(0, length(parameters('privateEndpoint_SubnetID')))[copyIndex()]]), 'blobZoneGroup')]",
-              "properties": {
-                "privateDnsZoneConfigs": [
-                  {
-                    "name": "default",
-                    "properties": {
-                      "privateDnsZoneId": "[resourceId('Microsoft.Network/privateDnsZones', variables('privateDNSZone_Blob_Name'))]"
-                    }
-                  }
-                ]
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.Network/privateDnsZones', variables('privateDNSZone_Blob_Name'))]",
-                "[resourceId('Microsoft.Network/privateEndpoints', format('{0}{1}', parameters('privateEndpoints_Blob_Name'), range(0, length(parameters('privateEndpoint_SubnetID')))[range(0, length(parameters('privateEndpoint_SubnetID')))[copyIndex()]]))]"
-              ]
-            },
-            {
-              "copy": {
-                "name": "virtualNetworkLink_Blob",
-                "count": "[length(range(0, length(parameters('privateDNSZoneLinkedVnetIDList'))))]"
-              },
-              "condition": "[parameters('usingBlobPrivateEndpoints')]",
-              "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
-              "apiVersion": "2018-09-01",
-              "name": "[format('{0}/{1}', variables('privateDNSZone_Blob_Name'), format('{0}_to_{1}', variables('privateDNSZone_Blob_Name'), parameters('privateDNSZoneLinkedVnetNamesList')[range(0, length(parameters('privateDNSZoneLinkedVnetIDList')))[copyIndex()]]))]",
-              "location": "global",
-              "properties": {
-                "registrationEnabled": false,
-                "virtualNetwork": {
-                  "id": "[parameters('privateDNSZoneLinkedVnetIDList')[range(0, length(parameters('privateDNSZoneLinkedVnetIDList')))[copyIndex()]]]"
+                  "id": "[parameters('privateEndpoint_SubnetID')]"
                 }
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Network/privateDnsZones', variables('privateDNSZone_Blob_Name'))]"
+                "[resourceId('Microsoft.Network/privateLinkServices', parameters('privateLink_Name'))]"
               ]
             },
             {
-              "type": "Microsoft.Storage/storageAccounts/fileServices",
-              "apiVersion": "2023-01-01",
-              "name": "[format('{0}/{1}', parameters('storageAccount_Name'), 'default')]",
-              "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccount_Name'))]"
-              ]
-            },
-            {
-              "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
-              "apiVersion": "2023-01-01",
-              "name": "[format('{0}/{1}/{2}', parameters('storageAccount_Name'), 'default', 'defaultfileshare')]",
-              "properties": {
-                "accessTier": "Hot",
-                "shareQuota": 1024
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts/fileServices', parameters('storageAccount_Name'), 'default')]"
-              ]
-            },
-            {
-              "copy": {
-                "name": "privateEndpoints_File",
-                "count": "[length(range(0, length(parameters('privateEndpoint_SubnetID'))))]"
-              },
-              "condition": "[parameters('usingFilePrivateEndpoints')]",
-              "type": "Microsoft.Network/privateEndpoints",
-              "apiVersion": "2023-05-01",
-              "name": "[format('{0}{1}', parameters('privateEndpoints_File_Name'), range(0, length(parameters('privateEndpoint_SubnetID')))[copyIndex()])]",
+              "type": "Microsoft.Network/privateLinkServices",
+              "apiVersion": "2022-09-01",
+              "name": "[parameters('privateLink_Name')]",
               "location": "[parameters('location')]",
               "properties": {
-                "privateLinkServiceConnections": [
+                "enableProxyProtocol": false,
+                "loadBalancerFrontendIpConfigurations": [
                   {
-                    "name": "[format('{0}_in_{1}_to_{2}', parameters('privateEndpoints_File_Name'), parameters('privateEndpoint_VirtualNetwork_Name'), parameters('storageAccount_Name'))]",
-                    "properties": {
-                      "privateLinkServiceId": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccount_Name'))]",
-                      "groupIds": [
-                        "file"
-                      ]
-                    }
+                    "id": "[format('{0}/frontendIPConfigurations/fip', resourceId('Microsoft.Network/loadBalancers', parameters('internalLoadBalancer_Name')))]"
                   }
                 ],
-                "manualPrivateLinkServiceConnections": [],
-                "subnet": {
-                  "id": "[parameters('privateEndpoint_SubnetID')[range(0, length(parameters('privateEndpoint_SubnetID')))[copyIndex()]]]"
-                },
-                "ipConfigurations": [],
-                "customDnsConfigs": [
+                "ipConfigurations": [
                   {
-                    "fqdn": "[take(substring(reference(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccount_Name')), '2023-01-01').primaryEndpoints.file, 7, 8), sub(length(substring(reference(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccount_Name')), '2023-01-01').primaryEndpoints.file, 7, 8)), 1))]"
-                  }
-                ]
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccount_Name'))]"
-              ]
-            },
-            {
-              "type": "Microsoft.Network/privateDnsZones",
-              "apiVersion": "2020-06-01",
-              "name": "[variables('privateDNSZone_File_Name')]",
-              "location": "global"
-            },
-            {
-              "copy": {
-                "name": "privateDNSZone_StorageAccount_File_Group",
-                "count": "[length(range(0, length(parameters('privateEndpoint_SubnetID'))))]"
-              },
-              "type": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups",
-              "apiVersion": "2023-04-01",
-              "name": "[format('{0}/{1}', format('{0}{1}', parameters('privateEndpoints_File_Name'), range(0, length(parameters('privateEndpoint_SubnetID')))[range(0, length(parameters('privateEndpoint_SubnetID')))[copyIndex()]]), 'fileZoneGroup')]",
-              "properties": {
-                "privateDnsZoneConfigs": [
-                  {
-                    "name": "default",
+                    "name": "default-1",
                     "properties": {
-                      "privateDnsZoneId": "[resourceId('Microsoft.Network/privateDnsZones', variables('privateDNSZone_File_Name'))]"
+                      "privateIPAllocationMethod": "Dynamic",
+                      "subnet": {
+                        "id": "[parameters('privateLink_SubnetID')]"
+                      },
+                      "primary": true,
+                      "privateIPAddressVersion": "IPv4"
                     }
                   }
                 ]
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Network/privateDnsZones', variables('privateDNSZone_File_Name'))]",
-                "[resourceId('Microsoft.Network/privateEndpoints', format('{0}{1}', parameters('privateEndpoints_File_Name'), range(0, length(parameters('privateEndpoint_SubnetID')))[range(0, length(parameters('privateEndpoint_SubnetID')))[copyIndex()]]))]"
-              ]
-            },
-            {
-              "copy": {
-                "name": "virtualNetworkLink_File",
-                "count": "[length(range(0, length(parameters('privateDNSZoneLinkedVnetIDList'))))]"
-              },
-              "condition": "[parameters('usingFilePrivateEndpoints')]",
-              "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
-              "apiVersion": "2018-09-01",
-              "name": "[format('{0}/{1}', variables('privateDNSZone_File_Name'), format('{0}_to_{1}', variables('privateDNSZone_File_Name'), parameters('privateDNSZoneLinkedVnetNamesList')[range(0, length(parameters('privateDNSZoneLinkedVnetIDList')))[copyIndex()]]))]",
-              "location": "global",
-              "properties": {
-                "registrationEnabled": false,
-                "virtualNetwork": {
-                  "id": "[parameters('privateDNSZoneLinkedVnetIDList')[range(0, length(parameters('privateDNSZoneLinkedVnetIDList')))[copyIndex()]]]"
-                }
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.Network/privateDnsZones', variables('privateDNSZone_File_Name'))]"
+                "[resourceId('Microsoft.Network/loadBalancers', parameters('internalLoadBalancer_Name'))]"
               ]
             }
           ],
           "outputs": {
-            "storageaccount_Blob_FQDN": {
+            "internalLoadBalancer_FrontendIPAddress": {
               "type": "string",
-              "value": "[take(substring(reference(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccount_Name')), '2023-01-01').primaryEndpoints.blob, 7, 8), sub(length(substring(reference(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccount_Name')), '2023-01-01').primaryEndpoints.blob, 7, 8)), 1))]"
+              "value": "[reference(resourceId('Microsoft.Network/loadBalancers', parameters('internalLoadBalancer_Name')), '2022-09-01').frontendIPConfigurations[0].properties.privateIPAddress]"
             },
-            "storageaccount_File_FQDN": {
+            "privateEndpoint_NetworkInterface_Name": {
               "type": "string",
-              "value": "[take(substring(reference(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccount_Name')), '2023-01-01').primaryEndpoints.file, 7, 8), sub(length(substring(reference(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccount_Name')), '2023-01-01').primaryEndpoints.file, 7, 8)), 1))]"
+              "value": "[reference(resourceId('Microsoft.Network/privateEndpoints', parameters('privateEndpoint_name')), '2022-09-01').customNetworkInterfaceName]"
             }
           }
         }
       },
       "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'spokebVMlin1')]",
         "[resourceId('Microsoft.Resources/deployments', 'hubVNet')]",
         "[resourceId('Microsoft.Resources/deployments', 'spokeBVNet')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "pe_NIC",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "existing_PrivateEndpoint_NetworkInterface_Name": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'pl'), '2022-09-01').outputs.privateEndpoint_NetworkInterface_Name.value]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.18.4.5664",
+              "templateHash": "12692582832155899301"
+            }
+          },
+          "parameters": {
+            "existing_PrivateEndpoint_NetworkInterface_Name": {
+              "type": "string"
+            }
+          },
+          "resources": [],
+          "outputs": {
+            "privateEndpoint_IPAddress": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Network/networkInterfaces', parameters('existing_PrivateEndpoint_NetworkInterface_Name')), '2023-05-01').ipConfigurations[0].properties.privateIPAddress]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'pl')]"
       ]
     }
   ]

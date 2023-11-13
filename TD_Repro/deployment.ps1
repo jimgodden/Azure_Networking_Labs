@@ -18,14 +18,17 @@ if (!$subID) {
 }
 Set-AzContext -Subscription $subID
 
-$rgName = "Connection_westeurope_Sandbox"
+$rgName = "Connection_ILB4_Sandbox"
 $locationA = 'westeurope'
 $locationB = 'westeurope'
 $randomFiveLetterString = .\scripts\deployment_Scripts\Get-LetterGUID.ps1
 
 # Might have to test with the same size VM the customer uses.
-$virtualMachine_Size = 'Standard_E48s_v5'
-     
+# $virtualMachine_Size = 'Standard_E48s_v5'
+
+
+$virtualMachine_Size = 'Standard_E4d_v5'
+
 
 
 Write-Host "Creating ${rgName}"
@@ -34,7 +37,10 @@ New-AzResourceGroup -Name $rgName -Location $locationA
 Write-Host "`nStarting Bicep Deployment.."
 New-AzResourceGroupDeployment -ResourceGroupName $rgName -TemplateFile $mainBicepFile -TemplateParameterFile $mainParameterFile `
     -locationA $locationA -locationB $locationB `
-    -storageAccount_Name "jamesgsa${randomFiveLetterString}"
+    -virtualMachine_Size $virtualMachine_Size
+    # -usingAzureFirewall $false
+    
+    # -storageAccount_Name "jamesgsa${randomFiveLetterString}"
 
 $end = get-date -UFormat "%s"
 $timeTotalSeconds = $end - $start

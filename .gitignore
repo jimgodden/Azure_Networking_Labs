@@ -1,2 +1,3 @@
 main.parameters.json
 virtualMachines.parameters.json
+scripts/fsconn.sh
