@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.18.4.5664",
-      "templateHash": "5033185060292316141"
+      "templateHash": "7375415749107912738"
     }
   },
   "parameters": {
@@ -51,6 +51,97 @@
     }
   },
   "resources": [
+    {
+      "type": "Microsoft.Network/privateEndpoints",
+      "apiVersion": "2023-05-01",
+      "name": "fspe",
+      "location": "[parameters('locationA')]",
+      "properties": {
+        "privateLinkServiceConnections": [
+          {
+            "name": "pelocA",
+            "properties": {
+              "privateLinkServiceId": "/subscriptions/a2c8e9b2-b8d3-4f38-8a72-642d0012c518/resourceGroups/Main/providers/Microsoft.Storage/storageAccounts/mainjamesgstorage",
+              "groupIds": [
+                "file"
+              ]
+            }
+          }
+        ],
+        "manualPrivateLinkServiceConnections": [],
+        "subnet": {
+          "id": "[reference(resourceId('Microsoft.Resources/deployments', 'hubVNet'), '2022-09-01').outputs.privateEndpoint_SubnetID.value]"
+        },
+        "ipConfigurations": [],
+        "customDnsConfigs": [
+          {
+            "fqdn": "mainjamesgstorage.file.core.windows.net"
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'hubVNet')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Network/privateDnsZones",
+      "apiVersion": "2020-06-01",
+      "name": "privatelink.file.core.windows.net",
+      "location": "global"
+    },
+    {
+      "type": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups",
+      "apiVersion": "2023-04-01",
+      "name": "[format('{0}/{1}', 'fspe', 'fileZoneGroup')]",
+      "properties": {
+        "privateDnsZoneConfigs": [
+          {
+            "name": "default",
+            "properties": {
+              "privateDnsZoneId": "[resourceId('Microsoft.Network/privateDnsZones', 'privatelink.file.core.windows.net')]"
+            }
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/privateEndpoints', 'fspe')]",
+        "[resourceId('Microsoft.Network/privateDnsZones', 'privatelink.file.core.windows.net')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+      "apiVersion": "2018-09-01",
+      "name": "[format('{0}/{1}', 'privatelink.file.core.windows.net', format('{0}_to_hubvnet', 'fspe'))]",
+      "location": "global",
+      "properties": {
+        "registrationEnabled": false,
+        "virtualNetwork": {
+          "id": "[reference(resourceId('Microsoft.Resources/deployments', 'hubVNet'), '2022-09-01').outputs.virtualNetwork_ID.value]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/privateEndpoints', 'fspe')]",
+        "[resourceId('Microsoft.Network/privateDnsZones', 'privatelink.file.core.windows.net')]",
+        "[resourceId('Microsoft.Resources/deployments', 'hubVNet')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+      "apiVersion": "2018-09-01",
+      "name": "[format('{0}/{1}', 'privatelink.file.core.windows.net', format('{0}_to_spokevnet', 'fspe'))]",
+      "location": "global",
+      "properties": {
+        "registrationEnabled": false,
+        "virtualNetwork": {
+          "id": "[reference(resourceId('Microsoft.Resources/deployments', 'spokeBVNet'), '2022-09-01').outputs.virtualNetwork_ID.value]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/privateEndpoints', 'fspe')]",
+        "[resourceId('Microsoft.Network/privateDnsZones', 'privatelink.file.core.windows.net')]",
+        "[resourceId('Microsoft.Resources/deployments', 'spokeBVNet')]"
+      ]
+    },
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2022-09-01",
@@ -935,11 +1026,8 @@
           "virtualMachine_ScriptFileLocation": {
             "value": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/"
           },
-          "virtualMachine_ScriptFileName": {
-            "value": "conntest"
-          },
           "commandToExecute": {
-            "value": "[format('nohup ./conntest -c {0} -p 5001 &', reference(resourceId('Microsoft.Resources/deployments', 'pl'), '2022-09-01').outputs.internalLoadBalancer_FrontendIPAddress.value)]"
+            "value": "[format('conntestClient.sh {0} privateLink', reference(resourceId('Microsoft.Resources/deployments', 'pe_NIC'), '2022-09-01').outputs.privateEndpoint_IPAddress.value)]"
           }
         },
         "template": {
@@ -1164,8 +1252,7 @@
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Resources/deployments', 'pl')]",
-        "[resourceId('Microsoft.Resources/deployments', 'spokebVMlin1')]",
+        "[resourceId('Microsoft.Resources/deployments', 'pe_NIC')]",
         "[resourceId('Microsoft.Resources/deployments', 'hubVNet')]"
       ]
     },
@@ -1207,7 +1294,7 @@
             "value": "conntest"
           },
           "commandToExecute": {
-            "value": "nohup ./conntest -s -p 5001 &"
+            "value": "conntestServer.sh privateLink"
           }
         },
         "template": {

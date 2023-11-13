@@ -77,6 +77,7 @@ module hubVM_Linux '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.bice
     virtualMachine_Name: 'hubVM-Linux'
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
+    virtualMachine_ScriptFileName: 'conntestClient.sh'
     commandToExecute: 'conntestClient.sh ${privateEndpoint_NIC.outputs.privateEndpoint_IPAddress} privateLink'
     // virtualMachine_ScriptFileName: 'conntest'
     // commandToExecute: 'nohup ./conntest -c ${ilb.outputs.frontendIPAddress} -p 5001 &'
@@ -97,7 +98,8 @@ module SpokeBVM_Linux1 '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.
     virtualMachine_Name: 'destVM1'
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
-    virtualMachine_ScriptFileName: 'conntest'
+    virtualMachine_ScriptFileName: 'conntestServer.sh'
+    // virtualMachine_ScriptFileName: 'conntest'
     commandToExecute: 'conntestServer.sh privateLink'
     // commandToExecute: 'nohup ./conntest -s -p 5001 &'
   }

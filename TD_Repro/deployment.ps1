@@ -18,7 +18,7 @@ if (!$subID) {
 }
 Set-AzContext -Subscription $subID
 
-$rgName = "Connection_ILB4_Sandbox"
+$rgName = "Connection_Test_PL_Sandbox"
 $locationA = 'westeurope'
 $locationB = 'westeurope'
 $randomFiveLetterString = .\scripts\deployment_Scripts\Get-LetterGUID.ps1
