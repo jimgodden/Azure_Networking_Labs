@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.18.4.5664",
-      "templateHash": "7375415749107912738"
+      "templateHash": "1291922704545721315"
     }
   },
   "parameters": {
@@ -1026,6 +1026,9 @@
           "virtualMachine_ScriptFileLocation": {
             "value": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/"
           },
+          "virtualMachine_ScriptFileName": {
+            "value": "conntestClient.sh"
+          },
           "commandToExecute": {
             "value": "[format('conntestClient.sh {0} privateLink', reference(resourceId('Microsoft.Resources/deployments', 'pe_NIC'), '2022-09-01').outputs.privateEndpoint_IPAddress.value)]"
           }
@@ -1291,7 +1294,7 @@
             "value": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/"
           },
           "virtualMachine_ScriptFileName": {
-            "value": "conntest"
+            "value": "conntestServer.sh"
           },
           "commandToExecute": {
             "value": "conntestServer.sh privateLink"

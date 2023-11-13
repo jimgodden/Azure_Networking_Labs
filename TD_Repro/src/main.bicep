@@ -78,7 +78,7 @@ module hubVM_Linux '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.bice
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
     virtualMachine_ScriptFileName: 'conntestClient.sh'
-    commandToExecute: 'conntestClient.sh ${privateEndpoint_NIC.outputs.privateEndpoint_IPAddress} privateLink'
+    commandToExecute: './conntestClient.sh ${privateEndpoint_NIC.outputs.privateEndpoint_IPAddress} privateLink'
     // virtualMachine_ScriptFileName: 'conntest'
     // commandToExecute: 'nohup ./conntest -c ${ilb.outputs.frontendIPAddress} -p 5001 &'
     // commandToExecute: 'nohup ./conntest -c ${privateEndpoint_NIC.outputs.privateEndpoint_IPAddress} -p 5001 &'
@@ -100,7 +100,7 @@ module SpokeBVM_Linux1 '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.
     virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
     virtualMachine_ScriptFileName: 'conntestServer.sh'
     // virtualMachine_ScriptFileName: 'conntest'
-    commandToExecute: 'conntestServer.sh privateLink'
+    commandToExecute: './conntestServer.sh privateLink'
     // commandToExecute: 'nohup ./conntest -s -p 5001 &'
   }
 }
@@ -216,74 +216,13 @@ module privateEndpoint_NIC '../../modules/Microsoft.Network/PrivateEndpointNetwo
   }
 }
 
-resource filesharePrivateEndpoint 'Microsoft.Network/privateEndpoints@2023-05-01' = {
-  name: 'fspe'
-  location: locationA
-  properties: {
-    privateLinkServiceConnections: [
-      {
-        name: 'pelocA'
-        properties: {
-          privateLinkServiceId: '/subscriptions/a2c8e9b2-b8d3-4f38-8a72-642d0012c518/resourceGroups/Main/providers/Microsoft.Storage/storageAccounts/mainjamesgstorage'
-          groupIds: [
-            'file'
-          ]
-        }
-      }
-    ]
-    manualPrivateLinkServiceConnections: []
-    subnet: {
-      id: virtualNetwork_Hub.outputs.privateEndpoint_SubnetID
-    }
-    ipConfigurations: []
-    customDnsConfigs: [
-      {
-        fqdn: 'mainjamesgstorage.file.core.windows.net'
-      }
-    ]
+module mainfilesharePrivateEndpoints '../../modules/filesystemPE.bicep' = {
+  name: 'mainfilesharePEs'
+  params: {
+    location: locationA
+    privateDNSZoneLinkedVnetIDs: [virtualNetwork_Hub.outputs.virtualNetwork_ID, virtualNetwork_Spoke_B.outputs.virtualNetwork_ID]
+    privateEndpoint_SubnetID: virtualNetwork_Hub.outputs.privateEndpoint_SubnetID
   }
 }
 
-resource privateDNSZone_StorageAccount_File 'Microsoft.Network/privateDnsZones@2020-06-01' = {
-  name: 'privatelink.file.core.windows.net'
-  location: 'global'
-}
 
-resource privateDNSZone_StorageAccount_File_Group 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2023-04-01' = {
-  parent: filesharePrivateEndpoint
-  name: 'fileZoneGroup'
-  properties: {
-    privateDnsZoneConfigs: [
-      {
-        name: 'default'
-        properties: {
-           privateDnsZoneId: privateDNSZone_StorageAccount_File.id
-        }
-      }
-    ]
-  }
-}
-
-resource virtualNetworkLink_File_Hub 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2018-09-01' = {
-  parent: privateDNSZone_StorageAccount_File
-  name: '${filesharePrivateEndpoint.name}_to_hubvnet'
-  location: 'global'
-  properties: {
-    registrationEnabled: false
-    virtualNetwork: {
-      id: virtualNetwork_Hub.outputs.virtualNetwork_ID
-    }
-  }
-}
-
-resource virtualNetworkLink_File_Spoke 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2018-09-01' = {
-  parent: privateDNSZone_StorageAccount_File
-  name: '${filesharePrivateEndpoint.name}_to_spokevnet'
-  location: 'global'
-  properties: {
-    registrationEnabled: false
-    virtualNetwork: {
-      id: virtualNetwork_Spoke_B.outputs.virtualNetwork_ID
-    }
-  }
-}
