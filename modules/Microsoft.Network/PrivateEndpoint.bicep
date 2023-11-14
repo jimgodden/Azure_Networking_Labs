@@ -1,48 +1,86 @@
-// param privateEndpoint_Objects array
+@description('Azure Datacenter that the resource is deployed to')
+param location string
 
-// @description('Resource location.')
-// param location string
+@description('Name of the Private Endpoint')
+param privateEndpoint_Name string
 
-// param privateEndpoint_Names array
+param privateLinkServiceId string
 
-// param privateEndpoint_SubnetIDs array
+@description('Subnet ID that the Private Endpoint will be deployed to')
+param privateEndpoint_SubnetID string 
 
-// @description('The resource id of private link service.')
-// param resource_ID string
+@description('Resource ID of the Virtual Networks to be linked to the Private DNS Zone')
+param virtualNetwork_IDs array
 
-// @description('The ID of the group obtained from the remote resource that this private endpoint should connect to.')
-// param groupID string
+@description('The ID of a group obtained from the remote resource that this private endpoint should connect to.')
+param groupID string
 
-// @description('Extracts the name of the resource from the Resource ID')
-// var resource_Name = last(split(resource_ID, '/'))
+@description('Fqdn that resolves to private endpoint ip address.')
+param fqdn string
 
+@description('''Name of the Private DNS Zone
+Example: privatelink.blob.core.windows.net''')
+param privateDNSZone_Name string
 
-// resource privateEndpoint 'Microsoft.Network/privateEndpoints@2023-05-01' = [ for privateEndpoint_Object in privateEndpoint_Objects: {
-//   name: '${privateEndpoint_Object.Name}'
-//   location: location
-//   properties: {
-//     privateLinkServiceConnections: [
-//       {
-//         name: '${privateEndpoint_Object.Name}_in_${privateEndpoint_Object.VirtualNetwork_Name}_to_${resource_Name}'
-//         properties: {
-//           privateLinkServiceId: resource_ID
-//           groupIds: [
-//             groupID
-//           ]
-//         }
-//       }
-//     ]
-//     manualPrivateLinkServiceConnections: []
-//     subnet: {
-//       id: privateEndpoint_Object.Subnet_ID
-//     }
-//     ipConfigurations: []
-//     customDnsConfigs: [
-//       {
-//         fqdn: privateEndpoint_Object.FQDN
-//       }
-//     ]
-//   }
-// } ]
+@description('Reads the last portion of the Service ID to get the name of the resource')
+var resource_Name = last(split(privateLinkServiceId, '/'))
 
-// module 
+resource privateEndpoint 'Microsoft.Network/privateEndpoints@2023-05-01' = {
+  name: privateEndpoint_Name
+  location: location
+  properties: {
+    privateLinkServiceConnections: [
+      {
+        name: '${privateEndpoint_Name}_to_${resource_Name}'
+        properties: {
+          privateLinkServiceId: privateLinkServiceId
+          groupIds: [
+            groupID
+          ]
+        }
+      }
+    ]
+    manualPrivateLinkServiceConnections: []
+    subnet: {
+      id: privateEndpoint_SubnetID
+    }
+    ipConfigurations: []
+    customDnsConfigs: [
+      {
+        fqdn: fqdn
+      }
+    ]
+  }
+}
+
+resource privateDNSZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
+  name: privateDNSZone_Name
+  location: 'global'
+}
+
+resource privateDNSZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2023-04-01' = {
+  parent: privateEndpoint
+  name: '${groupID}ZoneGroup'
+  properties: {
+    privateDnsZoneConfigs: [
+      {
+        name: 'default'
+        properties: {
+           privateDnsZoneId: privateDNSZone.id
+        }
+      }
+    ]
+  }
+}
+
+resource virtualNetworkLink_File 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2018-09-01' = [ for virtualNetwork_ID in virtualNetwork_IDs: {
+  parent: privateDNSZone
+  name: '${privateEndpoint.name}_to_${last(split(virtualNetwork_ID, '/'))}'
+  location: 'global'
+  properties: {
+    registrationEnabled: false
+    virtualNetwork: {
+      id: virtualNetwork_ID
+    }
+  }
+}]

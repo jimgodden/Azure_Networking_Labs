@@ -19,9 +19,9 @@ if (!$subID) {
 Set-AzContext -Subscription $subID
 
 
-$iteration = "3"
-$scenario_Name = "privatelink${3}"
-$rgName = "Connection_${scenario_Name}_${iteration}_Sandbox"
+$iteration = "4"
+$scenario_Name = "privatelink${iteration}"
+$rgName = "Connection_${scenario_Name}_Sandbox"
 $locationA = 'westeurope'
 $locationB = 'westeurope'
 $randomFiveLetterString = .\scripts\deployment_Scripts\Get-LetterGUID.ps1

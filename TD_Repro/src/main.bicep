@@ -1,11 +1,11 @@
-@description('Azure Datacenter location for the Hub and Spoke A resources')
-param locationA string = 'westeurope'
+@description('Azure Datacenter location for the Hub and Server A resources')
+param locationClient string = 'westeurope'
 
 @description('''
-Azure Datacenter location for the Spoke B resources.  
-Use the same region as locationA if you do not want to test multi-region
+Azure Datacenter location for the Server B resources.  
+Use the same region as locationClient if you do not want to test multi-region
 ''')
-param locationB string = 'westeurope'
+param locationServer string = 'westeurope'
 
 @description('Username for the admin account of the Virtual Machines')
 param virtualMachine_adminUsername string
@@ -39,44 +39,40 @@ param scenario_Name string
 // param aaron bool = false
 
 
-module virtualNetwork_Hub '../../modules/Microsoft.Network/VirtualNetworkHub.bicep' = {
-  name: 'hubVNet'
+module virtualNetwork_Client '../../modules/Microsoft.Network/VirtualNetworkHub.bicep' = {
+  name: 'clientVNet'
   params: {
     firstTwoOctetsOfVirtualNetworkPrefix: '10.100'
-    location: locationA
-    networkSecurityGroup_Default_Name: 'nsg_hub'
-    routeTable_Name: 'rt_hub'
-    virtualNetwork_Name: 'vnet_hub'
+    location: locationClient
+    virtualNetwork_Name: 'Client_VNet'
   }
 }
 
-module virtualNetwork_Spoke_B '../../modules/Microsoft.Network/VirtualNetworkSpoke.bicep' = {
-  name: 'spokeBVNet'
+module virtualNetwork_Server '../../modules/Microsoft.Network/VirtualNetworkSpoke.bicep' = {
+  name: 'serverBVNet'
   params: {
     firstTwoOctetsOfVirtualNetworkPrefix: '10.101'
-    location: locationB
-    networkSecurityGroup_Default_Name: 'nsg_SpokeB'
-    routeTable_Name: 'rt_SpokeB'
-    virtualNetwork_Name: 'VNet_SpokeB'
+    location: locationServer
+    virtualNetwork_Name: 'Server_VNet'
   }
 }
-module hubToSpokeBPeering '../../modules/Microsoft.Network/VirtualNetworkPeering.bicep' = {
-  name: 'hubToSpokeBPeering'
+module clientToServerBPeering '../../modules/Microsoft.Network/VirtualNetworkPeering.bicep' = {
+  name: 'clientToServerBPeering'
   params: {
-    virtualNetwork_Source_Name: virtualNetwork_Hub.outputs.virtualNetwork_Name
-    virtualNetwork_Destination_Name: virtualNetwork_Spoke_B.outputs.virtualNetwork_Name
+    virtualNetwork_Source_Name: virtualNetwork_Client.outputs.virtualNetwork_Name
+    virtualNetwork_Destination_Name: virtualNetwork_Server.outputs.virtualNetwork_Name
   }
 }
 
-module hubVM_Linux '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.bicep' = {
-  name: 'hubvm'
+module clientVM_Linux '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.bicep' = {
+  name: 'clientvm'
   params: {
     acceleratedNetworking: acceleratedNetworking
-    location: locationA
-    subnet_ID: virtualNetwork_Hub.outputs.general_SubnetID
+    location: locationClient
+    subnet_ID: virtualNetwork_Client.outputs.general_SubnetID
     virtualMachine_AdminPassword: virtualMachine_adminPassword
     virtualMachine_AdminUsername: virtualMachine_adminUsername
-    virtualMachine_Name: 'hubVM-Linux'
+    virtualMachine_Name: 'clientVM-Linux'
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
     virtualMachine_ScriptFileName: 'conntestClient.sh'
@@ -89,15 +85,15 @@ module hubVM_Linux '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.bice
   }
 }
 
-module SpokeBVM_Linux1 '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.bicep' = {
-  name: 'spokebVMlin1'
+module ServerVM_Linux1 '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.bicep' = {
+  name: 'serverVM1-lin'
   params: {
     acceleratedNetworking: acceleratedNetworking
-    location: locationB
-    subnet_ID: virtualNetwork_Spoke_B.outputs.general_SubnetID
+    location: locationServer
+    subnet_ID: virtualNetwork_Server.outputs.general_SubnetID
     virtualMachine_AdminPassword: virtualMachine_adminPassword
     virtualMachine_AdminUsername: virtualMachine_adminUsername
-    virtualMachine_Name: 'destVM1'
+    virtualMachine_Name: 'ServerVM1'
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
     virtualMachine_ScriptFileName: 'conntestServer.sh'
@@ -110,12 +106,12 @@ module SpokeBVM_Linux1 '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.
   ]
 }
 
-// module SpokeBVM_Linux2 '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.bicep' = {
-//   name: 'spokebVMlin2'
+// module ServerBVM_Linux2 '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.bicep' = {
+//   name: 'serverbVMlin2'
 //   params: {
 //     acceleratedNetworking: acceleratedNetworking
-//     location: locationB
-//     subnet_ID: virtualNetwork_Spoke_B.outputs.general_SubnetID
+//     location: locationServer
+//     subnet_ID: virtualNetwork_Server.outputs.general_SubnetID
 //     virtualMachine_AdminPassword: virtualMachine_adminPassword
 //     virtualMachine_AdminUsername: virtualMachine_adminUsername
 //     virtualMachine_Name: 'destvm2'
@@ -136,7 +132,7 @@ module SpokeBVM_Linux1 '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.
 //     azureFirewall_SKU: 'Basic'
 //     azureFirewall_Subnet_ID: virtualNetwork_Hub.outputs.azureFirewall_SubnetID
 //     azureFirewallPolicy_Name: 'azfw_policy'
-//     location: locationA
+//     location: locationClient
 //   }
 // }
 
@@ -151,33 +147,33 @@ module SpokeBVM_Linux1 '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.
 //   }
 // }
 
-// module udrToAzFW_SpokeB '../../modules/Microsoft.Network/RouteTable.bicep' = if (usingAzureFirewall) {
-//   name: 'udrToAzFW_SpokeB'
+// module udrToAzFW_ServerB '../../modules/Microsoft.Network/RouteTable.bicep' = if (usingAzureFirewall) {
+//   name: 'udrToAzFW_ServerB'
 //   params: {
 //     addressPrefix: '10.100.0.0/24'
 //     nextHopType: 'VirtualAppliance'
-//     routeTable_Name: virtualNetwork_Spoke_B.outputs.routeTable_Name
+//     routeTable_Name: virtualNetwork_Server.outputs.routeTable_Name
 //     routeTableRoute_Name: 'toAzFW'
 //     nextHopIpAddress: firewall.outputs.azureFirewall_PrivateIPAddress
 //   }
 // }
 
-module hubBastion '../../modules/Microsoft.Network/Bastion.bicep' = {
-  name: 'hubBastion'
+module clientBastion '../../modules/Microsoft.Network/Bastion.bicep' = {
+  name: 'clientBastion'
   params: {
-    bastion_SubnetID: virtualNetwork_Hub.outputs.bastion_SubnetID
-    location: locationA
+    bastion_SubnetID: virtualNetwork_Client.outputs.bastion_SubnetID
+    location: locationClient
   }
 }
 
 // module storageAccount '../../modules/Microsoft.Storage/StorageAccount.bicep' = {
 //   name: 'storageAccount'
 //   params: {
-//     location: locationA
-//     privateDNSZoneLinkedVnetIDList: [virtualNetwork_Hub.outputs.virtualNetwork_ID, virtualNetwork_Spoke_B.outputs.virtualNetwork_ID]
-//     privateDNSZoneLinkedVnetNamesList: [virtualNetwork_Hub.outputs.virtualNetwork_Name, virtualNetwork_Spoke_B.outputs.virtualNetwork_Name]
-//     privateEndpoint_SubnetID: [virtualNetwork_Hub.outputs.privateEndpoint_SubnetID, virtualNetwork_Spoke_B.outputs.privateEndpoint_SubnetID]
-//     privateEndpoint_VirtualNetwork_Name: [virtualNetwork_Hub.outputs.virtualNetwork_Name, virtualNetwork_Spoke_B.outputs.virtualNetwork_Name]
+//     location: locationClient
+//     privateDNSZoneLinkedVnetIDList: [virtualNetwork_Hub.outputs.virtualNetwork_ID, virtualNetwork_Server.outputs.virtualNetwork_ID]
+//     privateDNSZoneLinkedVnetNamesList: [virtualNetwork_Hub.outputs.virtualNetwork_Name, virtualNetwork_Server.outputs.virtualNetwork_Name]
+//     privateEndpoint_SubnetID: [virtualNetwork_Hub.outputs.privateEndpoint_SubnetID, virtualNetwork_Server.outputs.privateEndpoint_SubnetID]
+//     privateEndpoint_VirtualNetwork_Name: [virtualNetwork_Hub.outputs.virtualNetwork_Name, virtualNetwork_Server.outputs.virtualNetwork_Name]
 //     privateEndpoints_Blob_Name: 'blob_pe'
 //     privateEndpoints_File_Name: 'fileshare_pe'
 //     storageAccount_Name: storageAccount_Name
@@ -187,29 +183,29 @@ module hubBastion '../../modules/Microsoft.Network/Bastion.bicep' = {
 // module ilb '../../modules/Microsoft.Network/InternalLoadBalancer.bicep' = {
   //   name: 'ilb'
   //   params: {
-  //     internalLoadBalancer_SubnetID: virtualNetwork_Spoke_B.outputs.general_SubnetID
-  //     location: locationB
-  //     networkInterface_IPConfig_Name: [SpokeBVM_Linux1.outputs.networkInterface_IPConfig0_Name, SpokeBVM_Linux2.outputs.networkInterface_IPConfig0_Name ]
-  //     networkInterface_Name: [SpokeBVM_Linux1.outputs.networkInterface_Name, SpokeBVM_Linux2.outputs.networkInterface_Name]
-  //     networkInterface_SubnetID: [virtualNetwork_Spoke_B.outputs.general_SubnetID, virtualNetwork_Spoke_B.outputs.general_SubnetID]
+  //     internalLoadBalancer_SubnetID: virtualNetwork_Server.outputs.general_SubnetID
+  //     location: locationServer
+  //     networkInterface_IPConfig_Name: [ServerVM_Linux1.outputs.networkInterface_IPConfig0_Name, ServerBVM_Linux2.outputs.networkInterface_IPConfig0_Name ]
+  //     networkInterface_Name: [ServerVM_Linux1.outputs.networkInterface_Name, ServerBVM_Linux2.outputs.networkInterface_Name]
+  //     networkInterface_SubnetID: [virtualNetwork_Server.outputs.general_SubnetID, virtualNetwork_Server.outputs.general_SubnetID]
   //     tcpPort: 5001
   //     enableTcpReset: true
   //   }
   //   dependsOn: [
-  //     hubBastion
+  //     clientBastion
   //   ]
   // }
 
 module privateLink '../../modules/Microsoft.Network/PrivateLink.bicep' = {
-  name: 'pl'
+  name: 'privatelink'
   params: {
-    internalLoadBalancer_SubnetID: virtualNetwork_Spoke_B.outputs.general_SubnetID
-    location: locationB
-    networkInterface_IPConfig_Name: SpokeBVM_Linux1.outputs.networkInterface_IPConfig0_Name
-    networkInterface_Name: SpokeBVM_Linux1.outputs.networkInterface_Name
-    networkInterface_SubnetID: virtualNetwork_Spoke_B.outputs.general_SubnetID
-    privateEndpoint_SubnetID: virtualNetwork_Hub.outputs.privateEndpoint_SubnetID
-    privateLink_SubnetID: virtualNetwork_Spoke_B.outputs.privateLinkService_SubnetID
+    internalLoadBalancer_SubnetID: virtualNetwork_Server.outputs.general_SubnetID
+    location: locationServer
+    networkInterface_IPConfig_Name: ServerVM_Linux1.outputs.networkInterface_IPConfig0_Name
+    networkInterface_Name: ServerVM_Linux1.outputs.networkInterface_Name
+    networkInterface_SubnetID: virtualNetwork_Server.outputs.general_SubnetID
+    privateEndpoint_SubnetID: virtualNetwork_Client.outputs.privateEndpoint_SubnetID
+    privateLink_SubnetID: virtualNetwork_Server.outputs.privateLinkService_SubnetID
     tcpPort: 5001
   }
 }
@@ -222,22 +218,30 @@ module privateEndpoint_NIC '../../modules/Microsoft.Network/PrivateEndpointNetwo
 }
 
 module mainfilesharePrivateEndpoints '../../modules/filesystemPE.bicep' = {
-  name: 'mainfilesharePEs'
+  name: 'mainfilesharePE'
   params: {
-    location: locationA
+    fqdn: 'mainjamesgstorage.file.core.windows.net'
+    privateDNSZone_Name: 'privatelink.file.core.windows.net'
+    privateEndpoint_Name: 'blob_pe'
+    privateLinkServiceId: '/subscriptions/a2c8e9b2-b8d3-4f38-8a72-642d0012c518/resourceGroups/Main/providers/Microsoft.Storage/storageAccounts/mainjamesgstorage'
+    location: locationClient
     groupID: 'file'
-    privateDNSZoneLinkedVnetIDs: [virtualNetwork_Hub.outputs.virtualNetwork_ID, virtualNetwork_Spoke_B.outputs.virtualNetwork_ID]
-    privateEndpoint_SubnetID: virtualNetwork_Hub.outputs.privateEndpoint_SubnetID
+    privateDNSZoneLinkedVnetIDs: [virtualNetwork_Client.outputs.virtualNetwork_ID, virtualNetwork_Server.outputs.virtualNetwork_ID]
+    privateEndpoint_SubnetID: virtualNetwork_Client.outputs.privateEndpoint_SubnetID
   }
 }
 
 module mainblobsharePrivateEndpoints '../../modules/filesystemPE.bicep' = {
-  name: 'mainblobsharePEs'
+  name: 'mainblobPE'
   params: {
-    location: locationA
+    fqdn: 'mainjamesgstorage.blob.core.windows.net'
+    privateDNSZone_Name: 'privatelink.blob.core.windows.net'
+    privateEndpoint_Name: 'blob_pe'
+    privateLinkServiceId: '/subscriptions/a2c8e9b2-b8d3-4f38-8a72-642d0012c518/resourceGroups/Main/providers/Microsoft.Storage/storageAccounts/mainjamesgstorage'
+    location: locationClient
     groupID: 'blob'
-    privateDNSZoneLinkedVnetIDs: [virtualNetwork_Hub.outputs.virtualNetwork_ID, virtualNetwork_Spoke_B.outputs.virtualNetwork_ID]
-    privateEndpoint_SubnetID: virtualNetwork_Hub.outputs.privateEndpoint_SubnetID
+    privateDNSZoneLinkedVnetIDs: [virtualNetwork_Client.outputs.virtualNetwork_ID, virtualNetwork_Server.outputs.virtualNetwork_ID]
+    privateEndpoint_SubnetID: virtualNetwork_Client.outputs.privateEndpoint_SubnetID
   }
 }
 

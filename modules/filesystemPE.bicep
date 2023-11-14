@@ -1,20 +1,39 @@
+@description('Azure Datacenter that the resource is deployed to')
 param location string
 
+@description('Name of the Private Endpoint')
+param privateEndpoint_Name string
+
+param privateLinkServiceId string
+
+@description('Subnet ID that the Private Endpoint will be deployed to')
 param privateEndpoint_SubnetID string 
 
-param privateDNSZoneLinkedVnetIDs array
+@description('Resource ID of the Virtual Networks to be linked to the Private DNS Zone')
+param virtualNetwork_IDs array
 
+@description('The ID of a group obtained from the remote resource that this private endpoint should connect to.')
 param groupID string
 
-resource filesharePrivateEndpoint 'Microsoft.Network/privateEndpoints@2023-05-01' = {
-  name: '${groupID}pe'
+@description('Fqdn that resolves to private endpoint ip address.')
+param fqdn string
+
+@description('''Name of the Private DNS Zone
+Example: privatelink.blob.core.windows.net''')
+param privateDNSZone_Name string
+
+@description('Reads the last portion of the Service ID to get the name of the resource')
+var resource_Name = last(split(privateLinkServiceId, '/'))
+
+resource privateEndpoint 'Microsoft.Network/privateEndpoints@2023-05-01' = {
+  name: privateEndpoint_Name
   location: location
   properties: {
     privateLinkServiceConnections: [
       {
-        name: 'pelocA'
+        name: '${privateEndpoint_Name}_to_${resource_Name}'
         properties: {
-          privateLinkServiceId: '/subscriptions/a2c8e9b2-b8d3-4f38-8a72-642d0012c518/resourceGroups/Main/providers/Microsoft.Storage/storageAccounts/mainjamesgstorage'
+          privateLinkServiceId: privateLinkServiceId
           groupIds: [
             groupID
           ]
@@ -28,40 +47,40 @@ resource filesharePrivateEndpoint 'Microsoft.Network/privateEndpoints@2023-05-01
     ipConfigurations: []
     customDnsConfigs: [
       {
-        fqdn: 'mainjamesgstorage.${groupID}.core.windows.net'
+        fqdn: fqdn
       }
     ]
   }
 }
 
-resource privateDNSZone_StorageAccount_File 'Microsoft.Network/privateDnsZones@2020-06-01' = {
-  name: 'privatelink.${groupID}.core.windows.net'
+resource privateDNSZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
+  name: privateDNSZone_Name
   location: 'global'
 }
 
-resource privateDNSZone_StorageAccount_File_Group 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2023-04-01' = {
-  parent: filesharePrivateEndpoint
+resource privateDNSZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2023-04-01' = {
+  parent: privateEndpoint
   name: '${groupID}ZoneGroup'
   properties: {
     privateDnsZoneConfigs: [
       {
         name: 'default'
         properties: {
-           privateDnsZoneId: privateDNSZone_StorageAccount_File.id
+           privateDnsZoneId: privateDNSZone.id
         }
       }
     ]
   }
 }
 
-resource virtualNetworkLink_File 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2018-09-01' = [ for privateDNSZoneLinkedVnetID in privateDNSZoneLinkedVnetIDs: {
-  parent: privateDNSZone_StorageAccount_File
-  name: '${filesharePrivateEndpoint.name}_to_${last(split(privateDNSZoneLinkedVnetID, '/'))}'
+resource virtualNetworkLink_File 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2018-09-01' = [ for virtualNetwork_ID in virtualNetwork_IDs: {
+  parent: privateDNSZone
+  name: '${privateEndpoint.name}_to_${last(split(virtualNetwork_ID, '/'))}'
   location: 'global'
   properties: {
     registrationEnabled: false
     virtualNetwork: {
-      id: privateDNSZoneLinkedVnetID
+      id: virtualNetwork_ID
     }
   }
 }]
