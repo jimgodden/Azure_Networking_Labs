@@ -15,6 +15,10 @@ Write-host "[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://por
 Write-Host "Building Azure ApplicationGateway Sandbox" 
 bicep build "C:\Users\jamesgodden\OneDrive - Microsoft\Programming\Azure_Networking_Labs\Azure_ApplicationGateway_Sandbox\src\main.bicep" --outfile "C:\Users\jamesgodden\OneDrive - Microsoft\Programming\Azure_Networking_Labs\Azure_ApplicationGateway_Sandbox\src\main.json"
 
+# Azure DNS Sandbox
+Write-Host "Building Azure DNS Sandbox"
+bicep build "C:\Users\jamesgodden\OneDrive - Microsoft\Programming\Azure_Networking_Labs\Azure_DNS_Sandbox\src\main.bicep" --outfile "C:\Users\jamesgodden\OneDrive - Microsoft\Programming\Azure_Networking_Labs\Azure_DNS_Sandbox\src\main.json"
+
 # Azure PrivateLink Sandbox
 Write-Host "Building Azure PrivateLink Sandbox" 
 bicep build "C:\Users\jamesgodden\OneDrive - Microsoft\Programming\Azure_Networking_Labs\Azure_PrivateLink_Sandbox\src\main.bicep" --outfile "C:\Users\jamesgodden\OneDrive - Microsoft\Programming\Azure_Networking_Labs\Azure_PrivateLink_Sandbox\src\main.json"

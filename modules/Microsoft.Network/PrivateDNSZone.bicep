@@ -1,5 +1,7 @@
 param privateDNSZone_Name string
 
+param registrationEnabled bool = false
+
 param virtualNetworkIDs array
 
 resource privateDNSZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
@@ -12,7 +14,7 @@ resource virtualNetworkLink 'Microsoft.Network/privateDnsZones/virtualNetworkLin
   name: last(split(virtualNetworkID, '/'))
   location: 'global'
   properties: {
-    registrationEnabled: false
+    registrationEnabled: registrationEnabled
     virtualNetwork: {
       id: virtualNetworkID
     }
