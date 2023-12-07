@@ -5,13 +5,17 @@
     "_generator": {
       "name": "bicep",
       "version": "0.23.1.45101",
-      "templateHash": "6630161662598261059"
+      "templateHash": "7430006498407641890"
     }
   },
   "parameters": {
     "trafficManagerProfile_Name": {
       "type": "string",
-      "defaultValue": "[uniqueString(resourceGroup().id)]"
+      "defaultValue": "trafficManagerProfile_CustomHeaderTest"
+    },
+    "relativeName": {
+      "type": "string",
+      "defaultValue": "[format('testfqdn{0}', uniqueString(resourceGroup().id))]"
     }
   },
   "resources": [
@@ -27,6 +31,15 @@
         "parameters": {
           "trafficManagerProfile_Name": {
             "value": "[parameters('trafficManagerProfile_Name')]"
+          },
+          "relativeName": {
+            "value": "[parameters('relativeName')]"
+          },
+          "customHeader_Name": {
+            "value": "test"
+          },
+          "customHeader_Value": {
+            "value": "[format('{0}.com', parameters('relativeName'))]"
           }
         },
         "template": {
@@ -36,13 +49,30 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "5937879474521648308"
+              "templateHash": "4801353146642494833"
             }
           },
           "parameters": {
             "trafficManagerProfile_Name": {
+              "type": "string"
+            },
+            "relativeName": {
               "type": "string",
-              "defaultValue": "[uniqueString(resourceGroup().id)]"
+              "metadata": {
+                "description": "The relative name in the FQDN for this profile endpoint.  Will be added to the front of \".trafficmanager.net\".  Must be unique."
+              }
+            },
+            "customHeader_Name": {
+              "type": "string",
+              "metadata": {
+                "description": "Descriptive name for the Custom Header.  Not the FQDN."
+              }
+            },
+            "customHeader_Value": {
+              "type": "string",
+              "metadata": {
+                "description": "Full FQDN of the Custom Header."
+              }
             }
           },
           "resources": [
@@ -55,20 +85,20 @@
                 "profileStatus": "Enabled",
                 "trafficRoutingMethod": "Performance",
                 "dnsConfig": {
-                  "relativeName": "anything"
+                  "relativeName": "[parameters('relativeName')]"
                 },
                 "monitorConfig": {
                   "profileMonitorStatus": "Disabled",
                   "protocol": "HTTPS",
                   "port": 443,
-                  "path": "/healthcheck.html",
+                  "path": "/",
                   "intervalInSeconds": 30,
                   "toleratedNumberOfFailures": 3,
                   "timeoutInSeconds": 10,
                   "customHeaders": [
                     {
-                      "name": "test",
-                      "value": "test.anythingidk.com"
+                      "name": "[parameters('customHeader_Name')]",
+                      "value": "[parameters('customHeader_Value')]"
                     }
                   ]
                 }
