@@ -35,7 +35,7 @@ Example: InitScript.ps1''')
 param virtualMachine_ScriptFileName string = 'Ubuntu20_DNS_Config.sh'
 // param virtualMachine_ScriptFileName string = 'Ubuntu20_WebServer_Config.sh'
 
-param commandToExecute string = 'Ubuntu20_DNS_Config.sh'
+param commandToExecute string
 
 @description('Joins the file path and the file name together')
 var virtualMachine_ScriptFileUri = '${virtualMachine_ScriptFileLocation}${virtualMachine_ScriptFileName}'

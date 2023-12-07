@@ -2,7 +2,7 @@ bicep build .\main.bicep
 
 $branchName
 
-$originalURL = "https://github.com/jimgodden/Azure_Networking_Labs/blob/main/TD_Repro/src/main.json"
+$originalURL = "https://github.com/jimgodden/Azure_Networking_Labs/blob/main/TrafficManTest/src/main.json"
 $removeBlob = $originalURL.Remove($originalURL.IndexOf("/blob"), 5)
 $shortURL = $removeBlob.Substring(14)
 $rawURL = "https://raw.githubusercontent${shortURL}"
@@ -30,3 +30,7 @@ bicep build "C:\Users\jamesgodden\OneDrive - Microsoft\Programming\Azure_Network
 # Azure VM to VM Sandbox
 Write-Host "Building Azure VM to VM Sandbox" 
 bicep build "C:\Users\jamesgodden\OneDrive - Microsoft\Programming\Azure_Networking_Labs\Azure_VM_to_VM_Sandbox\src\main.bicep" --outfile "C:\Users\jamesgodden\OneDrive - Microsoft\Programming\Azure_Networking_Labs\Azure_VM_to_VM_Sandbox\src\main.json"
+
+# TrafficManTest
+Write-Host "Building TrafficManTest" 
+bicep build "C:\Users\jamesgodden\OneDrive - Microsoft\Programming\Azure_Networking_Labs\TrafficManTest\src\main.bicep" --outfile "C:\Users\jamesgodden\OneDrive - Microsoft\Programming\Azure_Networking_Labs\TrafficManTest\src\main.json"

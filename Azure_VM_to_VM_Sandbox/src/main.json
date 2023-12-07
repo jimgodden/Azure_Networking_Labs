@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.23.1.45101",
-      "templateHash": "10427853508029606817"
+      "templateHash": "11629572077191758658"
     }
   },
   "parameters": {
@@ -50,7 +50,7 @@
     },
     "virtualNetworkGateway_SKU": {
       "type": "string",
-      "defaultValue": "VpnGw1",
+      "defaultValue": "VpnGw2",
       "metadata": {
         "description": "SKU of the Virtual Network Gateway"
       }
@@ -63,6 +63,7 @@
     },
     "azureFirewall_SKU": {
       "type": "string",
+      "defaultValue": "Basic",
       "allowedValues": [
         "Basic",
         "Standard",

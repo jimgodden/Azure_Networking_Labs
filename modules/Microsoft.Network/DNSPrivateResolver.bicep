@@ -1,34 +1,4 @@
 @description('the location for resolver VNET and dns private resolver - Azure DNS Private Resolver available in specific region, refer the documenation to select the supported region for this deployment. For more information https://docs.microsoft.com/azure/dns/dns-private-resolver-overview#regional-availability')
-// @allowed([
-//   'australiaeast'
-//   'uksouth'
-//   'northeurope'
-//   'southcentralus'
-//   'westus3'
-//   'eastus'
-//   'northcentralus'
-//   'westcentralus'
-//   'eastus2'
-//   'westeurope'
-//   'centralus'
-//   'canadacentral'
-//   'brazilsouth'
-//   'francecentral'
-//   'swedencentral'
-//   'switzerlandnorth'
-//   'eastasia'
-//   'southeastasia'
-//   'japaneast'
-//   'koreacentral'
-//   'southafricanorth'
-//   'centralindia'
-//   'westus'
-//   'canadaeast'
-//   'qatarcentral'
-//   'uaenorth'
-//   'australiasoutheast'
-//   'polandcentral'
-// ])
 param location string
 
 @description('Resource ID of the Virtual Network to which the DNS Private resolver will be added.')
@@ -51,29 +21,6 @@ param inboundEndpoint_Name string = 'endpoint-inbound'
 
 @description('name that will be used for the private resolver outbound endpoint')
 param outboundEndpoint_Name string = 'endpoint-outbound'
-
-// @description('Name of the forwarding ruleset.')
-// param dnsForwardingRuleSet_Name string = 'forwardingRule'
-
-// @description('Name of the forwarding rule.  No special characters besides underscores can be used.')
-// param forwardingRule_Name string
-
-// @description('the target domain name for the forwarding ruleset')
-// param domainName string
-
-
-// @description('''the list of target DNS servers ip address and the port number for conditional forwarding
-// Format to be used:
-// {
-//   ipaddress: '10.0.0.1'
-//   port: 53
-// }
-// {
-//   ipaddress: '10.0.0.2'
-//   port: 53
-// }
-// ''')
-// param targetDNSServers array
 
 resource dnsPrivateResolver 'Microsoft.Network/dnsResolvers@2022-07-01' = {
   name: dnsPrivateResolver_Name

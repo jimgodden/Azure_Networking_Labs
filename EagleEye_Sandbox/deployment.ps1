@@ -1,6 +1,6 @@
 # This file will be used for testing purposes until a proper CI/CD pipeline is in place.
 
-$deploymentName = "Azure_VM_to_VM_Sandbox"
+$deploymentName = "EagleEye_Sandbox"
 $deploymentFilePath = ".\${deploymentName}\"
 $mainBicepFile = "${deploymentFilePath}src\main.bicep"
 $mainParameterFile = "${deploymentFilePath}main.parameters.bicepparam"

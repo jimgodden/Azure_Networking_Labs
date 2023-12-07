@@ -349,5 +349,6 @@ output applicationGateway_PrivateIP string = cidrHost(subnet_AddressRangeCIDRs[3
 
 output virtualNetwork_Name string = virtualNetwork.name
 output virtualNetwork_ID string = virtualNetwork.id
+output virtualNetwork_AddressPrefix string = virtualNetwork.properties.addressSpace.addressPrefixes[0]
 
 output routeTable_Name string = routeTable.name

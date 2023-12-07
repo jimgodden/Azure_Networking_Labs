@@ -212,28 +212,6 @@ module azureFirewall '../../modules/Microsoft.Network/AzureFirewall.bicep' = if 
   ]
 }
 
-// module udrToAzFW_Hub '../../modules/Microsoft.Network/RouteTable.bicep' = if (usingAzureFirewall) {
-//   name: 'udrToAzFW_Hub'
-//   params: {
-//     addressPrefix: '10.101.0.0/24'
-//     nextHopType: 'VirtualAppliance'
-//     routeTable_Name: virtualNetwork_Client.outputs.routeTable_Name
-//     routeTableRoute_Name: 'toAzFW'
-//     nextHopIpAddress: azureFirewall.outputs.azureFirewall_PrivateIPAddress
-//   }
-// }
-
-// module udrToAzFW_Server '../../modules/Microsoft.Network/RouteTable.bicep' = if (usingAzureFirewall) {
-//   name: 'udrToAzFW_Server'
-//   params: {
-//     addressPrefix: '10.100.0.0/24'
-//     nextHopType: 'VirtualAppliance'
-//     routeTable_Name: virtualNetwork_SpokeA.outputs.routeTable_Name
-//     routeTableRoute_Name: 'toAzFW'
-//     nextHopIpAddress: azureFirewall.outputs.azureFirewall_PrivateIPAddress
-//   }
-// }
-
 module hubBastion '../../modules/Microsoft.Network/Bastion.bicep' = {
   name: 'hubBastion'
   params: {

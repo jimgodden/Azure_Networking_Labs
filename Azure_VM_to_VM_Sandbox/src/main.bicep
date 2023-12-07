@@ -2,14 +2,14 @@
 param srcLocation string = resourceGroup().location
 
 @description('Azure Datacenter location for the destination resources')
-param dstLocation string
+param dstLocation string = srcLocation
 
 @description('Username for the admin account of the Virtual Machines')
-param virtualMachine_adminUsername string
+param virtualMachine_AdminUsername string
 
 @description('Password for the admin account of the Virtual Machines')
 @secure()
-param virtualMachine_adminPassword string
+param virtualMachine_AdminPassword string
 
 @description('Size of the Virtual Machines')
 param virtualMachine_Size string = 'Standard_B2ms' // 'Standard_D2s_v3' // 'Standard_D16lds_v5'
@@ -21,7 +21,7 @@ I'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net.
 param acceleratedNetworking bool = false
 
 @description('SKU of the Virtual Network Gateway')
-param virtualNetworkGateway_SKU string = 'VpnGw1'
+param virtualNetworkGateway_SKU string = 'VpnGw2'
 
 @description('VPN Shared Key used for authenticating VPN connections')
 @secure()
@@ -33,7 +33,7 @@ param vpn_SharedKey string
   'Standard'
   'Premium'
 ])
-param azureFirewall_SKU string
+param azureFirewall_SKU string = 'Basic'
 
 @description('If true, Virtual Networks will be connected via Virtual Network Gateway S2S connection.  If false, Virtual Network Peering will be used instead.')
 param isUsingVPN bool = true
@@ -155,8 +155,8 @@ module sourceVM_Windows '../../Modules/Microsoft.Compute/WindowsServer2022/Virtu
     location: srcLocation
     networkInterface_Name: 'srcVM-Windows_NIC${i}'
     subnet_ID: virtualNetwork_Source.outputs.general_SubnetID
-    virtualMachine_AdminPassword: virtualMachine_adminPassword
-    virtualMachine_AdminUsername: virtualMachine_adminUsername
+    virtualMachine_AdminPassword: virtualMachine_AdminPassword
+    virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'srcVM-Windows${i}'
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
@@ -171,8 +171,8 @@ module destinationVM_Windows '../../Modules/Microsoft.Compute/WindowsServer2022/
     location: dstLocation
     networkInterface_Name: 'dstVM-Windows_NIC${i}'
     subnet_ID: virtualNetwork_Destination.outputs.general_SubnetID
-    virtualMachine_AdminPassword: virtualMachine_adminPassword
-    virtualMachine_AdminUsername: virtualMachine_adminUsername
+    virtualMachine_AdminPassword: virtualMachine_AdminPassword
+    virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'dstVM-Windows${i}'
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
@@ -188,12 +188,13 @@ module sourceVM_Linx '../../Modules/Microsoft.Compute/Ubuntu20/VirtualMachine.bi
     location: srcLocation
     networkInterface_Name: 'srcVM-Linux_NIC${i}'
     subnet_ID: virtualNetwork_Source.outputs.general_SubnetID
-    virtualMachine_AdminPassword: virtualMachine_adminPassword
-    virtualMachine_AdminUsername: virtualMachine_adminUsername
+    virtualMachine_AdminPassword: virtualMachine_AdminPassword
+    virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'srcVM-Linux${i}'
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
     virtualMachine_ScriptFileName: 'Ubuntu20_WebServer_Config.sh'
+    commandToExecute: './Ubuntu20_WebServer_Config.sh'
   }
 } ]
 
@@ -204,12 +205,13 @@ module destinationVMLinx '../../Modules/Microsoft.Compute/Ubuntu20/VirtualMachin
     location: dstLocation
     networkInterface_Name: 'dstVM-Linux_NIC${i}'
     subnet_ID: virtualNetwork_Destination.outputs.general_SubnetID
-    virtualMachine_AdminPassword: virtualMachine_adminPassword
-    virtualMachine_AdminUsername: virtualMachine_adminUsername
+    virtualMachine_AdminPassword: virtualMachine_AdminPassword
+    virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'dstVM-Linux${i}'
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
     virtualMachine_ScriptFileName: 'Ubuntu20_WebServer_Config.sh'
+    commandToExecute: './Ubuntu20_WebServer_Config.sh'
   }
 } ]
 
@@ -224,6 +226,9 @@ module sourceAzFW '../../modules/Microsoft.Network/AzureFirewall.bicep' = if (is
     azureFirewall_Subnet_ID: virtualNetwork_Source.outputs.azureFirewall_SubnetID
     location: srcLocation
   }
+  dependsOn: [
+    sourceVirtualNetworkGateway
+  ]
 }
 
 module destinationAzFW '../../modules/Microsoft.Network/AzureFirewall.bicep' = if (isUsingAzureFirewall) {
@@ -236,6 +241,9 @@ module destinationAzFW '../../modules/Microsoft.Network/AzureFirewall.bicep' = i
     azureFirewall_Subnet_ID: virtualNetwork_Destination.outputs.azureFirewall_SubnetID
     location: dstLocation
   }
+  dependsOn: [
+    destinationVirtualNetworkGateway
+  ]
 }
 
 // Azure Bastion for connecting to the Virtual Machines
