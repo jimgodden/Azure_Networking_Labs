@@ -1,4 +1,4 @@
-param trafficManagerProfile_Name string = 'trafficManagerProfile_CustomHeaderTest'
+param trafficManagerProfile_Name string = 'trafficManagerProfile-CustomHeaderTest'
 
 param relativeName string = 'testfqdn${uniqueString(resourceGroup().id)}'
 

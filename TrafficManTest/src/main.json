@@ -5,13 +5,13 @@
     "_generator": {
       "name": "bicep",
       "version": "0.23.1.45101",
-      "templateHash": "7430006498407641890"
+      "templateHash": "7593819518991247923"
     }
   },
   "parameters": {
     "trafficManagerProfile_Name": {
       "type": "string",
-      "defaultValue": "trafficManagerProfile_CustomHeaderTest"
+      "defaultValue": "trafficManagerProfile-CustomHeaderTest"
     },
     "relativeName": {
       "type": "string",
