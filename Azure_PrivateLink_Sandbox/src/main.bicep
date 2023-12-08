@@ -212,27 +212,59 @@ module azureFirewall '../../modules/Microsoft.Network/AzureFirewall.bicep' = if 
   ]
 }
 
-// module udrToAzFW_Hub '../../modules/Microsoft.Network/RouteTable.bicep' = if (usingAzureFirewall) {
-//   name: 'udrToAzFW_Hub'
-//   params: {
-//     addressPrefix: '10.101.0.0/24'
-//     nextHopType: 'VirtualAppliance'
-//     routeTable_Name: virtualNetwork_Client.outputs.routeTable_Name
-//     routeTableRoute_Name: 'toAzFW'
-//     nextHopIpAddress: azureFirewall.outputs.azureFirewall_PrivateIPAddress
-//   }
-// }
+module udrToAzFW_Hub '../../modules/Microsoft.Network/RouteTable.bicep' = if (usingAzureFirewall) {
+  name: 'udrToAzFW_Hub'
+  params: {
+    addressPrefixs: [
+      virtualNetwork_Hub.outputs.virtualNetwork_AddressPrefix
+      virtualNetwork_SpokeA.outputs.virtualNetwork_AddressPrefix
+      virtualNetwork_SpokeB.outputs.virtualNetwork_AddressPrefix
+    ]
+    nextHopType: 'VirtualAppliance'
+    routeTable_Name: virtualNetwork_Hub.outputs.routeTable_Name
+    routeTableRoute_Name: 'toAzFW'
+    nextHopIpAddress: azureFirewall.outputs.azureFirewall_PrivateIPAddress
+  }
+  dependsOn: [
+    azureFirewall
+  ]
+}
 
-// module udrToAzFW_Server '../../modules/Microsoft.Network/RouteTable.bicep' = if (usingAzureFirewall) {
-//   name: 'udrToAzFW_Server'
-//   params: {
-//     addressPrefix: '10.100.0.0/24'
-//     nextHopType: 'VirtualAppliance'
-//     routeTable_Name: virtualNetwork_SpokeA.outputs.routeTable_Name
-//     routeTableRoute_Name: 'toAzFW'
-//     nextHopIpAddress: azureFirewall.outputs.azureFirewall_PrivateIPAddress
-//   }
-// }
+module udrToAzFW_SpokeA '../../modules/Microsoft.Network/RouteTable.bicep' = if (usingAzureFirewall) {
+  name: 'udrToAzFW_SpokeA'
+  params: {
+    addressPrefixs: [
+      virtualNetwork_Hub.outputs.virtualNetwork_AddressPrefix
+      virtualNetwork_SpokeA.outputs.virtualNetwork_AddressPrefix
+      virtualNetwork_SpokeB.outputs.virtualNetwork_AddressPrefix
+    ]
+    nextHopType: 'VirtualAppliance'
+    routeTable_Name: virtualNetwork_SpokeA.outputs.routeTable_Name
+    routeTableRoute_Name: 'toAzFW'
+    nextHopIpAddress: azureFirewall.outputs.azureFirewall_PrivateIPAddress
+  }
+  dependsOn: [
+    azureFirewall
+  ]
+}
+
+module udrToAzFW_SpokeB '../../modules/Microsoft.Network/RouteTable.bicep' = if (usingAzureFirewall) {
+  name: 'udrToAzFW_SpokeB'
+  params: {
+    addressPrefixs: [
+      virtualNetwork_Hub.outputs.virtualNetwork_AddressPrefix
+      virtualNetwork_SpokeA.outputs.virtualNetwork_AddressPrefix
+      virtualNetwork_SpokeB.outputs.virtualNetwork_AddressPrefix
+    ]
+    nextHopType: 'VirtualAppliance'
+    routeTable_Name: virtualNetwork_SpokeB.outputs.routeTable_Name
+    routeTableRoute_Name: 'toAzFW'
+    nextHopIpAddress: azureFirewall.outputs.azureFirewall_PrivateIPAddress
+  }
+  dependsOn: [
+    azureFirewall
+  ]
+}
 
 module hubBastion '../../modules/Microsoft.Network/Bastion.bicep' = {
   name: 'hubBastion'

@@ -50,7 +50,6 @@ param storageAccount_Name string = 'stortemp${uniqueString(resourceGroup().id)}'
 module virtualNetwork_Client '../../modules/Microsoft.Network/VirtualNetworkHub.bicep' = {
   name: 'clientVNet'
   params: {
-    // firstTwoOctetsOfVirtualNetworkPrefix: '10.100'
     virtualNetwork_AddressPrefix: '10.100.0.0/16'
     location: locationClient
     virtualNetwork_Name: 'Client_VNet'
@@ -61,7 +60,6 @@ module virtualNetwork_Client '../../modules/Microsoft.Network/VirtualNetworkHub.
 module virtualNetwork_Server '../../modules/Microsoft.Network/VirtualNetworkSpoke.bicep' = {
   name: 'serverVNet'
   params: {
-    // firstTwoOctetsOfVirtualNetworkPrefix: '10.101'
     virtualNetwork_AddressPrefix: '10.101.0.0/16'
     location: locationServer
     virtualNetwork_Name: 'Server_VNet'
@@ -134,7 +132,7 @@ module firewall '../../modules/Microsoft.Network/AzureFirewall.bicep' = if (usin
 module udrToAzFW_Hub '../../modules/Microsoft.Network/RouteTable.bicep' = if (usingAzureFirewall) {
   name: 'udrToAzFW_Hub'
   params: {
-    addressPrefix: '10.101.0.0/24'
+    addressPrefixs: [virtualNetwork_Server.outputs.virtualNetwork_AddressPrefix]
     nextHopType: 'VirtualAppliance'
     routeTable_Name: virtualNetwork_Client.outputs.routeTable_Name
     routeTableRoute_Name: 'toAzFW'
@@ -145,7 +143,7 @@ module udrToAzFW_Hub '../../modules/Microsoft.Network/RouteTable.bicep' = if (us
 module udrToAzFW_Server '../../modules/Microsoft.Network/RouteTable.bicep' = if (usingAzureFirewall) {
   name: 'udrToAzFW_Server'
   params: {
-    addressPrefix: '10.100.0.0/24'
+    addressPrefixs: [virtualNetwork_Client.outputs.virtualNetwork_AddressPrefix]
     nextHopType: 'VirtualAppliance'
     routeTable_Name: virtualNetwork_Server.outputs.routeTable_Name
     routeTableRoute_Name: 'toAzFW'

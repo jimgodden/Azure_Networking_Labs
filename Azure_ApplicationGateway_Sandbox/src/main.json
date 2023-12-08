@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.23.1.45101",
-      "templateHash": "10269186903108295064"
+      "templateHash": "15167586490921585387"
     }
   },
   "parameters": {
@@ -75,7 +75,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "8230852748103601460"
+              "templateHash": "6825111486099162691"
             }
           },
           "parameters": {
@@ -409,6 +409,10 @@
             "virtualNetwork_ID": {
               "type": "string",
               "value": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name'))]"
+            },
+            "virtualNetwork_AddressPrefix": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name')), '2022-09-01').addressSpace.addressPrefixes[0]]"
             },
             "routeTable_Name": {
               "type": "string",

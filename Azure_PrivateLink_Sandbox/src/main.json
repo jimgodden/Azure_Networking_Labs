@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.23.1.45101",
-      "templateHash": "18064532177415870778"
+      "templateHash": "14481012498037125451"
     }
   },
   "parameters": {
@@ -118,7 +118,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "8230852748103601460"
+              "templateHash": "6825111486099162691"
             }
           },
           "parameters": {
@@ -453,6 +453,10 @@
               "type": "string",
               "value": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name'))]"
             },
+            "virtualNetwork_AddressPrefix": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name')), '2022-09-01').addressSpace.addressPrefixes[0]]"
+            },
             "routeTable_Name": {
               "type": "string",
               "value": "[parameters('routeTable_Name')]"
@@ -497,7 +501,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "7497823782549619897"
+              "templateHash": "7929100725364188136"
             }
           },
           "parameters": {
@@ -737,6 +741,10 @@
             "virtualNetwork_ID": {
               "type": "string",
               "value": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name'))]"
+            },
+            "virtualNetwork_AddressPrefix": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name')), '2022-09-01').addressSpace.addressPrefixes[0]]"
             },
             "routeTable_Name": {
               "type": "string",
@@ -785,7 +793,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "7497823782549619897"
+              "templateHash": "7929100725364188136"
             }
           },
           "parameters": {
@@ -1025,6 +1033,10 @@
             "virtualNetwork_ID": {
               "type": "string",
               "value": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name'))]"
+            },
+            "virtualNetwork_AddressPrefix": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name')), '2022-09-01').addressSpace.addressPrefixes[0]]"
             },
             "routeTable_Name": {
               "type": "string",
@@ -3193,6 +3205,324 @@
       ]
     },
     {
+      "condition": "[parameters('usingAzureFirewall')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "udrToAzFW_Hub",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "addressPrefixs": {
+            "value": [
+              "[reference(resourceId('Microsoft.Resources/deployments', 'hub_VNet'), '2022-09-01').outputs.virtualNetwork_AddressPrefix.value]",
+              "[reference(resourceId('Microsoft.Resources/deployments', 'spokeA_VNet'), '2022-09-01').outputs.virtualNetwork_AddressPrefix.value]",
+              "[reference(resourceId('Microsoft.Resources/deployments', 'spokeB_VNet'), '2022-09-01').outputs.virtualNetwork_AddressPrefix.value]"
+            ]
+          },
+          "nextHopType": {
+            "value": "VirtualAppliance"
+          },
+          "routeTable_Name": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'hub_VNet'), '2022-09-01').outputs.routeTable_Name.value]"
+          },
+          "routeTableRoute_Name": {
+            "value": "toAzFW"
+          },
+          "nextHopIpAddress": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'hubAzureFirewall'), '2022-09-01').outputs.azureFirewall_PrivateIPAddress.value]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.23.1.45101",
+              "templateHash": "13296261736535890165"
+            }
+          },
+          "parameters": {
+            "routeTable_Name": {
+              "type": "string"
+            },
+            "routeTableRoute_Name": {
+              "type": "string"
+            },
+            "addressPrefixs": {
+              "type": "array"
+            },
+            "nextHopIpAddress": {
+              "type": "string",
+              "defaultValue": ""
+            },
+            "nextHopType": {
+              "type": "string",
+              "allowedValues": [
+                "None",
+                "VirtualAppliance",
+                "Internet",
+                "VirtualNetworkGateway",
+                "VnetLocal"
+              ]
+            }
+          },
+          "resources": [
+            {
+              "copy": {
+                "name": "routeTable_Route_Firewall",
+                "count": "[length(range(0, length(parameters('addressPrefixs'))))]"
+              },
+              "condition": "[equals(parameters('nextHopType'), 'VirtualAppliance')]",
+              "type": "Microsoft.Network/routeTables/routes",
+              "apiVersion": "2023-05-01",
+              "name": "[format('{0}/{1}', parameters('routeTable_Name'), format('{0}{1}', parameters('routeTableRoute_Name'), range(0, length(parameters('addressPrefixs')))[copyIndex()]))]",
+              "properties": {
+                "addressPrefix": "[parameters('addressPrefixs')[range(0, length(parameters('addressPrefixs')))[copyIndex()]]]",
+                "nextHopType": "[parameters('nextHopType')]",
+                "nextHopIpAddress": "[parameters('nextHopIpAddress')]"
+              }
+            },
+            {
+              "copy": {
+                "name": "routeTable_Route",
+                "count": "[length(range(0, length(parameters('addressPrefixs'))))]"
+              },
+              "condition": "[not(equals(parameters('nextHopType'), 'VirtualAppliance'))]",
+              "type": "Microsoft.Network/routeTables/routes",
+              "apiVersion": "2023-05-01",
+              "name": "[format('{0}/{1}', parameters('routeTable_Name'), format('{0}{1}', parameters('routeTableRoute_Name'), range(0, length(parameters('addressPrefixs')))[copyIndex()]))]",
+              "properties": {
+                "addressPrefix": "[parameters('addressPrefixs')[range(0, length(parameters('addressPrefixs')))[copyIndex()]]]",
+                "nextHopType": "[parameters('nextHopType')]"
+              }
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'hubAzureFirewall')]",
+        "[resourceId('Microsoft.Resources/deployments', 'hub_VNet')]",
+        "[resourceId('Microsoft.Resources/deployments', 'spokeA_VNet')]",
+        "[resourceId('Microsoft.Resources/deployments', 'spokeB_VNet')]"
+      ]
+    },
+    {
+      "condition": "[parameters('usingAzureFirewall')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "udrToAzFW_SpokeA",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "addressPrefixs": {
+            "value": [
+              "[reference(resourceId('Microsoft.Resources/deployments', 'hub_VNet'), '2022-09-01').outputs.virtualNetwork_AddressPrefix.value]",
+              "[reference(resourceId('Microsoft.Resources/deployments', 'spokeA_VNet'), '2022-09-01').outputs.virtualNetwork_AddressPrefix.value]",
+              "[reference(resourceId('Microsoft.Resources/deployments', 'spokeB_VNet'), '2022-09-01').outputs.virtualNetwork_AddressPrefix.value]"
+            ]
+          },
+          "nextHopType": {
+            "value": "VirtualAppliance"
+          },
+          "routeTable_Name": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'spokeA_VNet'), '2022-09-01').outputs.routeTable_Name.value]"
+          },
+          "routeTableRoute_Name": {
+            "value": "toAzFW"
+          },
+          "nextHopIpAddress": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'hubAzureFirewall'), '2022-09-01').outputs.azureFirewall_PrivateIPAddress.value]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.23.1.45101",
+              "templateHash": "13296261736535890165"
+            }
+          },
+          "parameters": {
+            "routeTable_Name": {
+              "type": "string"
+            },
+            "routeTableRoute_Name": {
+              "type": "string"
+            },
+            "addressPrefixs": {
+              "type": "array"
+            },
+            "nextHopIpAddress": {
+              "type": "string",
+              "defaultValue": ""
+            },
+            "nextHopType": {
+              "type": "string",
+              "allowedValues": [
+                "None",
+                "VirtualAppliance",
+                "Internet",
+                "VirtualNetworkGateway",
+                "VnetLocal"
+              ]
+            }
+          },
+          "resources": [
+            {
+              "copy": {
+                "name": "routeTable_Route_Firewall",
+                "count": "[length(range(0, length(parameters('addressPrefixs'))))]"
+              },
+              "condition": "[equals(parameters('nextHopType'), 'VirtualAppliance')]",
+              "type": "Microsoft.Network/routeTables/routes",
+              "apiVersion": "2023-05-01",
+              "name": "[format('{0}/{1}', parameters('routeTable_Name'), format('{0}{1}', parameters('routeTableRoute_Name'), range(0, length(parameters('addressPrefixs')))[copyIndex()]))]",
+              "properties": {
+                "addressPrefix": "[parameters('addressPrefixs')[range(0, length(parameters('addressPrefixs')))[copyIndex()]]]",
+                "nextHopType": "[parameters('nextHopType')]",
+                "nextHopIpAddress": "[parameters('nextHopIpAddress')]"
+              }
+            },
+            {
+              "copy": {
+                "name": "routeTable_Route",
+                "count": "[length(range(0, length(parameters('addressPrefixs'))))]"
+              },
+              "condition": "[not(equals(parameters('nextHopType'), 'VirtualAppliance'))]",
+              "type": "Microsoft.Network/routeTables/routes",
+              "apiVersion": "2023-05-01",
+              "name": "[format('{0}/{1}', parameters('routeTable_Name'), format('{0}{1}', parameters('routeTableRoute_Name'), range(0, length(parameters('addressPrefixs')))[copyIndex()]))]",
+              "properties": {
+                "addressPrefix": "[parameters('addressPrefixs')[range(0, length(parameters('addressPrefixs')))[copyIndex()]]]",
+                "nextHopType": "[parameters('nextHopType')]"
+              }
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'hubAzureFirewall')]",
+        "[resourceId('Microsoft.Resources/deployments', 'hub_VNet')]",
+        "[resourceId('Microsoft.Resources/deployments', 'spokeA_VNet')]",
+        "[resourceId('Microsoft.Resources/deployments', 'spokeB_VNet')]"
+      ]
+    },
+    {
+      "condition": "[parameters('usingAzureFirewall')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "udrToAzFW_SpokeB",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "addressPrefixs": {
+            "value": [
+              "[reference(resourceId('Microsoft.Resources/deployments', 'hub_VNet'), '2022-09-01').outputs.virtualNetwork_AddressPrefix.value]",
+              "[reference(resourceId('Microsoft.Resources/deployments', 'spokeA_VNet'), '2022-09-01').outputs.virtualNetwork_AddressPrefix.value]",
+              "[reference(resourceId('Microsoft.Resources/deployments', 'spokeB_VNet'), '2022-09-01').outputs.virtualNetwork_AddressPrefix.value]"
+            ]
+          },
+          "nextHopType": {
+            "value": "VirtualAppliance"
+          },
+          "routeTable_Name": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'spokeB_VNet'), '2022-09-01').outputs.routeTable_Name.value]"
+          },
+          "routeTableRoute_Name": {
+            "value": "toAzFW"
+          },
+          "nextHopIpAddress": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'hubAzureFirewall'), '2022-09-01').outputs.azureFirewall_PrivateIPAddress.value]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.23.1.45101",
+              "templateHash": "13296261736535890165"
+            }
+          },
+          "parameters": {
+            "routeTable_Name": {
+              "type": "string"
+            },
+            "routeTableRoute_Name": {
+              "type": "string"
+            },
+            "addressPrefixs": {
+              "type": "array"
+            },
+            "nextHopIpAddress": {
+              "type": "string",
+              "defaultValue": ""
+            },
+            "nextHopType": {
+              "type": "string",
+              "allowedValues": [
+                "None",
+                "VirtualAppliance",
+                "Internet",
+                "VirtualNetworkGateway",
+                "VnetLocal"
+              ]
+            }
+          },
+          "resources": [
+            {
+              "copy": {
+                "name": "routeTable_Route_Firewall",
+                "count": "[length(range(0, length(parameters('addressPrefixs'))))]"
+              },
+              "condition": "[equals(parameters('nextHopType'), 'VirtualAppliance')]",
+              "type": "Microsoft.Network/routeTables/routes",
+              "apiVersion": "2023-05-01",
+              "name": "[format('{0}/{1}', parameters('routeTable_Name'), format('{0}{1}', parameters('routeTableRoute_Name'), range(0, length(parameters('addressPrefixs')))[copyIndex()]))]",
+              "properties": {
+                "addressPrefix": "[parameters('addressPrefixs')[range(0, length(parameters('addressPrefixs')))[copyIndex()]]]",
+                "nextHopType": "[parameters('nextHopType')]",
+                "nextHopIpAddress": "[parameters('nextHopIpAddress')]"
+              }
+            },
+            {
+              "copy": {
+                "name": "routeTable_Route",
+                "count": "[length(range(0, length(parameters('addressPrefixs'))))]"
+              },
+              "condition": "[not(equals(parameters('nextHopType'), 'VirtualAppliance'))]",
+              "type": "Microsoft.Network/routeTables/routes",
+              "apiVersion": "2023-05-01",
+              "name": "[format('{0}/{1}', parameters('routeTable_Name'), format('{0}{1}', parameters('routeTableRoute_Name'), range(0, length(parameters('addressPrefixs')))[copyIndex()]))]",
+              "properties": {
+                "addressPrefix": "[parameters('addressPrefixs')[range(0, length(parameters('addressPrefixs')))[copyIndex()]]]",
+                "nextHopType": "[parameters('nextHopType')]"
+              }
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'hubAzureFirewall')]",
+        "[resourceId('Microsoft.Resources/deployments', 'hub_VNet')]",
+        "[resourceId('Microsoft.Resources/deployments', 'spokeA_VNet')]",
+        "[resourceId('Microsoft.Resources/deployments', 'spokeB_VNet')]"
+      ]
+    },
+    {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2022-09-01",
       "name": "hubBastion",
@@ -3629,7 +3959,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "8230852748103601460"
+              "templateHash": "6825111486099162691"
             }
           },
           "parameters": {
@@ -3963,6 +4293,10 @@
             "virtualNetwork_ID": {
               "type": "string",
               "value": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name'))]"
+            },
+            "virtualNetwork_AddressPrefix": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name')), '2022-09-01').addressSpace.addressPrefixes[0]]"
             },
             "routeTable_Name": {
               "type": "string",

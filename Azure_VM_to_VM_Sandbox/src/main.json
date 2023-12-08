@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.23.1.45101",
-      "templateHash": "11629572077191758658"
+      "templateHash": "15868946374664536558"
     }
   },
   "parameters": {
@@ -18,17 +18,18 @@
     },
     "dstLocation": {
       "type": "string",
+      "defaultValue": "[parameters('srcLocation')]",
       "metadata": {
         "description": "Azure Datacenter location for the destination resources"
       }
     },
-    "virtualMachine_adminUsername": {
+    "virtualMachine_AdminUsername": {
       "type": "string",
       "metadata": {
         "description": "Username for the admin account of the Virtual Machines"
       }
     },
-    "virtualMachine_adminPassword": {
+    "virtualMachine_AdminPassword": {
       "type": "securestring",
       "metadata": {
         "description": "Password for the admin account of the Virtual Machines"
@@ -165,7 +166,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "8230852748103601460"
+              "templateHash": "6825111486099162691"
             }
           },
           "parameters": {
@@ -499,6 +500,10 @@
             "virtualNetwork_ID": {
               "type": "string",
               "value": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name'))]"
+            },
+            "virtualNetwork_AddressPrefix": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name')), '2022-09-01').addressSpace.addressPrefixes[0]]"
             },
             "routeTable_Name": {
               "type": "string",
@@ -538,7 +543,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "8230852748103601460"
+              "templateHash": "6825111486099162691"
             }
           },
           "parameters": {
@@ -872,6 +877,10 @@
             "virtualNetwork_ID": {
               "type": "string",
               "value": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name'))]"
+            },
+            "virtualNetwork_AddressPrefix": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name')), '2022-09-01').addressSpace.addressPrefixes[0]]"
             },
             "routeTable_Name": {
               "type": "string",
@@ -1584,10 +1593,10 @@
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'srcVNET'), '2022-09-01').outputs.general_SubnetID.value]"
           },
           "virtualMachine_AdminPassword": {
-            "value": "[parameters('virtualMachine_adminPassword')]"
+            "value": "[parameters('virtualMachine_AdminPassword')]"
           },
           "virtualMachine_AdminUsername": {
-            "value": "[parameters('virtualMachine_adminUsername')]"
+            "value": "[parameters('virtualMachine_AdminUsername')]"
           },
           "virtualMachine_Name": {
             "value": "[format('srcVM-Windows{0}', range(1, parameters('numberOfSourceSideWindowsVMs'))[copyIndex()])]"
@@ -1962,10 +1971,10 @@
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'dstVNET'), '2022-09-01').outputs.general_SubnetID.value]"
           },
           "virtualMachine_AdminPassword": {
-            "value": "[parameters('virtualMachine_adminPassword')]"
+            "value": "[parameters('virtualMachine_AdminPassword')]"
           },
           "virtualMachine_AdminUsername": {
-            "value": "[parameters('virtualMachine_adminUsername')]"
+            "value": "[parameters('virtualMachine_AdminUsername')]"
           },
           "virtualMachine_Name": {
             "value": "[format('dstVM-Windows{0}', range(1, parameters('numberOfDestinationSideWindowsVMs'))[copyIndex()])]"
@@ -2340,10 +2349,10 @@
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'srcVNET'), '2022-09-01').outputs.general_SubnetID.value]"
           },
           "virtualMachine_AdminPassword": {
-            "value": "[parameters('virtualMachine_adminPassword')]"
+            "value": "[parameters('virtualMachine_AdminPassword')]"
           },
           "virtualMachine_AdminUsername": {
-            "value": "[parameters('virtualMachine_adminUsername')]"
+            "value": "[parameters('virtualMachine_AdminUsername')]"
           },
           "virtualMachine_Name": {
             "value": "[format('srcVM-Linux{0}', range(1, parameters('numberOfSourceSideLinuxVMs'))[copyIndex()])]"
@@ -2356,6 +2365,9 @@
           },
           "virtualMachine_ScriptFileName": {
             "value": "Ubuntu20_WebServer_Config.sh"
+          },
+          "commandToExecute": {
+            "value": "./Ubuntu20_WebServer_Config.sh"
           }
         },
         "template": {
@@ -2365,7 +2377,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "17423959341546419370"
+              "templateHash": "15787432860770797044"
             }
           },
           "parameters": {
@@ -2431,8 +2443,7 @@
               }
             },
             "commandToExecute": {
-              "type": "string",
-              "defaultValue": "Ubuntu20_DNS_Config.sh"
+              "type": "string"
             }
           },
           "variables": {
@@ -2705,10 +2716,10 @@
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'dstVNET'), '2022-09-01').outputs.general_SubnetID.value]"
           },
           "virtualMachine_AdminPassword": {
-            "value": "[parameters('virtualMachine_adminPassword')]"
+            "value": "[parameters('virtualMachine_AdminPassword')]"
           },
           "virtualMachine_AdminUsername": {
-            "value": "[parameters('virtualMachine_adminUsername')]"
+            "value": "[parameters('virtualMachine_AdminUsername')]"
           },
           "virtualMachine_Name": {
             "value": "[format('dstVM-Linux{0}', range(1, parameters('numberOfDestinationSideLinuxVMs'))[copyIndex()])]"
@@ -2721,6 +2732,9 @@
           },
           "virtualMachine_ScriptFileName": {
             "value": "Ubuntu20_WebServer_Config.sh"
+          },
+          "commandToExecute": {
+            "value": "./Ubuntu20_WebServer_Config.sh"
           }
         },
         "template": {
@@ -2730,7 +2744,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "17423959341546419370"
+              "templateHash": "15787432860770797044"
             }
           },
           "parameters": {
@@ -2796,8 +2810,7 @@
               }
             },
             "commandToExecute": {
-              "type": "string",
-              "defaultValue": "Ubuntu20_DNS_Config.sh"
+              "type": "string"
             }
           },
           "variables": {
@@ -3263,6 +3276,7 @@
         }
       },
       "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'srcVNG')]",
         "[resourceId('Microsoft.Resources/deployments', 'srcVNET')]"
       ]
     },
@@ -3487,6 +3501,7 @@
         }
       },
       "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'dstVNG')]",
         "[resourceId('Microsoft.Resources/deployments', 'dstVNET')]"
       ]
     },
