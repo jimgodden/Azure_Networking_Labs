@@ -47,3 +47,17 @@ resource virtualHubVirtualNetworkConn 'Microsoft.Network/virtualHubs/hubVirtualN
     enableInternetSecurity: true
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

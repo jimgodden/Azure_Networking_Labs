@@ -39,3 +39,17 @@ resource virtualNetworkPeering_Spoke_to_Hub 'Microsoft.Network/virtualNetworks/v
     }
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

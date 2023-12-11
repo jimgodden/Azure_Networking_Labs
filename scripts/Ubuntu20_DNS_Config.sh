@@ -27,3 +27,16 @@ sudo systemctl restart bind9
 
 # Enable and start the BIND9 service on boot
 # sudo systemctl enable bind9
+
+
+
+
+
+
+
+
+
+
+
+
+

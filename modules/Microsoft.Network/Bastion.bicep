@@ -60,3 +60,17 @@ resource bastion_vip 'Microsoft.Network/publicIPAddresses@2022-09-01' = {
     ipTags: []
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

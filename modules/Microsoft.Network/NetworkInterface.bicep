@@ -42,3 +42,17 @@ output networkInterface_ID string = networkInterface.id
 output networkInterface_IPConfig0_Name string = networkInterface.properties.ipConfigurations[0].name
 output networkInterface_IPConfig0_ID string = networkInterface.properties.ipConfigurations[0].id
 output networkInterface_PrivateIPAddress string = networkInterface.properties.ipConfigurations[0].properties.privateIPAddress
+
+
+
+
+
+
+
+
+
+
+
+
+
+

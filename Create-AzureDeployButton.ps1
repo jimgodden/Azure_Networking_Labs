@@ -11,3 +11,16 @@ $encodedURL = [uri]::EscapeDataString($rawURL)
 
 Write-Host "Link for Azure Deploy Button for ${DirectoryName}"
 Write-host "[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/${encodedURL})"
+
+
+
+
+
+
+
+
+
+
+
+
+

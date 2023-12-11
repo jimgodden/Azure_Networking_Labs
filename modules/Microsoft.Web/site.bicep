@@ -209,3 +209,17 @@ resource appServiceEnvironment_Subnet_Link 'Microsoft.Web/sites/virtualNetworkCo
 }
 
 output website_FQDN string = site_hostnameBinding.name
+
+
+
+
+
+
+
+
+
+
+
+
+
+

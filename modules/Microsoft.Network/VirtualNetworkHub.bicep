@@ -352,3 +352,17 @@ output virtualNetwork_ID string = virtualNetwork.id
 output virtualNetwork_AddressPrefix string = virtualNetwork.properties.addressSpace.addressPrefixes[0]
 
 output routeTable_Name string = routeTable.name
+
+
+
+
+
+
+
+
+
+
+
+
+
+

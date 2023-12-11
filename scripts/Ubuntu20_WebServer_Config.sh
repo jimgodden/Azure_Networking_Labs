@@ -49,3 +49,16 @@ EOL
 
 # Reload Nginx to apply the configuration changes
 sudo systemctl reload nginx
+
+
+
+
+
+
+
+
+
+
+
+
+

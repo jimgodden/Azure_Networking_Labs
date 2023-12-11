@@ -212,3 +212,17 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2022-11-01' =
     }
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

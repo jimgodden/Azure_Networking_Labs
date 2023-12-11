@@ -27,3 +27,17 @@ Set-Shortcut -ApplicationFilePath "C:\Program Files\Wireshark\Wireshark.exe"  -D
 Set-Shortcut -ApplicationFilePath "C:\Program Files\WindowsApps\Microsoft.WindowsTerminal_1.16.10261.0_x64__8wekyb3d8bbwe\wt.exe" -DestinationFilePath "C:\Users\$ENV:USERNAME\Desktop\Terminal.lnk"
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+

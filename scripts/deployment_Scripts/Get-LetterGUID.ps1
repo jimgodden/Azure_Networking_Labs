@@ -6,3 +6,17 @@ foreach ($letter in $fiveLettersArray) {
 }
 
 return $fiveLettersString
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -178,3 +178,17 @@ resource privateLink 'Microsoft.Network/privateLinkServices@2022-09-01' = {
 
 output internalLoadBalancer_FrontendIPAddress string = internalLoadBalancer.properties.frontendIPConfigurations[0].properties.privateIPAddress
 output privateEndpoint_NetworkInterface_Name string = privateendpoint.properties.customNetworkInterfaceName
+
+
+
+
+
+
+
+
+
+
+
+
+
+

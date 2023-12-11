@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.23.1.45101",
-      "templateHash": "15167586490921585387"
+      "templateHash": "7989972850885047375"
     }
   },
   "parameters": {
@@ -1032,7 +1032,7 @@
             "value": "[parameters('virtualMachine_Size')]"
           },
           "virtualMachine_ScriptFileLocation": {
-            "value": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/"
+            "value": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/buildtest/scripts/"
           },
           "virtualMachine_ScriptFileName": {
             "value": "WinServ2022_General_InitScript.ps1"
@@ -1045,7 +1045,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "1096034176172248179"
+              "templateHash": "7631129113061106956"
             }
           },
           "parameters": {
@@ -1098,7 +1098,7 @@
             },
             "virtualMachine_ScriptFileLocation": {
               "type": "string",
-              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/",
+              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/buildtest/scripts/",
               "metadata": {
                 "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\r\nExample: https://example.com/scripts/"
               }
@@ -1495,3 +1495,6 @@
     }
   ]
 }
+
+
+

@@ -4,10 +4,10 @@ param(
 
 $projectPath = "C:\Users\$env:USERNAME\OneDrive - Microsoft\Programming\Azure_Networking_Labs"
 
-$searchString1 = "/main/"
+$searchString1 = "/branchtest/"
 $replaceString1 = "/$BranchName/"
 
-$searchString2 = "%2Fmain%2F"
+$searchString2 = "%2Fbranchtest%2F"
 $replaceString2 = "%2F$BranchName%2F"
 
 $ProjectNames = @(
@@ -26,11 +26,10 @@ function Update-BranchNameReferences {
     )
 
     Get-ChildItem -Path $path -Recurse | ForEach-Object {
-        if ($_.FullName -eq "build.ps1") {
-            continue
-        }
         # Check if the file is not a directory
         if (-not $_.PSIsContainer) {
+
+            Write-Host $_.FullName
             # Read the content of the file
             $content = Get-Content $_.FullName -Raw
     
@@ -51,3 +50,14 @@ $ProjectNames | Foreach-Object -ThrottleLimit 5 -Parallel {
     Write-Host "Building $PSItem" 
     bicep build "${path}\src\main.bicep" --outfile "${path}\src\main.json"
 }
+
+
+
+
+
+
+
+
+
+
+

@@ -116,3 +116,17 @@ output storageAccountFileShare_Name string = storageAccount_File_FileShare.name
 
 #disable-next-line outputs-should-not-contain-secrets // disabling this warning since this deployment is for testing only
 output storageAccount_key0 string = storageAccount.listKeys().keys[0].value
+
+
+
+
+
+
+
+
+
+
+
+
+
+

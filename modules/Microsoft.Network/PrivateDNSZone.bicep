@@ -21,3 +21,17 @@ resource virtualNetworkLink 'Microsoft.Network/privateDnsZones/virtualNetworkLin
   }
 } ]
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+

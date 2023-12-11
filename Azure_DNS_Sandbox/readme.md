@@ -8,3 +8,16 @@ Diagram of the infrastructure
 ![Diagram of the infrastructure](diagram.drawio.png)
 
 Note: This Diagram is in this repository, and can be modified via https://app.diagrams.net/
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -83,7 +83,7 @@ module clientVM_Linux '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.b
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'ClientVM${i}'
     virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
+    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/buildtest/scripts/'
     virtualMachine_ScriptFileName: 'conntestClient.sh'
     // Use the following for Private Link testing
     // commandToExecute: './conntestClient.sh ${privateEndpoint_NIC.outputs.privateEndpoint_IPAddress} ${scenario_Name} ${storageAccount.outputs.storageAccount_Name} ${storageAccount.outputs.storageAccountFileShare_Name} ${storageAccount.outputs.storageAccount_key0}'
@@ -107,7 +107,7 @@ module ServerVM_Linux '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.b
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'ServerVM${i}'
     virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
+    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/buildtest/scripts/'
     virtualMachine_ScriptFileName: 'conntestServer.sh'
     commandToExecute: './conntestServer.sh ${scenario_Name} ${storageAccount.outputs.storageAccount_Name} ${storageAccount.outputs.storageAccountFileShare_Name} ${storageAccount.outputs.storageAccount_key0}'
   }
@@ -205,5 +205,19 @@ module privateEndpoint_NIC '../../modules/Microsoft.Network/PrivateEndpointNetwo
     existing_PrivateEndpoint_NetworkInterface_Name: privateLink.outputs.privateEndpoint_NetworkInterface_Name
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

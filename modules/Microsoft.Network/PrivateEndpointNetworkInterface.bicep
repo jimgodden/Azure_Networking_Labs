@@ -6,3 +6,17 @@ resource privateEndpoint_NIC 'Microsoft.Network/networkInterfaces@2023-05-01' ex
 }
 
 output privateEndpoint_IPAddress string = privateEndpoint_NIC.properties.ipConfigurations[0].properties.privateIPAddress
+
+
+
+
+
+
+
+
+
+
+
+
+
+
