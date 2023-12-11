@@ -56,3 +56,5 @@ output networkInterface_PrivateIPAddress string = networkInterface.properties.ip
 
 
 
+
+

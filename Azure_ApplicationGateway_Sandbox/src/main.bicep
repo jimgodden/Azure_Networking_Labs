@@ -1,14 +1,14 @@
 param location string = resourceGroup().location
 
 @description('Name of the App Service')
-param site_Name string =  'jamesgsite${substring(uniqueString(resourceGroup().id), 0, 5)}'
+param site_Name string =  'anptestsite${substring(uniqueString(resourceGroup().id), 0, 5)}'
 
 @description('Username for the admin account of the Virtual Machines')
-param virtualMachine_adminUsername string
+param virtualMachine_AdminUsername string
 
 @description('Password for the admin account of the Virtual Machines')
 @secure()
-param virtualMachine_adminPassword string
+param virtualMachine_AdminPassword string
 
 @description('Password for the Virtual Machine Admin User')
 param virtualMachine_Size string = 'Standard_B2ms' // 'Standard_D2s_v3' // 'Standard_D16lds_v5'
@@ -22,7 +22,6 @@ param acceleratedNetworking bool = false
 module virtualNetwork_Hub '../../modules/Microsoft.Network/VirtualNetworkHub.bicep' = {
   name: 'VirtualNetworkHub'
   params: {
-    // firstTwoOctetsOfVirtualNetworkPrefix: '10.0'
     virtualNetwork_AddressPrefix: '10.0.0.0/16'
     location: location
     virtualNetwork_Name: 'VirutalNetworkHub'
@@ -53,7 +52,6 @@ module AppGW '../../modules/Microsoft.Network/ApplicationGateway_v2.bicep' = {
   }
 }
 
-// Windows Virtual Machines
 module clientVMWindows '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
   name: 'clientVMWindows'
   params: {
@@ -61,8 +59,8 @@ module clientVMWindows '../../modules/Microsoft.Compute/WindowsServer2022/Virtua
     location: location
     networkInterface_Name: 'clientVMWindows_NetworkInterface'
     subnet_ID: virtualNetwork_Hub.outputs.general_SubnetID
-    virtualMachine_AdminPassword: virtualMachine_adminPassword
-    virtualMachine_AdminUsername: virtualMachine_adminUsername
+    virtualMachine_AdminPassword: virtualMachine_AdminPassword
+    virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'clientVMWindows'
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/buildtest/scripts/'
@@ -78,6 +76,8 @@ module hubBastion '../../modules/Microsoft.Network/Bastion.bicep' = {
     location: location
   }
 }
+
+
 
 
 

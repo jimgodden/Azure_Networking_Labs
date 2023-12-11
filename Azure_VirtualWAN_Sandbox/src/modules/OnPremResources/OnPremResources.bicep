@@ -106,3 +106,5 @@ output virtualNetworkGateway_ASN int = vpn.outputs.virtualNetworkGateway_ASN
 
 
 
+
+

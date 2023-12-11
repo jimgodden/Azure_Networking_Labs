@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.23.1.45101",
-      "templateHash": "7989972850885047375"
+      "templateHash": "13503869392401486612"
     }
   },
   "parameters": {
@@ -15,18 +15,18 @@
     },
     "site_Name": {
       "type": "string",
-      "defaultValue": "[format('jamesgsite{0}', substring(uniqueString(resourceGroup().id), 0, 5))]",
+      "defaultValue": "[format('anptestsite{0}', substring(uniqueString(resourceGroup().id), 0, 5))]",
       "metadata": {
         "description": "Name of the App Service"
       }
     },
-    "virtualMachine_adminUsername": {
+    "virtualMachine_AdminUsername": {
       "type": "string",
       "metadata": {
         "description": "Username for the admin account of the Virtual Machines"
       }
     },
-    "virtualMachine_adminPassword": {
+    "virtualMachine_AdminPassword": {
       "type": "securestring",
       "metadata": {
         "description": "Password for the admin account of the Virtual Machines"
@@ -1020,10 +1020,10 @@
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'VirtualNetworkHub'), '2022-09-01').outputs.general_SubnetID.value]"
           },
           "virtualMachine_AdminPassword": {
-            "value": "[parameters('virtualMachine_adminPassword')]"
+            "value": "[parameters('virtualMachine_AdminPassword')]"
           },
           "virtualMachine_AdminUsername": {
-            "value": "[parameters('virtualMachine_adminUsername')]"
+            "value": "[parameters('virtualMachine_AdminUsername')]"
           },
           "virtualMachine_Name": {
             "value": "clientVMWindows"
@@ -1495,6 +1495,3 @@
     }
   ]
 }
-
-
-

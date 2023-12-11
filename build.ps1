@@ -4,10 +4,10 @@ param(
 
 $projectPath = "C:\Users\$env:USERNAME\OneDrive - Microsoft\Programming\Azure_Networking_Labs"
 
-$searchString1 = "/branchtest/"
+$searchString1 = "/main/"
 $replaceString1 = "/$BranchName/"
 
-$searchString2 = "%2Fbranchtest%2F"
+$searchString2 = "%2Fmain%2F"
 $replaceString2 = "%2F$BranchName%2F"
 
 $ProjectNames = @(
@@ -50,14 +50,5 @@ $ProjectNames | Foreach-Object -ThrottleLimit 5 -Parallel {
     Write-Host "Building $PSItem" 
     bicep build "${path}\src\main.bicep" --outfile "${path}\src\main.json"
 }
-
-
-
-
-
-
-
-
-
 
 

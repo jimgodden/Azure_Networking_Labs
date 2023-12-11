@@ -1,13 +1,19 @@
-main.parameters.json
-virtualMachines.parameters.json
-full.parameters.bicepparam
+
 build.ps1
+Azure_ApplicationGateway_Sandbox/iteration.txt
+Azure_ApplicationGateway_Sandbox/main.parameters.bicepparam
+Azure_DNS_Sandbox/iteration.txt
+Azure_DNS_Sandbox/main.parameters.bicepparam
 Azure_PrivateLink_Sandbox/iteration.txt
 Azure_PrivateLink_Sandbox/main.parameters.bicepparam
 Azure_VirtualWAN_Sandbox/iteration.txt
 Azure_VirtualWAN_Sandbox/main.parameters.bicepparam
+Azure_VM_to_VM_Sandbox/iteration.txt
+Azure_VM_to_VM_Sandbox/main.parameters.bicepparam
 TD_Repro/iteration.txt
 TD_Repro/main.parameters.bicepparam
+
+
 
 
 
