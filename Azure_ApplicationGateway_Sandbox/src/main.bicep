@@ -63,7 +63,7 @@ module clientVMWindows '../../modules/Microsoft.Compute/WindowsServer2022/Virtua
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'clientVMWindows'
     virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/buildtest/scripts/'
+    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
     virtualMachine_ScriptFileName: 'WinServ2022_General_InitScript.ps1'
   }
 }
@@ -76,6 +76,8 @@ module hubBastion '../../modules/Microsoft.Network/Bastion.bicep' = {
     location: location
   }
 }
+
+
 
 
 

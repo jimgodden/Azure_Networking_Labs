@@ -91,3 +91,5 @@ output virtualNetworkGateway_ASN int = virtualNetworkGateway.properties.bgpSetti
 
 
 
+
+

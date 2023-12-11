@@ -22,3 +22,5 @@ output privateEndpoint_IPAddress string = privateEndpoint_NIC.properties.ipConfi
 
 
 
+
+

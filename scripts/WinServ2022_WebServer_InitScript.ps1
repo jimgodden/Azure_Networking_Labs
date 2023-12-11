@@ -26,7 +26,7 @@ Invoke-WebRequest -Uri "https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx" 
 Invoke-WebRequest -Uri "https://github.com/microsoft/terminal/releases/download/v1.16.10261.0/Microsoft.WindowsTerminal_Win10_1.16.10261.0_8wekyb3d8bbwe.msixbundle" -OutFile "c:\Microsoft.WindowsTerminal_Win10_1.16.10261.0_8wekyb3d8bbwe.msixbundle"
 
 New-Item -ItemType Directory -Name Tools -Path "c:\"
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/buildtest/scripts/WinServ2022_InstallTools.ps1" -OutFile "c:\installTools.ps1"
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2022_InstallTools.ps1" -OutFile "c:\installTools.ps1"
 
 # Define variables for the IIS website and certificate
 $siteName = "Default Web Site"
@@ -49,6 +49,8 @@ New-WebBinding -Name $siteName -Port $port -Protocol "https"
 $SSLCert = Get-ChildItem -Path "cert:\LocalMachine\My" | Where-Object {$_.subject -like 'cn=localhost'}
 Set-Location "IIS:\sslbindings"
 New-Item "!${port}!" -value $SSLCert
+
+
 
 
 

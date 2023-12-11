@@ -132,3 +132,5 @@ output storageAccount_key0 string = storageAccount.listKeys().keys[0].value
 
 
 
+
+
