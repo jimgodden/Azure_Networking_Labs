@@ -1,7 +1,10 @@
 # This file will be used for testing purposes until a proper CI/CD pipeline is in place.
 
-$deploymentName = "Azure_PrivateLink_Sandbox"
-$deploymentFilePath = ".\${deploymentName}\"
+param(
+    [string]$DeploymentName
+)
+
+$deploymentFilePath = ".\${DeploymentName}\"
 $mainBicepFile = "${deploymentFilePath}src\main.bicep"
 $mainParameterFile = "${deploymentFilePath}main.parameters.bicepparam"
 $iterationFile = "${deploymentFilePath}iteration.txt"
@@ -12,7 +15,7 @@ if (!(Test-Path $iterationFile)) {
 }
 
 $iteration = [int](Get-Content $iterationFile)
-$rgName = "${deploymentName}_${iteration}"
+$rgName = "${DeploymentName}_${iteration}"
 $location = "eastus2"
 
 if (Get-AzResourceGroup -Name $rgName) {
@@ -27,14 +30,14 @@ if (Get-AzResourceGroup -Name $rgName) {
         Remove-AzResourceGroup -Name $rgName -Force -AsJob
         Set-Content -Path $iterationFile -Value "$($iteration + 1)"
         $iteration = [int](Get-Content $iterationFile)
-        $rgName = "${deploymentName}_${iteration}"
+        $rgName = "${DeploymentName}_${iteration}"
         Write-Host "Creating $rgName"
     } 
     elseif ($response -eq "2") {
         Write-Host "`nDisregarding $rgName"
         Set-Content -Path $iterationFile -Value "$($iteration + 1)"
         $iteration = [int](Get-Content $iterationFile)
-        $rgName = "${deploymentName}_${iteration}"
+        $rgName = "${DeploymentName}_${iteration}"
         Write-Host "Creating $rgName"
     } 
     elseif ($response -eq "3") {
@@ -48,7 +51,7 @@ if (Get-AzResourceGroup -Name $rgName) {
 else {
     Set-Content -Path $iterationFile -Value "$($iteration + 1)"
     $iteration = [int](Get-Content $iterationFile)
-    $rgName = "${deploymentName}_${iteration}"
+    $rgName = "${DeploymentName}_${iteration}"
 }
 
 # Specifies the account and subscription where the deployment will take place.

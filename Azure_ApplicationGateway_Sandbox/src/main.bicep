@@ -19,12 +19,44 @@ I'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net.
 ''')
 param acceleratedNetworking bool = false
 
+var virtualMachine_ScriptFileLocation = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
+
+var virtualMachine_Website_DomainName = 'contoso.com'
+
 module virtualNetwork_Hub '../../modules/Microsoft.Network/VirtualNetworkHub.bicep' = {
   name: 'VirtualNetworkHub'
   params: {
     virtualNetwork_AddressPrefix: '10.0.0.0/16'
     location: location
     virtualNetwork_Name: 'VirutalNetworkHub'
+  }
+}
+
+module clientVM '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
+  name: 'clientVM'
+  params: {
+    acceleratedNetworking: acceleratedNetworking
+    location: location
+    networkInterface_Name: 'clientVM_NetworkInterface'
+    subnet_ID: virtualNetwork_Hub.outputs.general_SubnetID
+    virtualMachine_AdminPassword: virtualMachine_AdminPassword
+    virtualMachine_AdminUsername: virtualMachine_AdminUsername
+    virtualMachine_Name: 'clientVM'
+    virtualMachine_Size: virtualMachine_Size
+    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
+    virtualMachine_ScriptFileName: 'WinServ2022_General_InitScript.ps1'
+    commandToExecute: 'WinServ2022_General_InitScript.ps1'
+  }
+}
+
+module AppGW '../../modules/Microsoft.Network/ApplicationGateway_v2.bicep' = {
+  name: 'AppGW'
+  params: {
+    applicationGateway_Name: 'AppGWv2'
+    applicationGateway_PrivateIPAddress: parseCidr(virtualNetwork_Hub.outputs.applicationGateway_Subnet_AddressPrefix).lastUsable
+    location: location
+    applicationGateway_SubnetID: virtualNetwork_Hub.outputs.applicationGateway_SubnetID
+    backendPoolFQDNs: [site.outputs.website_FQDN, '${webserverVM.outputs.virtualMachine_Name}.${virtualMachine_Website_DomainName}']
   }
 }
 
@@ -39,35 +71,29 @@ module site '../../modules/Microsoft.Web/site.bicep' = {
   }
 }
 
-module AppGW '../../modules/Microsoft.Network/ApplicationGateway_v2.bicep' = {
-  name: 'AppGW'
+module privateDNSZone_ContosoDotCom '../../modules/Microsoft.Network/PrivateDNSZone.bicep' = {
+  name: 'contosoDotCom'
   params: {
-    applicationGateway_Name: 'AppGWv2'
-    publicIP_ApplicationGateway_Name: 'AppGW_PIP'
-    applicationGateway_PrivateIP_Address: virtualNetwork_Hub.outputs.applicationGateway_PrivateIP
-    applicationGatewayWAF_Name: 'AppGW_WAF'
-    location: location
-    applicationGateway_SubnetID: virtualNetwork_Hub.outputs.applicationGateway_SubnetID
-    backendPoolFQDN: site.outputs.website_FQDN
+    privateDNSZone_Name: virtualMachine_Website_DomainName
+    virtualNetworkIDs: [virtualNetwork_Hub.outputs.virtualNetwork_ID]
   }
 }
 
-module clientVMWindows '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
-  name: 'clientVMWindows'
+module webserverVM '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
+  name: 'webserverVM'
   params: {
     acceleratedNetworking: acceleratedNetworking
     location: location
-    networkInterface_Name: 'clientVMWindows_NetworkInterface'
     subnet_ID: virtualNetwork_Hub.outputs.general_SubnetID
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
-    virtualMachine_Name: 'clientVMWindows'
+    virtualMachine_Name: 'webserverVM'
     virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
-    virtualMachine_ScriptFileName: 'WinServ2022_General_InitScript.ps1'
+    virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
+    virtualMachine_ScriptFileName: 'WinServ2022_WebServer_InitScript.ps1'
+    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_WebServer_InitScript.ps1 -FQDN webserverVM.${virtualMachine_Website_DomainName}'
   }
 }
-
 
 module hubBastion '../../modules/Microsoft.Network/Bastion.bicep' = {
   name: 'hubBastion'

@@ -31,42 +31,6 @@ param networkSecurityGroup_Default_Name string = '${virtualNetwork_Name}_NSG_Gen
 @description('Name of the General Route Table')
 param routeTable_Name string = '${virtualNetwork_Name}_RT_General'
 
-// @description('''First two octects of the Virtual Network address prefix
-// Example: for a network address of '10.0.0.0/16' you would enter '10.0' here''')
-// param firstTwoOctetsOfVirtualNetworkPrefix string
-
-// // Subnets
-// @description('Name of the General Subnet for any other resources')
-// param subnet_General_Name string = 'General'
-
-// @description('Address Prefix of the General Subnet')
-// param subnet_General_AddressPrefix string = '${firstTwoOctetsOfVirtualNetworkPrefix}.0.0/24'
-
-// @description('Name of the PrivateEndpoint Subnet')
-// param subnet_PrivateEndpoints_Name string = 'PrivateEndpoints'
-
-// @description('Address Prefix of the PrivateEndpoint Subnet')
-// param subnet_PrivateEndpoints_AddressPrefix string = '${firstTwoOctetsOfVirtualNetworkPrefix}.1.0/24'
-
-// @description('Name of the PrivateEndpoint Subnet')
-// param subnet_PrivateLinkService_Name string = 'PrivateLinkService'
-
-// @description('Address Prefix of the PrivateEndpoint Subnet')
-// param subnet_PrivateLinkService_AddressPrefix string = '${firstTwoOctetsOfVirtualNetworkPrefix}.2.0/24'
-
-// @description('Name of the ApplicationGateway Subnet')
-// param subnet_ApplicationGatewaySubnet_Name string = 'ApplicationGatewaySubnet'
-
-// @description('Address Prefix of the ApplicationGateway Subnet')
-// // Any changes to this value need to be replicated to the output applicationGatewayPrivateIP
-// param subnet_ApplicationGatewaySubnet_AddressPrefix string = '${firstTwoOctetsOfVirtualNetworkPrefix}.3.0/24'
-
-// @description('Name of the AppService Subnet')
-// param subnet_AppServiceSubnet_Name string = 'AppServiceSubnet'
-
-// @description('Address Prefix of the AppService Subnet')
-// param subnet_AppServiceSubnet_AddressPrefix string = '${firstTwoOctetsOfVirtualNetworkPrefix}.4.0/24'
-
 
 resource virtualNetwork 'Microsoft.Network/virtualNetworks@2022-09-01' = {
   name: virtualNetwork_Name
@@ -232,9 +196,11 @@ output privateLinkService_SubnetID string = virtualNetwork.properties.subnets[2]
 output applicationGateway_SubnetID string = virtualNetwork.properties.subnets[3].id 
 output appService_SubnetID string = virtualNetwork.properties.subnets[4].id
 
-// Should be one of the last IPs in the subnet range.  This is for the appgw frontend private ip.
-// output applicationGateway_PrivateIP string = '${firstTwoOctetsOfVirtualNetworkPrefix}.3.254'
-output applicationGateway_PrivateIP string = cidrHost(subnet_AddressRangeCIDRs[3], 250)
+output general_Subnet_AddressPrefix string = virtualNetwork.properties.subnets[0].properties.addressPrefix
+output privateEndpoint_Subnet_AddressPrefix string = virtualNetwork.properties.subnets[1].properties.addressPrefix
+output privateLinkService_Subnet_AddressPrefix string = virtualNetwork.properties.subnets[2].properties.addressPrefix
+output applicationGateway_Subnet_AddressPrefix string = virtualNetwork.properties.subnets[3].properties.addressPrefix 
+output appService_Subnet_AddressPrefix string = virtualNetwork.properties.subnets[4].properties.addressPrefix
 
 output virtualNetwork_Name string = virtualNetwork.name
 output virtualNetwork_ID string = virtualNetwork.id

@@ -11,20 +11,18 @@ param location string
 param applicationGateway_Name string
 
 @description('Name of the Public IP Address resource of the Applciation Gateway')
-param publicIP_ApplicationGateway_Name string
+param publicIP_ApplicationGateway_Name string = '${applicationGateway_Name}_PIP'
 
 @description('Name of the Private IP Address of the Frontend of the Applciation Gateway')
-param applicationGateway_PrivateIP_Address string
+param applicationGateway_PrivateIPAddress string
 
 param applicationGateway_SubnetID string
 
 @description('Name of the Web Application Firewall of the Application Gateway')
-param applicationGatewayWAF_Name string
+param applicationGatewayWAF_Name string = '${applicationGateway_Name}_WAF'
 
 @description('FQDN of the website in the backend pool of the Application Gateway')
-param backendPoolFQDN string
-
-// var applicationGatewaySubnetID = resourceId('Microsoft.Network/virtualNetworks/subnets', Vnet_Name, applicationGateway_Subnet_Name)
+param backendPoolFQDNs array
 
 @description('Application Gateway sub resource IDs')
 var frontendID = resourceId('Microsoft.Network/applicationGateways/frontendIPConfigurations', applicationGateway_Name, 'fip_private')
@@ -34,7 +32,6 @@ var backendAddressPoolID = resourceId('Microsoft.Network/applicationGateways/bac
 var backendHTTPSettingsID = resourceId('Microsoft.Network/applicationGateways/backendHttpSettingsCollection', applicationGateway_Name, 'http-to-asp-settings')
 
 
-// Done
 resource applicationGatewayWAF 'Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies@2022-11-01' = {
   name: applicationGatewayWAF_Name
   location: location
@@ -68,7 +65,6 @@ resource applicationGatewayWAF 'Microsoft.Network/ApplicationGatewayWebApplicati
   }
 }
 
-//Done
 resource publicIP_ApplicationGateway 'Microsoft.Network/publicIPAddresses@2022-11-01' = {
   name: publicIP_ApplicationGateway_Name
   location: location
@@ -83,7 +79,6 @@ resource publicIP_ApplicationGateway 'Microsoft.Network/publicIPAddresses@2022-1
     ipTags: []
   }
 }
-
 
 resource applicationGateway 'Microsoft.Network/applicationGateways@2022-11-01' = {
   name: applicationGateway_Name
@@ -120,7 +115,7 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2022-11-01' =
       {
         name: 'fip_private'
         properties: {
-          privateIPAddress: applicationGateway_PrivateIP_Address
+          privateIPAddress: applicationGateway_PrivateIPAddress
           privateIPAllocationMethod: 'Static'
           subnet: {
             id: applicationGateway_SubnetID
@@ -140,8 +135,7 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2022-11-01' =
       {
         name: 'bep'
         properties: {
-          backendAddresses: [
-            {
+          backendAddresses: [ for backendPoolFQDN in backendPoolFQDNs: {
               fqdn: backendPoolFQDN
             }
           ]

@@ -180,27 +180,12 @@ resource virtualMachine_CustomScriptExtension 'Microsoft.Compute/virtualMachines
   }
 }
 
+output virtualMachine_Name string = virtualMachine_Windows.name
+
 output networkInterface_Name string = networkInterface.outputs.networkInterface_Name
 output networkInterface_ID string = networkInterface.outputs.networkInterface_ID
 
 output networkInterface_IPConfig0_Name string = networkInterface.outputs.networkInterface_IPConfig0_Name
 output networkInterface_IPConfig0_ID string = networkInterface.outputs.networkInterface_IPConfig0_ID
 output networkInterface_PrivateIPAddress string = networkInterface.outputs.networkInterface_PrivateIPAddress
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

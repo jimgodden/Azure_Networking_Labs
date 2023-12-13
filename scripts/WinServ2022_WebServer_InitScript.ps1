@@ -1,3 +1,7 @@
+param (
+    [string]$FQDN
+)
+
 # Chocolatey installation
 Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
 
@@ -33,6 +37,13 @@ $siteName = "Default Web Site"
 $port = 443
 $certName = "MySelfSignedCert"
 
+if ($null -eq $FQDN) {
+    $hostHeader = "example.contoso.com"
+}
+else {
+    $hostHeader = $FQDN
+}
+
 # Create a self-signed certificate
 New-SelfSignedCertificate -DnsName "localhost" -CertStoreLocation "cert:\LocalMachine\My" -FriendlyName $certName
 
@@ -44,25 +55,8 @@ Install-WindowsFeature -Name Web-Server -includeManagementTools
 
 Import-Module WebAdministration
 
-New-WebBinding -Name $siteName -Port $port -Protocol "https"
+New-WebBinding -Name $siteName -Port $port -Protocol "https" -HostHeader $hostHeader
 
 $SSLCert = Get-ChildItem -Path "cert:\LocalMachine\My" | Where-Object {$_.subject -like 'cn=localhost'}
 Set-Location "IIS:\sslbindings"
 New-Item "!${port}!" -value $SSLCert
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

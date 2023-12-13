@@ -50,31 +50,6 @@ module networkInterface '../../Microsoft.Network/NetworkInterface.bicep' = {
   }
 }
 
-// resource networkInterface 'Microsoft.Network/networkInterfaces@2022-09-01' = {
-//   name: networkInterface_Name
-//   location: location
-//   properties: {
-//     ipConfigurations: [
-//       {
-//         name: 'ipconfig0'
-//         type: 'Microsoft.Network/networkInterfaces/ipConfigurations'
-//         properties: {
-//           privateIPAllocationMethod: 'Dynamic'
-//           subnet: {
-//             id: subnet_ID
-//           }
-//           primary: true
-//           privateIPAddressVersion: 'IPv4'
-//         }
-//       }
-//     ]
-//     enableAcceleratedNetworking: acceleratedNetworking
-//     enableIPForwarding: false
-//     disableTcpStateTracking: false
-//     nicType: 'Standard'
-//   }
-// }
-
 resource virtualMachine_Linux 'Microsoft.Compute/virtualMachines@2023-03-01' = {
   name: virtualMachine_Name
   location: location
@@ -165,6 +140,8 @@ resource vm_CustomScriptExtension 'Microsoft.Compute/virtualMachines/extensions@
     }
   }
 }
+
+output virtualMachine_Name string = virtualMachine_Linux.name
 
 output networkInterface_Name string = networkInterface.outputs.networkInterface_Name
 output networkInterface_ID string = networkInterface.outputs.networkInterface_ID

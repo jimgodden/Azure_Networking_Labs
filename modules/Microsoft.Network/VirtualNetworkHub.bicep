@@ -343,9 +343,17 @@ output bastion_SubnetID string = virtualNetwork.properties.subnets[8].id
 output privateResolver_Inbound_SubnetID string = virtualNetwork.properties.subnets[9].id
 output privateResolver_Outbound_SubnetID string = virtualNetwork.properties.subnets[10].id
 
-// Should be one of the last IPs in the subnet range.  This is for the appgw frontend private ip.
-// output applicationGateway_PrivateIP string = '${firstTwoOctetsOfVirtualNetworkPrefix}.3.254'
-output applicationGateway_PrivateIP string = cidrHost(subnet_AddressRangeCIDRs[3], 250)
+output general_Subnet_AddressPrefix string = virtualNetwork.properties.subnets[0].properties.addressPrefix
+output privateEndpoint_Subnet_AddressPrefix string = virtualNetwork.properties.subnets[1].properties.addressPrefix
+output privateLinkService_Subnet_AddressPrefix string = virtualNetwork.properties.subnets[2].properties.addressPrefix
+output applicationGateway_Subnet_AddressPrefix string = virtualNetwork.properties.subnets[3].properties.addressPrefix 
+output appService_Subnet_AddressPrefix string = virtualNetwork.properties.subnets[4].properties.addressPrefix
+output gateway_Subnet_AddressPrefix string = virtualNetwork.properties.subnets[5].properties.addressPrefix
+output azureFirewall_Subnet_AddressPrefix string = virtualNetwork.properties.subnets[6].properties.addressPrefix
+output azureFirewallManagement_Subnet_AddressPrefix string = virtualNetwork.properties.subnets[7].properties.addressPrefix
+output bastion_Subnet_AddressPrefix string = virtualNetwork.properties.subnets[8].properties.addressPrefix
+output privateResolver_Inbound_Subnet_AddressPrefix string = virtualNetwork.properties.subnets[9].properties.addressPrefix
+output privateResolver_Outbound_Subnet_AddressPrefix string = virtualNetwork.properties.subnets[10].properties.addressPrefix
 
 output virtualNetwork_Name string = virtualNetwork.name
 output virtualNetwork_ID string = virtualNetwork.id

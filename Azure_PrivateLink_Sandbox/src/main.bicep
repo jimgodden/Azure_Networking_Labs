@@ -20,8 +20,6 @@ param virtualMachine_AdminPassword string
 @description('Password for the Virtual Machine Admin User')
 param virtualMachine_Size string = 'Standard_B2ms' // 'Standard_D2s_v3' // 'Standard_D16lds_v5'
 
-param virtualMachine_ScriptFileLocation string = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
-
 @description('''True enables Accelerated Networking and False disabled it.  
 Not all VM sizes support Accel Net (i.e. Standard_B2ms).  
 I'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net.
@@ -49,6 +47,8 @@ Must end with a period (.)
 Example:
 contoso.com.''')
 param onpremResolvableDomainName string = 'contoso.com.'
+
+var virtualMachine_ScriptFileLocation = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
 
 
 module virtualNetwork_Hub '../../modules/Microsoft.Network/VirtualNetworkHub.bicep' = {
