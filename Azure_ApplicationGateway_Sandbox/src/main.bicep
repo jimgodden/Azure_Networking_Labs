@@ -45,7 +45,7 @@ module clientVM '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachin
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
     virtualMachine_ScriptFileName: 'WinServ2022_General_InitScript.ps1'
-    commandToExecute: 'WinServ2022_General_InitScript.ps1'
+    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_General_InitScript.ps1'
   }
 }
 
