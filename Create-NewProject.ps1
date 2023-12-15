@@ -15,6 +15,9 @@ Set-Content -Path ".\$ProjectName\${ProjectName}-deployment.ps1" -Value ".\deplo
 
 New-Item -ItemType File -Path ".\$ProjectName" -Name "diagram.drawio.png"
 
+New-Item -ItemType File -Path ".\$ProjectName" -Name "iteration.txt"
+Set-Content -Path ".\$ProjectName\iteration.txt" -Value "1"
+
 New-Item -ItemType File -Path ".\$ProjectName" -Name "main.parameters.bicepparam"
 $bicepParamInitializer = "using './src/main.bicep' /*Provide a path to a bicep template*/"
 Set-Content -Path ".\$ProjectName\main.parameters.bicepparam" -Value $bicepParamInitializer

@@ -22,12 +22,12 @@ $StorageAccountNameShortened = $StorageAccountName.Split('.')
 cmd.exe /C "cmdkey /add:`"${StorageAccountName}`" /user:`"localhost\$($StorageAccountNameShortened[0])`" /pass:`"${StorageAccountKey}`""
 New-PSDrive -Name Z -PSProvider FileSystem -Root "\\${StorageAccountName}\${StorageAccountFileShareName}" -Persist
 
-
+New-Item -ItemType Directory -Path "Z:\" -Name "iwashere"
 
 Start-Job -ScriptBlock {
     # Set the folder path to search
-    $folderPathBase = "\\$($using:StorageAccountName)\$($using:StorageAccountFileShareName)"
-    $folderPathOriginalPcaps = "${folderPathBase}\$($using:ScenarioName)"
+    $folderPathBase = "Z:"
+    $folderPathOriginalPcaps = "Z:\$($using:ScenarioName)"
 
     $folderForCapsWithoutIssues = "NoIssuesFound"
 
