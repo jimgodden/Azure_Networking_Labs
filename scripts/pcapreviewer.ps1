@@ -24,34 +24,43 @@ New-PSDrive -Name Z -PSProvider FileSystem -Root "\\${StorageAccountName}\${Stor
 
 
 
-# Set the folder path to search
-$folderPath = "\\${StorageAccountName}\${StorageAccountFileShareName}\${ScenarioName}"
+Start-Job -ScriptBlock {
+    # Set the folder path to search
+    $folderPathBase = "\\$($using:StorageAccountName)\$($using:StorageAccountFileShareName)"
+    $folderPathOriginalPcaps = "${folderPathBase}\$($using:ScenarioName)"
 
-# Set the size threshold in megabytes
-$sizeThreshold = 5
+    $folderForCapsWithoutIssues = "NoIssuesFound"
 
-# Define the filter criteria
-$filterCriteria = "tcp.flags.reset == 1 and tcp.time_delta < 7 and tcp.time_delta > 4"
-$tshark = "C:\Program Files\Wireshark\tshark.exe"
+    # Set the size threshold in megabytes
+    $sizeThreshold = 5
 
+    $filterCriteria = "tcp.flags.reset == 1 and tcp.time_delta < 7 and tcp.time_delta > 4"
+    $tshark = "C:\Program Files\Wireshark\tshark.exe"
 
-# Get files in the specified folder that are greater than 5 megabytes
-$files = Get-ChildItem -Path $folderPath | Where-Object { $_.Length -gt ($sizeThreshold * 1MB) }
+    while ($true) {
+        # Get files in the specified folder that are greater than 5 megabytes
+        $files = Get-ChildItem -Path $folderPathOriginalPcaps | Where-Object { $_.Length -gt ($sizeThreshold * 1MB) }
 
-while ($true) {
-    if ($files.Count -gt 0) {
-        Write-Host "Files larger than $sizeThreshold megabytes found in ${folderPath}:"
-        $files | ForEach-Object {
-            # Use tshark to filter packets based on the specified criteria
-            $tsharkOutput = "$tshark -r $($_.FullName) -Y ""$filterCriteria"""
+        if ($files.Count -gt 0) {
+            Write-Host "Files larger than $sizeThreshold megabytes found in ${folderPathOriginalPcaps}:"
+            $files | ForEach-Object {
+                # Use tshark to filter packets based on the specified criteria
+                $tsharkOutput = "$tshark -r $($_.FullName) -Y ""$filterCriteria"""
 
-            if ($tsharkOutput) {
-                Move-Item -Path $_.FullName -Destination "\\${StorageAccountName}\${StorageAccountFileShareName}"
+                if ($tsharkOutput) {
+                    Move-Item -Path $_.FullName -Destination $folderPathBase
+                }
+                else {
+                    if (!(Test-Path "${folderPathBase}\${folderForCapsWithoutIssues}")) {
+                        New-Item -ItemType Directory -Path $folderPathBase -Name $folderForCapsWithoutIssues
+                    }
+                    Move-Item -Path $_.FullName -Destination "${folderPathBase}\${folderForCapsWithoutIssues}"
+                }
             }
+        } else {
+            Write-Host "No files larger than $sizeThreshold megabytes found in $folderPath."
         }
-    } else {
-        Write-Host "No files larger than $sizeThreshold megabytes found in $folderPath."
-    }
 
-    Start-Sleep -Seconds 1800
+        Start-Sleep -Seconds 1800
+    } 
 }

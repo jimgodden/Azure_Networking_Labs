@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.23.1.45101",
-      "templateHash": "4363566207095465177"
+      "templateHash": "17966788950273153948"
     }
   },
   "parameters": {
@@ -2029,6 +2029,7 @@
         }
       },
       "dependsOn": [
+        "clientVM_Linux",
         "[resourceId('Microsoft.Resources/deployments', 'storageAccount')]",
         "[resourceId('Microsoft.Resources/deployments', 'clientVNet')]"
       ]

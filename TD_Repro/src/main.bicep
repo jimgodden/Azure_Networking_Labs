@@ -132,6 +132,9 @@ module pcapReviewVM '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMa
     virtualMachine_ScriptFileName: 'pcapreviewer.ps1'
     commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File pcapreviewer.ps1 -ScenarioName ${scenario_Name} -StorageAccountName ${storageAccount.outputs.storageAccount_Name} -StorageAccountFileShareName ${storageAccount.outputs.storageAccountFileShare_Name} -StorageAccountKey ${storageAccount.outputs.storageAccount_key0}'
   }
+  dependsOn: [
+    clientVM_Linux // We only want to start checking for pcaps after the client has been deployed and starts capturing
+  ]
 }
 
 

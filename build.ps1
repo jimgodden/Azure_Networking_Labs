@@ -50,7 +50,3 @@ $ProjectNames | Foreach-Object -ThrottleLimit 5 -Parallel {
     Write-Host "Building $PSItem" 
     bicep build "${path}\src\main.bicep" --outfile "${path}\src\main.json"
 }
-
-
-
-
