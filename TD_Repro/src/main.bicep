@@ -46,6 +46,8 @@ Storage account name restrictions:
 @maxLength(24)
 param storageAccount_Name string = 'stortemp${uniqueString(resourceGroup().id)}'
 
+var virtualMachine_ScriptFileLocation = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
+
 
 module virtualNetwork_Client '../../modules/Microsoft.Network/VirtualNetworkHub.bicep' = {
   name: 'clientVNet'
@@ -83,12 +85,12 @@ module clientVM_Linux '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.b
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'ClientVM${i}'
     virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
+    virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
     virtualMachine_ScriptFileName: 'conntestClient.sh'
     // Use the following for Private Link testing
-    // commandToExecute: './conntestClient.sh ${privateEndpoint_NIC.outputs.privateEndpoint_IPAddress} ${scenario_Name} ${storageAccount.outputs.storageAccount_Name} ${storageAccount.outputs.storageAccountFileShare_Name} ${storageAccount.outputs.storageAccount_key0}'
+    commandToExecute: './conntestClient.sh ${privateEndpoint_NIC.outputs.privateEndpoint_IPAddress} ${scenario_Name} ${storageAccount.outputs.storageAccount_Name} ${storageAccount.outputs.storageAccountFileShare_Name} ${storageAccount.outputs.storageAccount_key0}'
     // Use the following for Load Balancer testing
-    commandToExecute: './conntestClient.sh ${privateLink.outputs.internalLoadBalancer_FrontendIPAddress} ${scenario_Name} ${storageAccount.outputs.storageAccount_Name} ${storageAccount.outputs.storageAccountFileShare_Name} ${storageAccount.outputs.storageAccount_key0}'
+    // commandToExecute: './conntestClient.sh ${privateLink.outputs.internalLoadBalancer_FrontendIPAddress} ${scenario_Name} ${storageAccount.outputs.storageAccount_Name} ${storageAccount.outputs.storageAccountFileShare_Name} ${storageAccount.outputs.storageAccount_key0}'
 
   }
   dependsOn: [
@@ -107,7 +109,7 @@ module ServerVM_Linux '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.b
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'ServerVM${i}'
     virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
+    virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
     virtualMachine_ScriptFileName: 'conntestServer.sh'
     commandToExecute: './conntestServer.sh ${scenario_Name} ${storageAccount.outputs.storageAccount_Name} ${storageAccount.outputs.storageAccountFileShare_Name} ${storageAccount.outputs.storageAccount_key0}'
   }
@@ -115,6 +117,22 @@ module ServerVM_Linux '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.b
     client_StorageAccount_File_PrivateEndpoint
   ]
 } ]
+
+module pcapReviewVM '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
+  name: 'pcapReviewVM'
+  params: {
+    acceleratedNetworking: false
+    location: locationClient
+    subnet_ID: virtualNetwork_Client.outputs.general_SubnetID
+    virtualMachine_AdminPassword: virtualMachine_AdminPassword
+    virtualMachine_AdminUsername: virtualMachine_AdminUsername
+    virtualMachine_Name: 'pcapReviewVM'
+    virtualMachine_Size: 'Standard_B2ms'
+    virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
+    virtualMachine_ScriptFileName: 'pcapreviewer.ps1'
+    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File pcapreviewer.ps1 -ScenarioName ${scenario_Name} -StorageAccountName ${storageAccount.outputs.storageAccount_Name} -StorageAccountFileShareName ${storageAccount.outputs.storageAccountFileShare_Name} -StorageAccountKey ${storageAccount.outputs.storageAccount_key0}'
+  }
+}
 
 
 module firewall '../../modules/Microsoft.Network/AzureFirewall.bicep' = if (usingAzureFirewall) {
@@ -196,6 +214,7 @@ module privateLink '../../modules/Microsoft.Network/PrivateLink.bicep' = {
     privateEndpoint_SubnetID: virtualNetwork_Client.outputs.privateEndpoint_SubnetID
     privateLink_SubnetID: virtualNetwork_Server.outputs.privateLinkService_SubnetID
     tcpPort: 5001
+    enableTcpReset: true
   }
 }
 

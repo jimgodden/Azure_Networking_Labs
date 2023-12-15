@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.23.1.45101",
-      "templateHash": "10170100390472706767"
+      "templateHash": "14860125341711101944"
     }
   },
   "parameters": {
@@ -2529,7 +2529,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "4106892316679403389"
+              "templateHash": "6499980711726777671"
             }
           },
           "parameters": {
@@ -2608,6 +2608,10 @@
               "metadata": {
                 "description": "TCP Port that will be used for connecting to the Virtual Machine behind the Private Link Service and Load Balancer"
               }
+            },
+            "enableTcpReset": {
+              "type": "bool",
+              "defaultValue": false
             }
           },
           "resources": [
@@ -2685,7 +2689,7 @@
                       "enableFloatingIP": false,
                       "idleTimeoutInMinutes": 4,
                       "protocol": "All",
-                      "enableTcpReset": false,
+                      "enableTcpReset": "[parameters('enableTcpReset')]",
                       "loadDistribution": "Default",
                       "disableOutboundSnat": true,
                       "backendAddressPool": {

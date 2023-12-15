@@ -34,6 +34,8 @@ param acceleratedNetworking bool
 @description('TCP Port that will be used for connecting to the Virtual Machine behind the Private Link Service and Load Balancer')
 param tcpPort int = 443
 
+param enableTcpReset bool = false
+
 // Modifies the existing Virtual Machine NIC to add it to the backend pool of the Load Balancer behind the Private Link Service
 resource networkInterface 'Microsoft.Network/networkInterfaces@2023-04-01' = [for i in range(0, length(networkInterface_Names)): {
   name: '${networkInterface_Names[i]}'
@@ -99,7 +101,7 @@ resource internalLoadBalancer 'Microsoft.Network/loadBalancers@2022-09-01' = {
           enableFloatingIP: false
           idleTimeoutInMinutes: 4
           protocol: 'All'
-          enableTcpReset: false
+          enableTcpReset: enableTcpReset
           loadDistribution: 'Default'
           disableOutboundSnat: true
           backendAddressPool: {
