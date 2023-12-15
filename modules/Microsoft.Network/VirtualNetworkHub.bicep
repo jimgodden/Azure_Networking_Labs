@@ -284,7 +284,7 @@ resource networkSecurityGroup 'Microsoft.Network/networkSecurityGroups@2022-09-0
 }
 
 resource networkSecurityGroup_ApplicationGateway 'Microsoft.Network/networkSecurityGroups@2022-11-01' = {
-  name: '${virtualNetwork_Name}_networkSecurityGroup_ApplicationGateway'
+  name: '${virtualNetwork_Name}_NSG_ApplicationGateway'
   location: location
   properties: {
     securityRules: []

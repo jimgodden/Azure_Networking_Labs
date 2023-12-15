@@ -76,6 +76,7 @@ module privateDNSZone_ContosoDotCom '../../modules/Microsoft.Network/PrivateDNSZ
   params: {
     privateDNSZone_Name: virtualMachine_Website_DomainName
     virtualNetworkIDs: [virtualNetwork_Hub.outputs.virtualNetwork_ID]
+    registrationEnabled: true
   }
 }
 
