@@ -4,9 +4,6 @@ param location string
 @description('Name of the Virtual Network')
 param virtualNetwork_Name string
 
-// @description('Address Prefix of the Virtual Network')
-// param virtualNetwork_AddressPrefix string = '${firstTwoOctetsOfVirtualNetworkPrefix}.0.0/16'
-
 @description('''An Array of Custom DNS Server IP Addresses.  Azure Wireserver will be used if left as an empty array [].
 Example:
 [10.0.0.4, 10.0.0.5]
@@ -170,25 +167,25 @@ resource networkSecurityGroup_ApplicationGateway_AppGWSpecificRule 'Microsoft.Ne
   }
 }
 
-// resource networkSecurityGroupRule 'Microsoft.Network/networkSecurityGroups/securityRules@2022-09-01' = {
-//   parent: networkSecurityGroup
-//   name: networkSecurityGroup_Default_RuleName
-//   properties: {
-//     description: 'test'
-//     protocol: '*'
-//     sourcePortRange: '*'
-//     destinationPortRange: '8080'
-//     sourceAddressPrefix: '10.0.0.1/32'
-//     destinationAddressPrefix: '*'
-//     access: 'Allow'
-//     priority: int(networkSecurityGroup_Default_RulePriority)
-//     direction: 'Inbound'
-//     sourcePortRanges: []
-//     destinationPortRanges: []
-//     sourceAddressPrefixes: []
-//     destinationAddressPrefixes: []
-//   }
-// }
+resource networkSecurityGroup_ApplicationGateway_HTTPSRule 'Microsoft.Network/networkSecurityGroups/securityRules@2022-11-01' = {
+  parent: networkSecurityGroup_ApplicationGateway
+  name: 'AllowHTTPS'
+  properties: {
+    description: 'Allow HTTPS'
+    protocol: 'Tcp'
+    sourcePortRange: '*'
+    destinationPortRange: '443'
+    sourceAddressPrefix: '*'
+    destinationAddressPrefix: '*'
+    access: 'Allow'
+    priority: 1001
+    direction: 'Inbound'
+    sourcePortRanges: []
+    destinationPortRanges: []
+    sourceAddressPrefixes: []
+    destinationAddressPrefixes: []
+  }
+}
 
 output general_SubnetID string = virtualNetwork.properties.subnets[0].id
 output privateEndpoint_SubnetID string = virtualNetwork.properties.subnets[1].id

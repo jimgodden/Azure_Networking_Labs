@@ -4,9 +4,6 @@ param location string
 @description('Name of the Virtual Network')
 param virtualNetwork_Name string
 
-// @description('Address Prefix of the Virtual Network')
-// param virtualNetwork_AddressPrefix string = '${firstTwoOctetsOfVirtualNetworkPrefix}.0.0/16'
-
 @description('''An Array of Custom DNS Server IP Addresses.  Azure Wireserver will be used if left as an empty array [].
 Example:
 [10.0.0.4, 10.0.0.5]
@@ -18,10 +15,6 @@ param networkSecurityGroup_Default_Name string = '${virtualNetwork_Name}_NSG_Gen
 
 @description('Name of the General Route Table')
 param routeTable_Name string = '${virtualNetwork_Name}_RT_General'
-
-// @description('''First two octects of the Virtual Network address prefix
-// Example: for a network address of '10.0.0.0/16' you would enter '10.0' here''')
-// param firstTwoOctetsOfVirtualNetworkPrefix string
 
 param virtualNetwork_AddressPrefix string
 
@@ -40,74 +33,6 @@ var subnet_Names = [
   'PrivateResolver_Inbound'
   'PrivateResolver_Outbound'
 ]
-
-// // Subnets
-// @description('Name of the General Subnet for any other resources')
-// param subnet_General_Name string = 'General'
-
-// @description('Address Prefix of the General Subnet')
-// param subnet_General_AddressPrefix string = '${firstTwoOctetsOfVirtualNetworkPrefix}.0.0/24'
-
-// @description('Name of the PrivateEndpoint Subnet')
-// param subnet_PrivateEndpoints_Name string = 'PrivateEndpoints'
-
-// @description('Address Prefix of the PrivateEndpoint Subnet')
-// param subnet_PrivateEndpoints_AddressPrefix string = '${firstTwoOctetsOfVirtualNetworkPrefix}.1.0/24'
-
-// @description('Name of the PrivateEndpoint Subnet')
-// param subnet_PrivateLinkService_Name string = 'PrivateLinkService'
-
-// @description('Address Prefix of the PrivateEndpoint Subnet')
-// param subnet_PrivateLinkService_AddressPrefix string = '${firstTwoOctetsOfVirtualNetworkPrefix}.2.0/24'
-
-// @description('Name of the ApplicationGateway Subnet')
-// param subnet_ApplicationGatewaySubnet_Name string = 'ApplicationGatewaySubnet'
-
-// @description('Address Prefix of the ApplicationGateway Subnet')
-// // Any changes to this value need to be replicated to the output applicationGatewayPrivateIP
-// param subnet_ApplicationGatewaySubnet_AddressPrefix string = '${firstTwoOctetsOfVirtualNetworkPrefix}.3.0/24'
-
-// @description('Name of the AppService Subnet')
-// param subnet_AppServiceSubnet_Name string = 'AppServiceSubnet'
-
-// @description('Address Prefix of the AppService Subnet')
-// param subnet_AppServiceSubnet_AddressPrefix string = '${firstTwoOctetsOfVirtualNetworkPrefix}.4.0/24'
-
-// @description('Name of the Azure Virtual Network Gateway Subnet')
-// param subnet_Gateway_Name string = 'GatewaySubnet'
-
-// @description('Address Prefix of the Azure Virtual Network Gateway Subnet')
-// param subnet_Gateway_AddressPrefix string = '${firstTwoOctetsOfVirtualNetworkPrefix}.5.0/24'
-
-// @description('Name of the Azure Firewall Subnet')
-// param subnet_azureFirewall_Name string = 'AzureFirewallSubnet'
-
-// @description('Address Prefix of the Azure Firewall Subnet')
-// param subnet_azureFirewall_AddressPrefix string = '${firstTwoOctetsOfVirtualNetworkPrefix}.6.0/24'
-
-// @description('Name of the Azure Firewall Management Subnet')
-// param subnet_azureFirewall_Management_Name string = 'AzureFirewallManagementSubnet'
-
-// @description('Address Prefix of the Azure Firewall Management Subnet')
-// param subnet_azureFirewall_Management_AddressPrefix string = '${firstTwoOctetsOfVirtualNetworkPrefix}.7.0/24'
-
-// @description('Name of the Azure Bastion Subnet')
-// param subnet_Bastion_Name string = 'AzureBastionSubnet'
-
-// @description('Address Prefix of the Azure Bastion Subnet')
-// param subnet_Bastion_AddressPrefix string = '${firstTwoOctetsOfVirtualNetworkPrefix}.8.0/24'
-
-// @description('Name of the Azure Bastion Subnet')
-// param subnet_PrivateResolver_Inbound_Name string = 'PrivateResolver_Inbound'
-
-// @description('Address Prefix of the Azure Bastion Subnet')
-// param subnet_PrivateResolver_Inbound_AddressPrefix string = '${firstTwoOctetsOfVirtualNetworkPrefix}.9.0/24'
-
-// @description('Name of the Azure Bastion Subnet')
-// param subnet_PrivateResolver_Outbound_Name string = 'PrivateResolver_Outbound'
-
-// @description('Address Prefix of the Azure Bastion Subnet')
-// param subnet_PrivateResolver_Outbound_AddressPrefix string = '${firstTwoOctetsOfVirtualNetworkPrefix}.10.0/24'
 
 resource virtualNetwork 'Microsoft.Network/virtualNetworks@2022-09-01' = {
   name: virtualNetwork_Name
@@ -303,6 +228,26 @@ resource networkSecurityGroup_ApplicationGateway_AppGWSpecificRule 'Microsoft.Ne
     destinationAddressPrefix: '*'
     access: 'Allow'
     priority: 1000
+    direction: 'Inbound'
+    sourcePortRanges: []
+    destinationPortRanges: []
+    sourceAddressPrefixes: []
+    destinationAddressPrefixes: []
+  }
+}
+
+resource networkSecurityGroup_ApplicationGateway_HTTPSRule 'Microsoft.Network/networkSecurityGroups/securityRules@2022-11-01' = {
+  parent: networkSecurityGroup_ApplicationGateway
+  name: 'AllowHTTPS'
+  properties: {
+    description: 'Allow HTTPS'
+    protocol: 'Tcp'
+    sourcePortRange: '*'
+    destinationPortRange: '443'
+    sourceAddressPrefix: '*'
+    destinationAddressPrefix: '*'
+    access: 'Allow'
+    priority: 1001
     direction: 'Inbound'
     sourcePortRanges: []
     destinationPortRanges: []
