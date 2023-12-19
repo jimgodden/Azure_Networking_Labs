@@ -1,7 +1,7 @@
 from azure.storage.blob import BlobServiceClient
 
 storage_account_name = "mainjamesgstorage"
-storage_account_key = "8X5m+bamOroajRncuzRvLdQPhgwrqIf2IDBGmrl7GPSz9w+uK8xzXfBCgWecHasUCzuQYeLrA6gk+ASthppt1A=="
+storage_account_key = ""
 container_name = "test"
 
 # Create a BlobServiceClient using the storage account name and key

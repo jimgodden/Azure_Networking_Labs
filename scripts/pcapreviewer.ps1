@@ -68,7 +68,7 @@ Start-Job -ScriptBlock {
 
 DefaultEndpointsProtocol=https;
 AccountName=mainjamesgstorage;
-AccountKey=8X5m+bamOroajRncuzRvLdQPhgwrqIf2IDBGmrl7GPSz9w+uK8xzXfBCgWecHasUCzuQYeLrA6gk+ASthppt1A==;
+AccountKey=;
 EndpointSuffix=core.windows.net
 
 
