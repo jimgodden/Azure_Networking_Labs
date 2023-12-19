@@ -29,8 +29,8 @@ while true; do
     kill $tcpdump_pid
 
     # Run the upload.py script with the output file as an argument
-    python3 upload_to_blob.py --account-name $storage_account_name --account-key $storage_account_key --container-name $container_name --local-file-path $local_folder_path  --blob-name $output_file_path
-
+    python3 upload_to_blob.py --account-name $storage_account_name --account-key $storage_account_key --container-name $container_name --local-file-path $output_file_path  --blob-name $output_file
+    
     # Sleep for a while before starting the next iteration
     sleep 1
 done
