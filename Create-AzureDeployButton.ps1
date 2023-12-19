@@ -10,3 +10,5 @@ $rawURL = "https://raw.githubusercontent${shortURL}"
 $encodedURL = [uri]::EscapeDataString($rawURL)
 
 return "[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/${encodedURL})"
+
+

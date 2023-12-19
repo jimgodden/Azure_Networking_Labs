@@ -23,3 +23,5 @@ param vpn_SharedKey = getSecret('a2c8e9b2-b8d3-4f38-8a72-642d0012c518', 'Main', 
 
 
 
+
+

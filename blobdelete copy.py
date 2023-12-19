@@ -22,3 +22,5 @@ for blob in blobs:
     blob_client.delete_blob()
 
     print(f"Deleted blob: {blob.name} from container: {container_name}")
+
+

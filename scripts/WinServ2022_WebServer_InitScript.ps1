@@ -64,3 +64,5 @@ New-SelfSignedCertificate -DnsName "localhost" -CertStoreLocation "cert:\LocalMa
 $SSLCert = Get-ChildItem -Path "cert:\LocalMachine\My" | Where-Object {$_.subject -like 'cn=localhost'}
 Set-Location "IIS:\sslbindings"
 New-Item "!${portHTTPS}!" -value $SSLCert
+
+

@@ -121,3 +121,5 @@ module hubBastion '../../modules/Microsoft.Network/Bastion.bicep' = {
 
 
 
+
+

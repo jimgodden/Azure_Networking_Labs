@@ -21,3 +21,5 @@ chmod +x $local_folder_path/upload_to_blob.py
 nohup $local_folder_path/capture_and_upload_server.sh 5001 $storage_account_name $storage_account_key $container_name $local_folder_path
 
 nohup /tmp/conntest -s -p 5001 &
+
+

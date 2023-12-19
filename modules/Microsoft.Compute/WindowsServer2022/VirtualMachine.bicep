@@ -189,3 +189,5 @@ output networkInterface_IPConfig0_Name string = networkInterface.outputs.network
 output networkInterface_IPConfig0_ID string = networkInterface.outputs.networkInterface_IPConfig0_ID
 output networkInterface_PrivateIPAddress string = networkInterface.outputs.networkInterface_PrivateIPAddress
 
+
+

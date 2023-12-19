@@ -31,3 +31,5 @@ for local_file in local_files:
         blob_client.upload_blob(data)
 
     print(f"Uploaded file: {local_file} to blob: {local_file} in container: {container_name}")
+
+

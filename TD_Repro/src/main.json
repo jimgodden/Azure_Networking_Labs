@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.23.1.45101",
-      "templateHash": "7527277540569401997"
+      "templateHash": "8002646511080701667"
     }
   },
   "parameters": {
@@ -955,10 +955,10 @@
             "value": "[variables('virtualMachine_ScriptFileLocation')]"
           },
           "virtualMachine_ScriptFileName": {
-            "value": "conntestClient.sh"
+            "value": "conntestClientBlob.sh"
           },
           "commandToExecute": {
-            "value": "[format('./conntestClient.sh {0} {1} {2} {3} {4}', reference(resourceId('Microsoft.Resources/deployments', 'pe_NIC'), '2022-09-01').outputs.privateEndpoint_IPAddress.value, parameters('scenario_Name'), reference(resourceId('Microsoft.Resources/deployments', 'storageAccount'), '2022-09-01').outputs.storageAccount_Name.value, reference(resourceId('Microsoft.Resources/deployments', 'storageAccount'), '2022-09-01').outputs.storageAccountFileShare_Name.value, reference(resourceId('Microsoft.Resources/deployments', 'storageAccount'), '2022-09-01').outputs.storageAccount_key0.value)]"
+            "value": "[format('./conntestClientBlob.sh {0} {1} {2} {3} /tmp/captures', reference(resourceId('Microsoft.Resources/deployments', 'privatelink'), '2022-09-01').outputs.internalLoadBalancer_FrontendIPAddress.value, reference(resourceId('Microsoft.Resources/deployments', 'storageAccount'), '2022-09-01').outputs.storageAccount_Name.value, reference(resourceId('Microsoft.Resources/deployments', 'storageAccount'), '2022-09-01').outputs.storageAccount_key0.value, reference(resourceId('Microsoft.Resources/deployments', 'storageAccount'), '2022-09-01').outputs.storageAccount_Blob_Container_Name.value)]"
           }
         },
         "template": {
@@ -1281,7 +1281,8 @@
       },
       "dependsOn": [
         "[resourceId('Microsoft.Resources/deployments', 'client_StorageAccount_File_PrivateEndpoint')]",
-        "[resourceId('Microsoft.Resources/deployments', 'pe_NIC')]",
+        "[resourceId('Microsoft.Resources/deployments', 'privatelink')]",
+        "ServerVM_Linux",
         "[resourceId('Microsoft.Resources/deployments', 'storageAccount')]",
         "[resourceId('Microsoft.Resources/deployments', 'clientVNet')]"
       ]
@@ -1325,10 +1326,10 @@
             "value": "[variables('virtualMachine_ScriptFileLocation')]"
           },
           "virtualMachine_ScriptFileName": {
-            "value": "conntestServer.sh"
+            "value": "conntestServerBlob.sh"
           },
           "commandToExecute": {
-            "value": "[format('./conntestServer.sh {0} {1} {2} {3}', parameters('scenario_Name'), reference(resourceId('Microsoft.Resources/deployments', 'storageAccount'), '2022-09-01').outputs.storageAccount_Name.value, reference(resourceId('Microsoft.Resources/deployments', 'storageAccount'), '2022-09-01').outputs.storageAccountFileShare_Name.value, reference(resourceId('Microsoft.Resources/deployments', 'storageAccount'), '2022-09-01').outputs.storageAccount_key0.value)]"
+            "value": "[format('./conntestServerBlob.sh  {0} {1} {2} /tmp/captures', reference(resourceId('Microsoft.Resources/deployments', 'storageAccount'), '2022-09-01').outputs.storageAccount_Name.value, reference(resourceId('Microsoft.Resources/deployments', 'storageAccount'), '2022-09-01').outputs.storageAccount_key0.value, reference(resourceId('Microsoft.Resources/deployments', 'storageAccount'), '2022-09-01').outputs.storageAccount_Blob_Container_Name.value)]"
           }
         },
         "template": {
@@ -1693,7 +1694,7 @@
             "value": "pcapreviewer.ps1"
           },
           "commandToExecute": {
-            "value": "[format('powershell.exe -ExecutionPolicy Unrestricted -File pcapreviewer.ps1 -ScenarioName {0} -StorageAccountName {1} -StorageAccountFileShareName {2} -StorageAccountKey {3}', parameters('scenario_Name'), reference(resourceId('Microsoft.Resources/deployments', 'storageAccount'), '2022-09-01').outputs.storageAccount_Name.value, reference(resourceId('Microsoft.Resources/deployments', 'storageAccount'), '2022-09-01').outputs.storageAccountFileShare_Name.value, reference(resourceId('Microsoft.Resources/deployments', 'storageAccount'), '2022-09-01').outputs.storageAccount_key0.value)]"
+            "value": "[format('powershell.exe -ExecutionPolicy Unrestricted -File pcapreviewer.ps1 -StorageAccountName {0} -StorageAccountKey {1}', reference(resourceId('Microsoft.Resources/deployments', 'storageAccount'), '2022-09-01').outputs.storageAccount_Name.value, reference(resourceId('Microsoft.Resources/deployments', 'storageAccount'), '2022-09-01').outputs.storageAccount_key0.value)]"
           }
         },
         "template": {
@@ -2611,7 +2612,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "14070102085477440278"
+              "templateHash": "2292003485366952190"
             }
           },
           "parameters": {
@@ -2702,6 +2703,14 @@
               ]
             },
             {
+              "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+              "apiVersion": "2023-01-01",
+              "name": "[format('{0}/{1}/{2}', parameters('storageAccount_Name'), 'default', 'default')]",
+              "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccount_Name'), 'default')]"
+              ]
+            },
+            {
               "type": "Microsoft.Storage/storageAccounts/fileServices",
               "apiVersion": "2023-01-01",
               "name": "[format('{0}/{1}', parameters('storageAccount_Name'), 'default')]",
@@ -2738,6 +2747,10 @@
             "storageAccount_ID": {
               "type": "string",
               "value": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccount_Name'))]"
+            },
+            "storageAccount_Blob_Container_Name": {
+              "type": "string",
+              "value": "default"
             },
             "storageAccountFileShare_Name": {
               "type": "string",
