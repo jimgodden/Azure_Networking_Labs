@@ -64,3 +64,27 @@ Start-Job -ScriptBlock {
         Start-Sleep -Seconds 1800
     } 
 }
+
+
+DefaultEndpointsProtocol=https;
+AccountName=mainjamesgstorage;
+AccountKey=8X5m+bamOroajRncuzRvLdQPhgwrqIf2IDBGmrl7GPSz9w+uK8xzXfBCgWecHasUCzuQYeLrA6gk+ASthppt1A==;
+EndpointSuffix=core.windows.net
+
+
+# Define variables
+$sasUrl = "https://mainjamesgstorage.blob.core.windows.net/website?sp=racwdli&st=2023-12-15T21:02:50Z&se=2023-12-16T05:02:50Z&spr=https&sv=2022-11-02&sr=c&sig=O8iJU2wL7t0adKR8umoeudIpaMSBgVWlVKyGCI%2FaS8A%3D"
+
+# Get a list of blobs in the container
+$blobs = Invoke-RestMethod -Uri $sasUrl -Method Get
+
+# Delete each blob
+foreach ($blob in $blobs) {
+    $blobName = $blob.Name
+
+    # Construct the URL for blob deletion
+    $deleteUrl = "$sasUrl&restype=container&comp=blob&blob=$blobName"
+    
+    # Send a DELETE request to delete the blob
+    Invoke-RestMethod -Uri $deleteUrl -Method Delete
+}

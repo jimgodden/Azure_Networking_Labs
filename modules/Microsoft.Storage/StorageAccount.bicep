@@ -66,7 +66,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
   }
 }
 
-resource storageAccount_Blob 'Microsoft.Storage/storageAccounts/blobServices@2023-01-01' = {
+resource storageAccount_BlobServices 'Microsoft.Storage/storageAccounts/blobServices@2023-01-01' = {
   parent: storageAccount
   name: 'default'
   properties: {
@@ -92,6 +92,11 @@ resource storageAccount_Blob 'Microsoft.Storage/storageAccounts/blobServices@202
   }
 }
 
+resource storageAccount_Blob_Container 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-01-01' = {
+  parent: storageAccount_BlobServices
+  name: 'default'
+}
+
 resource storageAccount_File 'Microsoft.Storage/storageAccounts/fileServices@2023-01-01' = {
   parent: storageAccount
   name: 'default'
@@ -112,25 +117,9 @@ output storageaccount_File_FQDN string = fileFQDN
 output storageAccount_Name string = storageAccount.name
 output storageAccount_ID string = storageAccount.id
 
+output storageAccount_Blob_Container_Name string = storageAccount_Blob_Container.name
+
 output storageAccountFileShare_Name string = storageAccount_File_FileShare.name
 
 #disable-next-line outputs-should-not-contain-secrets // disabling this warning since this deployment is for testing only
 output storageAccount_key0 string = storageAccount.listKeys().keys[0].value
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

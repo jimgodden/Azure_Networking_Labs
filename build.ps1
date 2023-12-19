@@ -14,8 +14,10 @@ $ProjectNames = @(
     "Azure_ApplicationGateway_Sandbox", 
     "Azure_DNS_Sandbox", 
     "Azure_PrivateLink_Sandbox", 
-    "Azure_VirtualWAN_Sandbox", 
-    "Azure_VM_to_VM_Sandbox", 
+    "Azure_VirtualWAN_Sandbox",
+    "Azure_VM_Linux",
+    "Azure_VM_to_VM_Sandbox",
+    "Azure_VM_Windows",
     "TD_Repro")
 
 function Update-BranchNameReferences {

@@ -86,9 +86,12 @@ module clientVM_Linux '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.b
     virtualMachine_Name: 'ClientVM${i}'
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    virtualMachine_ScriptFileName: 'conntestClient.sh'
+    // Use the following for blob testing
+    virtualMachine_ScriptFileName: 'conntestClientBlob.sh'
+    commandToExecute: './conntestClientBlob.sh ${privateLink.outputs.internalLoadBalancer_FrontendIPAddress} ${storageAccount.outputs.storageAccount_Name} ${storageAccount.outputs.storageAccount_key0} ${storageAccount.outputs.storageAccount_Blob_Container_Name} /tmp/captures'
+    // virtualMachine_ScriptFileName: 'conntestClient.sh'
     // Use the following for Private Link testing
-    commandToExecute: './conntestClient.sh ${privateEndpoint_NIC.outputs.privateEndpoint_IPAddress} ${scenario_Name} ${storageAccount.outputs.storageAccount_Name} ${storageAccount.outputs.storageAccountFileShare_Name} ${storageAccount.outputs.storageAccount_key0}'
+    // commandToExecute: './conntestClient.sh ${privateEndpoint_NIC.outputs.privateEndpoint_IPAddress} ${scenario_Name} ${storageAccount.outputs.storageAccount_Name} ${storageAccount.outputs.storageAccountFileShare_Name} ${storageAccount.outputs.storageAccount_key0}'
     // Use the following for Load Balancer testing
     // commandToExecute: './conntestClient.sh ${privateLink.outputs.internalLoadBalancer_FrontendIPAddress} ${scenario_Name} ${storageAccount.outputs.storageAccount_Name} ${storageAccount.outputs.storageAccountFileShare_Name} ${storageAccount.outputs.storageAccount_key0}'
 
@@ -110,8 +113,10 @@ module ServerVM_Linux '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.b
     virtualMachine_Name: 'ServerVM${i}'
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    virtualMachine_ScriptFileName: 'conntestServer.sh'
-    commandToExecute: './conntestServer.sh ${scenario_Name} ${storageAccount.outputs.storageAccount_Name} ${storageAccount.outputs.storageAccountFileShare_Name} ${storageAccount.outputs.storageAccount_key0}'
+    // virtualMachine_ScriptFileName: 'conntestServer.sh'
+    // commandToExecute: './conntestServer.sh ${scenario_Name} ${storageAccount.outputs.storageAccount_Name} ${storageAccount.outputs.storageAccountFileShare_Name} ${storageAccount.outputs.storageAccount_key0}'
+    virtualMachine_ScriptFileName: 'conntestServerBlob.sh'
+    commandToExecute: './conntestServerBlob.sh  ${storageAccount.outputs.storageAccount_Name} ${storageAccount.outputs.storageAccount_key0} ${storageAccount.outputs.storageAccount_Blob_Container_Name} /tmp/captures'
   }
   dependsOn: [
     client_StorageAccount_File_PrivateEndpoint
@@ -188,6 +193,23 @@ module storageAccount '../../modules/Microsoft.Storage/StorageAccount.bicep' = {
   }
 }
 
+module client_StorageAccount_Blob_PrivateEndpoint '../../modules/Microsoft.Network/PrivateEndpoint.bicep' = {
+  name: 'client_StorageAccount_Blob_PrivateEndpoint'
+  params: {
+    fqdn: '${storageAccount_Name}.blob.${environment().suffixes.storage}'
+    groupID: 'blob'
+    location: locationClient
+    privateDNSZone_Name: 'privatelink.blob.${environment().suffixes.storage}'
+    privateEndpoint_Name: '${storageAccount_Name}_blob_pe'
+    privateEndpoint_SubnetID: virtualNetwork_Client.outputs.privateEndpoint_SubnetID
+    privateLinkServiceId: storageAccount.outputs.storageAccount_ID
+    virtualNetwork_IDs: [
+      virtualNetwork_Client.outputs.virtualNetwork_ID
+      virtualNetwork_Server.outputs.virtualNetwork_ID
+    ]  
+  }
+}
+
 module client_StorageAccount_File_PrivateEndpoint '../../modules/Microsoft.Network/PrivateEndpoint.bicep' = {
   name: 'client_StorageAccount_File_PrivateEndpoint'
   params: {
@@ -227,23 +249,3 @@ module privateEndpoint_NIC '../../modules/Microsoft.Network/PrivateEndpointNetwo
     existing_PrivateEndpoint_NetworkInterface_Name: privateLink.outputs.privateEndpoint_NetworkInterface_Name
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
