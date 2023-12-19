@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.23.1.45101",
-      "templateHash": "8002646511080701667"
+      "templateHash": "12448364745956825507"
     }
   },
   "parameters": {
@@ -47,12 +47,6 @@
       "defaultValue": true,
       "metadata": {
         "description": "True enables Accelerated Networking and False disabled it.  \r\nNot all VM sizes support Accel Net (i.e. Standard_B2ms).  \r\nI'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net.\r\n"
-      }
-    },
-    "scenario_Name": {
-      "type": "string",
-      "metadata": {
-        "description": "Use this name to help differentiate between tests."
       }
     },
     "numberOfClientVMs": {

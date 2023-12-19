@@ -34,12 +34,14 @@ function Update-BranchNameReferences {
             Write-Host $_.FullName
             # Read the content of the file
             $content = Get-Content $_.FullName -Raw
-    
-            # Replace the string
-            $newContent = $content -replace [regex]::Escape($searchString), $replaceString
-    
-            # Write the modified content back to the file
-            $newContent | Set-Content $_.FullName
+
+            if ($content.contains($searchString)) {
+                # Replace the string
+                $newContent = $content -replace [regex]::Escape($searchString), $replaceString
+
+                # Write the modified content back to the file
+                $newContent | Set-Content $_.FullName
+            }
         }
     }
 }
@@ -52,5 +54,7 @@ $ProjectNames | Foreach-Object -ThrottleLimit 5 -Parallel {
     Write-Host "Building $PSItem" 
     bicep build "${path}\src\main.bicep" --outfile "${path}\src\main.json"
 }
+
+
 
 

@@ -23,9 +23,6 @@ I'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net.
 ''')
 param acceleratedNetworking bool = true
 
-@description('Use this name to help differentiate between tests.')
-param scenario_Name string
-
 @maxValue(1000)
 @description('Number of Client Virtual Machines to be used as the source of the traffic')
 param numberOfClientVMs int
@@ -250,5 +247,6 @@ module privateEndpoint_NIC '../../modules/Microsoft.Network/PrivateEndpointNetwo
     existing_PrivateEndpoint_NetworkInterface_Name: privateLink.outputs.privateEndpoint_NetworkInterface_Name
   }
 }
+
 
 
