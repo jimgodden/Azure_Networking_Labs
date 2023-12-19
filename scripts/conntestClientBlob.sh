@@ -19,6 +19,7 @@ chmod +x $local_folder_path/capture_and_upload.sh
 curl -o $local_folder_path/upload_to_blob.py https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/upload_to_blob.py
 chmod +x $local_folder_path/upload_to_blob.py
 
+sudo apt-get update -y
 sudo apt-get install python3-pip -y
 pip install azure-storage-blob
 
