@@ -99,6 +99,7 @@ module clientVM_Linux '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.b
   dependsOn: [
     storageAccount
     client_StorageAccount_File_PrivateEndpoint
+    ServerVM_Linux
   ]
 } ]
 
@@ -135,7 +136,7 @@ module pcapReviewVM '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMa
     virtualMachine_Size: 'Standard_B2ms'
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
     virtualMachine_ScriptFileName: 'pcapreviewer.ps1'
-    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File pcapreviewer.ps1 -ScenarioName ${scenario_Name} -StorageAccountName ${storageAccount.outputs.storageAccount_Name} -StorageAccountFileShareName ${storageAccount.outputs.storageAccountFileShare_Name} -StorageAccountKey ${storageAccount.outputs.storageAccount_key0}'
+    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File pcapreviewer.ps1 -StorageAccountName ${storageAccount.outputs.storageAccount_Name} -StorageAccountKey ${storageAccount.outputs.storageAccount_key0}'
   }
   dependsOn: [
     clientVM_Linux // We only want to start checking for pcaps after the client has been deployed and starts capturing
