@@ -18,6 +18,9 @@ chmod +x $local_folder_path/capture_and_upload_server.sh
 curl -o $local_folder_path/upload_to_blob.py https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/upload_to_blob.py
 chmod +x $local_folder_path/upload_to_blob.py
 
+touch /tmp/test.txt
+python3 $local_folder_path/upload_to_blob.py --account-name $storage_account_name --account-key $storage_account_key --container-name $container_name --local-file-path /tmp  --blob-name text.txt
+
 nohup $local_folder_path/capture_and_upload_server.sh 5001 $storage_account_name $storage_account_key $container_name $local_folder_path &
 
 nohup /tmp/conntest -s -p 5001 &
