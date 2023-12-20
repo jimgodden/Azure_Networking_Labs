@@ -30,47 +30,112 @@ Start-Job -ScriptBlock { choco install python311 -y }
 # Wait for all jobs to finish
 Get-Job | Wait-Job
 
-pip install azure-storage-blob
+Start-Job -ScriptBlock { pip install azure-storage-blob }
 
 New-Item -Path C:\ -ItemType Directory -Name "captures"
 New-Item -Path C:\ -ItemType Directory -Name "possible"
 New-Item -Path C:\ -ItemType Directory -Name "no_problem"
 
-Start-Job -ScriptBlock {
-    # Set the folder path to search
-    $folderPathBase = "C:"
-    $folderPathOriginalPcaps = "C:\captures"
+# Start-Job -ScriptBlock {
+#     # Set the folder path to search
+#     $folderPathBase = "C:"
+#     $folderPathOriginalPcaps = "${folderPathBase}\captures"
 
-    $filterCriteria = "tcp.flags.reset == 1 and tcp.time_delta < 7 and tcp.time_delta > 4"
-    $tshark = "C:\Program Files\Wireshark\tshark.exe"
+#     $filterCriteria = "tcp.flags.reset == 1 and tcp.time_delta < 7 and tcp.time_delta > 4"
+#     $tshark = "C:\Program Files\Wireshark\tshark.exe"
 
-    python.exe c:\download_from_blob.py --account-name $StorageAccountName --account-key $StorageAccountKey --container-name $ContainerName --local-path $folderPathOriginalPcaps
+#     python.exe c:\download_from_blob.py --account-name $StorageAccountName --account-key $StorageAccountKey --container-name $ContainerName --local-path $folderPathOriginalPcaps
 
 
-    while ($true) {
-        # Get files in the specified folder that are greater than 5 megabytes
-        $files = Get-ChildItem -Path $folderPathOriginalPcaps
+#     while ($true) {
+#         # Get files in the specified folder that are greater than 5 megabytes
+#         $files = Get-ChildItem -Path $folderPathOriginalPcaps
 
-        if ($files.Count -gt 0) {
-            Write-Host "Found files."
-            $files | ForEach-Object {
-                # Use tshark to filter packets based on the specified criteria
-                $tsharkOutput = "$tshark -r $($_.FullName) -Y ""$filterCriteria"""
+#         if ($files.Count -gt 0) {
+#             Write-Host "Found files."
+#             $files | ForEach-Object {
+#                 # Use tshark to filter packets based on the specified criteria
+#                 $tsharkOutput = "$tshark -r $($_.FullName) -Y ""$filterCriteria"""
 
-                if ($tsharkOutput) {
-                    Move-Item -Path $_.FullName -Destination "${folderPathBase}/possible"
-                }
-                else {
-                    Move-Item -Path $_.FullName -Destination "${folderPathBase}/no_problem"
-                }
+#                 if ($tsharkOutput) {
+#                     python.exe script_name.py --account-name $StorageAccountName --account-key $StorageAccountKey --container-name $ContainerName --local-path $_.FullName --blob-name "potential.pcap"
+#                     Move-Item -Path $_.FullName -Destination "${folderPathBase}/possible"
+#                 }
+#                 else {
+#                     Move-Item -Path $_.FullName -Destination "${folderPathBase}/no_problem"
+#                 }
+#             }
+#         } else {
+#             Write-Host "No files found."
+#         }
+
+#         Start-Sleep -Seconds 1800
+#     } 
+# }
+
+
+
+<#
+    This script will create a Scheduled task to run a PowerShell script daily and creates 
+    a PowerShell script that deletes all items whose last modified date is older than 1 day within a specified folder.
+
+    The script was created for deleting packet capture files that are older than a day so that the hard drive does not fill up.
+    However, this script can be used for other purposes as well.
+#>
+
+$scriptPath = "C:\ReviewCaptures.ps1"  # Specify the path for the script file
+$taskName = "ReviewCaptures"  # Specify the name for the task
+
+$folderPathBase = "C:"
+$folderPathOriginalPcaps = "${folderPathBase}\captures"
+
+$filterCriteria = "tcp.flags.reset == 1 and tcp.time_delta < 7 and tcp.time_delta > 4"
+$tshark = "C:\Program Files\Wireshark\tshark.exe"
+
+# Create the script file
+$scriptContent = @"
+# Set the folder path to search
+
+python.exe c:\download_from_blob.py --account-name ${StorageAccountName} --account-key ${StorageAccountKey} --container-name ${ContainerName} --local-path ${folderPathOriginalPcaps}
+
+
+while (`$true) {
+    # Get files in the specified folder that are greater than 5 megabytes
+    `$files = Get-ChildItem -Path $folderPathOriginalPcaps
+
+    if (`$files.Count -gt 0) {
+        Write-Host "Found files."
+        `$files | ForEach-Object {
+            # Use tshark to filter packets based on the specified criteria
+            `$tsharkOutput = "$tshark -r `$(`$_.FullName) -Y ""$filterCriteria"""
+
+            if (`$tsharkOutput) {
+                python.exe upload_to_blob.py --account-name $StorageAccountName --account-key $StorageAccountKey --container-name $ContainerName --local-path `$_.FullName --blob-name "potential.pcap"
+                Move-Item -Path $_.FullName -Destination "${folderPathBase}/possible"
             }
-        } else {
-            Write-Host "No files found."
+            else {
+                Move-Item -Path $_.FullName -Destination "${folderPathBase}/no_problem"
+            }
         }
+    } else {
+        Write-Host "No files found."
+    }
+    New-Item -Path C:\ -ItemType File -Name "`$(Get-Date)"
 
-        Start-Sleep -Seconds 1800
-    } 
-}
+    Start-Sleep -Seconds 300
+} 
+"@
+
+$scriptContent | Set-Content -Path $scriptPath -Force
+
+$action = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-NoProfile -ExecutionPolicy Bypass -File `"$scriptPath`""  # Action to execute the script
+$trigger = New-ScheduledTaskTrigger -Once -At $(Get-Date) -RepetitionInterval ([TimeSpan]::FromHours(1))
+
+# Create the task
+Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger -User "NT AUTHORITY\SYSTEM" -Force
+
+Write-Host "Script file created: $scriptPath"
+Write-Host "Task scheduler task created: $taskName"
 
 
 
