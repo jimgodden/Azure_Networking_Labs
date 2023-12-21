@@ -32,7 +32,7 @@ param virtualMachine_ScriptFileLocation string = 'https://raw.githubusercontent.
 
 @description('''Name of the file to be ran while the Virtual Machine is being created
 Example: InitScript.ps1''')
-param virtualMachine_ScriptFileName string = 'InitScript.ps1'
+param virtualMachine_ScriptFileName string = 'WinServ2022_General_InitScript.ps1'
 
 @description('Joins the file path and the file name together')
 var virtualMachine_ScriptFileUri = '${virtualMachine_ScriptFileLocation}${virtualMachine_ScriptFileName}'
