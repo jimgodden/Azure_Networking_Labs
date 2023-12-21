@@ -60,22 +60,20 @@ if (`$files.Count -gt 0) {
     Write-Host "Found files."
     `$files | ForEach-Object {
         # Use tshark to filter packets based on the specified criteria
-        `$tsharkOutput = & "$tshark -r `$_.FullName -Y "$filterCriteria""
+        `$tsharkOutput = & "$tshark" -r `$_.FullName -Y "$filterCriteria"
 
         if (`$tsharkOutput) {
             py.exe ${folderPathBase}\upload_to_blob.py --account-name $StorageAccountName --account-key $StorageAccountKey --container-name $ContainerName --local-file-path `$_.FullName --blob-name "alert`$_.name"
             Move-Item -Path `$_.FullName -Destination "${folderPathBase}/possible"
         }
         else {
-            Move-Item -Path `$_.FullName -Destination "${folderPathBase}/no_problem"
             py.exe ${folderPathBase}\upload_to_blob.py --account-name $StorageAccountName --account-key $StorageAccountKey --container-name $ContainerName --local-file-path `$_.FullName --blob-name "noprob`$_.name"
-
+            Move-Item -Path `$_.FullName -Destination "${folderPathBase}/no_problem"
         }
     }
 } else {
     Write-Host "No files found."
 }
-New-Item -Path C:\ -ItemType File -Name "Success.txt"
 "@
 
 $scriptContent | Set-Content -Path $scriptPath -Force

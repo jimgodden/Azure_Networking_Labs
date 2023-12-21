@@ -11,7 +11,7 @@ $iterationFile = "${deploymentFilePath}iteration.txt"
 
 if (!(Test-Path $iterationFile)) {
     New-Item -Path $iterationFile
-    Set-Content -Path $iterationFile -Value 1
+    Set-Content -Path $iterationFile -Value "1"
 }
 
 $iteration = [int](Get-Content $iterationFile)
