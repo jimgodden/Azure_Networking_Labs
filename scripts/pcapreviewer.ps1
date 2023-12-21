@@ -7,28 +7,36 @@ Param(
 $filesToDownload = @(
     "upload_to_blob.py",
     "download_from_blob.py",
-    "delete_from_blob.py"
+    "delete_from_blob.py",
+    "ChocoInstalls.ps1"
 )
 
 foreach ($fileToDownload in $filesToDownload) {
     Invoke-WebRequest -Uri "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/$fileToDownload" -OutFile "c:\$fileToDownload"
 }
 
-
 # Chocolatey installation
 Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
 
-# Install Visual Studio Code
-Start-Job -ScriptBlock { choco install vscode -y }
+$currentTimePlusThreeMinutes = (Get-Date).AddMinutes(3)
 
-# Install Wireshark
-Start-Job -ScriptBlock { choco install wireshark -y }
+$initTaskAction = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-NoProfile -ExecutionPolicy Bypass -File `"C:\ChocoInstalls.ps1`""  # Action to execute the script
+$initTaskTrigger = New-ScheduledTaskTrigger -Once -At $currentTimePlusThreeMinutes
 
-# Install Python 3.11
-Start-Job -ScriptBlock { choco install python311 -y }
+# Create the task
+Register-ScheduledTask -TaskName $taskName -Action $initTaskAction -Trigger $initTaskTrigger -User "NT AUTHORITY\SYSTEM" -Force
 
-# Wait for all jobs to finish
-Get-Job | Wait-Job
+# # Install Visual Studio Code
+# Start-Job -ScriptBlock { choco install vscode -y }
+
+# # Install Wireshark
+# Start-Job -ScriptBlock { choco install wireshark -y }
+
+# # Install Python 3.11
+# Start-Job -ScriptBlock { choco install python311 -y }
+
+# # Wait for all jobs to finish
+# Get-Job | Wait-Job
 
 New-Item -Path C:\ -ItemType Directory -Name "captures"
 New-Item -Path C:\ -ItemType Directory -Name "possible"
@@ -88,9 +96,5 @@ $trigger = New-ScheduledTaskTrigger -Once -At $currentTimePlusFiveMinutes -Repet
 
 # Create the task
 Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger -User "NT AUTHORITY\SYSTEM" -Force
-
-Write-Host "Script file created: $scriptPath"
-Write-Host "Task scheduler task created: $taskName"
-
 
 Restart-Computer
