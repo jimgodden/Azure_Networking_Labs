@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.23.1.45101",
-      "templateHash": "6825305032005495004"
+      "templateHash": "10073054609707794234"
     }
   },
   "parameters": {
@@ -981,7 +981,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "13025094248244545933"
+              "templateHash": "7854143378368474742"
             }
           },
           "parameters": {
@@ -1041,7 +1041,7 @@
             },
             "virtualMachine_ScriptFileName": {
               "type": "string",
-              "defaultValue": "InitScript.ps1",
+              "defaultValue": "WinServ2022_General_InitScript.ps1",
               "metadata": {
                 "description": "Name of the file to be ran while the Virtual Machine is being created\r\nExample: InitScript.ps1"
               }
@@ -1355,7 +1355,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "13025094248244545933"
+              "templateHash": "7854143378368474742"
             }
           },
           "parameters": {
@@ -1415,7 +1415,7 @@
             },
             "virtualMachine_ScriptFileName": {
               "type": "string",
-              "defaultValue": "InitScript.ps1",
+              "defaultValue": "WinServ2022_General_InitScript.ps1",
               "metadata": {
                 "description": "Name of the file to be ran while the Virtual Machine is being created\r\nExample: InitScript.ps1"
               }
@@ -1730,7 +1730,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "13025094248244545933"
+              "templateHash": "7854143378368474742"
             }
           },
           "parameters": {
@@ -1790,7 +1790,7 @@
             },
             "virtualMachine_ScriptFileName": {
               "type": "string",
-              "defaultValue": "InitScript.ps1",
+              "defaultValue": "WinServ2022_General_InitScript.ps1",
               "metadata": {
                 "description": "Name of the file to be ran while the Virtual Machine is being created\r\nExample: InitScript.ps1"
               }
@@ -3767,7 +3767,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "13025094248244545933"
+              "templateHash": "7854143378368474742"
             }
           },
           "parameters": {
@@ -3827,7 +3827,7 @@
             },
             "virtualMachine_ScriptFileName": {
               "type": "string",
-              "defaultValue": "InitScript.ps1",
+              "defaultValue": "WinServ2022_General_InitScript.ps1",
               "metadata": {
                 "description": "Name of the file to be ran while the Virtual Machine is being created\r\nExample: InitScript.ps1"
               }
