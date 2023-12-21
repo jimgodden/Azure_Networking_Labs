@@ -30,8 +30,6 @@ Start-Job -ScriptBlock { choco install python311 -y }
 # Wait for all jobs to finish
 Get-Job | Wait-Job
 
-invoke-expression 'cmd /c start powershell -NoExit -Command { pip install azure-storage-blob }'
-
 New-Item -Path C:\ -ItemType Directory -Name "captures"
 New-Item -Path C:\ -ItemType Directory -Name "possible"
 New-Item -Path C:\ -ItemType Directory -Name "no_problem"
@@ -55,9 +53,9 @@ $tshark = "C:\Program Files\Wireshark\tshark.exe"
 
 # Create the script file
 $scriptContent = @"
-# Set the folder path to search
+pip install azure-storage-blob
 
-python.exe c:\download_from_blob.py --account-name ${StorageAccountName} --account-key ${StorageAccountKey} --container-name ${ContainerName} --local-path ${folderPathOriginalPcaps}
+py.exe c:\download_from_blob.py --account-name ${StorageAccountName} --account-key ${StorageAccountKey} --container-name ${ContainerName} --local-path ${folderPathOriginalPcaps}
 
 
 while (`$true) {
@@ -70,7 +68,7 @@ while (`$true) {
             `$tsharkOutput = "$tshark -r `$(`$_.FullName) -Y ""$filterCriteria"""
 
             if (`$tsharkOutput) {
-                python.exe upload_to_blob.py --account-name $StorageAccountName --account-key $StorageAccountKey --container-name $ContainerName --local-path `$_.FullName --blob-name "potential.pcap"
+                py.exe upload_to_blob.py --account-name $StorageAccountName --account-key $StorageAccountKey --container-name $ContainerName --local-path `$_.FullName --blob-name "potential.pcap"
                 Move-Item -Path $_.FullName -Destination "${folderPathBase}/possible"
             }
             else {
@@ -81,15 +79,15 @@ while (`$true) {
         Write-Host "No files found."
     }
     New-Item -Path C:\ -ItemType File -Name "`$(Get-Date)"
-
-    Start-Sleep -Seconds 300
 } 
 "@
 
 $scriptContent | Set-Content -Path $scriptPath -Force
 
+$currentTimePlusFiveMinutes = (Get-Date).AddMinutes(5)
+
 $action = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-NoProfile -ExecutionPolicy Bypass -File `"$scriptPath`""  # Action to execute the script
-$trigger = New-ScheduledTaskTrigger -Once -At $(Get-Date) -RepetitionInterval ([TimeSpan]::FromHours(1))
+$trigger = New-ScheduledTaskTrigger -Once -At $currentTimePlusFiveMinutes -RepetitionInterval ([TimeSpan]::FromMinutes(10))
 
 # Create the task
 Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger -User "NT AUTHORITY\SYSTEM" -Force
@@ -98,4 +96,4 @@ Write-Host "Script file created: $scriptPath"
 Write-Host "Task scheduler task created: $taskName"
 
 
-
+Restart-Computer
