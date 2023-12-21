@@ -19,12 +19,12 @@ foreach ($fileToDownload in $filesToDownload) {
 Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
 
 $currentTimePlusThreeMinutes = (Get-Date).AddMinutes(3)
-
-$initTaskAction = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-NoProfile -ExecutionPolicy Bypass -File `"C:\ChocoInstalls.ps1`""  # Action to execute the script
+$initTaskName = "Init"
+$initTaskAction = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-NoProfile -ExecutionPolicy Bypass -File `"C:\ChocoInstalls.ps1`""
 $initTaskTrigger = New-ScheduledTaskTrigger -Once -At $currentTimePlusThreeMinutes
 
 # Create the task
-Register-ScheduledTask -TaskName $taskName -Action $initTaskAction -Trigger $initTaskTrigger -User "NT AUTHORITY\SYSTEM" -Force
+Register-ScheduledTask -TaskName $initTaskName -Action $initTaskAction -Trigger $initTaskTrigger -User "NT AUTHORITY\SYSTEM" -Force
 
 # # Install Visual Studio Code
 # Start-Job -ScriptBlock { choco install vscode -y }
