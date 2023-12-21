@@ -57,29 +57,26 @@ pip install azure-storage-blob
 
 py.exe c:\download_from_blob.py --account-name ${StorageAccountName} --account-key ${StorageAccountKey} --container-name ${ContainerName} --local-path ${folderPathOriginalPcaps}
 
+`$files = Get-ChildItem -Path $folderPathOriginalPcaps
 
-while (`$true) {
-    `$files = Get-ChildItem -Path $folderPathOriginalPcaps
+if (`$files.Count -gt 0) {
+    Write-Host "Found files."
+    `$files | ForEach-Object {
+        # Use tshark to filter packets based on the specified criteria
+        `$tsharkOutput = "$tshark -r `$(`$_.FullName) -Y ""$filterCriteria"""
 
-    if (`$files.Count -gt 0) {
-        Write-Host "Found files."
-        `$files | ForEach-Object {
-            # Use tshark to filter packets based on the specified criteria
-            `$tsharkOutput = "$tshark -r `$(`$_.FullName) -Y ""$filterCriteria"""
-
-            if (`$tsharkOutput) {
-                py.exe upload_to_blob.py --account-name $StorageAccountName --account-key $StorageAccountKey --container-name $ContainerName --local-path `$_.FullName --blob-name "potential.pcap"
-                Move-Item -Path $_.FullName -Destination "${folderPathBase}/possible"
-            }
-            else {
-                Move-Item -Path $_.FullName -Destination "${folderPathBase}/no_problem"
-            }
+        if (`$tsharkOutput) {
+            py.exe upload_to_blob.py --account-name $StorageAccountName --account-key $StorageAccountKey --container-name $ContainerName --local-path `$_.FullName --blob-name "potential.pcap"
+            Move-Item -Path $_.FullName -Destination "${folderPathBase}/possible"
         }
-    } else {
-        Write-Host "No files found."
+        else {
+            Move-Item -Path $_.FullName -Destination "${folderPathBase}/no_problem"
+        }
     }
-    New-Item -Path C:\ -ItemType File -Name "`$(Get-Date)"
-} 
+} else {
+    Write-Host "No files found."
+}
+New-Item -Path C:\ -ItemType File -Name "Success.txt"
 "@
 
 $scriptContent | Set-Content -Path $scriptPath -Force
