@@ -26,17 +26,6 @@ $initTaskTrigger = New-ScheduledTaskTrigger -Once -At $currentTimePlusThreeMinut
 # Create the task
 Register-ScheduledTask -TaskName $initTaskName -Action $initTaskAction -Trigger $initTaskTrigger -User "NT AUTHORITY\SYSTEM" -Force
 
-# # Install Visual Studio Code
-# Start-Job -ScriptBlock { choco install vscode -y }
-
-# # Install Wireshark
-# Start-Job -ScriptBlock { choco install wireshark -y }
-
-# # Install Python 3.11
-# Start-Job -ScriptBlock { choco install python311 -y }
-
-# # Wait for all jobs to finish
-# Get-Job | Wait-Job
 
 New-Item -Path C:\ -ItemType Directory -Name "captures"
 New-Item -Path C:\ -ItemType Directory -Name "possible"
@@ -63,7 +52,7 @@ $tshark = "C:\Program Files\Wireshark\tshark.exe"
 $scriptContent = @"
 pip install azure-storage-blob
 
-py.exe c:\download_from_blob.py --account-name ${StorageAccountName} --account-key ${StorageAccountKey} --container-name ${ContainerName} --local-path ${folderPathOriginalPcaps}
+py.exe ${folderPathBase}\download_from_blob.py --account-name ${StorageAccountName} --account-key ${StorageAccountKey} --container-name ${ContainerName} --local-path ${folderPathOriginalPcaps}
 
 `$files = Get-ChildItem -Path $folderPathOriginalPcaps
 
@@ -71,14 +60,16 @@ if (`$files.Count -gt 0) {
     Write-Host "Found files."
     `$files | ForEach-Object {
         # Use tshark to filter packets based on the specified criteria
-        `$tsharkOutput = "$tshark -r `$(`$_.FullName) -Y ""$filterCriteria"""
+        `$tsharkOutput = & "$tshark -r `$_.FullName -Y "$filterCriteria""
 
         if (`$tsharkOutput) {
-            py.exe upload_to_blob.py --account-name $StorageAccountName --account-key $StorageAccountKey --container-name $ContainerName --local-path `$_.FullName --blob-name "potential.pcap"
-            Move-Item -Path $_.FullName -Destination "${folderPathBase}/possible"
+            py.exe ${folderPathBase}\upload_to_blob.py --account-name $StorageAccountName --account-key $StorageAccountKey --container-name $ContainerName --local-file-path `$_.FullName --blob-name "alert`$_.name"
+            Move-Item -Path `$_.FullName -Destination "${folderPathBase}/possible"
         }
         else {
-            Move-Item -Path $_.FullName -Destination "${folderPathBase}/no_problem"
+            Move-Item -Path `$_.FullName -Destination "${folderPathBase}/no_problem"
+            py.exe ${folderPathBase}\upload_to_blob.py --account-name $StorageAccountName --account-key $StorageAccountKey --container-name $ContainerName --local-file-path `$_.FullName --blob-name "noprob`$_.name"
+
         }
     }
 } else {
@@ -89,10 +80,10 @@ New-Item -Path C:\ -ItemType File -Name "Success.txt"
 
 $scriptContent | Set-Content -Path $scriptPath -Force
 
-$currentTimePlusFiveMinutes = (Get-Date).AddMinutes(5)
+$currentTimePlusTenMinutes = (Get-Date).AddMinutes(10)
 
 $action = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-NoProfile -ExecutionPolicy Bypass -File `"$scriptPath`""  # Action to execute the script
-$trigger = New-ScheduledTaskTrigger -Once -At $currentTimePlusFiveMinutes -RepetitionInterval ([TimeSpan]::FromMinutes(10))
+$trigger = New-ScheduledTaskTrigger -Once -At $currentTimePlusTenMinutes -RepetitionInterval ([TimeSpan]::FromMinutes(20))
 
 # Create the task
 Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger -User "NT AUTHORITY\SYSTEM" -Force

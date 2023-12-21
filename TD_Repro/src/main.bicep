@@ -31,8 +31,8 @@ param numberOfClientVMs int
 @description('Number of Server Virtual Machines to be used as the destination of the traffic')
 param numberOfServerVMs int
 
-@description('Set to true if you want to use an Azure Firewall between client and server.')
-param usingAzureFirewall bool = false
+// @description('Set to true if you want to use an Azure Firewall between client and server.')
+// param usingAzureFirewall bool = false
 
 @description('''
 Storage account name restrictions:
@@ -133,7 +133,7 @@ module pcapReviewVM '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMa
     virtualMachine_Size: 'Standard_B2ms'
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
     virtualMachine_ScriptFileName: 'pcapreviewer.ps1'
-    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File pcapreviewer.ps1 -StorageAccountName ${storageAccount.outputs.storageAccount_Name} -StorageAccountKey ${storageAccount.outputs.storageAccount_key0}'
+    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File pcapreviewer.ps1 -StorageAccountName ${storageAccount.outputs.storageAccount_Name} -StorageAccountKey ${storageAccount.outputs.storageAccount_key0} -ContainerName ${storageAccount.outputs.storageAccount_Blob_Container_Name}'
   }
   dependsOn: [
     clientVM_Linux // We only want to start checking for pcaps after the client has been deployed and starts capturing
@@ -141,39 +141,39 @@ module pcapReviewVM '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMa
 }
 
 
-module firewall '../../modules/Microsoft.Network/AzureFirewall.bicep' = if (usingAzureFirewall) {
-  name: 'azfw'
-  params: {
-    azureFirewall_ManagementSubnet_ID: virtualNetwork_Client.outputs.azureFirewallManagement_SubnetID
-    azureFirewall_Name: 'azfw'
-    azureFirewall_SKU: 'Basic'
-    azureFirewall_Subnet_ID: virtualNetwork_Client.outputs.azureFirewall_SubnetID
-    azureFirewallPolicy_Name: 'azfw_policy'
-    location: locationClient
-  }
-}
+// module firewall '../../modules/Microsoft.Network/AzureFirewall.bicep' = if (usingAzureFirewall) {
+//   name: 'azfw'
+//   params: {
+//     azureFirewall_ManagementSubnet_ID: virtualNetwork_Client.outputs.azureFirewallManagement_SubnetID
+//     azureFirewall_Name: 'azfw'
+//     azureFirewall_SKU: 'Basic'
+//     azureFirewall_Subnet_ID: virtualNetwork_Client.outputs.azureFirewall_SubnetID
+//     azureFirewallPolicy_Name: 'azfw_policy'
+//     location: locationClient
+//   }
+// }
 
-module udrToAzFW_Hub '../../modules/Microsoft.Network/RouteTable.bicep' = if (usingAzureFirewall) {
-  name: 'udrToAzFW_Hub'
-  params: {
-    addressPrefixs: [virtualNetwork_Server.outputs.virtualNetwork_AddressPrefix]
-    nextHopType: 'VirtualAppliance'
-    routeTable_Name: virtualNetwork_Client.outputs.routeTable_Name
-    routeTableRoute_Name: 'toAzFW'
-    nextHopIpAddress: firewall.outputs.azureFirewall_PrivateIPAddress
-  }
-}
+// module udrToAzFW_Hub '../../modules/Microsoft.Network/RouteTable.bicep' = if (usingAzureFirewall) {
+//   name: 'udrToAzFW_Hub'
+//   params: {
+//     addressPrefixs: [virtualNetwork_Server.outputs.virtualNetwork_AddressPrefix]
+//     nextHopType: 'VirtualAppliance'
+//     routeTable_Name: virtualNetwork_Client.outputs.routeTable_Name
+//     routeTableRoute_Name: 'toAzFW'
+//     nextHopIpAddress: firewall.outputs.azureFirewall_PrivateIPAddress
+//   }
+// }
 
-module udrToAzFW_Server '../../modules/Microsoft.Network/RouteTable.bicep' = if (usingAzureFirewall) {
-  name: 'udrToAzFW_Server'
-  params: {
-    addressPrefixs: [virtualNetwork_Client.outputs.virtualNetwork_AddressPrefix]
-    nextHopType: 'VirtualAppliance'
-    routeTable_Name: virtualNetwork_Server.outputs.routeTable_Name
-    routeTableRoute_Name: 'toAzFW'
-    nextHopIpAddress: firewall.outputs.azureFirewall_PrivateIPAddress
-  }
-}
+// module udrToAzFW_Server '../../modules/Microsoft.Network/RouteTable.bicep' = if (usingAzureFirewall) {
+//   name: 'udrToAzFW_Server'
+//   params: {
+//     addressPrefixs: [virtualNetwork_Client.outputs.virtualNetwork_AddressPrefix]
+//     nextHopType: 'VirtualAppliance'
+//     routeTable_Name: virtualNetwork_Server.outputs.routeTable_Name
+//     routeTableRoute_Name: 'toAzFW'
+//     nextHopIpAddress: firewall.outputs.azureFirewall_PrivateIPAddress
+//   }
+// }
 
 module clientBastion '../../modules/Microsoft.Network/Bastion.bicep' = {
   name: 'clientBastion'
