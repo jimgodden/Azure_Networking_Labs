@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.23.1.45101",
-      "templateHash": "10866774122619413208"
+      "templateHash": "9096063264640435098"
     }
   },
   "parameters": {
@@ -61,13 +61,6 @@
       "maxValue": 1000,
       "metadata": {
         "description": "Number of Server Virtual Machines to be used as the destination of the traffic"
-      }
-    },
-    "usingAzureFirewall": {
-      "type": "bool",
-      "defaultValue": false,
-      "metadata": {
-        "description": "Set to true if you want to use an Azure Firewall between client and server."
       }
     },
     "storageAccount_Name": {
@@ -952,7 +945,7 @@
             "value": "conntestClientBlob.sh"
           },
           "commandToExecute": {
-            "value": "[format('./conntestClientBlob.sh {0} {1} {2} {3} /tmp/captures', reference(resourceId('Microsoft.Resources/deployments', 'privatelink'), '2022-09-01').outputs.internalLoadBalancer_FrontendIPAddress.value, reference(resourceId('Microsoft.Resources/deployments', 'storageAccount'), '2022-09-01').outputs.storageAccount_Name.value, reference(resourceId('Microsoft.Resources/deployments', 'storageAccount'), '2022-09-01').outputs.storageAccount_key0.value, reference(resourceId('Microsoft.Resources/deployments', 'storageAccount'), '2022-09-01').outputs.storageAccount_Blob_Container_Name.value)]"
+            "value": "[format('./conntestClientBlob.sh {0} {1} {2} {3} /tmp/captures', reference(resourceId('Microsoft.Resources/deployments', 'privatelink'), '2022-09-01').outputs.internalLoadBalancer_FrontendIPAddress.value, reference(resourceId('Microsoft.Resources/deployments', 'storageAccount'), '2022-09-01').outputs.storageAccount_Name.value, reference(resourceId('Microsoft.Resources/deployments', 'storageAccount'), '2022-09-01').outputs.storageAccount_key0.value, reference(resourceId('Microsoft.Resources/deployments', 'storageAccountContainers'), '2022-09-01').outputs.container_Names.value[0])]"
           }
         },
         "template": {
@@ -1278,6 +1271,7 @@
         "[resourceId('Microsoft.Resources/deployments', 'privatelink')]",
         "ServerVM_Linux",
         "[resourceId('Microsoft.Resources/deployments', 'storageAccount')]",
+        "[resourceId('Microsoft.Resources/deployments', 'storageAccountContainers')]",
         "[resourceId('Microsoft.Resources/deployments', 'clientVNet')]"
       ]
     },
@@ -1323,7 +1317,7 @@
             "value": "conntestServerBlob.sh"
           },
           "commandToExecute": {
-            "value": "[format('./conntestServerBlob.sh  {0} {1} {2} /tmp/captures', reference(resourceId('Microsoft.Resources/deployments', 'storageAccount'), '2022-09-01').outputs.storageAccount_Name.value, reference(resourceId('Microsoft.Resources/deployments', 'storageAccount'), '2022-09-01').outputs.storageAccount_key0.value, reference(resourceId('Microsoft.Resources/deployments', 'storageAccount'), '2022-09-01').outputs.storageAccount_Blob_Container_Name.value)]"
+            "value": "[format('./conntestServerBlob.sh  {0} {1} {2} /tmp/captures', reference(resourceId('Microsoft.Resources/deployments', 'storageAccount'), '2022-09-01').outputs.storageAccount_Name.value, reference(resourceId('Microsoft.Resources/deployments', 'storageAccount'), '2022-09-01').outputs.storageAccount_key0.value, reference(resourceId('Microsoft.Resources/deployments', 'storageAccountContainers'), '2022-09-01').outputs.container_Names.value[0])]"
           }
         },
         "template": {
@@ -1647,6 +1641,7 @@
       "dependsOn": [
         "[resourceId('Microsoft.Resources/deployments', 'client_StorageAccount_File_PrivateEndpoint')]",
         "[resourceId('Microsoft.Resources/deployments', 'storageAccount')]",
+        "[resourceId('Microsoft.Resources/deployments', 'storageAccountContainers')]",
         "[resourceId('Microsoft.Resources/deployments', 'serverVNet')]"
       ]
     },
@@ -1688,7 +1683,7 @@
             "value": "pcapreviewer.ps1"
           },
           "commandToExecute": {
-            "value": "[format('powershell.exe -ExecutionPolicy Unrestricted -File pcapreviewer.ps1 -StorageAccountName {0} -StorageAccountKey {1}', reference(resourceId('Microsoft.Resources/deployments', 'storageAccount'), '2022-09-01').outputs.storageAccount_Name.value, reference(resourceId('Microsoft.Resources/deployments', 'storageAccount'), '2022-09-01').outputs.storageAccount_key0.value)]"
+            "value": "[format('powershell.exe -ExecutionPolicy Unrestricted -File pcapreviewer.ps1 -StorageAccountName {0} -StorageAccountKey {1} -ContainerName {2} -NeedsReviewContainerName {3} -IgnoreContainerName {4}', reference(resourceId('Microsoft.Resources/deployments', 'storageAccount'), '2022-09-01').outputs.storageAccount_Name.value, reference(resourceId('Microsoft.Resources/deployments', 'storageAccount'), '2022-09-01').outputs.storageAccount_key0.value, reference(resourceId('Microsoft.Resources/deployments', 'storageAccountContainers'), '2022-09-01').outputs.container_Names.value[0], reference(resourceId('Microsoft.Resources/deployments', 'storageAccountContainers'), '2022-09-01').outputs.container_Names.value[1], reference(resourceId('Microsoft.Resources/deployments', 'storageAccountContainers'), '2022-09-01').outputs.container_Names.value[2])]"
           }
         },
         "template": {
@@ -2026,437 +2021,8 @@
       "dependsOn": [
         "clientVM_Linux",
         "[resourceId('Microsoft.Resources/deployments', 'storageAccount')]",
+        "[resourceId('Microsoft.Resources/deployments', 'storageAccountContainers')]",
         "[resourceId('Microsoft.Resources/deployments', 'clientVNet')]"
-      ]
-    },
-    {
-      "condition": "[parameters('usingAzureFirewall')]",
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
-      "name": "azfw",
-      "properties": {
-        "expressionEvaluationOptions": {
-          "scope": "inner"
-        },
-        "mode": "Incremental",
-        "parameters": {
-          "azureFirewall_ManagementSubnet_ID": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'clientVNet'), '2022-09-01').outputs.azureFirewallManagement_SubnetID.value]"
-          },
-          "azureFirewall_Name": {
-            "value": "azfw"
-          },
-          "azureFirewall_SKU": {
-            "value": "Basic"
-          },
-          "azureFirewall_Subnet_ID": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'clientVNet'), '2022-09-01').outputs.azureFirewall_SubnetID.value]"
-          },
-          "azureFirewallPolicy_Name": {
-            "value": "azfw_policy"
-          },
-          "location": {
-            "value": "[parameters('locationClient')]"
-          }
-        },
-        "template": {
-          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0.0",
-          "metadata": {
-            "_generator": {
-              "name": "bicep",
-              "version": "0.23.1.45101",
-              "templateHash": "5890929983380066864"
-            }
-          },
-          "parameters": {
-            "location": {
-              "type": "string",
-              "metadata": {
-                "description": "Azure Datacenter location that the main resouces will be deployed to."
-              }
-            },
-            "azureFirewall_Name": {
-              "type": "string",
-              "metadata": {
-                "description": "Name of the Azure Firewall within the vHub A"
-              }
-            },
-            "azureFirewall_SKU": {
-              "type": "string",
-              "allowedValues": [
-                "Basic",
-                "Standard",
-                "Premium"
-              ],
-              "metadata": {
-                "description": "Sku name of the Azure Firewall.  Allowed values are Basic, Standard, and Premium"
-              }
-            },
-            "azureFirewallPolicy_Name": {
-              "type": "string",
-              "metadata": {
-                "description": "Name of the Azure Firewall Policy"
-              }
-            },
-            "azureFirewall_Subnet_ID": {
-              "type": "string",
-              "metadata": {
-                "description": "Resource ID of the Azure Firewall Subnet.  Note: The subnet name must be \"AzureFirewallSubnet"
-              }
-            },
-            "azureFirewall_ManagementSubnet_ID": {
-              "type": "string",
-              "metadata": {
-                "description": "Resource ID of the Azure Firewall Management Subnet.  Note: The subnet name must be \"AzureFirewallManagementSubnet"
-              }
-            }
-          },
-          "resources": [
-            {
-              "type": "Microsoft.Network/publicIPAddresses",
-              "apiVersion": "2022-11-01",
-              "name": "[format('{0}_PIP', parameters('azureFirewall_Name'))]",
-              "location": "[parameters('location')]",
-              "sku": {
-                "name": "Standard",
-                "tier": "Regional"
-              },
-              "properties": {
-                "publicIPAddressVersion": "IPv4",
-                "publicIPAllocationMethod": "Static",
-                "idleTimeoutInMinutes": 4,
-                "ipTags": []
-              }
-            },
-            {
-              "type": "Microsoft.Network/publicIPAddresses",
-              "apiVersion": "2022-11-01",
-              "name": "[format('{0}_Management_PIP', parameters('azureFirewall_Name'))]",
-              "location": "[parameters('location')]",
-              "sku": {
-                "name": "Standard",
-                "tier": "Regional"
-              },
-              "properties": {
-                "publicIPAddressVersion": "IPv4",
-                "publicIPAllocationMethod": "Static",
-                "idleTimeoutInMinutes": 4,
-                "ipTags": []
-              }
-            },
-            {
-              "type": "Microsoft.Network/firewallPolicies",
-              "apiVersion": "2022-07-01",
-              "name": "[parameters('azureFirewallPolicy_Name')]",
-              "location": "[parameters('location')]",
-              "properties": {
-                "sku": {
-                  "tier": "[parameters('azureFirewall_SKU')]"
-                }
-              }
-            },
-            {
-              "type": "Microsoft.Network/azureFirewalls",
-              "apiVersion": "2022-11-01",
-              "name": "[parameters('azureFirewall_Name')]",
-              "location": "[parameters('location')]",
-              "properties": {
-                "sku": {
-                  "name": "AZFW_VNet",
-                  "tier": "[parameters('azureFirewall_SKU')]"
-                },
-                "additionalProperties": {},
-                "managementIpConfiguration": {
-                  "name": "managementipconfig",
-                  "properties": {
-                    "publicIPAddress": {
-                      "id": "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_Management_PIP', parameters('azureFirewall_Name')))]"
-                    },
-                    "subnet": {
-                      "id": "[parameters('azureFirewall_ManagementSubnet_ID')]"
-                    }
-                  }
-                },
-                "ipConfigurations": [
-                  {
-                    "name": "ipconfiguration",
-                    "properties": {
-                      "publicIPAddress": {
-                        "id": "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP', parameters('azureFirewall_Name')))]"
-                      },
-                      "subnet": {
-                        "id": "[parameters('azureFirewall_Subnet_ID')]"
-                      }
-                    }
-                  }
-                ],
-                "firewallPolicy": {
-                  "id": "[resourceId('Microsoft.Network/firewallPolicies', parameters('azureFirewallPolicy_Name'))]"
-                }
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_Management_PIP', parameters('azureFirewall_Name')))]",
-                "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP', parameters('azureFirewall_Name')))]",
-                "[resourceId('Microsoft.Network/firewallPolicies', parameters('azureFirewallPolicy_Name'))]"
-              ]
-            },
-            {
-              "type": "Microsoft.Network/firewallPolicies/ruleCollectionGroups",
-              "apiVersion": "2023-05-01",
-              "name": "[format('{0}/{1}', parameters('azureFirewallPolicy_Name'), 'DefaultNetworkRuleCollectionGroup')]",
-              "properties": {
-                "priority": 200,
-                "ruleCollections": [
-                  {
-                    "name": "allowall",
-                    "priority": 100,
-                    "ruleCollectionType": "FirewallPolicyFilterRuleCollection",
-                    "action": {
-                      "type": "Allow"
-                    },
-                    "rules": [
-                      {
-                        "ruleType": "NetworkRule",
-                        "name": "any",
-                        "ipProtocols": [
-                          "any"
-                        ],
-                        "sourceAddresses": [
-                          "*"
-                        ],
-                        "destinationAddresses": [
-                          "*"
-                        ],
-                        "destinationPorts": [
-                          "*"
-                        ]
-                      }
-                    ]
-                  }
-                ]
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.Network/firewallPolicies', parameters('azureFirewallPolicy_Name'))]"
-              ]
-            }
-          ],
-          "outputs": {
-            "azureFirewall_PrivateIPAddress": {
-              "type": "string",
-              "value": "[reference(resourceId('Microsoft.Network/azureFirewalls', parameters('azureFirewall_Name')), '2022-11-01').ipConfigurations[0].properties.privateIPAddress]"
-            }
-          }
-        }
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Resources/deployments', 'clientVNet')]"
-      ]
-    },
-    {
-      "condition": "[parameters('usingAzureFirewall')]",
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
-      "name": "udrToAzFW_Hub",
-      "properties": {
-        "expressionEvaluationOptions": {
-          "scope": "inner"
-        },
-        "mode": "Incremental",
-        "parameters": {
-          "addressPrefixs": {
-            "value": [
-              "[reference(resourceId('Microsoft.Resources/deployments', 'serverVNet'), '2022-09-01').outputs.virtualNetwork_AddressPrefix.value]"
-            ]
-          },
-          "nextHopType": {
-            "value": "VirtualAppliance"
-          },
-          "routeTable_Name": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'clientVNet'), '2022-09-01').outputs.routeTable_Name.value]"
-          },
-          "routeTableRoute_Name": {
-            "value": "toAzFW"
-          },
-          "nextHopIpAddress": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'azfw'), '2022-09-01').outputs.azureFirewall_PrivateIPAddress.value]"
-          }
-        },
-        "template": {
-          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0.0",
-          "metadata": {
-            "_generator": {
-              "name": "bicep",
-              "version": "0.23.1.45101",
-              "templateHash": "13296261736535890165"
-            }
-          },
-          "parameters": {
-            "routeTable_Name": {
-              "type": "string"
-            },
-            "routeTableRoute_Name": {
-              "type": "string"
-            },
-            "addressPrefixs": {
-              "type": "array"
-            },
-            "nextHopIpAddress": {
-              "type": "string",
-              "defaultValue": ""
-            },
-            "nextHopType": {
-              "type": "string",
-              "allowedValues": [
-                "None",
-                "VirtualAppliance",
-                "Internet",
-                "VirtualNetworkGateway",
-                "VnetLocal"
-              ]
-            }
-          },
-          "resources": [
-            {
-              "copy": {
-                "name": "routeTable_Route_Firewall",
-                "count": "[length(range(0, length(parameters('addressPrefixs'))))]"
-              },
-              "condition": "[equals(parameters('nextHopType'), 'VirtualAppliance')]",
-              "type": "Microsoft.Network/routeTables/routes",
-              "apiVersion": "2023-05-01",
-              "name": "[format('{0}/{1}', parameters('routeTable_Name'), format('{0}{1}', parameters('routeTableRoute_Name'), range(0, length(parameters('addressPrefixs')))[copyIndex()]))]",
-              "properties": {
-                "addressPrefix": "[parameters('addressPrefixs')[range(0, length(parameters('addressPrefixs')))[copyIndex()]]]",
-                "nextHopType": "[parameters('nextHopType')]",
-                "nextHopIpAddress": "[parameters('nextHopIpAddress')]"
-              }
-            },
-            {
-              "copy": {
-                "name": "routeTable_Route",
-                "count": "[length(range(0, length(parameters('addressPrefixs'))))]"
-              },
-              "condition": "[not(equals(parameters('nextHopType'), 'VirtualAppliance'))]",
-              "type": "Microsoft.Network/routeTables/routes",
-              "apiVersion": "2023-05-01",
-              "name": "[format('{0}/{1}', parameters('routeTable_Name'), format('{0}{1}', parameters('routeTableRoute_Name'), range(0, length(parameters('addressPrefixs')))[copyIndex()]))]",
-              "properties": {
-                "addressPrefix": "[parameters('addressPrefixs')[range(0, length(parameters('addressPrefixs')))[copyIndex()]]]",
-                "nextHopType": "[parameters('nextHopType')]"
-              }
-            }
-          ]
-        }
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Resources/deployments', 'azfw')]",
-        "[resourceId('Microsoft.Resources/deployments', 'clientVNet')]",
-        "[resourceId('Microsoft.Resources/deployments', 'serverVNet')]"
-      ]
-    },
-    {
-      "condition": "[parameters('usingAzureFirewall')]",
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
-      "name": "udrToAzFW_Server",
-      "properties": {
-        "expressionEvaluationOptions": {
-          "scope": "inner"
-        },
-        "mode": "Incremental",
-        "parameters": {
-          "addressPrefixs": {
-            "value": [
-              "[reference(resourceId('Microsoft.Resources/deployments', 'clientVNet'), '2022-09-01').outputs.virtualNetwork_AddressPrefix.value]"
-            ]
-          },
-          "nextHopType": {
-            "value": "VirtualAppliance"
-          },
-          "routeTable_Name": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'serverVNet'), '2022-09-01').outputs.routeTable_Name.value]"
-          },
-          "routeTableRoute_Name": {
-            "value": "toAzFW"
-          },
-          "nextHopIpAddress": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'azfw'), '2022-09-01').outputs.azureFirewall_PrivateIPAddress.value]"
-          }
-        },
-        "template": {
-          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0.0",
-          "metadata": {
-            "_generator": {
-              "name": "bicep",
-              "version": "0.23.1.45101",
-              "templateHash": "13296261736535890165"
-            }
-          },
-          "parameters": {
-            "routeTable_Name": {
-              "type": "string"
-            },
-            "routeTableRoute_Name": {
-              "type": "string"
-            },
-            "addressPrefixs": {
-              "type": "array"
-            },
-            "nextHopIpAddress": {
-              "type": "string",
-              "defaultValue": ""
-            },
-            "nextHopType": {
-              "type": "string",
-              "allowedValues": [
-                "None",
-                "VirtualAppliance",
-                "Internet",
-                "VirtualNetworkGateway",
-                "VnetLocal"
-              ]
-            }
-          },
-          "resources": [
-            {
-              "copy": {
-                "name": "routeTable_Route_Firewall",
-                "count": "[length(range(0, length(parameters('addressPrefixs'))))]"
-              },
-              "condition": "[equals(parameters('nextHopType'), 'VirtualAppliance')]",
-              "type": "Microsoft.Network/routeTables/routes",
-              "apiVersion": "2023-05-01",
-              "name": "[format('{0}/{1}', parameters('routeTable_Name'), format('{0}{1}', parameters('routeTableRoute_Name'), range(0, length(parameters('addressPrefixs')))[copyIndex()]))]",
-              "properties": {
-                "addressPrefix": "[parameters('addressPrefixs')[range(0, length(parameters('addressPrefixs')))[copyIndex()]]]",
-                "nextHopType": "[parameters('nextHopType')]",
-                "nextHopIpAddress": "[parameters('nextHopIpAddress')]"
-              }
-            },
-            {
-              "copy": {
-                "name": "routeTable_Route",
-                "count": "[length(range(0, length(parameters('addressPrefixs'))))]"
-              },
-              "condition": "[not(equals(parameters('nextHopType'), 'VirtualAppliance'))]",
-              "type": "Microsoft.Network/routeTables/routes",
-              "apiVersion": "2023-05-01",
-              "name": "[format('{0}/{1}', parameters('routeTable_Name'), format('{0}{1}', parameters('routeTableRoute_Name'), range(0, length(parameters('addressPrefixs')))[copyIndex()]))]",
-              "properties": {
-                "addressPrefix": "[parameters('addressPrefixs')[range(0, length(parameters('addressPrefixs')))[copyIndex()]]]",
-                "nextHopType": "[parameters('nextHopType')]"
-              }
-            }
-          ]
-        }
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Resources/deployments', 'azfw')]",
-        "[resourceId('Microsoft.Resources/deployments', 'clientVNet')]",
-        "[resourceId('Microsoft.Resources/deployments', 'serverVNet')]"
       ]
     },
     {
@@ -2606,7 +2172,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "2292003485366952190"
+              "templateHash": "14453665587624672321"
             }
           },
           "parameters": {
@@ -2697,14 +2263,6 @@
               ]
             },
             {
-              "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
-              "apiVersion": "2023-01-01",
-              "name": "[format('{0}/{1}/{2}', parameters('storageAccount_Name'), 'default', 'default')]",
-              "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccount_Name'), 'default')]"
-              ]
-            },
-            {
               "type": "Microsoft.Storage/storageAccounts/fileServices",
               "apiVersion": "2023-01-01",
               "name": "[format('{0}/{1}', parameters('storageAccount_Name'), 'default')]",
@@ -2742,7 +2300,7 @@
               "type": "string",
               "value": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccount_Name'))]"
             },
-            "storageAccount_Blob_Container_Name": {
+            "storageAccount_BlobServices_Name": {
               "type": "string",
               "value": "default"
             },
@@ -2757,6 +2315,77 @@
           }
         }
       }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "storageAccountContainers",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "container_Names": {
+            "value": [
+              "unfilteredCaptures",
+              "needsReview",
+              "ignore"
+            ]
+          },
+          "storageAccount_BlobServices_Name": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'storageAccount'), '2022-09-01').outputs.storageAccount_BlobServices_Name.value]"
+          },
+          "storageAccount_Name": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'storageAccount'), '2022-09-01').outputs.storageAccount_Name.value]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.23.1.45101",
+              "templateHash": "6793475986584697570"
+            }
+          },
+          "parameters": {
+            "storageAccount_Name": {
+              "type": "string"
+            },
+            "storageAccount_BlobServices_Name": {
+              "type": "string"
+            },
+            "container_Names": {
+              "type": "array"
+            }
+          },
+          "resources": [
+            {
+              "copy": {
+                "name": "storageAccount_Blob_Container",
+                "count": "[length(parameters('container_Names'))]"
+              },
+              "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+              "apiVersion": "2023-01-01",
+              "name": "[format('{0}/{1}/{2}', parameters('storageAccount_Name'), parameters('storageAccount_BlobServices_Name'), parameters('container_Names')[copyIndex()])]"
+            }
+          ],
+          "outputs": {
+            "container_Names": {
+              "type": "array",
+              "copy": {
+                "count": "[length(range(0, length(parameters('container_Names'))))]",
+                "input": "[parameters('container_Names')[range(0, length(parameters('container_Names')))[copyIndex()]]]"
+              }
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'storageAccount')]"
+      ]
     },
     {
       "type": "Microsoft.Resources/deployments",

@@ -196,7 +196,7 @@ module storageAccountContainers '../../modules/Microsoft.Storage/Container.bicep
   params: {
     container_Names: ['unfilteredCaptures', 'needsReview', 'ignore']
     storageAccount_BlobServices_Name: storageAccount.outputs.storageAccount_BlobServices_Name
-    storageAccount_Name: storageAccount.name
+    storageAccount_Name: storageAccount.outputs.storageAccount_Name
   }
 }
 

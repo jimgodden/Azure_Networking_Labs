@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.23.1.45101",
-      "templateHash": "10073054609707794234"
+      "templateHash": "16715038607417031428"
     }
   },
   "parameters": {
@@ -2397,7 +2397,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "2292003485366952190"
+              "templateHash": "14453665587624672321"
             }
           },
           "parameters": {
@@ -2488,14 +2488,6 @@
               ]
             },
             {
-              "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
-              "apiVersion": "2023-01-01",
-              "name": "[format('{0}/{1}/{2}', parameters('storageAccount_Name'), 'default', 'default')]",
-              "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccount_Name'), 'default')]"
-              ]
-            },
-            {
               "type": "Microsoft.Storage/storageAccounts/fileServices",
               "apiVersion": "2023-01-01",
               "name": "[format('{0}/{1}', parameters('storageAccount_Name'), 'default')]",
@@ -2533,7 +2525,7 @@
               "type": "string",
               "value": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccount_Name'))]"
             },
-            "storageAccount_Blob_Container_Name": {
+            "storageAccount_BlobServices_Name": {
               "type": "string",
               "value": "default"
             },
