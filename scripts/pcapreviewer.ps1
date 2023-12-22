@@ -1,7 +1,9 @@
 Param(
     [string]$StorageAccountName,
     [string]$StorageAccountKey,
-    [string]$ContainerName
+    [string]$ContainerName,
+    [string]$NeedsReviewContainerName,
+    [string]$IgnoreContainerName
 )
 
 $filesToDownload = @(
@@ -53,6 +55,8 @@ $scriptContent = @"
 pip install azure-storage-blob
 
 py.exe ${folderPathBase}\download_from_blob.py --account-name ${StorageAccountName} --account-key ${StorageAccountKey} --container-name ${ContainerName} --local-path ${folderPathOriginalPcaps}
+py.exe ${folderPathBase}\delete_from_blob.py --account-name ${StorageAccountName} --account-key ${StorageAccountKey} --container-name ${ContainerName}
+
 
 `$files = Get-ChildItem -Path $folderPathOriginalPcaps
 
@@ -63,11 +67,11 @@ if (`$files.Count -gt 0) {
         `$tsharkOutput = & "$tshark" -r `$_.FullName -Y "$filterCriteria"
 
         if (`$tsharkOutput) {
-            py.exe ${folderPathBase}\upload_to_blob.py --account-name $StorageAccountName --account-key $StorageAccountKey --container-name $ContainerName --local-file-path `$_.FullName --blob-name "alert`$_.name"
+            py.exe ${folderPathBase}\upload_to_blob.py --account-name $StorageAccountName --account-key $StorageAccountKey --container-name $NeedsReviewContainerName --local-file-path `$_.FullName --blob-name `$_.name
             Move-Item -Path `$_.FullName -Destination "${folderPathBase}/possible"
         }
         else {
-            py.exe ${folderPathBase}\upload_to_blob.py --account-name $StorageAccountName --account-key $StorageAccountKey --container-name $ContainerName --local-file-path `$_.FullName --blob-name "noprob`$_.name"
+            py.exe ${folderPathBase}\upload_to_blob.py --account-name $StorageAccountName --account-key $StorageAccountKey --container-name $IgnoreContainerName --local-file-path `$_.FullName --blob-name `$_.name
             Move-Item -Path `$_.FullName -Destination "${folderPathBase}/no_problem"
         }
     }

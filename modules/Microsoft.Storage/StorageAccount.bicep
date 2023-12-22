@@ -92,11 +92,6 @@ resource storageAccount_BlobServices 'Microsoft.Storage/storageAccounts/blobServ
   }
 }
 
-resource storageAccount_Blob_Container 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-01-01' = {
-  parent: storageAccount_BlobServices
-  name: 'default'
-}
-
 resource storageAccount_File 'Microsoft.Storage/storageAccounts/fileServices@2023-01-01' = {
   parent: storageAccount
   name: 'default'
@@ -117,7 +112,7 @@ output storageaccount_File_FQDN string = fileFQDN
 output storageAccount_Name string = storageAccount.name
 output storageAccount_ID string = storageAccount.id
 
-output storageAccount_Blob_Container_Name string = storageAccount_Blob_Container.name
+output storageAccount_BlobServices_Name string = storageAccount_BlobServices.name
 
 output storageAccountFileShare_Name string = storageAccount_File_FileShare.name
 

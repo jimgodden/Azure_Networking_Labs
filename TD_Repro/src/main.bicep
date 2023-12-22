@@ -85,7 +85,7 @@ module clientVM_Linux '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.b
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
     // Use the following for blob testing
     virtualMachine_ScriptFileName: 'conntestClientBlob.sh'
-    commandToExecute: './conntestClientBlob.sh ${privateLink.outputs.internalLoadBalancer_FrontendIPAddress} ${storageAccount.outputs.storageAccount_Name} ${storageAccount.outputs.storageAccount_key0} ${storageAccount.outputs.storageAccount_Blob_Container_Name} /tmp/captures'
+    commandToExecute: './conntestClientBlob.sh ${privateLink.outputs.internalLoadBalancer_FrontendIPAddress} ${storageAccount.outputs.storageAccount_Name} ${storageAccount.outputs.storageAccount_key0} ${storageAccountContainers.outputs.container_Names[0]} /tmp/captures'
     // virtualMachine_ScriptFileName: 'conntestClient.sh'
     // Use the following for Private Link testing
     // commandToExecute: './conntestClient.sh ${privateEndpoint_NIC.outputs.privateEndpoint_IPAddress} ${scenario_Name} ${storageAccount.outputs.storageAccount_Name} ${storageAccount.outputs.storageAccountFileShare_Name} ${storageAccount.outputs.storageAccount_key0}'
@@ -114,7 +114,7 @@ module ServerVM_Linux '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.b
     // virtualMachine_ScriptFileName: 'conntestServer.sh'
     // commandToExecute: './conntestServer.sh ${scenario_Name} ${storageAccount.outputs.storageAccount_Name} ${storageAccount.outputs.storageAccountFileShare_Name} ${storageAccount.outputs.storageAccount_key0}'
     virtualMachine_ScriptFileName: 'conntestServerBlob.sh'
-    commandToExecute: './conntestServerBlob.sh  ${storageAccount.outputs.storageAccount_Name} ${storageAccount.outputs.storageAccount_key0} ${storageAccount.outputs.storageAccount_Blob_Container_Name} /tmp/captures'
+    commandToExecute: './conntestServerBlob.sh  ${storageAccount.outputs.storageAccount_Name} ${storageAccount.outputs.storageAccount_key0} ${storageAccountContainers.outputs.container_Names[0]} /tmp/captures'
   }
   dependsOn: [
     client_StorageAccount_File_PrivateEndpoint
@@ -133,7 +133,7 @@ module pcapReviewVM '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMa
     virtualMachine_Size: 'Standard_B2ms'
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
     virtualMachine_ScriptFileName: 'pcapreviewer.ps1'
-    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File pcapreviewer.ps1 -StorageAccountName ${storageAccount.outputs.storageAccount_Name} -StorageAccountKey ${storageAccount.outputs.storageAccount_key0} -ContainerName ${storageAccount.outputs.storageAccount_Blob_Container_Name}'
+    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File pcapreviewer.ps1 -StorageAccountName ${storageAccount.outputs.storageAccount_Name} -StorageAccountKey ${storageAccount.outputs.storageAccount_key0} -ContainerName ${storageAccountContainers.outputs.container_Names[0]} -NeedsReviewContainerName ${storageAccountContainers.outputs.container_Names[1]} -IgnoreContainerName ${storageAccountContainers.outputs.container_Names[2]}'
   }
   dependsOn: [
     clientVM_Linux // We only want to start checking for pcaps after the client has been deployed and starts capturing
@@ -188,6 +188,15 @@ module storageAccount '../../modules/Microsoft.Storage/StorageAccount.bicep' = {
   params: {
     location: locationClient
     storageAccount_Name: storageAccount_Name
+  }
+}
+
+module storageAccountContainers '../../modules/Microsoft.Storage/Container.bicep' = {
+  name: 'storageAccountContainers'
+  params: {
+    container_Names: ['unfilteredCaptures', 'needsReview', 'ignore']
+    storageAccount_BlobServices_Name: storageAccount.outputs.storageAccount_BlobServices_Name
+    storageAccount_Name: storageAccount.name
   }
 }
 
