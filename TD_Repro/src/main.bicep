@@ -194,7 +194,7 @@ module storageAccount '../../modules/Microsoft.Storage/StorageAccount.bicep' = {
 module storageAccountContainers '../../modules/Microsoft.Storage/Container.bicep' = {
   name: 'storageAccountContainers'
   params: {
-    container_Names: ['unfilteredCaptures', 'needsReview', 'ignore']
+    container_Names: ['unfilteredcaptures', 'needsreview', 'ignore']
     storageAccount_BlobServices_Name: storageAccount.outputs.storageAccount_BlobServices_Name
     storageAccount_Name: storageAccount.outputs.storageAccount_Name
   }
