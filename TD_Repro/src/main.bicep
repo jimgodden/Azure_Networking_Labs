@@ -95,7 +95,7 @@ module clientVM_Linux '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.b
   }
   dependsOn: [
     storageAccount
-    client_StorageAccount_File_PrivateEndpoint
+    client_StorageAccount_Blob_PrivateEndpoint
     ServerVM_Linux
   ]
 } ]
@@ -117,7 +117,7 @@ module ServerVM_Linux '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.b
     commandToExecute: './conntestServerBlob.sh  ${storageAccount.outputs.storageAccount_Name} ${storageAccount.outputs.storageAccount_key0} ${storageAccountContainers.outputs.container_Names[0]} /tmp/captures'
   }
   dependsOn: [
-    client_StorageAccount_File_PrivateEndpoint
+    client_StorageAccount_Blob_PrivateEndpoint
   ]
 } ]
 
@@ -208,23 +208,6 @@ module client_StorageAccount_Blob_PrivateEndpoint '../../modules/Microsoft.Netwo
     location: locationClient
     privateDNSZone_Name: 'privatelink.blob.${environment().suffixes.storage}'
     privateEndpoint_Name: '${storageAccount_Name}_blob_pe'
-    privateEndpoint_SubnetID: virtualNetwork_Client.outputs.privateEndpoint_SubnetID
-    privateLinkServiceId: storageAccount.outputs.storageAccount_ID
-    virtualNetwork_IDs: [
-      virtualNetwork_Client.outputs.virtualNetwork_ID
-      virtualNetwork_Server.outputs.virtualNetwork_ID
-    ]  
-  }
-}
-
-module client_StorageAccount_File_PrivateEndpoint '../../modules/Microsoft.Network/PrivateEndpoint.bicep' = {
-  name: 'client_StorageAccount_File_PrivateEndpoint'
-  params: {
-    fqdn: '${storageAccount_Name}.file.${environment().suffixes.storage}'
-    groupID: 'file'
-    location: locationClient
-    privateDNSZone_Name: 'privatelink.file.${environment().suffixes.storage}'
-    privateEndpoint_Name: '${storageAccount_Name}_file_pe'
     privateEndpoint_SubnetID: virtualNetwork_Client.outputs.privateEndpoint_SubnetID
     privateLinkServiceId: storageAccount.outputs.storageAccount_ID
     virtualNetwork_IDs: [
