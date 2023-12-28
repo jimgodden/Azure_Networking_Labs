@@ -21,7 +21,7 @@ module virtualMachine_Linux '../modules/Microsoft.Compute/Ubuntu20/VirtualMachin
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'linuxVM${i}'
     virtualMachine_Size: 'B2ms'
-    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
+    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/VNET-Hub-and-Spoke-Merge/scripts/'
     virtualMachine_ScriptFileName: 'Ubuntu20_DNS_Config.sh'
   }
 } ]
@@ -36,7 +36,7 @@ module virtualMachine_Windows '../modules/Microsoft.Compute/WindowsServer2022/Vi
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'windowsVM${i}'
     virtualMachine_Size: 'B2ms'
-    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
+    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/VNET-Hub-and-Spoke-Merge/scripts/'
     virtualMachine_ScriptFileName: 'WinServ2022_General_InitScript.ps1'
   }
 } ]
@@ -45,7 +45,7 @@ module virtualMachine_Windows '../modules/Microsoft.Compute/WindowsServer2022/Vi
 
 // Start Network
 
-module virtualNetwork_Hub '../modules/Microsoft.Network/VirtualNetworkHub.bicep' = {
+module virtualNetwork_Hub '../modules/Microsoft.Network/VirtualNetwork.bicep' = {
   name: 'hubVNet'
   params: {
     firstTwoOctetsOfVirtualNetworkPrefix: '10.0'
@@ -56,7 +56,7 @@ module virtualNetwork_Hub '../modules/Microsoft.Network/VirtualNetworkHub.bicep'
   }
 }
 
-module virtualNetwork_SpokeA '../modules/Microsoft.Network/VirtualNetworkSpoke.bicep' = {
+module virtualNetwork_SpokeA '../modules/Microsoft.Network/VirtualNetwork.bicep' = {
   name: 'spokeAVNet'
   params: {
     firstTwoOctetsOfVirtualNetworkPrefix: '10.1'
@@ -222,6 +222,7 @@ module webApp '../modules/Microsoft.Web/site.bicep' = {
     site_Name: 'readdescfornamingreq'
   }
 }
+
 
 
 

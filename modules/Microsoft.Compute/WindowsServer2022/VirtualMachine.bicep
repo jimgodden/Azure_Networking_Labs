@@ -28,7 +28,7 @@ param subnet_ID string
 
 @description('''Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /
 Example: https://example.com/scripts/''')
-param virtualMachine_ScriptFileLocation string = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
+param virtualMachine_ScriptFileLocation string = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/VNET-Hub-and-Spoke-Merge/scripts/'
 
 @description('''Name of the file to be ran while the Virtual Machine is being created
 Example: InitScript.ps1''')
@@ -188,6 +188,7 @@ output networkInterface_ID string = networkInterface.outputs.networkInterface_ID
 output networkInterface_IPConfig0_Name string = networkInterface.outputs.networkInterface_IPConfig0_Name
 output networkInterface_IPConfig0_ID string = networkInterface.outputs.networkInterface_IPConfig0_ID
 output networkInterface_PrivateIPAddress string = networkInterface.outputs.networkInterface_PrivateIPAddress
+
 
 
 

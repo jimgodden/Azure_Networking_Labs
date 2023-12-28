@@ -48,10 +48,10 @@ Example:
 contoso.com.''')
 param onpremResolvableDomainName string = 'contoso.com.'
 
-var virtualMachine_ScriptFileLocation = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
+var virtualMachine_ScriptFileLocation = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/VNET-Hub-and-Spoke-Merge/scripts/'
 
 
-module virtualNetwork_Hub '../../modules/Microsoft.Network/VirtualNetworkHub.bicep' = {
+module virtualNetwork_Hub '../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
   name: 'hub_VNet'
   params: {
     // firstTwoOctetsOfVirtualNetworkPrefix: '10.0'
@@ -61,7 +61,7 @@ module virtualNetwork_Hub '../../modules/Microsoft.Network/VirtualNetworkHub.bic
   }
 }
 
-module virtualNetwork_SpokeA '../../modules/Microsoft.Network/VirtualNetworkSpoke.bicep' = {
+module virtualNetwork_SpokeA '../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
   name: 'spokeA_VNet'
   params: {
     // firstTwoOctetsOfVirtualNetworkPrefix: '10.1'
@@ -72,7 +72,7 @@ module virtualNetwork_SpokeA '../../modules/Microsoft.Network/VirtualNetworkSpok
   }
 }
 
-module virtualNetwork_SpokeB '../../modules/Microsoft.Network/VirtualNetworkSpoke.bicep' = {
+module virtualNetwork_SpokeB '../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
   name: 'spokeB_VNet'
   params: {
     // firstTwoOctetsOfVirtualNetworkPrefix: '10.2'
@@ -304,7 +304,7 @@ module dnsPrivateResolverForwardingRuleSet '../../modules/Microsoft.Network/DNSP
   }
 }
 
-module virtualNetwork_OnPremHub '../../modules/Microsoft.Network/VirtualNetworkHub.bicep' = {
+module virtualNetwork_OnPremHub '../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
   name: 'onprem_VNet'
   params: {
     // firstTwoOctetsOfVirtualNetworkPrefix: '10.100'
@@ -375,6 +375,7 @@ module Hub_to_OnPrem_conn '../../modules/Microsoft.Network/Connection_and_LocalN
     vpn_SharedKey: vpn_SharedKey
   }
 }
+
 
 
 

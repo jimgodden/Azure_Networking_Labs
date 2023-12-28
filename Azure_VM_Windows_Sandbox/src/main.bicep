@@ -17,7 +17,7 @@ I'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net.
 ''')
 param acceleratedNetworking bool = false
 
-module virtualNetwork '../../modules/Microsoft.Network/VirtualNetworkHub.bicep' = {
+module virtualNetwork '../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
   name: 'vnet'
   params: {
     location: location

@@ -2,7 +2,7 @@
 
 hname=$(hostname)
 
-curl -o /tmp/conntest https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/conntest
+curl -o /tmp/conntest https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/VNET-Hub-and-Spoke-Merge/scripts/conntest
 chmod +x /tmp/conntest
 
 mkdir /mnt/$3
@@ -29,6 +29,7 @@ chmod 600 $directory
 nohup tcpdump -w /mnt/$3/$1/$hname-trace-%m-%d-%H-%M-%S.pcap port 5001 -G 3800 -C 500M -s 120 -K -n &
 
 nohup /tmp/conntest -s -p 5001 &
+
 
 
 

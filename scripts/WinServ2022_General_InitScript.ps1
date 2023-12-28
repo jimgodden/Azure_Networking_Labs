@@ -27,7 +27,8 @@ Invoke-WebRequest -Uri "https://github.com/microsoft/terminal/releases/download/
 
 
 New-Item -ItemType Directory -Name Tools -Path "c:\"
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2022_InstallTools.ps1" -OutFile "c:\installTools.ps1"
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/VNET-Hub-and-Spoke-Merge/scripts/WinServ2022_InstallTools.ps1" -OutFile "c:\installTools.ps1"
+
 
 
 

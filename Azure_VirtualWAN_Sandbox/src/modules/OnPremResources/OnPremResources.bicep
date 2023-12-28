@@ -25,7 +25,7 @@ param virtualMachine_AdminUsername string
 @secure()
 param virtualMachine_AdminPassword string
 
-module virtualNetwork_Hub '../../../../modules/Microsoft.Network/VirtualNetworkHub.bicep' = {
+module virtualNetwork_Hub '../../../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
   name: 'OnPrem_VNET'
   params: {
     location: location
@@ -80,7 +80,7 @@ module virtualMachine_Windows '../../../../modules/Microsoft.Compute/WindowsServ
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'OnPremWinVM'
     virtualMachine_Size: 'B2ms'
-    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
+    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/VNET-Hub-and-Spoke-Merge/scripts/'
     virtualMachine_ScriptFileName: 'WinServ2022_General_InitScript.ps1'
   }
 }
@@ -90,6 +90,7 @@ output virtualNetworkGateway_Name string = vpn.outputs.virtualNetworkGateway_Nam
 output virtualNetworkGateway_PublicIPAddress string = vpn.outputs.virtualNetworkGateway_PublicIPAddress
 output virtualNetworkGateway_BGPAddress string = vpn.outputs.virtualNetworkGateway_BGPAddress
 output virtualNetworkGateway_ASN int = vpn.outputs.virtualNetworkGateway_ASN
+
 
 
 

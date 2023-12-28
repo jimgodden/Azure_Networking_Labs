@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.23.1.45101",
-      "templateHash": "16715038607417031428"
+      "templateHash": "13239662173344710755"
     }
   },
   "parameters": {
@@ -37,7 +37,7 @@
     },
     "virtualMachine_ScriptFileLocation": {
       "type": "string",
-      "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/"
+      "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/VNET-Hub-and-Spoke-Merge/scripts/"
     },
     "acceleratedNetworking": {
       "type": "bool",
@@ -557,7 +557,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "16198592468535579999"
+              "templateHash": "13053173869664832562"
             }
           },
           "parameters": {
@@ -580,9 +580,6 @@
                 "description": "An Array of Custom DNS Server IP Addresses.  Azure Wireserver will be used if left as an empty array [].\r\nExample:\r\n[10.0.0.4, 10.0.0.5]\r\n"
               }
             },
-            "virtualNetwork_AddressPrefix": {
-              "type": "string"
-            },
             "networkSecurityGroup_Default_Name": {
               "type": "string",
               "defaultValue": "[format('{0}_NSG_General', parameters('virtualNetwork_Name'))]",
@@ -596,6 +593,9 @@
               "metadata": {
                 "description": "Name of the General Route Table"
               }
+            },
+            "virtualNetwork_AddressPrefix": {
+              "type": "string"
             }
           },
           "variables": {
@@ -611,7 +611,13 @@
               "PrivateEndpoints",
               "PrivateLinkService",
               "ApplicationGatewaySubnet",
-              "AppServiceSubnet"
+              "AppServiceSubnet",
+              "GatewaySubnet",
+              "AzureFirewallSubnet",
+              "AzureFirewallManagementSubnet",
+              "AzureBastionSubnet",
+              "PrivateResolver_Inbound",
+              "PrivateResolver_Outbound"
             ]
           },
           "resources": [
@@ -680,7 +686,7 @@
                     "properties": {
                       "addressPrefix": "[variables('subnet_AddressRangeCIDRs')[3]]",
                       "networkSecurityGroup": {
-                        "id": "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}_networkSecurityGroup_ApplicationGateway', parameters('virtualNetwork_Name')))]"
+                        "id": "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}_NSG_ApplicationGateway', parameters('virtualNetwork_Name')))]"
                       },
                       "delegations": [],
                       "privateEndpointNetworkPolicies": "Disabled",
@@ -706,13 +712,77 @@
                       "privateEndpointNetworkPolicies": "Disabled",
                       "privateLinkServiceNetworkPolicies": "Enabled"
                     }
+                  },
+                  {
+                    "name": "[variables('subnet_Names')[5]]",
+                    "properties": {
+                      "addressPrefix": "[variables('subnet_AddressRangeCIDRs')[5]]",
+                      "delegations": [],
+                      "privateEndpointNetworkPolicies": "Disabled",
+                      "privateLinkServiceNetworkPolicies": "Enabled"
+                    }
+                  },
+                  {
+                    "name": "[variables('subnet_Names')[6]]",
+                    "properties": {
+                      "addressPrefix": "[variables('subnet_AddressRangeCIDRs')[6]]",
+                      "delegations": [],
+                      "privateEndpointNetworkPolicies": "Disabled",
+                      "privateLinkServiceNetworkPolicies": "Enabled"
+                    }
+                  },
+                  {
+                    "name": "[variables('subnet_Names')[7]]",
+                    "properties": {
+                      "addressPrefix": "[variables('subnet_AddressRangeCIDRs')[7]]",
+                      "delegations": [],
+                      "privateEndpointNetworkPolicies": "Disabled",
+                      "privateLinkServiceNetworkPolicies": "Enabled"
+                    }
+                  },
+                  {
+                    "name": "[variables('subnet_Names')[8]]",
+                    "properties": {
+                      "addressPrefix": "[variables('subnet_AddressRangeCIDRs')[8]]",
+                      "delegations": [],
+                      "privateEndpointNetworkPolicies": "Disabled",
+                      "privateLinkServiceNetworkPolicies": "Enabled"
+                    }
+                  },
+                  {
+                    "name": "[variables('subnet_Names')[9]]",
+                    "properties": {
+                      "addressPrefix": "[variables('subnet_AddressRangeCIDRs')[9]]",
+                      "delegations": [
+                        {
+                          "name": "Microsoft.Network.dnsResolvers",
+                          "properties": {
+                            "serviceName": "Microsoft.Network/dnsResolvers"
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "name": "[variables('subnet_Names')[10]]",
+                    "properties": {
+                      "addressPrefix": "[variables('subnet_AddressRangeCIDRs')[10]]",
+                      "delegations": [
+                        {
+                          "name": "Microsoft.Network.dnsResolvers",
+                          "properties": {
+                            "serviceName": "Microsoft.Network/dnsResolvers"
+                          }
+                        }
+                      ]
+                    }
                   }
                 ],
                 "enableDdosProtection": false
               },
               "dependsOn": [
                 "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroup_Default_Name'))]",
-                "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}_networkSecurityGroup_ApplicationGateway', parameters('virtualNetwork_Name')))]",
+                "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}_NSG_ApplicationGateway', parameters('virtualNetwork_Name')))]",
                 "[resourceId('Microsoft.Network/routeTables', parameters('routeTable_Name'))]"
               ]
             },
@@ -735,7 +805,7 @@
             {
               "type": "Microsoft.Network/networkSecurityGroups",
               "apiVersion": "2022-11-01",
-              "name": "[format('{0}_networkSecurityGroup_ApplicationGateway', parameters('virtualNetwork_Name'))]",
+              "name": "[format('{0}_NSG_ApplicationGateway', parameters('virtualNetwork_Name'))]",
               "location": "[parameters('location')]",
               "properties": {
                 "securityRules": []
@@ -744,7 +814,7 @@
             {
               "type": "Microsoft.Network/networkSecurityGroups/securityRules",
               "apiVersion": "2022-11-01",
-              "name": "[format('{0}/{1}', format('{0}_networkSecurityGroup_ApplicationGateway', parameters('virtualNetwork_Name')), 'AllowGatewayManager')]",
+              "name": "[format('{0}/{1}', format('{0}_NSG_ApplicationGateway', parameters('virtualNetwork_Name')), 'AllowGatewayManager')]",
               "properties": {
                 "description": "Allow GatewayManager",
                 "protocol": "*",
@@ -761,13 +831,13 @@
                 "destinationAddressPrefixes": []
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}_networkSecurityGroup_ApplicationGateway', parameters('virtualNetwork_Name')))]"
+                "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}_NSG_ApplicationGateway', parameters('virtualNetwork_Name')))]"
               ]
             },
             {
               "type": "Microsoft.Network/networkSecurityGroups/securityRules",
               "apiVersion": "2022-11-01",
-              "name": "[format('{0}/{1}', format('{0}_networkSecurityGroup_ApplicationGateway', parameters('virtualNetwork_Name')), 'AllowHTTPS')]",
+              "name": "[format('{0}/{1}', format('{0}_NSG_ApplicationGateway', parameters('virtualNetwork_Name')), 'AllowHTTPS')]",
               "properties": {
                 "description": "Allow HTTPS",
                 "protocol": "Tcp",
@@ -784,7 +854,7 @@
                 "destinationAddressPrefixes": []
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}_networkSecurityGroup_ApplicationGateway', parameters('virtualNetwork_Name')))]"
+                "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}_NSG_ApplicationGateway', parameters('virtualNetwork_Name')))]"
               ]
             }
           ],
@@ -809,6 +879,30 @@
               "type": "string",
               "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name')), '2022-09-01').subnets[4].id]"
             },
+            "gateway_SubnetID": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name')), '2022-09-01').subnets[5].id]"
+            },
+            "azureFirewall_SubnetID": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name')), '2022-09-01').subnets[6].id]"
+            },
+            "azureFirewallManagement_SubnetID": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name')), '2022-09-01').subnets[7].id]"
+            },
+            "bastion_SubnetID": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name')), '2022-09-01').subnets[8].id]"
+            },
+            "privateResolver_Inbound_SubnetID": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name')), '2022-09-01').subnets[9].id]"
+            },
+            "privateResolver_Outbound_SubnetID": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name')), '2022-09-01').subnets[10].id]"
+            },
             "general_Subnet_AddressPrefix": {
               "type": "string",
               "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name')), '2022-09-01').subnets[0].properties.addressPrefix]"
@@ -828,6 +922,30 @@
             "appService_Subnet_AddressPrefix": {
               "type": "string",
               "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name')), '2022-09-01').subnets[4].properties.addressPrefix]"
+            },
+            "gateway_Subnet_AddressPrefix": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name')), '2022-09-01').subnets[5].properties.addressPrefix]"
+            },
+            "azureFirewall_Subnet_AddressPrefix": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name')), '2022-09-01').subnets[6].properties.addressPrefix]"
+            },
+            "azureFirewallManagement_Subnet_AddressPrefix": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name')), '2022-09-01').subnets[7].properties.addressPrefix]"
+            },
+            "bastion_Subnet_AddressPrefix": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name')), '2022-09-01').subnets[8].properties.addressPrefix]"
+            },
+            "privateResolver_Inbound_Subnet_AddressPrefix": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name')), '2022-09-01').subnets[9].properties.addressPrefix]"
+            },
+            "privateResolver_Outbound_Subnet_AddressPrefix": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name')), '2022-09-01').subnets[10].properties.addressPrefix]"
             },
             "virtualNetwork_Name": {
               "type": "string",
@@ -981,7 +1099,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "7854143378368474742"
+              "templateHash": "8356203842519025786"
             }
           },
           "parameters": {
@@ -1034,7 +1152,7 @@
             },
             "virtualMachine_ScriptFileLocation": {
               "type": "string",
-              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/",
+              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/VNET-Hub-and-Spoke-Merge/scripts/",
               "metadata": {
                 "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\r\nExample: https://example.com/scripts/"
               }
@@ -1355,7 +1473,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "7854143378368474742"
+              "templateHash": "8356203842519025786"
             }
           },
           "parameters": {
@@ -1408,7 +1526,7 @@
             },
             "virtualMachine_ScriptFileLocation": {
               "type": "string",
-              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/",
+              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/VNET-Hub-and-Spoke-Merge/scripts/",
               "metadata": {
                 "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\r\nExample: https://example.com/scripts/"
               }
@@ -1730,7 +1848,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "7854143378368474742"
+              "templateHash": "8356203842519025786"
             }
           },
           "parameters": {
@@ -1783,7 +1901,7 @@
             },
             "virtualMachine_ScriptFileLocation": {
               "type": "string",
-              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/",
+              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/VNET-Hub-and-Spoke-Merge/scripts/",
               "metadata": {
                 "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\r\nExample: https://example.com/scripts/"
               }
@@ -3759,7 +3877,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "7854143378368474742"
+              "templateHash": "8356203842519025786"
             }
           },
           "parameters": {
@@ -3812,7 +3930,7 @@
             },
             "virtualMachine_ScriptFileLocation": {
               "type": "string",
-              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/",
+              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/VNET-Hub-and-Spoke-Merge/scripts/",
               "metadata": {
                 "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\r\nExample: https://example.com/scripts/"
               }

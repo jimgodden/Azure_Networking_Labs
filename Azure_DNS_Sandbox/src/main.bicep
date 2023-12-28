@@ -11,7 +11,7 @@ param virtualMachine_AdminPassword string
 @description('Password for the Virtual Machine Admin User')
 param virtualMachine_Size string = 'Standard_B2ms' // 'Standard_D2s_v3' // 'Standard_D16lds_v5'
 
-param virtualMachine_ScriptFileLocation string = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
+param virtualMachine_ScriptFileLocation string = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/VNET-Hub-and-Spoke-Merge/scripts/'
 
 @description('''True enables Accelerated Networking and False disabled it.  
 Not all VM sizes support Accel Net (i.e. Standard_B2ms).  
@@ -44,7 +44,7 @@ Example:
 contoso.com.''')
 param onpremResolvableDomainName string = 'contoso.com.'
 
-module virtualNetwork_Hub '../../modules/Microsoft.Network/VirtualNetworkHub.bicep' = {
+module virtualNetwork_Hub '../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
   name: 'hub_VNet'
   params: {
     virtualNetwork_AddressPrefix: '10.0.0.0/16'
@@ -53,7 +53,7 @@ module virtualNetwork_Hub '../../modules/Microsoft.Network/VirtualNetworkHub.bic
   }
 }
 
-module virtualNetwork_Spoke '../../modules/Microsoft.Network/VirtualNetworkSpoke.bicep' = {
+module virtualNetwork_Spoke '../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
   name: 'spoke_VNet'
   params: {
     virtualNetwork_AddressPrefix: '10.1.0.0/16'
@@ -217,7 +217,7 @@ module dnsZone_TestDotCom '../../modules/Microsoft.Network/DNSZone.bicep' = {
   }
 }
 
-module virtualNetwork_OnPremHub '../../modules/Microsoft.Network/VirtualNetworkHub.bicep' = {
+module virtualNetwork_OnPremHub '../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
   name: 'onprem_VNet'
   params: {
     virtualNetwork_AddressPrefix: '10.100.0.0/16'
@@ -287,6 +287,7 @@ module Hub_to_OnPrem_conn '../../modules/Microsoft.Network/Connection_and_LocalN
     vpn_SharedKey: vpn_SharedKey
   }
 }
+
 
 
 

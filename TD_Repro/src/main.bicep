@@ -43,10 +43,10 @@ Storage account name restrictions:
 @maxLength(24)
 param storageAccount_Name string = 'stortemp${uniqueString(resourceGroup().id)}'
 
-var virtualMachine_ScriptFileLocation = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
+var virtualMachine_ScriptFileLocation = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/VNET-Hub-and-Spoke-Merge/scripts/'
 
 
-module virtualNetwork_Client '../../modules/Microsoft.Network/VirtualNetworkHub.bicep' = {
+module virtualNetwork_Client '../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
   name: 'clientVNet'
   params: {
     virtualNetwork_AddressPrefix: '10.100.0.0/16'
@@ -56,7 +56,7 @@ module virtualNetwork_Client '../../modules/Microsoft.Network/VirtualNetworkHub.
   }
 }
 
-module virtualNetwork_Server '../../modules/Microsoft.Network/VirtualNetworkSpoke.bicep' = {
+module virtualNetwork_Server '../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
   name: 'serverVNet'
   params: {
     virtualNetwork_AddressPrefix: '10.101.0.0/16'
@@ -256,6 +256,7 @@ module privateEndpoint_NIC '../../modules/Microsoft.Network/PrivateEndpointNetwo
     existing_PrivateEndpoint_NetworkInterface_Name: privateLink.outputs.privateEndpoint_NetworkInterface_Name
   }
 }
+
 
 
 
