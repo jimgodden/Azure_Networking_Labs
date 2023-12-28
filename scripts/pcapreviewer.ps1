@@ -14,7 +14,7 @@ $filesToDownload = @(
 )
 
 foreach ($fileToDownload in $filesToDownload) {
-    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/VNET-Hub-and-Spoke-Merge/scripts/$fileToDownload" -OutFile "c:\$fileToDownload"
+    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/$fileToDownload" -OutFile "c:\$fileToDownload"
 }
 
 # Chocolatey installation
@@ -91,4 +91,5 @@ $trigger = New-ScheduledTaskTrigger -Once -At $currentTimePlusTenMinutes -Repeti
 Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger -User "NT AUTHORITY\SYSTEM" -Force
 
 Restart-Computer
+
 

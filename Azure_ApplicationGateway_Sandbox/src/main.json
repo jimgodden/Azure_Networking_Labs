@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.23.1.45101",
-      "templateHash": "10168379148275698524"
+      "templateHash": "7711919466514489566"
     }
   },
   "parameters": {
@@ -48,7 +48,7 @@
     }
   },
   "variables": {
-    "virtualMachine_ScriptFileLocation": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/VNET-Hub-and-Spoke-Merge/scripts/",
+    "virtualMachine_ScriptFileLocation": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/",
     "virtualMachine_Website_DomainName": "contoso.com"
   },
   "resources": [
@@ -524,7 +524,7 @@
             "value": "[parameters('virtualMachine_Size')]"
           },
           "virtualMachine_ScriptFileLocation": {
-            "value": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/VNET-Hub-and-Spoke-Merge/scripts/"
+            "value": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/"
           },
           "virtualMachine_ScriptFileName": {
             "value": "WinServ2022_General_InitScript.ps1"
@@ -540,7 +540,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "8356203842519025786"
+              "templateHash": "8019744214561870945"
             }
           },
           "parameters": {
@@ -593,7 +593,7 @@
             },
             "virtualMachine_ScriptFileLocation": {
               "type": "string",
-              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/VNET-Hub-and-Spoke-Merge/scripts/",
+              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/",
               "metadata": {
                 "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\r\nExample: https://example.com/scripts/"
               }
@@ -1573,7 +1573,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "8356203842519025786"
+              "templateHash": "8019744214561870945"
             }
           },
           "parameters": {
@@ -1626,7 +1626,7 @@
             },
             "virtualMachine_ScriptFileLocation": {
               "type": "string",
-              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/VNET-Hub-and-Spoke-Merge/scripts/",
+              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/",
               "metadata": {
                 "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\r\nExample: https://example.com/scripts/"
               }

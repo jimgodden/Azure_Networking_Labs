@@ -11,7 +11,7 @@ param virtualMachine_AdminPassword string
 @description('Password for the Virtual Machine Admin User')
 param virtualMachine_Size string = 'Standard_B2ms' // 'Standard_D2s_v3' // 'Standard_D16lds_v5'
 
-param virtualMachine_ScriptFileLocation string = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/VNET-Hub-and-Spoke-Merge/scripts/'
+param virtualMachine_ScriptFileLocation string = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/'
 
 @description('''True enables Accelerated Networking and False disabled it.  
 Not all VM sizes support Accel Net (i.e. Standard_B2ms).  
@@ -287,6 +287,7 @@ module Hub_to_OnPrem_conn '../../modules/Microsoft.Network/Connection_and_LocalN
     vpn_SharedKey: vpn_SharedKey
   }
 }
+
 
 
 

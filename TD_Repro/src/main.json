@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.23.1.45101",
-      "templateHash": "10446617585312783902"
+      "templateHash": "2210075158411303990"
     }
   },
   "parameters": {
@@ -74,7 +74,7 @@
     }
   },
   "variables": {
-    "virtualMachine_ScriptFileLocation": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/VNET-Hub-and-Spoke-Merge/scripts/"
+    "virtualMachine_ScriptFileLocation": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/"
   },
   "resources": [
     {
@@ -1073,7 +1073,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "8538161459271066359"
+              "templateHash": "5536141961870804709"
             }
           },
           "parameters": {
@@ -1126,7 +1126,7 @@
             },
             "virtualMachine_ScriptFileLocation": {
               "type": "string",
-              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/VNET-Hub-and-Spoke-Merge/scripts/",
+              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/",
               "metadata": {
                 "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\r\nExample: https://example.com/scripts/"
               }
@@ -1385,7 +1385,7 @@
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Resources/deployments', 'client_StorageAccount_File_PrivateEndpoint')]",
+        "[resourceId('Microsoft.Resources/deployments', 'client_StorageAccount_Blob_PrivateEndpoint')]",
         "[resourceId('Microsoft.Resources/deployments', 'privatelink')]",
         "ServerVM_Linux",
         "[resourceId('Microsoft.Resources/deployments', 'storageAccount')]",
@@ -1445,7 +1445,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "8538161459271066359"
+              "templateHash": "5536141961870804709"
             }
           },
           "parameters": {
@@ -1498,7 +1498,7 @@
             },
             "virtualMachine_ScriptFileLocation": {
               "type": "string",
-              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/VNET-Hub-and-Spoke-Merge/scripts/",
+              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/",
               "metadata": {
                 "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\r\nExample: https://example.com/scripts/"
               }
@@ -1757,7 +1757,7 @@
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Resources/deployments', 'client_StorageAccount_File_PrivateEndpoint')]",
+        "[resourceId('Microsoft.Resources/deployments', 'client_StorageAccount_Blob_PrivateEndpoint')]",
         "[resourceId('Microsoft.Resources/deployments', 'storageAccount')]",
         "[resourceId('Microsoft.Resources/deployments', 'storageAccountContainers')]",
         "[resourceId('Microsoft.Resources/deployments', 'serverVNet')]"
@@ -1811,7 +1811,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "8356203842519025786"
+              "templateHash": "8019744214561870945"
             }
           },
           "parameters": {
@@ -1864,7 +1864,7 @@
             },
             "virtualMachine_ScriptFileLocation": {
               "type": "string",
-              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/VNET-Hub-and-Spoke-Merge/scripts/",
+              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/",
               "metadata": {
                 "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\r\nExample: https://example.com/scripts/"
               }
@@ -2529,188 +2529,6 @@
           },
           "privateEndpoint_Name": {
             "value": "[format('{0}_blob_pe', parameters('storageAccount_Name'))]"
-          },
-          "privateEndpoint_SubnetID": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'clientVNet'), '2022-09-01').outputs.privateEndpoint_SubnetID.value]"
-          },
-          "privateLinkServiceId": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'storageAccount'), '2022-09-01').outputs.storageAccount_ID.value]"
-          },
-          "virtualNetwork_IDs": {
-            "value": [
-              "[reference(resourceId('Microsoft.Resources/deployments', 'clientVNet'), '2022-09-01').outputs.virtualNetwork_ID.value]",
-              "[reference(resourceId('Microsoft.Resources/deployments', 'serverVNet'), '2022-09-01').outputs.virtualNetwork_ID.value]"
-            ]
-          }
-        },
-        "template": {
-          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0.0",
-          "metadata": {
-            "_generator": {
-              "name": "bicep",
-              "version": "0.23.1.45101",
-              "templateHash": "5437966452409985071"
-            }
-          },
-          "parameters": {
-            "location": {
-              "type": "string",
-              "metadata": {
-                "description": "Azure Datacenter that the resource is deployed to"
-              }
-            },
-            "privateEndpoint_Name": {
-              "type": "string",
-              "metadata": {
-                "description": "Name of the Private Endpoint"
-              }
-            },
-            "privateLinkServiceId": {
-              "type": "string"
-            },
-            "privateEndpoint_SubnetID": {
-              "type": "string",
-              "metadata": {
-                "description": "Subnet ID that the Private Endpoint will be deployed to"
-              }
-            },
-            "virtualNetwork_IDs": {
-              "type": "array",
-              "metadata": {
-                "description": "Resource ID of the Virtual Networks to be linked to the Private DNS Zone"
-              }
-            },
-            "groupID": {
-              "type": "string",
-              "metadata": {
-                "description": "The ID of a group obtained from the remote resource that this private endpoint should connect to."
-              }
-            },
-            "fqdn": {
-              "type": "string",
-              "metadata": {
-                "description": "Fqdn that resolves to private endpoint ip address."
-              }
-            },
-            "privateDNSZone_Name": {
-              "type": "string",
-              "metadata": {
-                "description": "Name of the Private DNS Zone\r\nExample: privatelink.blob.${environment().suffixes.storage}"
-              }
-            }
-          },
-          "variables": {
-            "resource_Name": "[last(split(parameters('privateLinkServiceId'), '/'))]"
-          },
-          "resources": [
-            {
-              "type": "Microsoft.Network/privateEndpoints",
-              "apiVersion": "2023-05-01",
-              "name": "[parameters('privateEndpoint_Name')]",
-              "location": "[parameters('location')]",
-              "properties": {
-                "privateLinkServiceConnections": [
-                  {
-                    "name": "[format('{0}_to_{1}', parameters('privateEndpoint_Name'), variables('resource_Name'))]",
-                    "properties": {
-                      "privateLinkServiceId": "[parameters('privateLinkServiceId')]",
-                      "groupIds": [
-                        "[parameters('groupID')]"
-                      ]
-                    }
-                  }
-                ],
-                "manualPrivateLinkServiceConnections": [],
-                "subnet": {
-                  "id": "[parameters('privateEndpoint_SubnetID')]"
-                },
-                "ipConfigurations": [],
-                "customDnsConfigs": [
-                  {
-                    "fqdn": "[parameters('fqdn')]"
-                  }
-                ]
-              }
-            },
-            {
-              "type": "Microsoft.Network/privateDnsZones",
-              "apiVersion": "2020-06-01",
-              "name": "[parameters('privateDNSZone_Name')]",
-              "location": "global"
-            },
-            {
-              "type": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups",
-              "apiVersion": "2023-04-01",
-              "name": "[format('{0}/{1}', parameters('privateEndpoint_Name'), format('{0}ZoneGroup', parameters('groupID')))]",
-              "properties": {
-                "privateDnsZoneConfigs": [
-                  {
-                    "name": "default",
-                    "properties": {
-                      "privateDnsZoneId": "[resourceId('Microsoft.Network/privateDnsZones', parameters('privateDNSZone_Name'))]"
-                    }
-                  }
-                ]
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.Network/privateDnsZones', parameters('privateDNSZone_Name'))]",
-                "[resourceId('Microsoft.Network/privateEndpoints', parameters('privateEndpoint_Name'))]"
-              ]
-            },
-            {
-              "copy": {
-                "name": "virtualNetworkLink_File",
-                "count": "[length(parameters('virtualNetwork_IDs'))]"
-              },
-              "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
-              "apiVersion": "2018-09-01",
-              "name": "[format('{0}/{1}', parameters('privateDNSZone_Name'), format('{0}_to_{1}', parameters('privateEndpoint_Name'), last(split(parameters('virtualNetwork_IDs')[copyIndex()], '/'))))]",
-              "location": "global",
-              "properties": {
-                "registrationEnabled": false,
-                "virtualNetwork": {
-                  "id": "[parameters('virtualNetwork_IDs')[copyIndex()]]"
-                }
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.Network/privateDnsZones', parameters('privateDNSZone_Name'))]",
-                "[resourceId('Microsoft.Network/privateEndpoints', parameters('privateEndpoint_Name'))]"
-              ]
-            }
-          ]
-        }
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Resources/deployments', 'storageAccount')]",
-        "[resourceId('Microsoft.Resources/deployments', 'clientVNet')]",
-        "[resourceId('Microsoft.Resources/deployments', 'serverVNet')]"
-      ]
-    },
-    {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
-      "name": "client_StorageAccount_File_PrivateEndpoint",
-      "properties": {
-        "expressionEvaluationOptions": {
-          "scope": "inner"
-        },
-        "mode": "Incremental",
-        "parameters": {
-          "fqdn": {
-            "value": "[format('{0}.file.{1}', parameters('storageAccount_Name'), environment().suffixes.storage)]"
-          },
-          "groupID": {
-            "value": "file"
-          },
-          "location": {
-            "value": "[parameters('locationClient')]"
-          },
-          "privateDNSZone_Name": {
-            "value": "[format('privatelink.file.{0}', environment().suffixes.storage)]"
-          },
-          "privateEndpoint_Name": {
-            "value": "[format('{0}_file_pe', parameters('storageAccount_Name'))]"
           },
           "privateEndpoint_SubnetID": {
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'clientVNet'), '2022-09-01').outputs.privateEndpoint_SubnetID.value]"

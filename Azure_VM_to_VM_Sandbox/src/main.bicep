@@ -68,7 +68,6 @@ module virtualNetwork_Source '../../Modules/Microsoft.Network/VirtualNetwork.bic
   name: 'srcVNET'
   params: {
     networkSecurityGroup_Default_Name: 'srcNSG'
-    // firstTwoOctetsOfVirtualNetworkPrefix: '10.0'
     virtualNetwork_AddressPrefix: '10.0.0.0/16'
     location: srcLocation
     virtualNetwork_Name: 'srcVNET'
@@ -79,14 +78,12 @@ module virtualNetwork_Destination '../../Modules/Microsoft.Network/VirtualNetwor
   name: 'dstVNET'
   params: {
     networkSecurityGroup_Default_Name: 'dstNSG'
-    // firstTwoOctetsOfVirtualNetworkPrefix: '10.1'
     virtualNetwork_AddressPrefix: '10.1.0.0/16'
     location: dstLocation
     virtualNetwork_Name: 'dstVNET'
   }
 }
 
-// Virtual Network Gateways
 module sourceVirtualNetworkGateway '../../modules/Microsoft.Network/VirtualNetworkGateway.bicep' = if (isUsingVPN) {
   name: 'srcVNG'
   params: {
@@ -108,6 +105,7 @@ module destinationVirtualNetworkGateway '../../modules/Microsoft.Network/Virtual
     virtualNetworkGateway_SKU: virtualNetworkGateway_SKU
   }
 }
+
 // Connections to the other Virtual Network Gateway
 module sourceVNG_Conn '../../modules/Microsoft.Network/Connection_and_LocalNetworkGateway.bicep' = if (isUsingVPN) {
   name: 'srcVNG_conn'
@@ -135,7 +133,6 @@ module destinationVNG_Conn '../../modules/Microsoft.Network/Connection_and_Local
   }
 }
 
-// Virtual Network Peerings
 module virtualNetworkPeering_Source_to_Destination '../../modules/Microsoft.Network/VirtualNetworkPeering.bicep' = {
   name: 'Source_to_Destination_Peering'
   params: {
@@ -147,7 +144,6 @@ module virtualNetworkPeering_Source_to_Destination '../../modules/Microsoft.Netw
   ]
 }
 
-// Windows Virtual Machines
 module sourceVM_Windows '../../Modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = [ for i in range(1, numberOfSourceSideWindowsVMs):  if (isUsingWindows) {
   name: 'srcVMWindows${i}'
   params: {
@@ -159,7 +155,7 @@ module sourceVM_Windows '../../Modules/Microsoft.Compute/WindowsServer2022/Virtu
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'srcVM-Windows${i}'
     virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/VNET-Hub-and-Spoke-Merge/scripts/'
+    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/'
     virtualMachine_ScriptFileName: 'WinServ2022_WebServer_InitScript.ps1'
   }
 } ]
@@ -175,12 +171,11 @@ module destinationVM_Windows '../../Modules/Microsoft.Compute/WindowsServer2022/
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'dstVM-Windows${i}'
     virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/VNET-Hub-and-Spoke-Merge/scripts/'
+    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/'
     virtualMachine_ScriptFileName: 'WinServ2022_WebServer_InitScript.ps1'
   }
 } ]
 
-// Linux Virtual Machines
 module sourceVM_Linx '../../Modules/Microsoft.Compute/Ubuntu20/VirtualMachine.bicep' = [ for i in range(1, numberOfSourceSideLinuxVMs):  if (isUsingLinux) {
   name: 'srcVMLinux${i}'
   params: {
@@ -192,7 +187,7 @@ module sourceVM_Linx '../../Modules/Microsoft.Compute/Ubuntu20/VirtualMachine.bi
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'srcVM-Linux${i}'
     virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/VNET-Hub-and-Spoke-Merge/scripts/'
+    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/'
     virtualMachine_ScriptFileName: 'Ubuntu20_WebServer_Config.sh'
     commandToExecute: './Ubuntu20_WebServer_Config.sh'
   }
@@ -209,13 +204,12 @@ module destinationVMLinx '../../Modules/Microsoft.Compute/Ubuntu20/VirtualMachin
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'dstVM-Linux${i}'
     virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/VNET-Hub-and-Spoke-Merge/scripts/'
+    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/'
     virtualMachine_ScriptFileName: 'Ubuntu20_WebServer_Config.sh'
     commandToExecute: './Ubuntu20_WebServer_Config.sh'
   }
 } ]
 
-// Azure Firewall
 module sourceAzFW '../../modules/Microsoft.Network/AzureFirewall.bicep' = if (isUsingAzureFirewall) {
   name: 'srcAzFW'
   params: {
@@ -246,7 +240,6 @@ module destinationAzFW '../../modules/Microsoft.Network/AzureFirewall.bicep' = i
   ]
 }
 
-// Azure Bastion for connecting to the Virtual Machines
 module sourceBastion '../../modules/Microsoft.Network/Bastion.bicep' = {
   name: 'srcBastion'
   params: {
@@ -254,26 +247,3 @@ module sourceBastion '../../modules/Microsoft.Network/Bastion.bicep' = {
     location: srcLocation
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

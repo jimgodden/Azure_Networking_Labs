@@ -43,7 +43,7 @@ Storage account name restrictions:
 @maxLength(24)
 param storageAccount_Name string = 'stortemp${uniqueString(resourceGroup().id)}'
 
-var virtualMachine_ScriptFileLocation = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/VNET-Hub-and-Spoke-Merge/scripts/'
+var virtualMachine_ScriptFileLocation = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/'
 
 
 module virtualNetwork_Client '../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
@@ -239,6 +239,7 @@ module privateEndpoint_NIC '../../modules/Microsoft.Network/PrivateEndpointNetwo
     existing_PrivateEndpoint_NetworkInterface_Name: privateLink.outputs.privateEndpoint_NetworkInterface_Name
   }
 }
+
 
 
 

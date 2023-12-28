@@ -48,7 +48,7 @@ Example:
 contoso.com.''')
 param onpremResolvableDomainName string = 'contoso.com.'
 
-var virtualMachine_ScriptFileLocation = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/VNET-Hub-and-Spoke-Merge/scripts/'
+var virtualMachine_ScriptFileLocation = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/'
 
 
 module virtualNetwork_Hub '../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
@@ -375,6 +375,7 @@ module Hub_to_OnPrem_conn '../../modules/Microsoft.Network/Connection_and_LocalN
     vpn_SharedKey: vpn_SharedKey
   }
 }
+
 
 
 
