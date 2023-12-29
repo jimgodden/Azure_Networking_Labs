@@ -1,6 +1,6 @@
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/WinServ2022_InstallTools.ps1" -OutFile "C:\WinServ2022_InstallTools.ps1"
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/WinServ2022_InitScript.ps1" -OutFile "C:\WinServ2022_InitScript.ps1"
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\WinServ2022_InitScript.ps1"
-
 
 # Creates a task that installs the tools when the user logs in
 $initTaskName = "Init"
