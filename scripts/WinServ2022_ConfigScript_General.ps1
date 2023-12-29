@@ -6,7 +6,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\WinServ2022_InitScri
 $initTaskName = "Init"
 $initTaskAction = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-NoProfile -ExecutionPolicy Bypass -File `"C:\WinServ2022_InstallTools.ps1`""
 $initTaskTrigger = New-ScheduledTaskTrigger -AtLogon
-Register-ScheduledTask -TaskName $initTaskName -Action $initTaskAction -Trigger $initTaskTrigger -Force
+Register-ScheduledTask -TaskName $initTaskName -Action $initTaskAction -Trigger $initTaskTrigger -User "NT AUTHORITY\SYSTEM" -Force
 
 # Creates a task that installs several packages using chocolatey after the computer has been restarted
 $currentTimePlusTwoMinutes = (Get-Date).AddMinutes(2)
