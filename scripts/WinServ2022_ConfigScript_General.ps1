@@ -4,3 +4,5 @@ Start-Job -ScriptBlock {
 }
 
 Get-Job | Wait-Job
+
+Restart-Computer
