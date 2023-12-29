@@ -26,5 +26,5 @@ Add-AppxPackage "c:\Microsoft.WindowsTerminal_Win10_1.16.10261.0_8wekyb3d8bbwe.m
 Set-Shortcut -ApplicationFilePath "C:\Program Files\Wireshark\Wireshark.exe"  -DestinationFilePath "${DesktopFilePath}/Wireshark.lnk"
 Set-Shortcut -ApplicationFilePath "C:\Program Files\WindowsApps\Microsoft.WindowsTerminal_1.16.10261.0_x64__8wekyb3d8bbwe\wt.exe" -DestinationFilePath "${DesktopFilePath}/Terminal.lnk"
 
-Unregister-ScheduledTask -TaskName "Init" -Confirm:$false
+# Unregister-ScheduledTask -TaskName "Init" -Confirm:$false
 
