@@ -31,8 +31,8 @@ Example: https://example.com/scripts/''')
 param virtualMachine_ScriptFileLocation string = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/'
 
 @description('''Name of the file to be ran while the Virtual Machine is being created
-Example: InitScript.ps1''')
-param virtualMachine_ScriptFileName string = 'WinServ2022_General_InitScript.ps1'
+Example: WinServ2022_ConfigScript_General.ps1''')
+param virtualMachine_ScriptFileName string = 'WinServ2022_ConfigScript_General.ps1'
 
 @description('Joins the file path and the file name together')
 var virtualMachine_ScriptFileUri = '${virtualMachine_ScriptFileLocation}${virtualMachine_ScriptFileName}'

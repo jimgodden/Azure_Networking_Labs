@@ -1624,7 +1624,7 @@
             "value": "[variables('virtualMachine_ScriptFileLocation')]"
           },
           "virtualMachine_ScriptFileName": {
-            "value": "WinServ2022_DNS_InitScript.ps1"
+            "value": "WinServ2022_ConfigScript_DNS.ps1"
           }
         },
         "template": {
@@ -1694,9 +1694,9 @@
             },
             "virtualMachine_ScriptFileName": {
               "type": "string",
-              "defaultValue": "WinServ2022_General_InitScript.ps1",
+              "defaultValue": "WinServ2022_ConfigScript_General.ps1",
               "metadata": {
-                "description": "Name of the file to be ran while the Virtual Machine is being created\r\nExample: InitScript.ps1"
+                "description": "Name of the file to be ran while the Virtual Machine is being created\r\nExample: WinServ2022_ConfigScript_General.ps1"
               }
             },
             "commandToExecute": {
@@ -1998,7 +1998,7 @@
             "value": "[variables('virtualMachine_ScriptFileLocation')]"
           },
           "virtualMachine_ScriptFileName": {
-            "value": "WinServ2022_General_InitScript.ps1"
+            "value": "WinServ2022_ConfigScript_General.ps1"
           }
         },
         "template": {
@@ -2068,9 +2068,9 @@
             },
             "virtualMachine_ScriptFileName": {
               "type": "string",
-              "defaultValue": "WinServ2022_General_InitScript.ps1",
+              "defaultValue": "WinServ2022_ConfigScript_General.ps1",
               "metadata": {
-                "description": "Name of the file to be ran while the Virtual Machine is being created\r\nExample: InitScript.ps1"
+                "description": "Name of the file to be ran while the Virtual Machine is being created\r\nExample: WinServ2022_ConfigScript_General.ps1"
               }
             },
             "commandToExecute": {
@@ -2373,7 +2373,7 @@
             "value": "[variables('virtualMachine_ScriptFileLocation')]"
           },
           "virtualMachine_ScriptFileName": {
-            "value": "WinServ2022_WebServer_InitScript.ps1"
+            "value": "WinServ2022_ConfigScript_WebServer.ps1"
           }
         },
         "template": {
@@ -2443,9 +2443,9 @@
             },
             "virtualMachine_ScriptFileName": {
               "type": "string",
-              "defaultValue": "WinServ2022_General_InitScript.ps1",
+              "defaultValue": "WinServ2022_ConfigScript_General.ps1",
               "metadata": {
-                "description": "Name of the file to be ran while the Virtual Machine is being created\r\nExample: InitScript.ps1"
+                "description": "Name of the file to be ran while the Virtual Machine is being created\r\nExample: WinServ2022_ConfigScript_General.ps1"
               }
             },
             "commandToExecute": {
@@ -4804,10 +4804,10 @@
             "value": "[variables('virtualMachine_ScriptFileLocation')]"
           },
           "virtualMachine_ScriptFileName": {
-            "value": "WinServ2022_DNS_InitScript.ps1"
+            "value": "WinServ2022_ConfigScript_DNS.ps1"
           },
           "commandToExecute": {
-            "value": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_DNS_InitScript.ps1 -SampleDNSZoneName {0} -SampleHostName \"a\" -SampleARecord \"172.16.0.1\" -PrivateDNSZone \"privatelink.blob.core.windows.net\" -ConditionalForwarderIPAddress {1}', parameters('onpremResolvableDomainName'), reference(resourceId('Microsoft.Resources/deployments', 'dnsPrivateResolver'), '2022-09-01').outputs.privateDNSResolver_Inbound_Endpoint_IPAddress.value)]"
+            "value": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -SampleDNSZoneName {0} -SampleHostName \"a\" -SampleARecord \"172.16.0.1\" -PrivateDNSZone \"privatelink.blob.core.windows.net\" -ConditionalForwarderIPAddress {1}', parameters('onpremResolvableDomainName'), reference(resourceId('Microsoft.Resources/deployments', 'dnsPrivateResolver'), '2022-09-01').outputs.privateDNSResolver_Inbound_Endpoint_IPAddress.value)]"
           }
         },
         "template": {
@@ -4877,9 +4877,9 @@
             },
             "virtualMachine_ScriptFileName": {
               "type": "string",
-              "defaultValue": "WinServ2022_General_InitScript.ps1",
+              "defaultValue": "WinServ2022_ConfigScript_General.ps1",
               "metadata": {
-                "description": "Name of the file to be ran while the Virtual Machine is being created\r\nExample: InitScript.ps1"
+                "description": "Name of the file to be ran while the Virtual Machine is being created\r\nExample: WinServ2022_ConfigScript_General.ps1"
               }
             },
             "commandToExecute": {

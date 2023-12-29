@@ -65,7 +65,7 @@ module virtualMachine_Windows '../../../../modules/Microsoft.Compute/WindowsServ
     virtualMachine_Name: 'winVM${virtualHub.outputs.virtualHub_Name}${i}'
     virtualMachine_Size: 'B2ms'
     virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/'
-    virtualMachine_ScriptFileName: 'WinServ2022_General_InitScript.ps1'
+    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_General.ps1'
   }
 } ]
 

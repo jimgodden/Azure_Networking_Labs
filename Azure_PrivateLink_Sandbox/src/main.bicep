@@ -118,7 +118,7 @@ module hub_WinVMs '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMach
     virtualMachine_Name: 'hub-WinVM${i}'
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    virtualMachine_ScriptFileName: 'WinServ2022_DNS_InitScript.ps1'
+    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_DNS.ps1'
   }
 } ]
 
@@ -133,7 +133,7 @@ module spokeA_WinVM '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMa
     virtualMachine_Name: 'spokeA-WinVM'
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    virtualMachine_ScriptFileName: 'WinServ2022_General_InitScript.ps1'
+    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_General.ps1'
   }
   dependsOn: [
     hub_To_SpokeA_Peering
@@ -151,7 +151,7 @@ module spokeB_WinVM '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMa
     virtualMachine_Name: 'spokeB-WinVM'
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    virtualMachine_ScriptFileName: 'WinServ2022_WebServer_InitScript.ps1'
+    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_WebServer.ps1'
   }
   dependsOn: [
     hub_To_SpokeB_Peering
@@ -325,8 +325,8 @@ module OnPremVM_WinDNS '../../modules/Microsoft.Compute/WindowsServer2022/Virtua
     virtualMachine_Name: 'OnPrem-WinDNS${i}'
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    virtualMachine_ScriptFileName: 'WinServ2022_DNS_InitScript.ps1'
-    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_DNS_InitScript.ps1 -SampleDNSZoneName ${onpremResolvableDomainName} -SampleHostName "a" -SampleARecord "172.16.0.1" -PrivateDNSZone "privatelink.blob.core.windows.net" -ConditionalForwarderIPAddress ${dnsPrivateResolver.outputs.privateDNSResolver_Inbound_Endpoint_IPAddress}'
+    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_DNS.ps1'
+    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -SampleDNSZoneName ${onpremResolvableDomainName} -SampleHostName "a" -SampleARecord "172.16.0.1" -PrivateDNSZone "privatelink.blob.core.windows.net" -ConditionalForwarderIPAddress ${dnsPrivateResolver.outputs.privateDNSResolver_Inbound_Endpoint_IPAddress}'
   }
 } ]
 

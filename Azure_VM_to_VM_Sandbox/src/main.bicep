@@ -156,7 +156,8 @@ module sourceVM_Windows '../../Modules/Microsoft.Compute/WindowsServer2022/Virtu
     virtualMachine_Name: 'srcVM-Windows${i}'
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/'
-    virtualMachine_ScriptFileName: 'WinServ2022_WebServer_InitScript.ps1'
+    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_General.ps1'
+    commandToExecute: 'powershell -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_General.ps1'
   }
 } ]
 
@@ -172,7 +173,8 @@ module destinationVM_Windows '../../Modules/Microsoft.Compute/WindowsServer2022/
     virtualMachine_Name: 'dstVM-Windows${i}'
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/'
-    virtualMachine_ScriptFileName: 'WinServ2022_WebServer_InitScript.ps1'
+    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_WebServer.ps1'
+    commandToExecute: 'powershell -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_WebServer.ps1'
   }
 } ]
 

@@ -44,8 +44,8 @@ module clientVM '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachin
     virtualMachine_Name: 'clientVM'
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/'
-    virtualMachine_ScriptFileName: 'WinServ2022_General_InitScript.ps1'
-    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_General_InitScript.ps1'
+    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_General.ps1'
+    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_General.ps1'
   }
 }
 
@@ -91,8 +91,8 @@ module webserverVM '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMac
     virtualMachine_Name: 'webserverVM'
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    virtualMachine_ScriptFileName: 'WinServ2022_WebServer_InitScript.ps1'
-    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_WebServer_InitScript.ps1 -FQDN webserverVM.${virtualMachine_Website_DomainName}'
+    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_WebServer.ps1'
+    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_WebServer.ps1 -FQDN webserverVM.${virtualMachine_Website_DomainName}'
   }
 }
 

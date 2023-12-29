@@ -1135,7 +1135,7 @@
               "type": "string",
               "defaultValue": "Ubuntu20_DNS_Config.sh",
               "metadata": {
-                "description": "Name of the file to be ran while the Virtual Machine is being created\r\nExample: InitScript.ps1"
+                "description": "Name of the file to be ran while the Virtual Machine is being created\r\nExample: WinServ2022_ConfigScript_General.ps1"
               }
             },
             "commandToExecute": {
@@ -1507,7 +1507,7 @@
               "type": "string",
               "defaultValue": "Ubuntu20_DNS_Config.sh",
               "metadata": {
-                "description": "Name of the file to be ran while the Virtual Machine is being created\r\nExample: InitScript.ps1"
+                "description": "Name of the file to be ran while the Virtual Machine is being created\r\nExample: WinServ2022_ConfigScript_General.ps1"
               }
             },
             "commandToExecute": {
@@ -1871,9 +1871,9 @@
             },
             "virtualMachine_ScriptFileName": {
               "type": "string",
-              "defaultValue": "WinServ2022_General_InitScript.ps1",
+              "defaultValue": "WinServ2022_ConfigScript_General.ps1",
               "metadata": {
-                "description": "Name of the file to be ran while the Virtual Machine is being created\r\nExample: InitScript.ps1"
+                "description": "Name of the file to be ran while the Virtual Machine is being created\r\nExample: WinServ2022_ConfigScript_General.ps1"
               }
             },
             "commandToExecute": {

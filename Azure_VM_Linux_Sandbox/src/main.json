@@ -585,7 +585,7 @@
               "type": "string",
               "defaultValue": "Ubuntu20_DNS_Config.sh",
               "metadata": {
-                "description": "Name of the file to be ran while the Virtual Machine is being created\r\nExample: InitScript.ps1"
+                "description": "Name of the file to be ran while the Virtual Machine is being created\r\nExample: WinServ2022_ConfigScript_General.ps1"
               }
             },
             "commandToExecute": {
