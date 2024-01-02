@@ -19,8 +19,6 @@ $initTaskAction = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-
 $initTaskTrigger = New-ScheduledTaskTrigger -AtLogon
 Register-ScheduledTask -TaskName $initTaskName -Action $initTaskAction -Trigger $initTaskTrigger -User "NT AUTHORITY\SYSTEM" -Force
 
-
-
 choco install powershell-core -y
 choco install python311 -y
 choco install vscode -y

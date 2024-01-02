@@ -1,4 +1,5 @@
 $DesktopFilePath = "C:\Users\$ENV:USERNAME\Desktop"
+New-Item -ItemType File -Path "c:\${ENV:USERNAME}washere.txt"
 
 function Set-Shortcut {
     param (
