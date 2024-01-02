@@ -1,5 +1,4 @@
 $DesktopFilePath = "C:\Users\$ENV:USERNAME\Desktop"
-New-Item -ItemType File -Path "c:\" -Name "${ENV:USERNAME}washere.txt"
 
 function Set-Shortcut {
     param (
@@ -28,4 +27,3 @@ Set-Shortcut -ApplicationFilePath "C:\Program Files\WindowsApps\Microsoft.Window
 c:\npcap-1.75.exe
 
 Unregister-ScheduledTask -TaskName "Init" -Confirm:$false
-
