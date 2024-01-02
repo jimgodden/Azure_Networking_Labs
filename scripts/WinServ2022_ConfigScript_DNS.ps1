@@ -1,4 +1,5 @@
 param (
+    [string]$Username,
     [string]$SampleDNSZoneName,
     [string]$SampleHostName,
     [string]$SampleARecord,
@@ -31,7 +32,7 @@ Start-Job -ScriptBlock {
 
 Start-Job -ScriptBlock {
     Invoke-WebRequest -Uri "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/WinServ2022_InitScript.ps1" -OutFile "C:\WinServ2022_InitScript.ps1"
-    powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\WinServ2022_InitScript.ps1"
+    powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\WinServ2022_InitScript.ps1" -Username $using:Username
 }
 
 Get-Job | Wait-Job

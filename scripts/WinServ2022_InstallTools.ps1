@@ -1,5 +1,5 @@
 $DesktopFilePath = "C:\Users\$ENV:USERNAME\Desktop"
-New-Item -ItemType File -Path "c:\${ENV:USERNAME}washere.txt"
+New-Item -ItemType File -Path "c:\" -Name "${ENV:USERNAME}washere.txt"
 
 function Set-Shortcut {
     param (
@@ -17,9 +17,6 @@ function Set-Shortcut {
 # ensures that Windows PowerShell is used
 Write-Host "Run this script in Windows PowerShell or else it will fail!"
 
-# npcap for using Wireshark for taking packet captures
-c:\npcap-1.75.exe
-
 # Package required for installing Windows Terminal
 Add-AppxPackage "c:\Microsoft.VCLibs.x64.14.00.Desktop.appx"
 Add-AppxPackage "c:\Microsoft.WindowsTerminal_Win10_1.16.10261.0_8wekyb3d8bbwe.msixbundle"
@@ -27,5 +24,8 @@ Add-AppxPackage "c:\Microsoft.WindowsTerminal_Win10_1.16.10261.0_8wekyb3d8bbwe.m
 Set-Shortcut -ApplicationFilePath "C:\Program Files\Wireshark\Wireshark.exe"  -DestinationFilePath "${DesktopFilePath}/Wireshark.lnk"
 Set-Shortcut -ApplicationFilePath "C:\Program Files\WindowsApps\Microsoft.WindowsTerminal_1.16.10261.0_x64__8wekyb3d8bbwe\wt.exe" -DestinationFilePath "${DesktopFilePath}/Terminal.lnk"
 
-# Unregister-ScheduledTask -TaskName "Init" -Confirm:$false
+# npcap for using Wireshark for taking packet captures
+c:\npcap-1.75.exe
+
+Unregister-ScheduledTask -TaskName "Init" -Confirm:$false
 
