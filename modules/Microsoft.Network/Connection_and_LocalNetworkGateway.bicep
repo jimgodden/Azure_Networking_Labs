@@ -4,8 +4,11 @@ param location string
 @description('Friendly name for the destination VPN device')
 param vpn_Destination_Name string
 
-@description('Public IP Address of the Destination VPN')
+@description('Public IP Address of the Destination VPN.  Use this or FQDN.  Not both.')
 param vpn_Destination_PublicIPAddress string
+
+@description('FQDN of the Destination VPN.  Use this or Public IP Address.  Not both.')
+param vpn_Destination_FQDN string = ''
 
 @description('BGP Peering Address of the Destination VPN')
 param vpn_Destination_BGPIPAddress string
@@ -70,6 +73,7 @@ resource localNetworkGateway 'Microsoft.Network/localNetworkGateways@2022-11-01'
   location: location
   properties: {
     gatewayIpAddress: vpn_Destination_PublicIPAddress
+    fqdn: vpn_Destination_FQDN
     bgpSettings: {
       asn: vpn_Destination_ASN
       bgpPeeringAddress: vpn_Destination_BGPIPAddress
