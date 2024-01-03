@@ -155,7 +155,7 @@ module sourceVM_Windows '../../Modules/Microsoft.Compute/WindowsServer2022/Virtu
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'srcVM-Windows${i}'
     virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/'
+    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
     virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_General.ps1'
     commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_General.ps1 -Username ${virtualMachine_AdminUsername}'
   }
@@ -172,7 +172,7 @@ module destinationVM_Windows '../../Modules/Microsoft.Compute/WindowsServer2022/
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'dstVM-Windows${i}'
     virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/'
+    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
     virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_WebServer.ps1'
     commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_WebServer.ps1 -Username ${virtualMachine_AdminUsername}'
   }
@@ -189,7 +189,7 @@ module sourceVM_Linx '../../Modules/Microsoft.Compute/Ubuntu20/VirtualMachine.bi
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'srcVM-Linux${i}'
     virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/'
+    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
     virtualMachine_ScriptFileName: 'Ubuntu20_WebServer_Config.sh'
     commandToExecute: './Ubuntu20_WebServer_Config.sh'
   }
@@ -206,7 +206,7 @@ module destinationVMLinx '../../Modules/Microsoft.Compute/Ubuntu20/VirtualMachin
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'dstVM-Linux${i}'
     virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/'
+    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
     virtualMachine_ScriptFileName: 'Ubuntu20_WebServer_Config.sh'
     commandToExecute: './Ubuntu20_WebServer_Config.sh'
   }
@@ -249,3 +249,4 @@ module sourceBastion '../../modules/Microsoft.Network/Bastion.bicep' = {
     location: srcLocation
   }
 }
+

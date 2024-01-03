@@ -13,7 +13,7 @@ $filesToDownload = @(
 
 # Downloads the general use scripts from the GitHub Repository
 foreach ($fileToDownload in $filesToDownload) {
-    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/$fileToDownload" -OutFile "c:\$fileToDownload"
+    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/$fileToDownload" -OutFile "c:\$fileToDownload"
 }
 
 # npcap for using Wireshark for taking packet captures
@@ -35,3 +35,4 @@ $chocoTaskName = "ChocoInstalls"
 $chocoTaskAction = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-NoProfile -ExecutionPolicy Bypass -File `"C:\ChocoInstalls.ps1`""
 $chocoTaskTrigger = New-ScheduledTaskTrigger -Once -At $currentTimePlusTwoMinutes
 Register-ScheduledTask -TaskName $chocoTaskName -Action $chocoTaskAction -Trigger $chocoTaskTrigger -User "NT AUTHORITY\SYSTEM" -Force
+

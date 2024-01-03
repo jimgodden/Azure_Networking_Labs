@@ -64,7 +64,7 @@ module virtualMachine_Windows '../../../../modules/Microsoft.Compute/WindowsServ
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'winVM${virtualHub.outputs.virtualHub_Name}${i}'
     virtualMachine_Size: 'B2ms'
-    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/'
+    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
     virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_General.ps1'
   }
 } ]
@@ -79,6 +79,7 @@ output virtualHub_VPNGateway_Name_Array array = virtualHub.outputs.vpnGateway_Na
 output virtualHub_VPNGateway_PublicIPAddresses array = virtualHub.outputs.vpnGateway_PublicIPAddresses
 output virtualHub_VPNGateway_BGPAddresses array = virtualHub.outputs.vpnGateway_BGPAddresses
 output virtualHub_VPNGateway_ASN array = virtualHub.outputs.vpnGateway_ASN
+
 
 
 

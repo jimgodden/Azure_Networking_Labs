@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.23.1.45101",
-      "templateHash": "16750582489053050829"
+      "templateHash": "6770876658317597669"
     }
   },
   "parameters": {
@@ -87,7 +87,7 @@
     }
   },
   "variables": {
-    "virtualMachine_ScriptFileLocation": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/"
+    "virtualMachine_ScriptFileLocation": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/"
   },
   "resources": [
     {
@@ -1634,7 +1634,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "8019744214561870945"
+              "templateHash": "7632930515549515641"
             }
           },
           "parameters": {
@@ -1687,7 +1687,7 @@
             },
             "virtualMachine_ScriptFileLocation": {
               "type": "string",
-              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/",
+              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/",
               "metadata": {
                 "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\r\nExample: https://example.com/scripts/"
               }
@@ -2008,7 +2008,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "8019744214561870945"
+              "templateHash": "7632930515549515641"
             }
           },
           "parameters": {
@@ -2061,7 +2061,7 @@
             },
             "virtualMachine_ScriptFileLocation": {
               "type": "string",
-              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/",
+              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/",
               "metadata": {
                 "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\r\nExample: https://example.com/scripts/"
               }
@@ -2383,7 +2383,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "8019744214561870945"
+              "templateHash": "7632930515549515641"
             }
           },
           "parameters": {
@@ -2436,7 +2436,7 @@
             },
             "virtualMachine_ScriptFileLocation": {
               "type": "string",
-              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/",
+              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/",
               "metadata": {
                 "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\r\nExample: https://example.com/scripts/"
               }
@@ -4807,7 +4807,7 @@
             "value": "WinServ2022_ConfigScript_DNS.ps1"
           },
           "commandToExecute": {
-            "value": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -SampleDNSZoneName {0} -SampleHostName \"a\" -SampleARecord \"172.16.0.1\" -PrivateDNSZone \"privatelink.blob.core.windows.net\" -ConditionalForwarderIPAddress {1}', parameters('onpremResolvableDomainName'), reference(resourceId('Microsoft.Resources/deployments', 'dnsPrivateResolver'), '2022-09-01').outputs.privateDNSResolver_Inbound_Endpoint_IPAddress.value)]"
+            "value": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username {0} -SampleDNSZoneName {1} -SampleHostName \"a\" -SampleARecord \"172.16.0.1\" -PrivateDNSZone \"privatelink.blob.core.windows.net\" -ConditionalForwarderIPAddress {2}', parameters('virtualMachine_AdminUsername'), parameters('onpremResolvableDomainName'), reference(resourceId('Microsoft.Resources/deployments', 'dnsPrivateResolver'), '2022-09-01').outputs.privateDNSResolver_Inbound_Endpoint_IPAddress.value)]"
           }
         },
         "template": {
@@ -4817,7 +4817,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "8019744214561870945"
+              "templateHash": "7632930515549515641"
             }
           },
           "parameters": {
@@ -4870,7 +4870,7 @@
             },
             "virtualMachine_ScriptFileLocation": {
               "type": "string",
-              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/",
+              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/",
               "metadata": {
                 "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\r\nExample: https://example.com/scripts/"
               }
@@ -5500,7 +5500,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "16532889140507493550"
+              "templateHash": "14372517579176968060"
             }
           },
           "parameters": {
@@ -5519,7 +5519,14 @@
             "vpn_Destination_PublicIPAddress": {
               "type": "string",
               "metadata": {
-                "description": "Public IP Address of the Destination VPN"
+                "description": "Public IP Address of the Destination VPN.  Use this or FQDN.  Not both."
+              }
+            },
+            "vpn_Destination_FQDN": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "FQDN of the Destination VPN.  Use this or Public IP Address.  Not both."
               }
             },
             "vpn_Destination_BGPIPAddress": {
@@ -5587,6 +5594,7 @@
               "location": "[parameters('location')]",
               "properties": {
                 "gatewayIpAddress": "[parameters('vpn_Destination_PublicIPAddress')]",
+                "fqdn": "[parameters('vpn_Destination_FQDN')]",
                 "bgpSettings": {
                   "asn": "[parameters('vpn_Destination_ASN')]",
                   "bgpPeeringAddress": "[parameters('vpn_Destination_BGPIPAddress')]"
@@ -5640,7 +5648,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "16532889140507493550"
+              "templateHash": "14372517579176968060"
             }
           },
           "parameters": {
@@ -5659,7 +5667,14 @@
             "vpn_Destination_PublicIPAddress": {
               "type": "string",
               "metadata": {
-                "description": "Public IP Address of the Destination VPN"
+                "description": "Public IP Address of the Destination VPN.  Use this or FQDN.  Not both."
+              }
+            },
+            "vpn_Destination_FQDN": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "FQDN of the Destination VPN.  Use this or Public IP Address.  Not both."
               }
             },
             "vpn_Destination_BGPIPAddress": {
@@ -5727,6 +5742,7 @@
               "location": "[parameters('location')]",
               "properties": {
                 "gatewayIpAddress": "[parameters('vpn_Destination_PublicIPAddress')]",
+                "fqdn": "[parameters('vpn_Destination_FQDN')]",
                 "bgpSettings": {
                   "asn": "[parameters('vpn_Destination_ASN')]",
                   "bgpPeeringAddress": "[parameters('vpn_Destination_BGPIPAddress')]"

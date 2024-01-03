@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.23.1.45101",
-      "templateHash": "7711919466514489566"
+      "templateHash": "12628271988369276142"
     }
   },
   "parameters": {
@@ -48,7 +48,7 @@
     }
   },
   "variables": {
-    "virtualMachine_ScriptFileLocation": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/",
+    "virtualMachine_ScriptFileLocation": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/",
     "virtualMachine_Website_DomainName": "contoso.com"
   },
   "resources": [
@@ -524,13 +524,13 @@
             "value": "[parameters('virtualMachine_Size')]"
           },
           "virtualMachine_ScriptFileLocation": {
-            "value": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/"
+            "value": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/"
           },
           "virtualMachine_ScriptFileName": {
             "value": "WinServ2022_ConfigScript_General.ps1"
           },
           "commandToExecute": {
-            "value": "powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_General.ps1"
+            "value": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_General.ps1 -Username {0}', parameters('virtualMachine_AdminUsername'))]"
           }
         },
         "template": {
@@ -540,7 +540,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "8019744214561870945"
+              "templateHash": "7632930515549515641"
             }
           },
           "parameters": {
@@ -593,7 +593,7 @@
             },
             "virtualMachine_ScriptFileLocation": {
               "type": "string",
-              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/",
+              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/",
               "metadata": {
                 "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\r\nExample: https://example.com/scripts/"
               }
@@ -1563,7 +1563,7 @@
             "value": "WinServ2022_ConfigScript_WebServer.ps1"
           },
           "commandToExecute": {
-            "value": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_WebServer.ps1 -FQDN webserverVM.{0}', variables('virtualMachine_Website_DomainName'))]"
+            "value": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_WebServer.ps1 -Username {0} -FQDN webserverVM.{1}', parameters('virtualMachine_AdminUsername'), variables('virtualMachine_Website_DomainName'))]"
           }
         },
         "template": {
@@ -1573,7 +1573,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "8019744214561870945"
+              "templateHash": "7632930515549515641"
             }
           },
           "parameters": {
@@ -1626,7 +1626,7 @@
             },
             "virtualMachine_ScriptFileLocation": {
               "type": "string",
-              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/",
+              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/",
               "metadata": {
                 "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\r\nExample: https://example.com/scripts/"
               }

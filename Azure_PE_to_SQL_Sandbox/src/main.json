@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.23.1.45101",
-      "templateHash": "4540371033362139206"
+      "templateHash": "6174170148973439681"
     }
   },
   "parameters": {
@@ -824,7 +824,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "8019744214561870945"
+              "templateHash": "7632930515549515641"
             }
           },
           "parameters": {
@@ -877,7 +877,7 @@
             },
             "virtualMachine_ScriptFileLocation": {
               "type": "string",
-              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/",
+              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/",
               "metadata": {
                 "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\r\nExample: https://example.com/scripts/"
               }

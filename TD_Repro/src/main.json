@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.23.1.45101",
-      "templateHash": "2210075158411303990"
+      "templateHash": "12695434059380883278"
     }
   },
   "parameters": {
@@ -74,7 +74,7 @@
     }
   },
   "variables": {
-    "virtualMachine_ScriptFileLocation": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/"
+    "virtualMachine_ScriptFileLocation": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/"
   },
   "resources": [
     {
@@ -1073,7 +1073,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "5536141961870804709"
+              "templateHash": "1353880023831061415"
             }
           },
           "parameters": {
@@ -1126,7 +1126,7 @@
             },
             "virtualMachine_ScriptFileLocation": {
               "type": "string",
-              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/",
+              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/",
               "metadata": {
                 "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\r\nExample: https://example.com/scripts/"
               }
@@ -1445,7 +1445,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "5536141961870804709"
+              "templateHash": "1353880023831061415"
             }
           },
           "parameters": {
@@ -1498,7 +1498,7 @@
             },
             "virtualMachine_ScriptFileLocation": {
               "type": "string",
-              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/",
+              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/",
               "metadata": {
                 "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\r\nExample: https://example.com/scripts/"
               }
@@ -1801,7 +1801,7 @@
             "value": "pcapreviewer.ps1"
           },
           "commandToExecute": {
-            "value": "[format('powershell.exe -ExecutionPolicy Unrestricted -File pcapreviewer.ps1 -StorageAccountName {0} -StorageAccountKey {1} -ContainerName {2} -NeedsReviewContainerName {3} -IgnoreContainerName {4}', reference(resourceId('Microsoft.Resources/deployments', 'storageAccount'), '2022-09-01').outputs.storageAccount_Name.value, reference(resourceId('Microsoft.Resources/deployments', 'storageAccount'), '2022-09-01').outputs.storageAccount_key0.value, reference(resourceId('Microsoft.Resources/deployments', 'storageAccountContainers'), '2022-09-01').outputs.container_Names.value[0], reference(resourceId('Microsoft.Resources/deployments', 'storageAccountContainers'), '2022-09-01').outputs.container_Names.value[1], reference(resourceId('Microsoft.Resources/deployments', 'storageAccountContainers'), '2022-09-01').outputs.container_Names.value[2])]"
+            "value": "[format('powershell.exe -ExecutionPolicy Unrestricted -File pcapreviewer.ps1 -Username {0} -StorageAccountName {1} -StorageAccountKey {2} -ContainerName {3} -NeedsReviewContainerName {4} -IgnoreContainerName {5}', parameters('virtualMachine_AdminUsername'), reference(resourceId('Microsoft.Resources/deployments', 'storageAccount'), '2022-09-01').outputs.storageAccount_Name.value, reference(resourceId('Microsoft.Resources/deployments', 'storageAccount'), '2022-09-01').outputs.storageAccount_key0.value, reference(resourceId('Microsoft.Resources/deployments', 'storageAccountContainers'), '2022-09-01').outputs.container_Names.value[0], reference(resourceId('Microsoft.Resources/deployments', 'storageAccountContainers'), '2022-09-01').outputs.container_Names.value[1], reference(resourceId('Microsoft.Resources/deployments', 'storageAccountContainers'), '2022-09-01').outputs.container_Names.value[2])]"
           }
         },
         "template": {
@@ -1811,7 +1811,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "8019744214561870945"
+              "templateHash": "7632930515549515641"
             }
           },
           "parameters": {
@@ -1864,7 +1864,7 @@
             },
             "virtualMachine_ScriptFileLocation": {
               "type": "string",
-              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/",
+              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/",
               "metadata": {
                 "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\r\nExample: https://example.com/scripts/"
               }

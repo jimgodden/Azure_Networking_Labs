@@ -19,7 +19,7 @@ I'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net.
 ''')
 param acceleratedNetworking bool = false
 
-var virtualMachine_ScriptFileLocation = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/'
+var virtualMachine_ScriptFileLocation = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
 
 var virtualMachine_Website_DomainName = 'contoso.com'
 
@@ -43,7 +43,7 @@ module clientVM '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachin
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'clientVM'
     virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/'
+    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
     virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_General.ps1'
     commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_General.ps1 -Username ${virtualMachine_AdminUsername}'
   }
@@ -103,6 +103,7 @@ module hubBastion '../../modules/Microsoft.Network/Bastion.bicep' = {
     location: location
   }
 }
+
 
 
 

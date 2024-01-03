@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.23.1.45101",
-      "templateHash": "4695977299411913414"
+      "templateHash": "16228884809254409657"
     }
   },
   "parameters": {
@@ -1378,7 +1378,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "16532889140507493550"
+              "templateHash": "14372517579176968060"
             }
           },
           "parameters": {
@@ -1397,7 +1397,14 @@
             "vpn_Destination_PublicIPAddress": {
               "type": "string",
               "metadata": {
-                "description": "Public IP Address of the Destination VPN"
+                "description": "Public IP Address of the Destination VPN.  Use this or FQDN.  Not both."
+              }
+            },
+            "vpn_Destination_FQDN": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "FQDN of the Destination VPN.  Use this or Public IP Address.  Not both."
               }
             },
             "vpn_Destination_BGPIPAddress": {
@@ -1465,6 +1472,7 @@
               "location": "[parameters('location')]",
               "properties": {
                 "gatewayIpAddress": "[parameters('vpn_Destination_PublicIPAddress')]",
+                "fqdn": "[parameters('vpn_Destination_FQDN')]",
                 "bgpSettings": {
                   "asn": "[parameters('vpn_Destination_ASN')]",
                   "bgpPeeringAddress": "[parameters('vpn_Destination_BGPIPAddress')]"
@@ -1519,7 +1527,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "16532889140507493550"
+              "templateHash": "14372517579176968060"
             }
           },
           "parameters": {
@@ -1538,7 +1546,14 @@
             "vpn_Destination_PublicIPAddress": {
               "type": "string",
               "metadata": {
-                "description": "Public IP Address of the Destination VPN"
+                "description": "Public IP Address of the Destination VPN.  Use this or FQDN.  Not both."
+              }
+            },
+            "vpn_Destination_FQDN": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "FQDN of the Destination VPN.  Use this or Public IP Address.  Not both."
               }
             },
             "vpn_Destination_BGPIPAddress": {
@@ -1606,6 +1621,7 @@
               "location": "[parameters('location')]",
               "properties": {
                 "gatewayIpAddress": "[parameters('vpn_Destination_PublicIPAddress')]",
+                "fqdn": "[parameters('vpn_Destination_FQDN')]",
                 "bgpSettings": {
                   "asn": "[parameters('vpn_Destination_ASN')]",
                   "bgpPeeringAddress": "[parameters('vpn_Destination_BGPIPAddress')]"
@@ -1731,10 +1747,13 @@
             "value": "[parameters('virtualMachine_Size')]"
           },
           "virtualMachine_ScriptFileLocation": {
-            "value": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/"
+            "value": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/"
           },
           "virtualMachine_ScriptFileName": {
-            "value": "WinServ2022_ConfigScript_WebServer.ps1"
+            "value": "WinServ2022_ConfigScript_General.ps1"
+          },
+          "commandToExecute": {
+            "value": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_General.ps1 -Username {0}', parameters('virtualMachine_AdminUsername'))]"
           }
         },
         "template": {
@@ -1744,7 +1763,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "8019744214561870945"
+              "templateHash": "7632930515549515641"
             }
           },
           "parameters": {
@@ -1797,7 +1816,7 @@
             },
             "virtualMachine_ScriptFileLocation": {
               "type": "string",
-              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/",
+              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/",
               "metadata": {
                 "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\r\nExample: https://example.com/scripts/"
               }
@@ -2113,10 +2132,13 @@
             "value": "[parameters('virtualMachine_Size')]"
           },
           "virtualMachine_ScriptFileLocation": {
-            "value": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/"
+            "value": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/"
           },
           "virtualMachine_ScriptFileName": {
             "value": "WinServ2022_ConfigScript_WebServer.ps1"
+          },
+          "commandToExecute": {
+            "value": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_WebServer.ps1 -Username {0}', parameters('virtualMachine_AdminUsername'))]"
           }
         },
         "template": {
@@ -2126,7 +2148,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "8019744214561870945"
+              "templateHash": "7632930515549515641"
             }
           },
           "parameters": {
@@ -2179,7 +2201,7 @@
             },
             "virtualMachine_ScriptFileLocation": {
               "type": "string",
-              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/",
+              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/",
               "metadata": {
                 "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\r\nExample: https://example.com/scripts/"
               }
@@ -2495,7 +2517,7 @@
             "value": "[parameters('virtualMachine_Size')]"
           },
           "virtualMachine_ScriptFileLocation": {
-            "value": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/"
+            "value": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/"
           },
           "virtualMachine_ScriptFileName": {
             "value": "Ubuntu20_WebServer_Config.sh"
@@ -2511,7 +2533,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "5536141961870804709"
+              "templateHash": "1353880023831061415"
             }
           },
           "parameters": {
@@ -2564,7 +2586,7 @@
             },
             "virtualMachine_ScriptFileLocation": {
               "type": "string",
-              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/",
+              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/",
               "metadata": {
                 "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\r\nExample: https://example.com/scripts/"
               }
@@ -2866,7 +2888,7 @@
             "value": "[parameters('virtualMachine_Size')]"
           },
           "virtualMachine_ScriptFileLocation": {
-            "value": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/"
+            "value": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/"
           },
           "virtualMachine_ScriptFileName": {
             "value": "Ubuntu20_WebServer_Config.sh"
@@ -2882,7 +2904,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "5536141961870804709"
+              "templateHash": "1353880023831061415"
             }
           },
           "parameters": {
@@ -2935,7 +2957,7 @@
             },
             "virtualMachine_ScriptFileLocation": {
               "type": "string",
-              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/Refactoring/scripts/",
+              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/",
               "metadata": {
                 "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\r\nExample: https://example.com/scripts/"
               }
