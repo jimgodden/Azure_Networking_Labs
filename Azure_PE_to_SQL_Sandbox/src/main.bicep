@@ -44,10 +44,9 @@ module virtualNetwork '../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
 module privateEndpoint_SQL '../../modules/Microsoft.Network/PrivateEndpoint.bicep' = {
   name: 'pe_sql'
   params: {
-    fqdn: '${sql.outputs.sqlServer_Name}${environment().suffixes.sqlServerHostname}'
     groupID: 'sqlServer'
     location: location
-    privateDNSZone_Name: '${sqlServer_Name}.privatelink${environment().suffixes.sqlServerHostname}'
+    privateDNSZone_Name: 'privatelink${environment().suffixes.sqlServerHostname}'
     privateEndpoint_Name: 'pe_sql'
     privateEndpoint_SubnetID: virtualNetwork.outputs.privateEndpoint_SubnetID
     privateLinkServiceId: sql.outputs.sqlServer_ID
@@ -65,6 +64,9 @@ module clientVM_Windows '../../modules/Microsoft.Compute/WindowsServer2022/Virtu
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'ClientVM'
     virtualMachine_Size: virtualMachine_Size
+    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
+    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_General.ps1'
+    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_General.ps1 -Username ${virtualMachine_AdminUsername}'
   }
 }
 

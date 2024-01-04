@@ -185,7 +185,6 @@ module storageAccount '../../modules/Microsoft.Storage/StorageAccount.bicep' = {
 module hub_StorageAccount_Blob_PrivateEndpoint '../../modules/Microsoft.Network/PrivateEndpoint.bicep' = {
   name: 'hub_StorageAccount_Blob_PrivateEndpoint'
   params: {
-    fqdn: storageAccount.outputs.storageaccount_Blob_FQDN
     groupID: 'blob'
     location: locationA
     privateDNSZone_Name: 'privatelink.blob.${environment().suffixes.storage}'

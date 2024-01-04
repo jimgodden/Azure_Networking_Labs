@@ -15,9 +15,6 @@ param virtualNetwork_IDs array
 @description('The ID of a group obtained from the remote resource that this private endpoint should connect to.')
 param groupID string
 
-@description('Fqdn that resolves to private endpoint ip address.')
-param fqdn string
-
 @description('''Name of the Private DNS Zone
 Example: privatelink.blob.${environment().suffixes.storage}''')
 param privateDNSZone_Name string
@@ -40,16 +37,9 @@ resource privateEndpoint 'Microsoft.Network/privateEndpoints@2023-05-01' = {
         }
       }
     ]
-    manualPrivateLinkServiceConnections: []
     subnet: {
       id: privateEndpoint_SubnetID
     }
-    ipConfigurations: []
-    customDnsConfigs: [
-      {
-        fqdn: fqdn
-      }
-    ]
   }
 }
 

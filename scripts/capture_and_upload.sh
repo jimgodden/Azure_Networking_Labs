@@ -22,8 +22,8 @@ while true; do
     # Capture the PID of the tcpdump process
     tcpdump_pid=$!
 
-    # Sleep for 30 minutes
-    sleep 1800
+    # Sleep for 10 minutes
+    sleep 600
 
     # Stop tcpdump
     kill $tcpdump_pid

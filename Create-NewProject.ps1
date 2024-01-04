@@ -1,7 +1,9 @@
 # Creates an empty Bicep deployment with all of the needed files to get started quickly.
 
 param(
-    [string]$ProjectName
+    
+    [string]$ProjectName,
+    [string]$BranchName
 )
 
 New-Item -ItemType Directory -Name $ProjectName
@@ -23,7 +25,7 @@ $bicepParamInitializer = "using './src/main.bicep' /*Provide a path to a bicep t
 Set-Content -Path ".\$ProjectName\main.parameters.bicepparam" -Value $bicepParamInitializer
 
 New-Item -ItemType File -Path ".\$ProjectName" -Name "readme.md"
-$deployButton = .\Create-AzureDeployButton.ps1 -DirectoryName $ProjectName
+$deployButton = .\Create-AzureDeployButton.ps1 -BranchName $BranchName -DirectoryName $ProjectName
 $readmeInitializer = @"
 $deployButton
 

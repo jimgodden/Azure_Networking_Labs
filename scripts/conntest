@@ -202,7 +202,9 @@ if __name__ == '__main__':
         # 432,000 secs =  5 days
         sixty4k = 65536
         twok = 2000
-        connections = [(100, 21, 10, twok)]
+        # connections = [(100, 21, 10, twok)]
+        connections = [(500, 21, 10, twok)]
+
         #connections = [(2, 20, 2, 1024)]
         #connections = [(2, 432000, 0, sixty4k)]
         #connections = [(1, 432000, 10, sixty4k*2)]
