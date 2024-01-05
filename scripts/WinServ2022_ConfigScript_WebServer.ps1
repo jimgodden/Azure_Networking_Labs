@@ -7,8 +7,12 @@ Start-Job -ScriptBlock {
     # Define variables for the IIS website and certificate
     $portHTTP = 80
     $portHTTPS = 443
+    $siteName = "TestWebsite"
     $certName = "MySelfSignedCert"
     $FQDN = $using:FQDN
+
+    # Create a self-signed certificate
+    $cert = New-SelfSignedCertificate -DnsName "localhost" -CertStoreLocation "cert:\LocalMachine\My" -FriendlyName $certName
 
     if ($null -eq $FQDN) {
         $hostHeader = "example.contoso.com"
@@ -28,15 +32,14 @@ Start-Job -ScriptBlock {
 
     Import-Module WebAdministration
 
-    New-WebBinding -Name "Default Web Site HTTP" -Port $portHTTP -Protocol "http" -HostHeader $hostHeader
-    New-WebBinding -Name "Default Web Site HTTPS" -Port $portHTTPS -Protocol "https" -HostHeader $hostHeader
+    New-Item -ItemType Directory -Name $siteName -Path "C:\"
 
-    # Create a self-signed certificate
-    New-SelfSignedCertificate -DnsName "localhost" -CertStoreLocation "cert:\LocalMachine\My" -FriendlyName $certName
+    New-Item -ItemType File -Name "index.html" -Path "C:\$siteName"
+    Set-Content -Path "C:\$siteName\index.html" -Value "Welcome to $env:COMPUTERNAME"
 
-    $SSLCert = Get-ChildItem -Path "cert:\LocalMachine\My" | Where-Object {$_.subject -like 'cn=localhost'}
-    Set-Location "IIS:\sslbindings"
-    New-Item "!${portHTTPS}!" -value $SSLCert
+    New-WebSite -Name $siteName -Port $portHTTP -HostHeader $hostHeader -PhysicalPath "C:\$siteName"
+    New-WebBinding -Name $siteName -Port $portHTTPS -Protocol "https" -HostHeader $hostHeader
+    (Get-WebBinding -Name $siteName -port $portHTTPS -Protocol "https").AddSslCertificate($cert.Thumbprint, "my")
 }
 
 Start-Job -ScriptBlock {

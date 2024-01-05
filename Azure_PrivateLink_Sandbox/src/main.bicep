@@ -119,6 +119,8 @@ module hub_WinVMs '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMach
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
     virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_DNS.ps1'
+    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username ${virtualMachine_AdminUsername}'
+
   }
 } ]
 
@@ -134,6 +136,7 @@ module spokeA_WinVM '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMa
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
     virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_General.ps1'
+    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_General.ps1 -Username ${virtualMachine_AdminUsername}'
   }
   dependsOn: [
     hub_To_SpokeA_Peering
@@ -152,6 +155,7 @@ module spokeB_WinVM '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMa
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
     virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_WebServer.ps1'
+    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_WebServer.ps1 -Username ${virtualMachine_AdminUsername}'
   }
   dependsOn: [
     hub_To_SpokeB_Peering

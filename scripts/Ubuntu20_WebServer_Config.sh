@@ -1,5 +1,8 @@
 #!/bin/bash
 
+server_name=$1
+
+
 # Update the package repository and install Nginx
 sudo apt update
 sudo apt install -y nginx
@@ -14,7 +17,7 @@ sudo systemctl enable nginx
 sudo tee /etc/nginx/sites-available/default >/dev/null <<EOL
 server {
     listen 80;
-    server_name your_domain.com;  # Replace with your domain name or server IP
+    server_name ${server_name};  # Replace with your domain name or server IP
 
     location / {
         root /var/www/html;

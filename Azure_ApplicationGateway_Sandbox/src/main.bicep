@@ -56,7 +56,11 @@ module AppGW '../../modules/Microsoft.Network/ApplicationGateway_v2.bicep' = {
     applicationGateway_PrivateIPAddress: parseCidr(virtualNetwork_Hub.outputs.applicationGateway_Subnet_AddressPrefix).lastUsable
     location: location
     applicationGateway_SubnetID: virtualNetwork_Hub.outputs.applicationGateway_SubnetID
-    backendPoolFQDNs: [site.outputs.website_FQDN, '${webserverVM.outputs.virtualMachine_Name}.${virtualMachine_Website_DomainName}']
+    backendPoolFQDNs: [
+      site.outputs.website_FQDN
+      '${webServVM_Win.outputs.virtualMachine_Name}.${virtualMachine_Website_DomainName}'
+      '${webServVM_Ubn.outputs.virtualMachine_Name}.${virtualMachine_Website_DomainName}'
+    ]
   }
 }
 
@@ -80,19 +84,35 @@ module privateDNSZone_ContosoDotCom '../../modules/Microsoft.Network/PrivateDNSZ
   }
 }
 
-module webserverVM '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
-  name: 'webserverVM'
+module webServVM_Win '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
+  name: 'webServVM_Win'
   params: {
     acceleratedNetworking: acceleratedNetworking
     location: location
     subnet_ID: virtualNetwork_Hub.outputs.general_SubnetID
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
-    virtualMachine_Name: 'webserverVM'
+    virtualMachine_Name: 'webserVM-Win'
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
     virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_WebServer.ps1'
     commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_WebServer.ps1 -Username ${virtualMachine_AdminUsername} -FQDN webserverVM.${virtualMachine_Website_DomainName}'
+  }
+}
+
+module webServVM_Ubn '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.bicep' = {
+  name: 'webServVM_Ubn'
+  params: {
+    acceleratedNetworking: acceleratedNetworking
+    location: location
+    subnet_ID: virtualNetwork_Hub.outputs.general_SubnetID
+    virtualMachine_AdminPassword: virtualMachine_AdminPassword
+    virtualMachine_AdminUsername: virtualMachine_AdminUsername
+    virtualMachine_Name: 'webServVM-Ubn'
+    virtualMachine_Size: virtualMachine_Size
+    virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
+    virtualMachine_ScriptFileName: 'Ubuntu20_WebServer_Config.sh'
+    commandToExecute: './Ubuntu20_WebServer_Config.sh webServVM-Ubn.${virtualMachine_Website_DomainName}'
   }
 }
 
