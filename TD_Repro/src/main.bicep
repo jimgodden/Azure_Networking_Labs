@@ -83,14 +83,11 @@ module clientVM_Linux '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.b
     virtualMachine_Name: 'ClientVM${i}'
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    // Use the following for blob testing
-    virtualMachine_ScriptFileName: 'conntestClientBlob.sh'
-    commandToExecute: './conntestClientBlob.sh ${privateLink.outputs.internalLoadBalancer_FrontendIPAddress} ${storageAccount.outputs.storageAccount_Name} ${storageAccount.outputs.storageAccount_key0} ${storageAccountContainers.outputs.container_Names[0]} /tmp/captures'
-    // virtualMachine_ScriptFileName: 'conntestClient.sh'
-    // Use the following for Private Link testing
-    // commandToExecute: './conntestClient.sh ${privateEndpoint_NIC.outputs.privateEndpoint_IPAddress} ${scenario_Name} ${storageAccount.outputs.storageAccount_Name} ${storageAccount.outputs.storageAccountFileShare_Name} ${storageAccount.outputs.storageAccount_key0}'
-    // Use the following for Load Balancer testing
-    // commandToExecute: './conntestClient.sh ${privateLink.outputs.internalLoadBalancer_FrontendIPAddress} ${scenario_Name} ${storageAccount.outputs.storageAccount_Name} ${storageAccount.outputs.storageAccountFileShare_Name} ${storageAccount.outputs.storageAccount_key0}'
+    virtualMachine_ScriptFileName: 'conntestClient.sh'
+    // Use the following for Load Balancer Testing
+    commandToExecute: './conntestClient.sh ${privateLink.outputs.internalLoadBalancer_FrontendIPAddress} ${storageAccount.outputs.storageAccount_Name} ${storageAccount.outputs.storageAccount_key0} ${storageAccountContainers.outputs.container_Names[0]} /tmp/captures'
+    // Use the following for Private Link Testing
+    // commandToExecute: './conntestClientBlob.sh ${privateEndpoint_NIC.outputs.privateEndpoint_IPAddress} ${storageAccount.outputs.storageAccount_Name} ${storageAccount.outputs.storageAccount_key0} ${storageAccountContainers.outputs.container_Names[0]} /tmp/captures'
 
   }
   dependsOn: [
@@ -111,10 +108,8 @@ module ServerVM_Linux '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.b
     virtualMachine_Name: 'ServerVM${i}'
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    // virtualMachine_ScriptFileName: 'conntestServer.sh'
-    // commandToExecute: './conntestServer.sh ${scenario_Name} ${storageAccount.outputs.storageAccount_Name} ${storageAccount.outputs.storageAccountFileShare_Name} ${storageAccount.outputs.storageAccount_key0}'
-    virtualMachine_ScriptFileName: 'conntestServerBlob.sh'
-    commandToExecute: './conntestServerBlob.sh  ${storageAccount.outputs.storageAccount_Name} ${storageAccount.outputs.storageAccount_key0} ${storageAccountContainers.outputs.container_Names[0]} /tmp/captures'
+    virtualMachine_ScriptFileName: 'conntestServer.sh'
+    commandToExecute: './conntestServer.sh  ${storageAccount.outputs.storageAccount_Name} ${storageAccount.outputs.storageAccount_key0} ${storageAccountContainers.outputs.container_Names[0]} /tmp/captures'
   }
   dependsOn: [
     client_StorageAccount_Blob_PrivateEndpoint
