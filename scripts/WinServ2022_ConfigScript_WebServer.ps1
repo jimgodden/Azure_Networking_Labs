@@ -37,6 +37,8 @@ Start-Job -ScriptBlock {
 
     Import-Module WebAdministration
 
+    Remove-Website -Name "Default Web Site"
+
     New-Item -ItemType Directory -Name $siteName -Path "C:\"
 
     New-Item -ItemType File -Name "index.html" -Path "C:\$siteName"
@@ -45,6 +47,7 @@ Start-Job -ScriptBlock {
     New-WebSite -Name $siteName -Port $portHTTP -HostHeader $hostHeader -PhysicalPath "C:\$siteName"
     New-WebBinding -Name $siteName -Port $portHTTPS -Protocol "https" -HostHeader $hostHeader
     (Get-WebBinding -Name $siteName -port $portHTTPS -Protocol "https").AddSslCertificate($cert.Thumbprint, "my")
+    Start-Website -Name "TestWebsite"
 }
 
 Start-Job -ScriptBlock {
