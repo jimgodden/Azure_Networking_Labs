@@ -31,7 +31,7 @@ resource networkSecurityGroupRuleHTTPS 'Microsoft.Network/networkSecurityGroups/
     description: 'Allows anyone to access the sever via port 443'
     protocol: '*'
     sourcePortRange: '*'
-    destinationPortRange: '*'
+    destinationPortRange: '443'
     sourceAddressPrefix: '*'
     destinationAddressPrefix: '*'
     access: 'Allow'
