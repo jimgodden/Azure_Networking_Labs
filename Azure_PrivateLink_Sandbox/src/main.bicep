@@ -54,7 +54,6 @@ var virtualMachine_ScriptFileLocation = 'https://raw.githubusercontent.com/jimgo
 module virtualNetwork_Hub '../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
   name: 'hub_VNet'
   params: {
-    // firstTwoOctetsOfVirtualNetworkPrefix: '10.0'
     virtualNetwork_AddressPrefix: '10.0.0.0/16'
     location: locationA
     virtualNetwork_Name: 'hub_VNet'
@@ -64,9 +63,8 @@ module virtualNetwork_Hub '../../modules/Microsoft.Network/VirtualNetwork.bicep'
 module virtualNetwork_SpokeA '../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
   name: 'spokeA_VNet'
   params: {
-    // firstTwoOctetsOfVirtualNetworkPrefix: '10.1'
     virtualNetwork_AddressPrefix: '10.1.0.0/16'
-    dnsServers: [for i in range(0, 2) : hub_WinVMs[i].outputs.networkInterface_PrivateIPAddress]
+    dnsServers: [for i in range(0, 2) : hub_DnsVMs[i].outputs.networkInterface_PrivateIPAddress]
     location: locationA
     virtualNetwork_Name: 'spokeA_VNet'
   }
@@ -75,9 +73,8 @@ module virtualNetwork_SpokeA '../../modules/Microsoft.Network/VirtualNetwork.bic
 module virtualNetwork_SpokeB '../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
   name: 'spokeB_VNet'
   params: {
-    // firstTwoOctetsOfVirtualNetworkPrefix: '10.2'
     virtualNetwork_AddressPrefix: '10.2.0.0/16'
-    dnsServers: [for i in range(0, 2) : hub_WinVMs[i].outputs.networkInterface_PrivateIPAddress]
+    dnsServers: [for i in range(0, 2) : hub_DnsVMs[i].outputs.networkInterface_PrivateIPAddress]
     location: locationB
     virtualNetwork_Name: 'spokeB_VNet'
   }
@@ -107,15 +104,15 @@ module hub_To_SpokeB_Peering '../../modules/Microsoft.Network/VirtualNetworkPeer
   ]
 }
 
-module hub_WinVMs '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = [ for i in range(0, 2) : {
-  name: 'hub-WinVM${i}'
+module hub_DnsVMs '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = [ for i in range(0, 2) : {
+  name: 'hub-DnsVM${i}'
   params: {
     acceleratedNetworking: acceleratedNetworking
     location: locationA
     subnet_ID: virtualNetwork_Hub.outputs.general_SubnetID
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
-    virtualMachine_Name: 'hub-WinVM${i}'
+    virtualMachine_Name: 'hub-DnsVM${i}'
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
     virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_DNS.ps1'
@@ -289,28 +286,9 @@ module dnsPrivateResolver '../../modules/Microsoft.Network/DNSPrivateResolver.bi
   }
 }
 
-module dnsPrivateResolverForwardingRuleSet '../../modules/Microsoft.Network/DNSPrivateResolverRuleSet.bicep' = {
-  name: 'dnsPrivateResolverForwardingRuleSet'
-  params: {
-    outboundEndpoint_ID: dnsPrivateResolver.outputs.dnsPrivateResolver_Outbound_Endpoint_ID
-    domainName: onpremResolvableDomainName
-    location: locationA
-    targetDNSServers: [for i in range(0, 2): {
-      port: 53
-      ipaddress: OnPremVM_WinDNS[i].outputs.networkInterface_PrivateIPAddress
-    }]
-    virtualNetwork_IDs: [
-      virtualNetwork_Hub.outputs.virtualNetwork_ID 
-      virtualNetwork_SpokeA.outputs.virtualNetwork_ID 
-      virtualNetwork_SpokeB.outputs.virtualNetwork_ID
-    ]
-  }
-}
-
 module virtualNetwork_OnPremHub '../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
   name: 'onprem_VNet'
   params: {
-    // firstTwoOctetsOfVirtualNetworkPrefix: '10.100'
     virtualNetwork_AddressPrefix: '10.100.0.0/16'
     location: locationOnPrem
     virtualNetwork_Name: 'onprem_VNet'
@@ -329,7 +307,7 @@ module OnPremVM_WinDNS '../../modules/Microsoft.Compute/WindowsServer2022/Virtua
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
     virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_DNS.ps1'
-    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username ${virtualMachine_AdminUsername} -SampleDNSZoneName ${onpremResolvableDomainName} -SampleHostName "a" -SampleARecord "172.16.0.1" -PrivateDNSZone "privatelink.blob.core.windows.net" -ConditionalForwarderIPAddress ${dnsPrivateResolver.outputs.privateDNSResolver_Inbound_Endpoint_IPAddress}'
+    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username ${virtualMachine_AdminUsername} -PrivateDNSZone "privatelink.blob.core.windows.net" -ConditionalForwarderIPAddress ${dnsPrivateResolver.outputs.privateDNSResolver_Inbound_Endpoint_IPAddress}'
   }
 } ]
 

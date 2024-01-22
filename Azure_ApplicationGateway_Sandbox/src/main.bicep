@@ -84,6 +84,15 @@ module privateDNSZone_ContosoDotCom '../../modules/Microsoft.Network/PrivateDNSZ
   }
 }
 
+module ARecord_AppGW '../../modules/Microsoft.Network/PrivateDNSZoneARecord.bicep' = {
+  name: 'ARecord_AppGW'
+  params: {
+    ARecord_name: 'appgw'
+    ipv4Address: AppGW.outputs.ApplicationGateway_FrontendIP_Private
+    PrivateDNSZone_Name: privateDNSZone_ContosoDotCom.outputs.PrivateDNSZone_Name
+  }
+}
+
 module webServVM_Win '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
   name: 'webServVM_Win'
   params: {

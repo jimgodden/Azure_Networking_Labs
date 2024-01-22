@@ -44,7 +44,7 @@ param vpn_SharedKey string
 param source_VirtualNetworkGateway_ResourceID string
 
 
-resource connection 'Microsoft.Network/connections@2022-11-01' = [ for i in range(1, length(destinationVPN_Name)) : {
+resource connection 'Microsoft.Network/connections@2022-11-01' = [ for i in range(0, length(destinationVPN_Name)) : {
   name: 'OnPrem_to_${destinationVPN_Name[i]}'
   location: location
   properties: {
@@ -166,7 +166,7 @@ resource connection 'Microsoft.Network/connections@2022-11-01' = [ for i in rang
 
 
 
-resource localNetworkGateway 'Microsoft.Network/localNetworkGateways@2022-11-01' = [ for i in range(1, length(destinationVPN_Name)) : {
+resource localNetworkGateway 'Microsoft.Network/localNetworkGateways@2022-11-01' = [ for i in range(0, length(destinationVPN_Name)) : {
   name: 'OnPrem_lng_for_${destinationVPN_Name[i]}'
   location: location
   properties: {

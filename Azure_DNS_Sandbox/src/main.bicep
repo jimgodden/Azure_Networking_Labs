@@ -29,7 +29,7 @@ Storage account name restrictions:
 param storageAccount_Name string = 'storagedns${uniqueString(resourceGroup().id)}'
 
 @description('Name of the Private DNS Zone that the Virtual Networks will be registered with.')
-param privateDNSZone_Name string = 'AzureVMs.com'
+param privateDNSZone_Name string = 'azure-contoso.com'
 
 @description('Name of the DNS Zone for public DNS resolution.')
 param publicDNSZone_Name string = 'DNSSandboxTest${uniqueString(resourceGroup().id)}.com'

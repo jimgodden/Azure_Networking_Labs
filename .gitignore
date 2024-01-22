@@ -18,3 +18,6 @@ Azure_VM_Linux_Sandbox/iteration.txt
 Azure_VM_Linux_Sandbox/main.parameters.bicepparam
 Azure_PE_to_SQL_Sandbox/iteration.txt
 Azure_PE_to_SQL_Sandbox/main.parameters.bicepparam
+tsg.md
+Azure_TrafficManager_Sandbox/iteration.txt
+Azure_TrafficManager_Sandbox/main.parameters.bicepparam

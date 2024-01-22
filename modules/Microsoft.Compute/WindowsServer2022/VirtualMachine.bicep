@@ -43,6 +43,9 @@ Example:
 ''')
 param commandToExecute string
 
+@description('Adds a Public IP to the Network Interface of the Virtual Machine')
+param addPublicIPAddress bool = false
+
 
 module networkInterface '../../Microsoft.Network/NetworkInterface.bicep' = {
   name: networkInterface_Name
@@ -51,6 +54,7 @@ module networkInterface '../../Microsoft.Network/NetworkInterface.bicep' = {
     location: location
     networkInterface_Name: networkInterface_Name
     subnet_ID: subnet_ID
+    addPublicIPAddress: addPublicIPAddress
   }
 }
 
@@ -163,10 +167,3 @@ output networkInterface_ID string = networkInterface.outputs.networkInterface_ID
 output networkInterface_IPConfig0_Name string = networkInterface.outputs.networkInterface_IPConfig0_Name
 output networkInterface_IPConfig0_ID string = networkInterface.outputs.networkInterface_IPConfig0_ID
 output networkInterface_PrivateIPAddress string = networkInterface.outputs.networkInterface_PrivateIPAddress
-
-
-
-
-
-
-

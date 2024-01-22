@@ -207,22 +207,4 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2022-11-01' =
   }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+output ApplicationGateway_FrontendIP_Private string = applicationGateway.properties.frontendIPConfigurations[0].properties.privateIPAddress

@@ -1,11 +1,11 @@
-@description('Deploys a vHub in another location for multi region connectivity if set to True.')
-param multiRegion bool = true
+// @description('Deploys a vHub in another location for multi region connectivity if set to True.')
+// param multiRegion bool = true
 
 @description('Azure Datacenter location that the main resouces will be deployed to.')
 param mainLocation string = 'eastus2'
 
-@description('Azure Datacenter location that the branch resouces will be deployed to.  This can be left blank if you are not deploying the hub in multiple regions')
-param branchLocation string = 'westus2'
+// @description('Azure Datacenter location that the branch resouces will be deployed to.  This can be left blank if you are not deploying the hub in multiple regions')
+// param branchLocation string = 'westus2'
 
 @description('Azure Datacenter location that the "OnPrem" resouces will be deployed to.')
 param onPremLocation string = 'eastus'
@@ -36,9 +36,7 @@ module virtualWAN '../../modules/Microsoft.Network/VirtualWAN.bicep' = {
 module virtualHubA_and_Contents 'modules/AzureResources/VirtualHub_and_Contents.bicep' = {
   name: 'vHubA'
   params: {
-    // firstTwoOctetsOfVirtualHubNetworkPrefix: '10.110'
     virtualNetwork_VirtualHub_AddressPrefix: '10.110.0.0/16'
-    // firstTwoOctetsOfVirtualNetworkPrefix: ['10.111', '10.112']
     virtualNetwork_AddressPrefixs: ['10.111.0.0/16', '10.112.0.0/16']
     location: mainLocation
     usingAzureFirewall: true
@@ -66,38 +64,36 @@ module vHubA_to_OnPrem 'modules/AzureResources/VWANToVNGConnection.bicep' = {
   }
 }
 
-module virtualHubB_and_Contents 'modules/AzureResources/VirtualHub_and_Contents.bicep' = if (multiRegion) {
-  name: 'vHubB'
-  params: {
-    // firstTwoOctetsOfVirtualHubNetworkPrefix: '10.120'
-    virtualNetwork_VirtualHub_AddressPrefix: '10.120.0.0/16'
-    // firstTwoOctetsOfVirtualNetworkPrefix: ['10.121', '10.122']
-    virtualNetwork_AddressPrefixs: ['10.121.0.0/16', '10.122.0.0/16']
-    location: branchLocation
-    usingAzureFirewall: false
-    usingVPN: false
-    virtualHub_UniquePrefix: 'B'
-    virtualMachine_AdminPassword: virtualMachine_AdminPassword
-    virtualMachine_AdminUsername: virtualMachine_AdminUsername
-    virtualWAN_ID: virtualWAN.outputs.virtualWAN_ID
-  }
-}
+// module virtualHubB_and_Contents 'modules/AzureResources/VirtualHub_and_Contents.bicep' = if (multiRegion) {
+//   name: 'vHubB'
+//   params: {
+//     virtualNetwork_VirtualHub_AddressPrefix: '10.120.0.0/16'
+//     virtualNetwork_AddressPrefixs: ['10.121.0.0/16', '10.122.0.0/16']
+//     location: branchLocation
+//     usingAzureFirewall: false
+//     usingVPN: false
+//     virtualHub_UniquePrefix: 'B'
+//     virtualMachine_AdminPassword: virtualMachine_AdminPassword
+//     virtualMachine_AdminUsername: virtualMachine_AdminUsername
+//     virtualWAN_ID: virtualWAN.outputs.virtualWAN_ID
+//   }
+// }
 
-module vHubB_to_OnPrem 'modules/AzureResources/VWANToVNGConnection.bicep' = {
-  name: 'vhubB_to_OnPrem'
-  params: {
-    destinationVPN_ASN: OnPremResources.outputs.virtualNetworkGateway_ASN
-    destinationVPN_BGPAddress: OnPremResources.outputs.virtualNetworkGateway_BGPAddress
-    destinationVPN_Name: OnPremResources.outputs.virtualNetworkGateway_Name
-    destinationVPN_PublicAddress: OnPremResources.outputs.virtualNetworkGateway_PublicIPAddress
-    location: branchLocation
-    virtualHub_Name: virtualHubB_and_Contents.outputs.virtualHub_Name
-    virtualHub_RouteTable_Default_ResourceID: virtualHubB_and_Contents.outputs.virtualHub_RouteTable_Default_ResourceID
-    virtualWAN_ID: virtualHubB_and_Contents.outputs.virtualWAN_ID
-    virtualWAN_VPNGateway_Name: virtualHubB_and_Contents.outputs.virtualWAN_ID
-    vpn_SharedKey: vpn_SharedKey
-  }
-}
+// module vHubB_to_OnPrem 'modules/AzureResources/VWANToVNGConnection.bicep' = {
+//   name: 'vhubB_to_OnPrem'
+//   params: {
+//     destinationVPN_ASN: OnPremResources.outputs.virtualNetworkGateway_ASN
+//     destinationVPN_BGPAddress: OnPremResources.outputs.virtualNetworkGateway_BGPAddress
+//     destinationVPN_Name: OnPremResources.outputs.virtualNetworkGateway_Name
+//     destinationVPN_PublicAddress: OnPremResources.outputs.virtualNetworkGateway_PublicIPAddress
+//     location: branchLocation
+//     virtualHub_Name: virtualHubB_and_Contents.outputs.virtualHub_Name
+//     virtualHub_RouteTable_Default_ResourceID: virtualHubB_and_Contents.outputs.virtualHub_RouteTable_Default_ResourceID
+//     virtualWAN_ID: virtualHubB_and_Contents.outputs.virtualWAN_ID
+//     virtualWAN_VPNGateway_Name: virtualHubB_and_Contents.outputs.virtualWAN_ID
+//     vpn_SharedKey: vpn_SharedKey
+//   }
+// }
 
 module OnPremResources 'modules/OnPremResources/OnPremResources.bicep' = {
   name: 'OnPremResources'
@@ -106,7 +102,6 @@ module OnPremResources 'modules/OnPremResources/OnPremResources.bicep' = {
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     usingAzureFirewall: false
-    // firstTwoOctetsOfVirtualNetworkPrefix: '10.200'
     virtualNetwork_AddressPrefix: '10.200.0.0/16'
     azureFirewall_SKU: 'Basic'
   }

@@ -21,23 +21,4 @@ resource virtualNetworkLink 'Microsoft.Network/privateDnsZones/virtualNetworkLin
   }
 } ]
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+output PrivateDNSZone_Name string = privateDNSZone.name

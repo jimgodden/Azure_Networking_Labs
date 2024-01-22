@@ -9,7 +9,10 @@ param acceleratedNetworking bool
 @description('The Resource ID of the subnet to which the Network Interface will be assigned.')
 param subnet_ID string
 
-resource networkInterface 'Microsoft.Network/networkInterfaces@2022-09-01' = {
+@description('Adds a Public IP to the Network Interface of the Virtual Machine')
+param addPublicIPAddress bool = false
+
+resource networkInterface 'Microsoft.Network/networkInterfaces@2022-09-01' = if (!addPublicIPAddress) {
   name: networkInterface_Name
   location: location
   properties: {
@@ -23,6 +26,9 @@ resource networkInterface 'Microsoft.Network/networkInterfaces@2022-09-01' = {
           }
           primary: true
           privateIPAddressVersion: 'IPv4'
+          publicIPAddress: {
+            id: addPublicIPAddress ? publicIPAddress.id : ''
+          }
         }
       }
     ]
@@ -30,6 +36,21 @@ resource networkInterface 'Microsoft.Network/networkInterfaces@2022-09-01' = {
     enableIPForwarding: false
     disableTcpStateTracking: false
     nicType: 'Standard'
+  }
+}
+
+resource publicIPAddress 'Microsoft.Network/publicIPAddresses@2023-06-01' = if (addPublicIPAddress) {
+  name: '${networkInterface_Name}_PIP'
+  location: location
+  sku: {
+    name: 'Standard'
+    tier: 'Regional'
+  }
+  properties: {
+    publicIPAddressVersion: 'IPv4'
+    publicIPAllocationMethod: 'Static'
+    idleTimeoutInMinutes: 4
+    ipTags: []
   }
 }
 
