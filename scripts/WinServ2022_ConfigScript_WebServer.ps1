@@ -1,6 +1,7 @@
 param (
     [string]$Username,
-    [string]$FQDN
+    [string]$FQDN,
+    [string]$location
 )
 
 Start-Job -ScriptBlock {    
@@ -21,6 +22,10 @@ Start-Job -ScriptBlock {
         $hostHeader = $FQDN
     }
 
+    if ($null -eq $location) {
+        $location = "Azure"
+    }
+
     # Open TCP port 80 on the firewall
     New-NetFirewallRule -DisplayName "Allow inbound TCP port ${portHTTP}" -Direction Inbound -LocalPort $portHTTP -Protocol TCP -Action Allow
 
@@ -35,7 +40,7 @@ Start-Job -ScriptBlock {
     New-Item -ItemType Directory -Name $siteName -Path "C:\"
 
     New-Item -ItemType File -Name "index.html" -Path "C:\$siteName"
-    Set-Content -Path "C:\$siteName\index.html" -Value "Welcome to $env:COMPUTERNAME"
+    Set-Content -Path "C:\$siteName\index.html" -Value "Welcome to $env:COMPUTERNAME in $location"
 
     New-WebSite -Name $siteName -Port $portHTTP -HostHeader $hostHeader -PhysicalPath "C:\$siteName"
     New-WebBinding -Name $siteName -Port $portHTTPS -Protocol "https" -HostHeader $hostHeader

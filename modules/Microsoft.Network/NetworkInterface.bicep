@@ -12,7 +12,7 @@ param subnet_ID string
 @description('Adds a Public IP to the Network Interface of the Virtual Machine')
 param addPublicIPAddress bool = false
 
-resource networkInterface 'Microsoft.Network/networkInterfaces@2022-09-01' = if (!addPublicIPAddress) {
+resource networkInterface 'Microsoft.Network/networkInterfaces@2022-09-01' = {
   name: networkInterface_Name
   location: location
   properties: {
@@ -54,9 +54,6 @@ resource publicIPAddress 'Microsoft.Network/publicIPAddresses@2023-06-01' = if (
   }
 }
 
-
-
-
 output networkInterface_Name string = networkInterface.name
 output networkInterface_ID string = networkInterface.id
 
@@ -64,22 +61,4 @@ output networkInterface_IPConfig0_Name string = networkInterface.properties.ipCo
 output networkInterface_IPConfig0_ID string = networkInterface.properties.ipConfigurations[0].id
 output networkInterface_PrivateIPAddress string = networkInterface.properties.ipConfigurations[0].properties.privateIPAddress
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+output networkInterface_PublicIPAddress string = addPublicIPAddress ? publicIPAddress.properties.ipAddress : ''

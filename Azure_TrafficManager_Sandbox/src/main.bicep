@@ -1,5 +1,14 @@
-@description('Azure Datacenter location for the source resources')
-param locationA string = resourceGroup().location
+@description('Azure Datacenter location for the hub')
+param location string = resourceGroup().location
+
+@description('Azure Datacenter location for the hub')
+param locationA string = 'eastus2'
+
+@description('Azure Datacenter location for the hub')
+param locationB string = 'westus2'
+
+@description('Azure Datacenter location for the hub')
+param locationC string = 'westeurope'
 
 @description('Username for the admin account of the Virtual Machines')
 param virtualMachine_AdminUsername string
@@ -8,45 +17,77 @@ param virtualMachine_AdminUsername string
 @secure()
 param virtualMachine_AdminPassword string
 
-@description('Size of the Virtual Machines')
-param virtualMachine_Size string = 'Standard_B2ms' // 'Standard_D2s_v3' // 'Standard_D16lds_v5'
-
-@description('''True enables Accelerated Networking and False disabled it.  
-Not all VM sizes support Accel Net (i.e. Standard_B2ms).  
-I'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net.
-''')
-param acceleratedNetworking bool = false
-
-module virtualNetworkA '../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
-  name: 'vnet'
+module virtualNetwork '../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
+  name: 'vnetHub'
   params: {
-    location: locationA
+    location: location
     virtualNetwork_AddressPrefix: '10.0.0.0/16'
-    virtualNetwork_Name: 'vnet'
-  }
-}
-
-module virtualMachine_Windows '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
-  name: 'WebServVM-A'
-  params: {
-    acceleratedNetworking: acceleratedNetworking
-    location: locationA
-    subnet_ID: virtualNetworkA.outputs.general_SubnetID
-    virtualMachine_AdminPassword: virtualMachine_AdminPassword
-    virtualMachine_AdminUsername: virtualMachine_AdminUsername
-    virtualMachine_Name: 'WebServVM-A'
-    virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
-    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_WebServer.ps1'
-    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_WebServer.ps1 -Username ${virtualMachine_AdminUsername}'
+    virtualNetwork_Name: 'vnetHub'
   }
 }
 
 module bastion '../../modules/Microsoft.Network/Bastion.bicep' = {
   name: 'bastion'
   params: {
-    bastion_SubnetID: virtualNetworkA.outputs.bastion_SubnetID
+    bastion_SubnetID: virtualNetwork.outputs.bastion_SubnetID
+    location: location
+  }
+}
+
+module regionA './modules/Create_Client_And_WebServer.bicep' = {
+  name: 'regionA'
+  params: {
     location: locationA
+    uniqueNamePrefix: 'A'
+    virtualNetwork_AddressPrefix: '10.1.0.0/16'
+    virtualMachine_AdminPassword: virtualMachine_AdminPassword
+    virtualMachine_AdminUsername: virtualMachine_AdminUsername
+  }
+}
+
+module hub_to_A '../../modules/Microsoft.Network/VirtualNetworkPeeringSpoke2Spoke.bicep' = {
+  name: 'hub_to_A'
+  params: {
+    virtualNetwork1_Name: virtualNetwork.outputs.virtualNetwork_Name
+    virtualNetwork2_Name: regionA.outputs.virtualNetwork_Name
+  }
+}
+
+module regionB './modules/Create_Client_And_WebServer.bicep' = {
+  name: 'regionB'
+  params: {
+    location: locationB
+    uniqueNamePrefix: 'B'
+    virtualNetwork_AddressPrefix: '10.2.0.0/16'
+    virtualMachine_AdminPassword: virtualMachine_AdminPassword
+    virtualMachine_AdminUsername: virtualMachine_AdminUsername
+  }
+}
+
+module hub_to_B '../../modules/Microsoft.Network/VirtualNetworkPeeringSpoke2Spoke.bicep' = {
+  name: 'hub_to_B'
+  params: {
+    virtualNetwork1_Name: virtualNetwork.outputs.virtualNetwork_Name
+    virtualNetwork2_Name: regionB.outputs.virtualNetwork_Name
+  }
+}
+
+module regionC './modules/Create_Client_And_WebServer.bicep' = {
+  name: 'regionC'
+  params: {
+    location: locationC
+    uniqueNamePrefix: 'C'
+    virtualNetwork_AddressPrefix: '10.3.0.0/16'
+    virtualMachine_AdminPassword: virtualMachine_AdminPassword
+    virtualMachine_AdminUsername: virtualMachine_AdminUsername
+  }
+}
+
+module hub_to_C '../../modules/Microsoft.Network/VirtualNetworkPeeringSpoke2Spoke.bicep' = {
+  name: 'hub_to_C'
+  params: {
+    virtualNetwork1_Name: virtualNetwork.outputs.virtualNetwork_Name
+    virtualNetwork2_Name: regionC.outputs.virtualNetwork_Name
   }
 }
 
