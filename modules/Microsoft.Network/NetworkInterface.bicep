@@ -9,39 +9,34 @@ param acceleratedNetworking bool
 @description('The Resource ID of the subnet to which the Network Interface will be assigned.')
 param subnet_ID string
 
-// @description('Adds a Public IP to the Network Interface of the Virtual Machine')
-// param addPublicIPAddress bool = false
+@description('Adds a Public IP to the Network Interface of the Virtual Machine if true.')
+param addPublicIPAddress bool = false
 
-// testing ways for optional public ip address
-// resource networkInterface 'Microsoft.Network/networkInterfaces@2022-09-01' = {
-//   name: networkInterface_Name
-//   location: location
-//   properties: {
-//     ipConfigurations: [
-//       {
-//         name: 'ipconfig0'
-//         properties: {
-//           privateIPAllocationMethod: 'Dynamic'
-//           subnet: {
-//             id: subnet_ID
-//           }
-//           primary: true
-//           privateIPAddressVersion: 'IPv4'
-//           // Only adds a public IP Address if addPublicIPAddress is true
-//           publicIPAddress: addPublicIPAddress ? { 
-//             id: publicIPAddress.id 
-//           } : {}
-//         }
-//       }
-//     ]
-//     enableAcceleratedNetworking: acceleratedNetworking
-//     enableIPForwarding: false
-//     disableTcpStateTracking: false
-//     nicType: 'Standard'
-//   }
-// }
+resource networkInterfaceWithoutPubIP 'Microsoft.Network/networkInterfaces@2022-09-01' = if (!addPublicIPAddress) {
+  name: networkInterface_Name
+  location: location
+  properties: {
+    ipConfigurations: [
+      {
+        name: 'ipconfig0'
+        properties: {
+          privateIPAllocationMethod: 'Dynamic'
+          subnet: {
+            id: subnet_ID
+          }
+          primary: true
+          privateIPAddressVersion: 'IPv4'
+        }
+      }
+    ]
+    enableAcceleratedNetworking: acceleratedNetworking
+    enableIPForwarding: false
+    disableTcpStateTracking: false
+    nicType: 'Standard'
+  }
+}
 
-resource networkInterface 'Microsoft.Network/networkInterfaces@2022-09-01' = {
+resource networkInterfaceWithPubIP 'Microsoft.Network/networkInterfaces@2022-09-01' = if (addPublicIPAddress) {
   name: networkInterface_Name
   location: location
   properties: {
@@ -68,7 +63,7 @@ resource networkInterface 'Microsoft.Network/networkInterfaces@2022-09-01' = {
   }
 }
 
-resource publicIPAddress 'Microsoft.Network/publicIPAddresses@2023-06-01' = { // if (addPublicIPAddress) {
+resource publicIPAddress 'Microsoft.Network/publicIPAddresses@2023-06-01' = if (addPublicIPAddress) {
   name: '${networkInterface_Name}_PIP'
   location: location
   sku: {
@@ -83,11 +78,11 @@ resource publicIPAddress 'Microsoft.Network/publicIPAddresses@2023-06-01' = { //
   }
 }
 
-output networkInterface_Name string = networkInterface.name
-output networkInterface_ID string = networkInterface.id
+output networkInterface_Name string = addPublicIPAddress ? networkInterfaceWithoutPubIP.name : networkInterfaceWithPubIP.name
+output networkInterface_ID string = addPublicIPAddress ? networkInterfaceWithoutPubIP.id : networkInterfaceWithPubIP.id
 
-output networkInterface_IPConfig0_Name string = networkInterface.properties.ipConfigurations[0].name
-output networkInterface_IPConfig0_ID string = networkInterface.properties.ipConfigurations[0].id
-output networkInterface_PrivateIPAddress string = networkInterface.properties.ipConfigurations[0].properties.privateIPAddress
+output networkInterface_IPConfig0_Name string = addPublicIPAddress ? networkInterfaceWithoutPubIP.properties.ipConfigurations[0].name : networkInterfaceWithPubIP.properties.ipConfigurations[0].name
+output networkInterface_IPConfig0_ID string = addPublicIPAddress ? networkInterfaceWithoutPubIP.properties.ipConfigurations[0].id : networkInterfaceWithPubIP.properties.ipConfigurations[0].id
+output networkInterface_PrivateIPAddress string = addPublicIPAddress ? networkInterfaceWithoutPubIP.properties.ipConfigurations[0].properties.privateIPAddress : networkInterfaceWithPubIP.properties.ipConfigurations[0].properties.privateIPAddress
 
-// output networkInterface_PublicIPAddress string = addPublicIPAddress ? publicIPAddress.properties.ipAddress : ''
+output networkInterface_PublicIPAddress string = addPublicIPAddress ? publicIPAddress.properties.ipAddress : ''
