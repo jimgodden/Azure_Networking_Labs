@@ -34,6 +34,14 @@ module bastion '../../modules/Microsoft.Network/Bastion.bicep' = {
   }
 }
 
+module logAnalyticsWorkspace '../../modules/Microsoft.OperationalInsights/Workspaces.bicep' = {
+  name: 'law'
+  params: {
+    location: location
+    Workspaces_name: 'lawtest'
+  }
+}
+
 module regionA './modules/Create_Client_And_WebServer.bicep' = {
   name: 'regionA'
   params: {

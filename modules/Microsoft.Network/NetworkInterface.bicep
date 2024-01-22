@@ -9,8 +9,37 @@ param acceleratedNetworking bool
 @description('The Resource ID of the subnet to which the Network Interface will be assigned.')
 param subnet_ID string
 
-@description('Adds a Public IP to the Network Interface of the Virtual Machine')
-param addPublicIPAddress bool = false
+// @description('Adds a Public IP to the Network Interface of the Virtual Machine')
+// param addPublicIPAddress bool = false
+
+// testing ways for optional public ip address
+// resource networkInterface 'Microsoft.Network/networkInterfaces@2022-09-01' = {
+//   name: networkInterface_Name
+//   location: location
+//   properties: {
+//     ipConfigurations: [
+//       {
+//         name: 'ipconfig0'
+//         properties: {
+//           privateIPAllocationMethod: 'Dynamic'
+//           subnet: {
+//             id: subnet_ID
+//           }
+//           primary: true
+//           privateIPAddressVersion: 'IPv4'
+//           // Only adds a public IP Address if addPublicIPAddress is true
+//           publicIPAddress: addPublicIPAddress ? { 
+//             id: publicIPAddress.id 
+//           } : {}
+//         }
+//       }
+//     ]
+//     enableAcceleratedNetworking: acceleratedNetworking
+//     enableIPForwarding: false
+//     disableTcpStateTracking: false
+//     nicType: 'Standard'
+//   }
+// }
 
 resource networkInterface 'Microsoft.Network/networkInterfaces@2022-09-01' = {
   name: networkInterface_Name
@@ -26,8 +55,8 @@ resource networkInterface 'Microsoft.Network/networkInterfaces@2022-09-01' = {
           }
           primary: true
           privateIPAddressVersion: 'IPv4'
-          publicIPAddress: {
-            id: addPublicIPAddress ? publicIPAddress.id : ''
+          publicIPAddress: { 
+            id: publicIPAddress.id 
           }
         }
       }
@@ -39,7 +68,7 @@ resource networkInterface 'Microsoft.Network/networkInterfaces@2022-09-01' = {
   }
 }
 
-resource publicIPAddress 'Microsoft.Network/publicIPAddresses@2023-06-01' = if (addPublicIPAddress) {
+resource publicIPAddress 'Microsoft.Network/publicIPAddresses@2023-06-01' = { // if (addPublicIPAddress) {
   name: '${networkInterface_Name}_PIP'
   location: location
   sku: {
@@ -61,4 +90,4 @@ output networkInterface_IPConfig0_Name string = networkInterface.properties.ipCo
 output networkInterface_IPConfig0_ID string = networkInterface.properties.ipConfigurations[0].id
 output networkInterface_PrivateIPAddress string = networkInterface.properties.ipConfigurations[0].properties.privateIPAddress
 
-output networkInterface_PublicIPAddress string = addPublicIPAddress ? publicIPAddress.properties.ipAddress : ''
+// output networkInterface_PublicIPAddress string = addPublicIPAddress ? publicIPAddress.properties.ipAddress : ''
