@@ -247,6 +247,7 @@ module sourceBastion '../../modules/Microsoft.Network/Bastion.bicep' = {
   params: {
     bastion_SubnetID: virtualNetwork_Source.outputs.bastion_SubnetID
     location: srcLocation
+    bastion_SKU: 'Standard'
   }
 }
 

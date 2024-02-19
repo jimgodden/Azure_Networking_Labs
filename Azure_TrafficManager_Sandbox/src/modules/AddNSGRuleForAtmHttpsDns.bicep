@@ -43,3 +43,23 @@ resource networkSecurityGroupRuleHTTPS 'Microsoft.Network/networkSecurityGroups/
     destinationAddressPrefixes: []
   }
 }
+
+resource networkSecurityGroupRuleDNS 'Microsoft.Network/networkSecurityGroups/securityRules@2022-09-01' = {
+  parent: networkSecurityGroup
+  name: 'DNS'
+  properties: {
+    description: 'Allows anyone to access the sever via port 53'
+    protocol: '*'
+    sourcePortRange: '*'
+    destinationPortRange: '53'
+    sourceAddressPrefix: '*'
+    destinationAddressPrefix: '*'
+    access: 'Allow'
+    priority: 2003
+    direction: 'Inbound'
+    sourcePortRanges: []
+    destinationPortRanges: []
+    sourceAddressPrefixes: []
+    destinationAddressPrefixes: []
+  }
+}

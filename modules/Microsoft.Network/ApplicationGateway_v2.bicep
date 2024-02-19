@@ -1,12 +1,6 @@
 @description('Region that the resources are deployed to')
 param location string
 
-// @description('Name of the Virtual Network for both the Application Gateway and App Service Environment')
-// param Vnet_Name string
-
-// @description('Name of the Application Gateway subnet')
-// param applicationGateway_Subnet_Name string
-
 @description('Name of the Application Gateway')
 param applicationGateway_Name string
 
@@ -201,9 +195,9 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2022-11-01' =
       minCapacity: 0
       maxCapacity: 2
     }
-    firewallPolicy: {
-      id: applicationGatewayWAF.id
-    }
+    // firewallPolicy: {
+    //   id: applicationGatewayWAF.id
+    // }
   }
 }
 

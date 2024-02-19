@@ -212,49 +212,86 @@ resource networkSecurityGroup_ApplicationGateway 'Microsoft.Network/networkSecur
   name: '${virtualNetwork_Name}_NSG_ApplicationGateway'
   location: location
   properties: {
-    securityRules: []
+    securityRules: [
+      {
+        name: 'AllowGatewayManager'
+        properties: {
+          description: 'Allow GatewayManager'
+          protocol: '*'
+          sourcePortRange: '*'
+          destinationPortRange: '65200-65535'
+          sourceAddressPrefix: 'GatewayManager'
+          destinationAddressPrefix: '*'
+          access: 'Allow'
+          priority: 1000
+          direction: 'Inbound'
+          sourcePortRanges: []
+          destinationPortRanges: []
+          sourceAddressPrefixes: []
+          destinationAddressPrefixes: []
+        }
+      }
+      {
+        name: 'AllowHTTPS'
+        properties: {
+          description: 'Allow HTTPS'
+          protocol: 'Tcp'
+          sourcePortRange: '*'
+          destinationPortRange: '443'
+          sourceAddressPrefix: '*'
+          destinationAddressPrefix: '*'
+          access: 'Allow'
+          priority: 1001
+          direction: 'Inbound'
+          sourcePortRanges: []
+          destinationPortRanges: []
+          sourceAddressPrefixes: []
+          destinationAddressPrefixes: []
+        }
+      }
+    ]
   }
 }
 
-resource networkSecurityGroup_ApplicationGateway_AppGWSpecificRule 'Microsoft.Network/networkSecurityGroups/securityRules@2022-11-01' = {
-  parent: networkSecurityGroup_ApplicationGateway
-  name: 'AllowGatewayManager'
-  properties: {
-    description: 'Allow GatewayManager'
-    protocol: '*'
-    sourcePortRange: '*'
-    destinationPortRange: '65200-65535'
-    sourceAddressPrefix: 'GatewayManager'
-    destinationAddressPrefix: '*'
-    access: 'Allow'
-    priority: 1000
-    direction: 'Inbound'
-    sourcePortRanges: []
-    destinationPortRanges: []
-    sourceAddressPrefixes: []
-    destinationAddressPrefixes: []
-  }
-}
+// resource networkSecurityGroup_ApplicationGateway_AppGWSpecificRule 'Microsoft.Network/networkSecurityGroups/securityRules@2022-11-01' = {
+//   parent: networkSecurityGroup_ApplicationGateway
+//   name: 'AllowGatewayManager'
+//   properties: {
+//     description: 'Allow GatewayManager'
+//     protocol: '*'
+//     sourcePortRange: '*'
+//     destinationPortRange: '65200-65535'
+//     sourceAddressPrefix: 'GatewayManager'
+//     destinationAddressPrefix: '*'
+//     access: 'Allow'
+//     priority: 1000
+//     direction: 'Inbound'
+//     sourcePortRanges: []
+//     destinationPortRanges: []
+//     sourceAddressPrefixes: []
+//     destinationAddressPrefixes: []
+//   }
+// }
 
-resource networkSecurityGroup_ApplicationGateway_HTTPSRule 'Microsoft.Network/networkSecurityGroups/securityRules@2022-11-01' = {
-  parent: networkSecurityGroup_ApplicationGateway
-  name: 'AllowHTTPS'
-  properties: {
-    description: 'Allow HTTPS'
-    protocol: 'Tcp'
-    sourcePortRange: '*'
-    destinationPortRange: '443'
-    sourceAddressPrefix: '*'
-    destinationAddressPrefix: '*'
-    access: 'Allow'
-    priority: 1001
-    direction: 'Inbound'
-    sourcePortRanges: []
-    destinationPortRanges: []
-    sourceAddressPrefixes: []
-    destinationAddressPrefixes: []
-  }
-}
+// resource networkSecurityGroup_ApplicationGateway_HTTPSRule 'Microsoft.Network/networkSecurityGroups/securityRules@2022-11-01' = {
+//   parent: networkSecurityGroup_ApplicationGateway
+//   name: 'AllowHTTPS'
+//   properties: {
+//     description: 'Allow HTTPS'
+//     protocol: 'Tcp'
+//     sourcePortRange: '*'
+//     destinationPortRange: '443'
+//     sourceAddressPrefix: '*'
+//     destinationAddressPrefix: '*'
+//     access: 'Allow'
+//     priority: 1001
+//     direction: 'Inbound'
+//     sourcePortRanges: []
+//     destinationPortRanges: []
+//     sourceAddressPrefixes: []
+//     destinationAddressPrefixes: []
+//   }
+// }
 
 // resource networkSecurityGroupRule 'Microsoft.Network/networkSecurityGroups/securityRules@2022-09-01' = {
 //   parent: networkSecurityGroup

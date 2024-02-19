@@ -32,7 +32,7 @@ module virtualNetwork '../../../modules/Microsoft.Network/VirtualNetwork.bicep' 
   }
 }
 
-module addNSGRules 'AddNSGRuleForAtmAnd443.bicep' = {
+module addNSGRules 'AddNSGRuleForAtmHttpsDns.bicep' = {
   name: 'addNSGRules${uniqueNamePrefix}'
   params: {
     networkSecurityGroup_Name: virtualNetwork.outputs.networkSecurityGroup_Name
@@ -40,7 +40,7 @@ module addNSGRules 'AddNSGRuleForAtmAnd443.bicep' = {
 }
 
 module virtualMachine_WebServ '../../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
-  name: 'WebServVM${uniqueNamePrefix}'
+  name: 'WebServVm${uniqueNamePrefix}'
   params: {
     acceleratedNetworking: acceleratedNetworking
     location: location
@@ -56,19 +56,20 @@ module virtualMachine_WebServ '../../../modules/Microsoft.Compute/WindowsServer2
   }
 }
 
-module virtualMachine_Client '../../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
-  name: 'ClientVM${uniqueNamePrefix}'
+module virtualMachine_DNS '../../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
+  name: 'DnsVm${uniqueNamePrefix}'
   params: {
     acceleratedNetworking: acceleratedNetworking
     location: location
     subnet_ID: virtualNetwork.outputs.general_SubnetID
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
-    virtualMachine_Name: 'ClientVM${uniqueNamePrefix}'
+    virtualMachine_Name: 'DnsVm${uniqueNamePrefix}'
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
-    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_General.ps1'
-    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_General.ps1 -Username ${virtualMachine_AdminUsername}'
+    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_DNS.ps1'
+    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username ${virtualMachine_AdminUsername}'
+    addPublicIPAddress: true
   }
 }
 

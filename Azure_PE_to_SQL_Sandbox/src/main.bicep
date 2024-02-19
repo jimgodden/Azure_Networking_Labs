@@ -21,6 +21,17 @@ param sql_AdministratorPassword string
 @description('Name of the SQL Server')
 param sqlServer_Name string = 'sql${uniqueString(resourceGroup().id)}'
 
+@description('Sku name of the Azure Firewall.  Allowed values are Basic, Standard, and Premium')
+@allowed([
+  'Basic'
+  'Standard'
+  'Premium'
+])
+param azureFirewall_SKU string = 'Basic'
+
+@description('If true, an Azure Firewall will be deployed in both source and destination')
+param isUsingAzureFirewall bool = true
+
 
 module sql '../../modules/Microsoft.Sql/Server.bicep' = {
   name: 'sql'
@@ -67,6 +78,29 @@ module clientVM_Windows '../../modules/Microsoft.Compute/WindowsServer2022/Virtu
     virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
     virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_General.ps1'
     commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_General.ps1 -Username ${virtualMachine_AdminUsername}'
+  }
+}
+
+module AzFW '../../modules/Microsoft.Network/AzureFirewall.bicep' = if (isUsingAzureFirewall) {
+  name: 'AzFW'
+  params: {
+    azureFirewall_Name: 'AzFW'
+    azureFirewall_SKU: azureFirewall_SKU
+    azureFirewall_ManagementSubnet_ID: virtualNetwork.outputs.azureFirewallManagement_SubnetID
+    azureFirewallPolicy_Name: 'AzFW_Policy'
+    azureFirewall_Subnet_ID: virtualNetwork.outputs.azureFirewall_SubnetID
+    location: location
+  }
+}
+
+module udrToAzFW '../../modules/Microsoft.Network/RouteTable.bicep' = if (isUsingAzureFirewall) {
+  name: 'udrToAzFW_Hub'
+  params: {
+    addressPrefixs: [virtualNetwork.outputs.virtualNetwork_AddressPrefix]
+    nextHopType: 'VirtualAppliance'
+    routeTable_Name: virtualNetwork.outputs.routeTable_Name
+    routeTableRoute_Name: 'toAzFW'
+    nextHopIpAddress: AzFW.outputs.azureFirewall_PrivateIPAddress
   }
 }
 
