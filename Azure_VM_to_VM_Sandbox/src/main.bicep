@@ -191,7 +191,7 @@ module sourceVM_Linx '../../Modules/Microsoft.Compute/Ubuntu20/VirtualMachine.bi
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
     virtualMachine_ScriptFileName: 'Ubuntu20_WebServer_Config.sh'
-    commandToExecute: './Ubuntu20_WebServer_Config.sh'
+    commandToExecute: './Ubuntu20_DNS_Config.sh'
   }
 } ]
 

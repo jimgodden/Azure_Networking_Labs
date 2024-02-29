@@ -43,7 +43,7 @@ module sql '../../modules/Microsoft.Sql/Server.bicep' = {
   }
 }
 
-module virtualNetwork '../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
+module virtualNetwork '../../modules/Microsoft.Network/VirtualNetworkNetPolicy.bicep' = {
   name: 'vnet'
   params: {
     location: location
