@@ -20,6 +20,9 @@ param vpn_Destination_ASN int
 @secure()
 param vpn_SharedKey string
 
+@description('Option to add an additional identifier in case two LNGs of the same name might get created.')
+param lngOptionalTag string = ''
+
 @description('Source Virtual Network Gateway ID')
 param virtualNetworkGateway_ID string
 
@@ -69,7 +72,7 @@ resource connection 'Microsoft.Network/connections@2022-11-01' = {
 }
 
 resource localNetworkGateway 'Microsoft.Network/localNetworkGateways@2022-11-01' = {
-  name: '${vpn_Destination_Name}_LocalNetworkGateway'
+  name: '${vpn_Destination_Name}_LocalNetworkGateway${lngOptionalTag}'
   location: location
   properties: {
     gatewayIpAddress: vpn_Destination_PublicIPAddress

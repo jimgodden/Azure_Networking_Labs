@@ -221,8 +221,7 @@ module dnsPrivateResolverForwardingRuleSet '../../modules/Microsoft.Network/DNSP
       ipaddress: OnPremVM_WinDNS[i].outputs.networkInterface_PrivateIPAddress
     }]
     virtualNetwork_IDs: [
-      virtualNetwork_Hub.outputs.virtualNetwork_ID
-      virtualNetwork_Spoke
+      virtualNetwork_Spoke.outputs.virtualNetwork_ID
     ]
   }
 }
@@ -306,6 +305,7 @@ module TransitPrimary_to_OnPrem_conn '../../modules/Microsoft.Network/Connection
     vpn_Destination_Name: virtualNetworkGateway_OnPrem.outputs.virtualNetworkGateway_Name
     vpn_Destination_PublicIPAddress: virtualNetworkGateway_OnPrem.outputs.virtualNetworkGateway_PublicIPAddress
     vpn_SharedKey: vpn_SharedKey
+    lngOptionalTag: 'Primary'
   }
 }
 
@@ -333,5 +333,6 @@ module TransitSecondary_to_OnPrem_conn '../../modules/Microsoft.Network/Connecti
     vpn_Destination_Name: virtualNetworkGateway_OnPrem.outputs.virtualNetworkGateway_Name
     vpn_Destination_PublicIPAddress: virtualNetworkGateway_OnPrem.outputs.virtualNetworkGateway_PublicIPAddress
     vpn_SharedKey: vpn_SharedKey
+    lngOptionalTag: 'Secondary'
   }
 }
