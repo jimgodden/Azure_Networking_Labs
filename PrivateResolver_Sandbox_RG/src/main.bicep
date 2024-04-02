@@ -52,6 +52,14 @@ module virtualNetwork_Transit_secondary '../../modules/Microsoft.Network/Virtual
     virtualNetwork_Name: 'transit_VNet_secondary'
   }
 }
+module virtualNetwork_Dummy '../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
+  name: 'dummy_VNet'
+  params: {
+    virtualNetwork_AddressPrefix: '10.111.0.0/16' // This will send routes for the spoke VNET to On Prem through the VNG
+    location: locationSecondary
+    virtualNetwork_Name: 'dummy_VNet'
+  }
+}
 module virtualNetwork_Hub '../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
   name: 'hub_VNet'
   params: {
@@ -68,6 +76,28 @@ module virtualNetwork_Spoke '../../modules/Microsoft.Network/VirtualNetwork.bice
     virtualNetwork_Name: 'spoke_VNet'
   }
 }
+module transitPrimary_To_Dummy_Peering '../../modules/Microsoft.Network/VirtualNetworkPeeringHub2Spoke.bicep' = {
+  name: 'transitPrimaryToDummyPeering'
+  params: {
+    virtualNetwork_Hub_Name: virtualNetwork_Transit_primary.outputs.virtualNetwork_Name
+    virtualNetwork_Spoke_Name: virtualNetwork_Dummy.outputs.virtualNetwork_Name
+  }
+  dependsOn: [
+    TransitPrimary_to_OnPrem_conn
+    OnPrem_to_TransitPrimary_conn
+  ]
+}
+// module transitSecondary_To_Dummy_Peering '../../modules/Microsoft.Network/VirtualNetworkPeeringHub2Spoke.bicep' = {
+//   name: 'transitSecondaryToDummyPeering'
+//   params: {
+//     virtualNetwork_Hub_Name: virtualNetwork_Transit_secondary.outputs.virtualNetwork_Name
+//     virtualNetwork_Spoke_Name: virtualNetwork_Dummy.outputs.virtualNetwork_Name
+//   }
+//   dependsOn: [
+//     TransitPrimary_to_OnPrem_conn
+//     OnPrem_to_TransitPrimary_conn
+//   ]
+// }
 module transitPrimary_To_Hub_Peering '../../modules/Microsoft.Network/VirtualNetworkPeeringHub2Spoke.bicep' = {
   name: 'transitPrimaryToHubPeering'
   params: {
@@ -140,7 +170,6 @@ module udrToAzFW_Hub '../../modules/Microsoft.Network/RouteTable.bicep' = {
   name: 'udrToAzFW_Hub'
   params: {
     addressPrefixs: [
-      virtualNetwork_Spoke.outputs.virtualNetwork_AddressPrefix
       virtualNetwork_Transit_primary.outputs.virtualNetwork_AddressPrefix
       virtualNetwork_Transit_secondary.outputs.virtualNetwork_AddressPrefix
       virtualNetwork_OnPremHub.outputs.virtualNetwork_AddressPrefix
@@ -196,6 +225,15 @@ module hubBastion '../../modules/Microsoft.Network/Bastion.bicep' = {
     bastion_SubnetID: virtualNetwork_Hub.outputs.bastion_SubnetID
     location: locationPrimary
     bastion_name: 'hub_bastion'
+  }
+}
+
+module onpremBastion '../../modules/Microsoft.Network/Bastion.bicep' = {
+  name: 'onpremBastion'
+  params: {
+    bastion_SubnetID: virtualNetwork_OnPremHub.outputs.bastion_SubnetID
+    location: locationOnPrem
+    bastion_name: 'onprem_bastion'
   }
 }
 

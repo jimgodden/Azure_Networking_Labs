@@ -128,6 +128,9 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2022-09-01' = {
         name: subnet_Names[5]
         properties: {
           addressPrefix: subnet_AddressRangeCIDRs[5]
+          routeTable: {
+            id: routeTable.id
+          }
           delegations: []
           privateEndpointNetworkPolicies: 'Disabled'
           privateLinkServiceNetworkPolicies: 'Enabled'
