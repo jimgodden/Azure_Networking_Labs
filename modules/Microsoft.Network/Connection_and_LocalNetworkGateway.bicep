@@ -1,4 +1,4 @@
-@description('Azure Datacenter to which the resources will be deployed')
+@description('Azure Datacenter that the source VNG is deployed')
 param location string
 
 @description('Friendly name for the destination VPN device')
@@ -20,11 +20,11 @@ param vpn_Destination_ASN int
 @secure()
 param vpn_SharedKey string
 
-@description('Existing Virtual Network Gateway ID')
+@description('Source Virtual Network Gateway ID')
 param virtualNetworkGateway_ID string
 
 var virtualNetworkGateway_ID_Split = split(virtualNetworkGateway_ID, '/')
-var virtualNetworkGateway_Name = virtualNetworkGateway_ID_Split[8]  // Needs to be tested.  Might be 7 instead.
+var virtualNetworkGateway_Name = virtualNetworkGateway_ID_Split[8] 
 
 resource connection 'Microsoft.Network/connections@2022-11-01' = {
     name: '${virtualNetworkGateway_Name}_to_${vpn_Destination_Name}_Connection'
@@ -80,24 +80,3 @@ resource localNetworkGateway 'Microsoft.Network/localNetworkGateways@2022-11-01'
     }
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
