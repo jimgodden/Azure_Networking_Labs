@@ -74,3 +74,6 @@ module virtualMachine_DNS '../../../modules/Microsoft.Compute/WindowsServer2022/
 }
 
 output virtualNetwork_Name string = virtualNetwork.outputs.virtualNetwork_Name
+
+
+

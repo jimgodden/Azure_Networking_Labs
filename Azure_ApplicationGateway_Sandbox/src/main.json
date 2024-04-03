@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.23.1.45101",
-      "templateHash": "12628271988369276142"
+      "templateHash": "7423585542366356884"
     }
   },
   "parameters": {
@@ -79,7 +79,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "13053173869664832562"
+              "templateHash": "6037394210715163095"
             }
           },
           "parameters": {
@@ -239,6 +239,9 @@
                     "name": "[variables('subnet_Names')[5]]",
                     "properties": {
                       "addressPrefix": "[variables('subnet_AddressRangeCIDRs')[5]]",
+                      "routeTable": {
+                        "id": "[resourceId('Microsoft.Network/routeTables', parameters('routeTable_Name'))]"
+                      },
                       "delegations": [],
                       "privateEndpointNetworkPolicies": "Disabled",
                       "privateLinkServiceNetworkPolicies": "Enabled"
@@ -330,54 +333,45 @@
               "name": "[format('{0}_NSG_ApplicationGateway', parameters('virtualNetwork_Name'))]",
               "location": "[parameters('location')]",
               "properties": {
-                "securityRules": []
+                "securityRules": [
+                  {
+                    "name": "AllowGatewayManager",
+                    "properties": {
+                      "description": "Allow GatewayManager",
+                      "protocol": "*",
+                      "sourcePortRange": "*",
+                      "destinationPortRange": "65200-65535",
+                      "sourceAddressPrefix": "GatewayManager",
+                      "destinationAddressPrefix": "*",
+                      "access": "Allow",
+                      "priority": 1000,
+                      "direction": "Inbound",
+                      "sourcePortRanges": [],
+                      "destinationPortRanges": [],
+                      "sourceAddressPrefixes": [],
+                      "destinationAddressPrefixes": []
+                    }
+                  },
+                  {
+                    "name": "AllowHTTPS",
+                    "properties": {
+                      "description": "Allow HTTPS",
+                      "protocol": "Tcp",
+                      "sourcePortRange": "*",
+                      "destinationPortRange": "443",
+                      "sourceAddressPrefix": "*",
+                      "destinationAddressPrefix": "*",
+                      "access": "Allow",
+                      "priority": 1001,
+                      "direction": "Inbound",
+                      "sourcePortRanges": [],
+                      "destinationPortRanges": [],
+                      "sourceAddressPrefixes": [],
+                      "destinationAddressPrefixes": []
+                    }
+                  }
+                ]
               }
-            },
-            {
-              "type": "Microsoft.Network/networkSecurityGroups/securityRules",
-              "apiVersion": "2022-11-01",
-              "name": "[format('{0}/{1}', format('{0}_NSG_ApplicationGateway', parameters('virtualNetwork_Name')), 'AllowGatewayManager')]",
-              "properties": {
-                "description": "Allow GatewayManager",
-                "protocol": "*",
-                "sourcePortRange": "*",
-                "destinationPortRange": "65200-65535",
-                "sourceAddressPrefix": "GatewayManager",
-                "destinationAddressPrefix": "*",
-                "access": "Allow",
-                "priority": 1000,
-                "direction": "Inbound",
-                "sourcePortRanges": [],
-                "destinationPortRanges": [],
-                "sourceAddressPrefixes": [],
-                "destinationAddressPrefixes": []
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}_NSG_ApplicationGateway', parameters('virtualNetwork_Name')))]"
-              ]
-            },
-            {
-              "type": "Microsoft.Network/networkSecurityGroups/securityRules",
-              "apiVersion": "2022-11-01",
-              "name": "[format('{0}/{1}', format('{0}_NSG_ApplicationGateway', parameters('virtualNetwork_Name')), 'AllowHTTPS')]",
-              "properties": {
-                "description": "Allow HTTPS",
-                "protocol": "Tcp",
-                "sourcePortRange": "*",
-                "destinationPortRange": "443",
-                "sourceAddressPrefix": "*",
-                "destinationAddressPrefix": "*",
-                "access": "Allow",
-                "priority": 1001,
-                "direction": "Inbound",
-                "sourcePortRanges": [],
-                "destinationPortRanges": [],
-                "sourceAddressPrefixes": [],
-                "destinationAddressPrefixes": []
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}_NSG_ApplicationGateway', parameters('virtualNetwork_Name')))]"
-              ]
             }
           ],
           "outputs": {
@@ -484,6 +478,10 @@
             "routeTable_Name": {
               "type": "string",
               "value": "[parameters('routeTable_Name')]"
+            },
+            "networkSecurityGroup_Name": {
+              "type": "string",
+              "value": "[parameters('networkSecurityGroup_Default_Name')]"
             }
           }
         }
@@ -540,7 +538,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "7632930515549515641"
+              "templateHash": "13038152426206092530"
             }
           },
           "parameters": {
@@ -593,23 +591,27 @@
             },
             "virtualMachine_ScriptFileLocation": {
               "type": "string",
-              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/",
               "metadata": {
                 "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\r\nExample: https://example.com/scripts/"
               }
             },
             "virtualMachine_ScriptFileName": {
               "type": "string",
-              "defaultValue": "WinServ2022_ConfigScript_General.ps1",
               "metadata": {
                 "description": "Name of the file to be ran while the Virtual Machine is being created\r\nExample: WinServ2022_ConfigScript_General.ps1"
               }
             },
             "commandToExecute": {
               "type": "string",
-              "defaultValue": "[format('powershell -ExecutionPolicy Unrestricted -File {0}', parameters('virtualMachine_ScriptFileName'))]",
               "metadata": {
-                "description": "'Command to execute while the Virtual Machine is being created.\r\nExample:\r\n'powershell -ExecutionPolicy Unrestricted -File ${virtualMachine_ScriptFileName}'\r\n"
+                "description": "'Command to execute while the Virtual Machine is being created.\r\nExample:\r\n'powershell.exe -ExecutionPolicy Unrestricted -File <file name.ps1>'\r\n"
+              }
+            },
+            "addPublicIPAddress": {
+              "type": "bool",
+              "defaultValue": false,
+              "metadata": {
+                "description": "Adds a Public IP to the Network Interface of the Virtual Machine"
               }
             }
           },
@@ -749,6 +751,9 @@
                   },
                   "subnet_ID": {
                     "value": "[parameters('subnet_ID')]"
+                  },
+                  "addPublicIPAddress": {
+                    "value": "[parameters('addPublicIPAddress')]"
                   }
                 },
                 "template": {
@@ -758,7 +763,7 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.23.1.45101",
-                      "templateHash": "16646750190955539652"
+                      "templateHash": "7947371311517908168"
                     }
                   },
                   "parameters": {
@@ -782,10 +787,18 @@
                       "metadata": {
                         "description": "The Resource ID of the subnet to which the Network Interface will be assigned."
                       }
+                    },
+                    "addPublicIPAddress": {
+                      "type": "bool",
+                      "defaultValue": false,
+                      "metadata": {
+                        "description": "Adds a Public IP to the Network Interface of the Virtual Machine if true."
+                      }
                     }
                   },
                   "resources": [
                     {
+                      "condition": "[not(parameters('addPublicIPAddress'))]",
                       "type": "Microsoft.Network/networkInterfaces",
                       "apiVersion": "2022-09-01",
                       "name": "[parameters('networkInterface_Name')]",
@@ -809,28 +822,81 @@
                         "disableTcpStateTracking": false,
                         "nicType": "Standard"
                       }
+                    },
+                    {
+                      "condition": "[parameters('addPublicIPAddress')]",
+                      "type": "Microsoft.Network/networkInterfaces",
+                      "apiVersion": "2022-09-01",
+                      "name": "[parameters('networkInterface_Name')]",
+                      "location": "[parameters('location')]",
+                      "properties": {
+                        "ipConfigurations": [
+                          {
+                            "name": "ipconfig0",
+                            "properties": {
+                              "privateIPAllocationMethod": "Dynamic",
+                              "subnet": {
+                                "id": "[parameters('subnet_ID')]"
+                              },
+                              "primary": true,
+                              "privateIPAddressVersion": "IPv4",
+                              "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP', parameters('networkInterface_Name')))]"
+                              }
+                            }
+                          }
+                        ],
+                        "enableAcceleratedNetworking": "[parameters('acceleratedNetworking')]",
+                        "enableIPForwarding": false,
+                        "disableTcpStateTracking": false,
+                        "nicType": "Standard"
+                      },
+                      "dependsOn": [
+                        "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP', parameters('networkInterface_Name')))]"
+                      ]
+                    },
+                    {
+                      "condition": "[parameters('addPublicIPAddress')]",
+                      "type": "Microsoft.Network/publicIPAddresses",
+                      "apiVersion": "2023-06-01",
+                      "name": "[format('{0}_PIP', parameters('networkInterface_Name'))]",
+                      "location": "[parameters('location')]",
+                      "sku": {
+                        "name": "Standard",
+                        "tier": "Regional"
+                      },
+                      "properties": {
+                        "publicIPAddressVersion": "IPv4",
+                        "publicIPAllocationMethod": "Static",
+                        "idleTimeoutInMinutes": 4,
+                        "ipTags": []
+                      }
                     }
                   ],
                   "outputs": {
                     "networkInterface_Name": {
                       "type": "string",
-                      "value": "[parameters('networkInterface_Name')]"
+                      "value": "[if(parameters('addPublicIPAddress'), parameters('networkInterface_Name'), parameters('networkInterface_Name'))]"
                     },
                     "networkInterface_ID": {
                       "type": "string",
-                      "value": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name'))]"
+                      "value": "[if(parameters('addPublicIPAddress'), resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name')), resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name')))]"
                     },
                     "networkInterface_IPConfig0_Name": {
                       "type": "string",
-                      "value": "[reference(resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name')), '2022-09-01').ipConfigurations[0].name]"
+                      "value": "[if(parameters('addPublicIPAddress'), reference(resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name')), '2022-09-01').ipConfigurations[0].name, reference(resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name')), '2022-09-01').ipConfigurations[0].name)]"
                     },
                     "networkInterface_IPConfig0_ID": {
                       "type": "string",
-                      "value": "[reference(resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name')), '2022-09-01').ipConfigurations[0].id]"
+                      "value": "[if(parameters('addPublicIPAddress'), reference(resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name')), '2022-09-01').ipConfigurations[0].id, reference(resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name')), '2022-09-01').ipConfigurations[0].id)]"
                     },
                     "networkInterface_PrivateIPAddress": {
                       "type": "string",
-                      "value": "[reference(resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name')), '2022-09-01').ipConfigurations[0].properties.privateIPAddress]"
+                      "value": "[if(parameters('addPublicIPAddress'), reference(resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name')), '2022-09-01').ipConfigurations[0].properties.privateIPAddress, reference(resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name')), '2022-09-01').ipConfigurations[0].properties.privateIPAddress)]"
+                    },
+                    "networkInterface_PublicIPAddress": {
+                      "type": "string",
+                      "value": "[if(parameters('addPublicIPAddress'), reference(resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP', parameters('networkInterface_Name'))), '2023-06-01').ipAddress, '')]"
                     }
                   }
                 }
@@ -861,6 +927,10 @@
             "networkInterface_PrivateIPAddress": {
               "type": "string",
               "value": "[reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2022-09-01').outputs.networkInterface_PrivateIPAddress.value]"
+            },
+            "networkInterface_PublicIPAddress": {
+              "type": "string",
+              "value": "[if(parameters('addPublicIPAddress'), reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2022-09-01').outputs.networkInterface_PublicIPAddress.value, '')]"
             }
           }
         }
@@ -894,7 +964,8 @@
           "backendPoolFQDNs": {
             "value": [
               "[reference(resourceId('Microsoft.Resources/deployments', 'site'), '2022-09-01').outputs.website_FQDN.value]",
-              "[format('{0}.{1}', reference(resourceId('Microsoft.Resources/deployments', 'webserverVM'), '2022-09-01').outputs.virtualMachine_Name.value, variables('virtualMachine_Website_DomainName'))]"
+              "[format('{0}.{1}', reference(resourceId('Microsoft.Resources/deployments', 'webServVM_Win'), '2022-09-01').outputs.virtualMachine_Name.value, variables('virtualMachine_Website_DomainName'))]",
+              "[format('{0}.{1}', reference(resourceId('Microsoft.Resources/deployments', 'webServVM_Ubn'), '2022-09-01').outputs.virtualMachine_Name.value, variables('virtualMachine_Website_DomainName'))]"
             ]
           }
         },
@@ -905,7 +976,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "7988093368707828361"
+              "templateHash": "13127244010664518931"
             }
           },
           "parameters": {
@@ -1136,23 +1207,26 @@
                 "autoscaleConfiguration": {
                   "minCapacity": 0,
                   "maxCapacity": 2
-                },
-                "firewallPolicy": {
-                  "id": "[resourceId('Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies', parameters('applicationGatewayWAF_Name'))]"
                 }
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies', parameters('applicationGatewayWAF_Name'))]",
                 "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIP_ApplicationGateway_Name'))]"
               ]
             }
-          ]
+          ],
+          "outputs": {
+            "ApplicationGateway_FrontendIP_Private": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Network/applicationGateways', parameters('applicationGateway_Name')), '2022-11-01').frontendIPConfigurations[0].properties.privateIPAddress]"
+            }
+          }
         }
       },
       "dependsOn": [
         "[resourceId('Microsoft.Resources/deployments', 'site')]",
         "[resourceId('Microsoft.Resources/deployments', 'VirtualNetworkHub')]",
-        "[resourceId('Microsoft.Resources/deployments', 'webserverVM')]"
+        "[resourceId('Microsoft.Resources/deployments', 'webServVM_Ubn')]",
+        "[resourceId('Microsoft.Resources/deployments', 'webServVM_Win')]"
       ]
     },
     {
@@ -1477,7 +1551,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "7526381240379136718"
+              "templateHash": "10237086546056836748"
             }
           },
           "parameters": {
@@ -1518,7 +1592,13 @@
                 "[resourceId('Microsoft.Network/privateDnsZones', parameters('privateDNSZone_Name'))]"
               ]
             }
-          ]
+          ],
+          "outputs": {
+            "PrivateDNSZone_Name": {
+              "type": "string",
+              "value": "[parameters('privateDNSZone_Name')]"
+            }
+          }
         }
       },
       "dependsOn": [
@@ -1528,7 +1608,78 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2022-09-01",
-      "name": "webserverVM",
+      "name": "ARecord_AppGW",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "ARecord_name": {
+            "value": "appgw"
+          },
+          "ipv4Address": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'AppGW'), '2022-09-01').outputs.ApplicationGateway_FrontendIP_Private.value]"
+          },
+          "PrivateDNSZone_Name": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'contosoDotCom'), '2022-09-01').outputs.PrivateDNSZone_Name.value]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.23.1.45101",
+              "templateHash": "11550215848462636831"
+            }
+          },
+          "parameters": {
+            "PrivateDNSZone_Name": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the Private DNS Zone that the record will be created in."
+              }
+            },
+            "ARecord_name": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the A record."
+              }
+            },
+            "ipv4Address": {
+              "type": "string",
+              "metadata": {
+                "description": "IPv4 Address of the A record."
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Network/privateDnsZones/A",
+              "apiVersion": "2020-06-01",
+              "name": "[format('{0}/{1}', parameters('PrivateDNSZone_Name'), parameters('ARecord_name'))]",
+              "properties": {
+                "aRecords": [
+                  {
+                    "ipv4Address": "[parameters('ipv4Address')]"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'AppGW')]",
+        "[resourceId('Microsoft.Resources/deployments', 'contosoDotCom')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "webServVM_Win",
       "properties": {
         "expressionEvaluationOptions": {
           "scope": "inner"
@@ -1551,7 +1702,7 @@
             "value": "[parameters('virtualMachine_AdminUsername')]"
           },
           "virtualMachine_Name": {
-            "value": "webserverVM"
+            "value": "webserVM-Win"
           },
           "virtualMachine_Size": {
             "value": "[parameters('virtualMachine_Size')]"
@@ -1573,7 +1724,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "7632930515549515641"
+              "templateHash": "13038152426206092530"
             }
           },
           "parameters": {
@@ -1626,23 +1777,27 @@
             },
             "virtualMachine_ScriptFileLocation": {
               "type": "string",
-              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/",
               "metadata": {
                 "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\r\nExample: https://example.com/scripts/"
               }
             },
             "virtualMachine_ScriptFileName": {
               "type": "string",
-              "defaultValue": "WinServ2022_ConfigScript_General.ps1",
               "metadata": {
                 "description": "Name of the file to be ran while the Virtual Machine is being created\r\nExample: WinServ2022_ConfigScript_General.ps1"
               }
             },
             "commandToExecute": {
               "type": "string",
-              "defaultValue": "[format('powershell -ExecutionPolicy Unrestricted -File {0}', parameters('virtualMachine_ScriptFileName'))]",
               "metadata": {
-                "description": "'Command to execute while the Virtual Machine is being created.\r\nExample:\r\n'powershell -ExecutionPolicy Unrestricted -File ${virtualMachine_ScriptFileName}'\r\n"
+                "description": "'Command to execute while the Virtual Machine is being created.\r\nExample:\r\n'powershell.exe -ExecutionPolicy Unrestricted -File <file name.ps1>'\r\n"
+              }
+            },
+            "addPublicIPAddress": {
+              "type": "bool",
+              "defaultValue": false,
+              "metadata": {
+                "description": "Adds a Public IP to the Network Interface of the Virtual Machine"
               }
             }
           },
@@ -1782,6 +1937,9 @@
                   },
                   "subnet_ID": {
                     "value": "[parameters('subnet_ID')]"
+                  },
+                  "addPublicIPAddress": {
+                    "value": "[parameters('addPublicIPAddress')]"
                   }
                 },
                 "template": {
@@ -1791,7 +1949,7 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.23.1.45101",
-                      "templateHash": "16646750190955539652"
+                      "templateHash": "7947371311517908168"
                     }
                   },
                   "parameters": {
@@ -1815,10 +1973,18 @@
                       "metadata": {
                         "description": "The Resource ID of the subnet to which the Network Interface will be assigned."
                       }
+                    },
+                    "addPublicIPAddress": {
+                      "type": "bool",
+                      "defaultValue": false,
+                      "metadata": {
+                        "description": "Adds a Public IP to the Network Interface of the Virtual Machine if true."
+                      }
                     }
                   },
                   "resources": [
                     {
+                      "condition": "[not(parameters('addPublicIPAddress'))]",
                       "type": "Microsoft.Network/networkInterfaces",
                       "apiVersion": "2022-09-01",
                       "name": "[parameters('networkInterface_Name')]",
@@ -1842,28 +2008,509 @@
                         "disableTcpStateTracking": false,
                         "nicType": "Standard"
                       }
+                    },
+                    {
+                      "condition": "[parameters('addPublicIPAddress')]",
+                      "type": "Microsoft.Network/networkInterfaces",
+                      "apiVersion": "2022-09-01",
+                      "name": "[parameters('networkInterface_Name')]",
+                      "location": "[parameters('location')]",
+                      "properties": {
+                        "ipConfigurations": [
+                          {
+                            "name": "ipconfig0",
+                            "properties": {
+                              "privateIPAllocationMethod": "Dynamic",
+                              "subnet": {
+                                "id": "[parameters('subnet_ID')]"
+                              },
+                              "primary": true,
+                              "privateIPAddressVersion": "IPv4",
+                              "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP', parameters('networkInterface_Name')))]"
+                              }
+                            }
+                          }
+                        ],
+                        "enableAcceleratedNetworking": "[parameters('acceleratedNetworking')]",
+                        "enableIPForwarding": false,
+                        "disableTcpStateTracking": false,
+                        "nicType": "Standard"
+                      },
+                      "dependsOn": [
+                        "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP', parameters('networkInterface_Name')))]"
+                      ]
+                    },
+                    {
+                      "condition": "[parameters('addPublicIPAddress')]",
+                      "type": "Microsoft.Network/publicIPAddresses",
+                      "apiVersion": "2023-06-01",
+                      "name": "[format('{0}_PIP', parameters('networkInterface_Name'))]",
+                      "location": "[parameters('location')]",
+                      "sku": {
+                        "name": "Standard",
+                        "tier": "Regional"
+                      },
+                      "properties": {
+                        "publicIPAddressVersion": "IPv4",
+                        "publicIPAllocationMethod": "Static",
+                        "idleTimeoutInMinutes": 4,
+                        "ipTags": []
+                      }
                     }
                   ],
                   "outputs": {
                     "networkInterface_Name": {
                       "type": "string",
-                      "value": "[parameters('networkInterface_Name')]"
+                      "value": "[if(parameters('addPublicIPAddress'), parameters('networkInterface_Name'), parameters('networkInterface_Name'))]"
                     },
                     "networkInterface_ID": {
                       "type": "string",
-                      "value": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name'))]"
+                      "value": "[if(parameters('addPublicIPAddress'), resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name')), resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name')))]"
                     },
                     "networkInterface_IPConfig0_Name": {
                       "type": "string",
-                      "value": "[reference(resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name')), '2022-09-01').ipConfigurations[0].name]"
+                      "value": "[if(parameters('addPublicIPAddress'), reference(resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name')), '2022-09-01').ipConfigurations[0].name, reference(resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name')), '2022-09-01').ipConfigurations[0].name)]"
                     },
                     "networkInterface_IPConfig0_ID": {
                       "type": "string",
-                      "value": "[reference(resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name')), '2022-09-01').ipConfigurations[0].id]"
+                      "value": "[if(parameters('addPublicIPAddress'), reference(resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name')), '2022-09-01').ipConfigurations[0].id, reference(resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name')), '2022-09-01').ipConfigurations[0].id)]"
                     },
                     "networkInterface_PrivateIPAddress": {
                       "type": "string",
-                      "value": "[reference(resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name')), '2022-09-01').ipConfigurations[0].properties.privateIPAddress]"
+                      "value": "[if(parameters('addPublicIPAddress'), reference(resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name')), '2022-09-01').ipConfigurations[0].properties.privateIPAddress, reference(resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name')), '2022-09-01').ipConfigurations[0].properties.privateIPAddress)]"
+                    },
+                    "networkInterface_PublicIPAddress": {
+                      "type": "string",
+                      "value": "[if(parameters('addPublicIPAddress'), reference(resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP', parameters('networkInterface_Name'))), '2023-06-01').ipAddress, '')]"
+                    }
+                  }
+                }
+              }
+            }
+          ],
+          "outputs": {
+            "virtualMachine_Name": {
+              "type": "string",
+              "value": "[parameters('virtualMachine_Name')]"
+            },
+            "networkInterface_Name": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2022-09-01').outputs.networkInterface_Name.value]"
+            },
+            "networkInterface_ID": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2022-09-01').outputs.networkInterface_ID.value]"
+            },
+            "networkInterface_IPConfig0_Name": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2022-09-01').outputs.networkInterface_IPConfig0_Name.value]"
+            },
+            "networkInterface_IPConfig0_ID": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2022-09-01').outputs.networkInterface_IPConfig0_ID.value]"
+            },
+            "networkInterface_PrivateIPAddress": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2022-09-01').outputs.networkInterface_PrivateIPAddress.value]"
+            },
+            "networkInterface_PublicIPAddress": {
+              "type": "string",
+              "value": "[if(parameters('addPublicIPAddress'), reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2022-09-01').outputs.networkInterface_PublicIPAddress.value, '')]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'VirtualNetworkHub')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "webServVM_Ubn",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "acceleratedNetworking": {
+            "value": "[parameters('acceleratedNetworking')]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "subnet_ID": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'VirtualNetworkHub'), '2022-09-01').outputs.general_SubnetID.value]"
+          },
+          "virtualMachine_AdminPassword": {
+            "value": "[parameters('virtualMachine_AdminPassword')]"
+          },
+          "virtualMachine_AdminUsername": {
+            "value": "[parameters('virtualMachine_AdminUsername')]"
+          },
+          "virtualMachine_Name": {
+            "value": "webServVM-Ubn"
+          },
+          "virtualMachine_Size": {
+            "value": "[parameters('virtualMachine_Size')]"
+          },
+          "virtualMachine_ScriptFileLocation": {
+            "value": "[variables('virtualMachine_ScriptFileLocation')]"
+          },
+          "virtualMachine_ScriptFileName": {
+            "value": "Ubuntu20_WebServer_Config.sh"
+          },
+          "commandToExecute": {
+            "value": "[format('./Ubuntu20_WebServer_Config.sh webServVM-Ubn.{0}', variables('virtualMachine_Website_DomainName'))]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.23.1.45101",
+              "templateHash": "3387092201658744577"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string"
+            },
+            "virtualMachine_Name": {
+              "type": "string",
+              "maxLength": 15,
+              "metadata": {
+                "description": "Name of the Virtual Machine"
+              }
+            },
+            "virtualMachine_Size": {
+              "type": "string",
+              "metadata": {
+                "description": "Size of the Virtual Machine\r\nExamples:\r\nB2ms - 2 Core 8GB Ram - Cannot use Accelerated Networking\r\nD2as_v5 2 Core 8GB Ram - Uses Accelerated Networking"
+              }
+            },
+            "virtualMachine_AdminUsername": {
+              "type": "string",
+              "metadata": {
+                "description": "Admin Username for the Virtual Machine"
+              }
+            },
+            "virtualMachine_AdminPassword": {
+              "type": "securestring",
+              "metadata": {
+                "description": "Password for the Virtual Machine Admin User"
+              }
+            },
+            "networkInterface_Name": {
+              "type": "string",
+              "defaultValue": "[format('{0}_NetworkInterface', parameters('virtualMachine_Name'))]",
+              "metadata": {
+                "description": "Name of the Virtual Machines Network Interface"
+              }
+            },
+            "acceleratedNetworking": {
+              "type": "bool",
+              "metadata": {
+                "description": "True enables Accelerated Networking and False disabled it.  Not all virtualMachine sizes support Accel Net"
+              }
+            },
+            "subnet_ID": {
+              "type": "string",
+              "metadata": {
+                "description": "The Resource ID of the subnet to which the Network Interface will be assigned."
+              }
+            },
+            "virtualMachine_ScriptFileLocation": {
+              "type": "string",
+              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/",
+              "metadata": {
+                "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\r\nExample: https://example.com/scripts/"
+              }
+            },
+            "virtualMachine_ScriptFileName": {
+              "type": "string",
+              "defaultValue": "Ubuntu20_DNS_Config.sh",
+              "metadata": {
+                "description": "Name of the file to be ran while the Virtual Machine is being created\r\nExample: WinServ2022_ConfigScript_General.ps1"
+              }
+            },
+            "commandToExecute": {
+              "type": "string"
+            }
+          },
+          "variables": {
+            "virtualMachine_ScriptFileUri": "[format('{0}{1}', parameters('virtualMachine_ScriptFileLocation'), parameters('virtualMachine_ScriptFileName'))]"
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Compute/virtualMachines",
+              "apiVersion": "2023-03-01",
+              "name": "[parameters('virtualMachine_Name')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "hardwareProfile": {
+                  "vmSize": "[parameters('virtualMachine_Size')]"
+                },
+                "storageProfile": {
+                  "imageReference": {
+                    "publisher": "canonical",
+                    "offer": "0001-com-ubuntu-server-focal",
+                    "sku": "20_04-lts-gen2",
+                    "version": "latest"
+                  },
+                  "osDisk": {
+                    "osType": "Linux",
+                    "name": "[format('{0}_OsDisk_1', parameters('virtualMachine_Name'))]",
+                    "createOption": "FromImage",
+                    "caching": "ReadWrite",
+                    "deleteOption": "Delete"
+                  },
+                  "dataDisks": []
+                },
+                "osProfile": {
+                  "computerName": "[parameters('virtualMachine_Name')]",
+                  "adminUsername": "[parameters('virtualMachine_AdminUsername')]",
+                  "adminPassword": "[parameters('virtualMachine_AdminPassword')]",
+                  "linuxConfiguration": {
+                    "disablePasswordAuthentication": false,
+                    "provisionVMAgent": true,
+                    "patchSettings": {
+                      "patchMode": "ImageDefault",
+                      "assessmentMode": "ImageDefault"
+                    }
+                  },
+                  "secrets": [],
+                  "allowExtensionOperations": true
+                },
+                "networkProfile": {
+                  "networkInterfaces": [
+                    {
+                      "id": "[reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2022-09-01').outputs.networkInterface_ID.value]",
+                      "properties": {
+                        "deleteOption": "Delete"
+                      }
+                    }
+                  ]
+                },
+                "diagnosticsProfile": {
+                  "bootDiagnostics": {
+                    "enabled": true
+                  }
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Compute/virtualMachines/extensions",
+              "apiVersion": "2022-11-01",
+              "name": "[format('{0}/{1}', parameters('virtualMachine_Name'), 'AzureNetworkWatcherExtension')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "autoUpgradeMinorVersion": true,
+                "publisher": "Microsoft.Azure.NetworkWatcher",
+                "type": "NetworkWatcherAgentLinux",
+                "typeHandlerVersion": "1.4"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachine_Name'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Compute/virtualMachines/extensions",
+              "apiVersion": "2021-11-01",
+              "name": "[format('{0}/{1}', parameters('virtualMachine_Name'), 'installcustomscript')]",
+              "location": "[parameters('location')]",
+              "tags": {
+                "displayName": "install software for Linux VM"
+              },
+              "properties": {
+                "publisher": "Microsoft.Azure.Extensions",
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.1",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                  "fileUris": [
+                    "[variables('virtualMachine_ScriptFileUri')]"
+                  ]
+                },
+                "protectedSettings": {
+                  "commandToExecute": "[parameters('commandToExecute')]"
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachine_Name'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Resources/deployments",
+              "apiVersion": "2022-09-01",
+              "name": "[parameters('networkInterface_Name')]",
+              "properties": {
+                "expressionEvaluationOptions": {
+                  "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                  "acceleratedNetworking": {
+                    "value": "[parameters('acceleratedNetworking')]"
+                  },
+                  "location": {
+                    "value": "[parameters('location')]"
+                  },
+                  "networkInterface_Name": {
+                    "value": "[parameters('networkInterface_Name')]"
+                  },
+                  "subnet_ID": {
+                    "value": "[parameters('subnet_ID')]"
+                  }
+                },
+                "template": {
+                  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "metadata": {
+                    "_generator": {
+                      "name": "bicep",
+                      "version": "0.23.1.45101",
+                      "templateHash": "7947371311517908168"
+                    }
+                  },
+                  "parameters": {
+                    "location": {
+                      "type": "string"
+                    },
+                    "networkInterface_Name": {
+                      "type": "string",
+                      "metadata": {
+                        "description": "Name of the Virtual Machines Network Interface"
+                      }
+                    },
+                    "acceleratedNetworking": {
+                      "type": "bool",
+                      "metadata": {
+                        "description": "True enables Accelerated Networking and False disabled it.  Not all virtualMachine sizes support Accel Net"
+                      }
+                    },
+                    "subnet_ID": {
+                      "type": "string",
+                      "metadata": {
+                        "description": "The Resource ID of the subnet to which the Network Interface will be assigned."
+                      }
+                    },
+                    "addPublicIPAddress": {
+                      "type": "bool",
+                      "defaultValue": false,
+                      "metadata": {
+                        "description": "Adds a Public IP to the Network Interface of the Virtual Machine if true."
+                      }
+                    }
+                  },
+                  "resources": [
+                    {
+                      "condition": "[not(parameters('addPublicIPAddress'))]",
+                      "type": "Microsoft.Network/networkInterfaces",
+                      "apiVersion": "2022-09-01",
+                      "name": "[parameters('networkInterface_Name')]",
+                      "location": "[parameters('location')]",
+                      "properties": {
+                        "ipConfigurations": [
+                          {
+                            "name": "ipconfig0",
+                            "properties": {
+                              "privateIPAllocationMethod": "Dynamic",
+                              "subnet": {
+                                "id": "[parameters('subnet_ID')]"
+                              },
+                              "primary": true,
+                              "privateIPAddressVersion": "IPv4"
+                            }
+                          }
+                        ],
+                        "enableAcceleratedNetworking": "[parameters('acceleratedNetworking')]",
+                        "enableIPForwarding": false,
+                        "disableTcpStateTracking": false,
+                        "nicType": "Standard"
+                      }
+                    },
+                    {
+                      "condition": "[parameters('addPublicIPAddress')]",
+                      "type": "Microsoft.Network/networkInterfaces",
+                      "apiVersion": "2022-09-01",
+                      "name": "[parameters('networkInterface_Name')]",
+                      "location": "[parameters('location')]",
+                      "properties": {
+                        "ipConfigurations": [
+                          {
+                            "name": "ipconfig0",
+                            "properties": {
+                              "privateIPAllocationMethod": "Dynamic",
+                              "subnet": {
+                                "id": "[parameters('subnet_ID')]"
+                              },
+                              "primary": true,
+                              "privateIPAddressVersion": "IPv4",
+                              "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP', parameters('networkInterface_Name')))]"
+                              }
+                            }
+                          }
+                        ],
+                        "enableAcceleratedNetworking": "[parameters('acceleratedNetworking')]",
+                        "enableIPForwarding": false,
+                        "disableTcpStateTracking": false,
+                        "nicType": "Standard"
+                      },
+                      "dependsOn": [
+                        "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP', parameters('networkInterface_Name')))]"
+                      ]
+                    },
+                    {
+                      "condition": "[parameters('addPublicIPAddress')]",
+                      "type": "Microsoft.Network/publicIPAddresses",
+                      "apiVersion": "2023-06-01",
+                      "name": "[format('{0}_PIP', parameters('networkInterface_Name'))]",
+                      "location": "[parameters('location')]",
+                      "sku": {
+                        "name": "Standard",
+                        "tier": "Regional"
+                      },
+                      "properties": {
+                        "publicIPAddressVersion": "IPv4",
+                        "publicIPAllocationMethod": "Static",
+                        "idleTimeoutInMinutes": 4,
+                        "ipTags": []
+                      }
+                    }
+                  ],
+                  "outputs": {
+                    "networkInterface_Name": {
+                      "type": "string",
+                      "value": "[if(parameters('addPublicIPAddress'), parameters('networkInterface_Name'), parameters('networkInterface_Name'))]"
+                    },
+                    "networkInterface_ID": {
+                      "type": "string",
+                      "value": "[if(parameters('addPublicIPAddress'), resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name')), resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name')))]"
+                    },
+                    "networkInterface_IPConfig0_Name": {
+                      "type": "string",
+                      "value": "[if(parameters('addPublicIPAddress'), reference(resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name')), '2022-09-01').ipConfigurations[0].name, reference(resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name')), '2022-09-01').ipConfigurations[0].name)]"
+                    },
+                    "networkInterface_IPConfig0_ID": {
+                      "type": "string",
+                      "value": "[if(parameters('addPublicIPAddress'), reference(resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name')), '2022-09-01').ipConfigurations[0].id, reference(resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name')), '2022-09-01').ipConfigurations[0].id)]"
+                    },
+                    "networkInterface_PrivateIPAddress": {
+                      "type": "string",
+                      "value": "[if(parameters('addPublicIPAddress'), reference(resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name')), '2022-09-01').ipConfigurations[0].properties.privateIPAddress, reference(resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name')), '2022-09-01').ipConfigurations[0].properties.privateIPAddress)]"
+                    },
+                    "networkInterface_PublicIPAddress": {
+                      "type": "string",
+                      "value": "[if(parameters('addPublicIPAddress'), reference(resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP', parameters('networkInterface_Name'))), '2023-06-01').ipAddress, '')]"
                     }
                   }
                 }

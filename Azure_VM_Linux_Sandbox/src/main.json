@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.23.1.45101",
-      "templateHash": "1017814303277298239"
+      "templateHash": "431481501022849221"
     }
   },
   "parameters": {
@@ -71,7 +71,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "13053173869664832562"
+              "templateHash": "6037394210715163095"
             }
           },
           "parameters": {
@@ -231,6 +231,9 @@
                     "name": "[variables('subnet_Names')[5]]",
                     "properties": {
                       "addressPrefix": "[variables('subnet_AddressRangeCIDRs')[5]]",
+                      "routeTable": {
+                        "id": "[resourceId('Microsoft.Network/routeTables', parameters('routeTable_Name'))]"
+                      },
                       "delegations": [],
                       "privateEndpointNetworkPolicies": "Disabled",
                       "privateLinkServiceNetworkPolicies": "Enabled"
@@ -322,54 +325,45 @@
               "name": "[format('{0}_NSG_ApplicationGateway', parameters('virtualNetwork_Name'))]",
               "location": "[parameters('location')]",
               "properties": {
-                "securityRules": []
+                "securityRules": [
+                  {
+                    "name": "AllowGatewayManager",
+                    "properties": {
+                      "description": "Allow GatewayManager",
+                      "protocol": "*",
+                      "sourcePortRange": "*",
+                      "destinationPortRange": "65200-65535",
+                      "sourceAddressPrefix": "GatewayManager",
+                      "destinationAddressPrefix": "*",
+                      "access": "Allow",
+                      "priority": 1000,
+                      "direction": "Inbound",
+                      "sourcePortRanges": [],
+                      "destinationPortRanges": [],
+                      "sourceAddressPrefixes": [],
+                      "destinationAddressPrefixes": []
+                    }
+                  },
+                  {
+                    "name": "AllowHTTPS",
+                    "properties": {
+                      "description": "Allow HTTPS",
+                      "protocol": "Tcp",
+                      "sourcePortRange": "*",
+                      "destinationPortRange": "443",
+                      "sourceAddressPrefix": "*",
+                      "destinationAddressPrefix": "*",
+                      "access": "Allow",
+                      "priority": 1001,
+                      "direction": "Inbound",
+                      "sourcePortRanges": [],
+                      "destinationPortRanges": [],
+                      "sourceAddressPrefixes": [],
+                      "destinationAddressPrefixes": []
+                    }
+                  }
+                ]
               }
-            },
-            {
-              "type": "Microsoft.Network/networkSecurityGroups/securityRules",
-              "apiVersion": "2022-11-01",
-              "name": "[format('{0}/{1}', format('{0}_NSG_ApplicationGateway', parameters('virtualNetwork_Name')), 'AllowGatewayManager')]",
-              "properties": {
-                "description": "Allow GatewayManager",
-                "protocol": "*",
-                "sourcePortRange": "*",
-                "destinationPortRange": "65200-65535",
-                "sourceAddressPrefix": "GatewayManager",
-                "destinationAddressPrefix": "*",
-                "access": "Allow",
-                "priority": 1000,
-                "direction": "Inbound",
-                "sourcePortRanges": [],
-                "destinationPortRanges": [],
-                "sourceAddressPrefixes": [],
-                "destinationAddressPrefixes": []
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}_NSG_ApplicationGateway', parameters('virtualNetwork_Name')))]"
-              ]
-            },
-            {
-              "type": "Microsoft.Network/networkSecurityGroups/securityRules",
-              "apiVersion": "2022-11-01",
-              "name": "[format('{0}/{1}', format('{0}_NSG_ApplicationGateway', parameters('virtualNetwork_Name')), 'AllowHTTPS')]",
-              "properties": {
-                "description": "Allow HTTPS",
-                "protocol": "Tcp",
-                "sourcePortRange": "*",
-                "destinationPortRange": "443",
-                "sourceAddressPrefix": "*",
-                "destinationAddressPrefix": "*",
-                "access": "Allow",
-                "priority": 1001,
-                "direction": "Inbound",
-                "sourcePortRanges": [],
-                "destinationPortRanges": [],
-                "sourceAddressPrefixes": [],
-                "destinationAddressPrefixes": []
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}_NSG_ApplicationGateway', parameters('virtualNetwork_Name')))]"
-              ]
             }
           ],
           "outputs": {
@@ -476,6 +470,10 @@
             "routeTable_Name": {
               "type": "string",
               "value": "[parameters('routeTable_Name')]"
+            },
+            "networkSecurityGroup_Name": {
+              "type": "string",
+              "value": "[parameters('networkSecurityGroup_Default_Name')]"
             }
           }
         }
@@ -523,7 +521,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.23.1.45101",
-              "templateHash": "1353880023831061415"
+              "templateHash": "3387092201658744577"
             }
           },
           "parameters": {
@@ -727,7 +725,7 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.23.1.45101",
-                      "templateHash": "16646750190955539652"
+                      "templateHash": "7947371311517908168"
                     }
                   },
                   "parameters": {
@@ -751,10 +749,18 @@
                       "metadata": {
                         "description": "The Resource ID of the subnet to which the Network Interface will be assigned."
                       }
+                    },
+                    "addPublicIPAddress": {
+                      "type": "bool",
+                      "defaultValue": false,
+                      "metadata": {
+                        "description": "Adds a Public IP to the Network Interface of the Virtual Machine if true."
+                      }
                     }
                   },
                   "resources": [
                     {
+                      "condition": "[not(parameters('addPublicIPAddress'))]",
                       "type": "Microsoft.Network/networkInterfaces",
                       "apiVersion": "2022-09-01",
                       "name": "[parameters('networkInterface_Name')]",
@@ -778,28 +784,81 @@
                         "disableTcpStateTracking": false,
                         "nicType": "Standard"
                       }
+                    },
+                    {
+                      "condition": "[parameters('addPublicIPAddress')]",
+                      "type": "Microsoft.Network/networkInterfaces",
+                      "apiVersion": "2022-09-01",
+                      "name": "[parameters('networkInterface_Name')]",
+                      "location": "[parameters('location')]",
+                      "properties": {
+                        "ipConfigurations": [
+                          {
+                            "name": "ipconfig0",
+                            "properties": {
+                              "privateIPAllocationMethod": "Dynamic",
+                              "subnet": {
+                                "id": "[parameters('subnet_ID')]"
+                              },
+                              "primary": true,
+                              "privateIPAddressVersion": "IPv4",
+                              "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP', parameters('networkInterface_Name')))]"
+                              }
+                            }
+                          }
+                        ],
+                        "enableAcceleratedNetworking": "[parameters('acceleratedNetworking')]",
+                        "enableIPForwarding": false,
+                        "disableTcpStateTracking": false,
+                        "nicType": "Standard"
+                      },
+                      "dependsOn": [
+                        "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP', parameters('networkInterface_Name')))]"
+                      ]
+                    },
+                    {
+                      "condition": "[parameters('addPublicIPAddress')]",
+                      "type": "Microsoft.Network/publicIPAddresses",
+                      "apiVersion": "2023-06-01",
+                      "name": "[format('{0}_PIP', parameters('networkInterface_Name'))]",
+                      "location": "[parameters('location')]",
+                      "sku": {
+                        "name": "Standard",
+                        "tier": "Regional"
+                      },
+                      "properties": {
+                        "publicIPAddressVersion": "IPv4",
+                        "publicIPAllocationMethod": "Static",
+                        "idleTimeoutInMinutes": 4,
+                        "ipTags": []
+                      }
                     }
                   ],
                   "outputs": {
                     "networkInterface_Name": {
                       "type": "string",
-                      "value": "[parameters('networkInterface_Name')]"
+                      "value": "[if(parameters('addPublicIPAddress'), parameters('networkInterface_Name'), parameters('networkInterface_Name'))]"
                     },
                     "networkInterface_ID": {
                       "type": "string",
-                      "value": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name'))]"
+                      "value": "[if(parameters('addPublicIPAddress'), resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name')), resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name')))]"
                     },
                     "networkInterface_IPConfig0_Name": {
                       "type": "string",
-                      "value": "[reference(resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name')), '2022-09-01').ipConfigurations[0].name]"
+                      "value": "[if(parameters('addPublicIPAddress'), reference(resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name')), '2022-09-01').ipConfigurations[0].name, reference(resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name')), '2022-09-01').ipConfigurations[0].name)]"
                     },
                     "networkInterface_IPConfig0_ID": {
                       "type": "string",
-                      "value": "[reference(resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name')), '2022-09-01').ipConfigurations[0].id]"
+                      "value": "[if(parameters('addPublicIPAddress'), reference(resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name')), '2022-09-01').ipConfigurations[0].id, reference(resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name')), '2022-09-01').ipConfigurations[0].id)]"
                     },
                     "networkInterface_PrivateIPAddress": {
                       "type": "string",
-                      "value": "[reference(resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name')), '2022-09-01').ipConfigurations[0].properties.privateIPAddress]"
+                      "value": "[if(parameters('addPublicIPAddress'), reference(resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name')), '2022-09-01').ipConfigurations[0].properties.privateIPAddress, reference(resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name')), '2022-09-01').ipConfigurations[0].properties.privateIPAddress)]"
+                    },
+                    "networkInterface_PublicIPAddress": {
+                      "type": "string",
+                      "value": "[if(parameters('addPublicIPAddress'), reference(resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP', parameters('networkInterface_Name'))), '2023-06-01').ipAddress, '')]"
                     }
                   }
                 }

@@ -36,3 +36,6 @@ $chocoTaskAction = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "
 $chocoTaskTrigger = New-ScheduledTaskTrigger -Once -At $currentTimePlusTwoMinutes
 Register-ScheduledTask -TaskName $chocoTaskName -Action $chocoTaskAction -Trigger $chocoTaskTrigger -User "NT AUTHORITY\SYSTEM" -Force
 
+
+
+

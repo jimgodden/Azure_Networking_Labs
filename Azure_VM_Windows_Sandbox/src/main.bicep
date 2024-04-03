@@ -51,3 +51,6 @@ module bastion '../../modules/Microsoft.Network/Bastion.bicep' = {
 }
 
 
+
+
+

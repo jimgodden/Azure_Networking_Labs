@@ -7,3 +7,6 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\WinServ2022_InitScri
 
 Restart-Computer
 
+
+
+

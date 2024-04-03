@@ -24,6 +24,9 @@
         "Name": "Azure_VM_Windows_Sandbox"
     },
     {
+        "Name": "PrivateResolver_Sandbox"
+    },
+    {
         "Name": "TD_Repro"
     }
 ]

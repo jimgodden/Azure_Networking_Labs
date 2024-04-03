@@ -111,3 +111,6 @@ module bastion '../../modules/Microsoft.Network/Bastion.bicep' = {
     location: location
   }
 }
+
+
+
