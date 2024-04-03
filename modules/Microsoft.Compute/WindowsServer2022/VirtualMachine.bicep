@@ -169,4 +169,3 @@ output networkInterface_IPConfig0_ID string = networkInterface.outputs.networkIn
 output networkInterface_PrivateIPAddress string = networkInterface.outputs.networkInterface_PrivateIPAddress
 
 output networkInterface_PublicIPAddress string = addPublicIPAddress ? networkInterface.outputs.networkInterface_PublicIPAddress : ''
-

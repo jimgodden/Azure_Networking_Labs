@@ -80,32 +80,3 @@ output virtualHub_VPNGateway_Name_Array array = virtualHub.outputs.vpnGateway_Na
 output virtualHub_VPNGateway_PublicIPAddresses array = virtualHub.outputs.vpnGateway_PublicIPAddresses
 output virtualHub_VPNGateway_BGPAddresses array = virtualHub.outputs.vpnGateway_BGPAddresses
 output virtualHub_VPNGateway_ASN array = virtualHub.outputs.vpnGateway_ASN
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

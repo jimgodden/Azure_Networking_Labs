@@ -74,24 +74,3 @@ output virtualNetworkGateway_Name string = virtualNetworkGateway.name
 output virtualNetworkGateway_PublicIPAddress string = virtualNetworkGateway_PublicIPAddress.properties.ipAddress
 output virtualNetworkGateway_BGPAddress string = virtualNetworkGateway.properties.bgpSettings.bgpPeeringAddress
 output virtualNetworkGateway_ASN int = virtualNetworkGateway.properties.bgpSettings.asn
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

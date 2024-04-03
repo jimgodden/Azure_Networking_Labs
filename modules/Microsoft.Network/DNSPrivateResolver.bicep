@@ -92,23 +92,3 @@ resource outboundEndpoint 'Microsoft.Network/dnsResolvers/outboundEndpoints@2022
 
 output dnsPrivateResolver_Outbound_Endpoint_ID string = outboundEndpoint.id
 output privateDNSResolver_Inbound_Endpoint_IPAddress string = inboundEndpoint.properties.ipConfigurations[0].privateIpAddress
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

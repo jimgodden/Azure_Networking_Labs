@@ -12,6 +12,9 @@
         "Name": "Azure_PrivateLink_Sandbox"
     },
     {
+        "Name": "Azure_TrafficManager_Sandbox"
+    },
+    {
         "Name": "Azure_VirtualWAN_Sandbox"
     },
     {

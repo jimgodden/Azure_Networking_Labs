@@ -20,23 +20,3 @@ resource DNSZoneARecord 'Microsoft.Network/dnsZones/A@2018-05-01' = {
 
 
 output dnsZone_NameServers array = DNSZone.properties.nameServers
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

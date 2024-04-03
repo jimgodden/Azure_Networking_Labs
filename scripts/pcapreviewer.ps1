@@ -91,9 +91,3 @@ $trigger = New-ScheduledTaskTrigger -Once -At $currentTimePlusTenMinutes -Repeti
 Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger -User "NT AUTHORITY\SYSTEM" -Force
 
 Restart-Computer
-
-
-
-
-
-

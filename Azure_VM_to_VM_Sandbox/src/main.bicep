@@ -251,7 +251,3 @@ module sourceBastion '../../modules/Microsoft.Network/Bastion.bicep' = {
     bastion_SKU: 'Standard'
   }
 }
-
-
-
-

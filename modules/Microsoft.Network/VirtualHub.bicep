@@ -126,23 +126,3 @@ output vpnGateway_Name_Array array = usingVPN ? vpnGateway_Name_Array : []
 output vpnGateway_PublicIPAddresses array = usingVPN ? vpnGateway_PublicIPAddresses : []
 output vpnGateway_BGPAddresses array = usingVPN ? vpnGateway_BGPAddresses : []
 output vpnGateway_ASN array = usingVPN ? vpnGateway_ASN : []
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

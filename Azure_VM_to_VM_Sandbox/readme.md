@@ -18,30 +18,3 @@ Diagram of the infrastructure with all optional components
 ![Diagram of the infrastructure with all optional components](diagram.drawio.png)
 
 Note: This Diagram is in this repository, and can be modified via https://app.diagrams.net/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

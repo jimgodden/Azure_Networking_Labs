@@ -37,23 +37,3 @@ resource routeTable_Route 'Microsoft.Network/routeTables/routes@2023-05-01' = [f
     nextHopType: nextHopType
   }
 } ]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

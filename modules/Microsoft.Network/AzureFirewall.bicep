@@ -139,23 +139,3 @@ resource azureFirewallPolicy_Rule 'Microsoft.Network/firewallPolicies/ruleCollec
 
 
 output azureFirewall_PrivateIPAddress string = azureFirewall.properties.ipConfigurations[0].properties.privateIPAddress
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

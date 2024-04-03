@@ -81,23 +81,3 @@ resource internalLoadBalancer 'Microsoft.Network/loadBalancers@2022-09-01' = {
 }
 
 output frontendIPAddress string = internalLoadBalancer.properties.frontendIPConfigurations[0].properties.privateIPAddress
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

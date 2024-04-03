@@ -99,5 +99,3 @@ module hub_to_C '../../modules/Microsoft.Network/VirtualNetworkPeeringSpoke2Spok
     virtualNetwork2_Name: regionC.outputs.virtualNetwork_Name
   }
 }
-
-

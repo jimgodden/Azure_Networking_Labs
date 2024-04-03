@@ -40,5 +40,3 @@ Add-Content -Path ".\.gitignore" -Value @"
 $ProjectName/iteration.txt
 $ProjectName/main.parameters.bicepparam
 "@
-
-

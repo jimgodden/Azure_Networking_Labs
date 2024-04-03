@@ -91,32 +91,3 @@ output virtualNetworkGateway_Name string = vpn.outputs.virtualNetworkGateway_Nam
 output virtualNetworkGateway_PublicIPAddress string = vpn.outputs.virtualNetworkGateway_PublicIPAddress
 output virtualNetworkGateway_BGPAddress string = vpn.outputs.virtualNetworkGateway_BGPAddress
 output virtualNetworkGateway_ASN int = vpn.outputs.virtualNetworkGateway_ASN
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

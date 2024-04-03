@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.23.1.45101",
-      "templateHash": "7423585542366356884"
+      "version": "0.26.54.24096",
+      "templateHash": "9269896797250676740"
     }
   },
   "parameters": {
@@ -78,8 +78,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.23.1.45101",
-              "templateHash": "6037394210715163095"
+              "version": "0.26.54.24096",
+              "templateHash": "8929284134504673363"
             }
           },
           "parameters": {
@@ -537,8 +537,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.23.1.45101",
-              "templateHash": "13038152426206092530"
+              "version": "0.26.54.24096",
+              "templateHash": "2749508208779935962"
             }
           },
           "parameters": {
@@ -762,8 +762,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.23.1.45101",
-                      "templateHash": "7947371311517908168"
+                      "version": "0.26.54.24096",
+                      "templateHash": "12161814309671133191"
                     }
                   },
                   "parameters": {
@@ -975,8 +975,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.23.1.45101",
-              "templateHash": "13127244010664518931"
+              "version": "0.26.54.24096",
+              "templateHash": "5016052238124140301"
             }
           },
           "parameters": {
@@ -1261,8 +1261,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.23.1.45101",
-              "templateHash": "12942242192912571240"
+              "version": "0.26.54.24096",
+              "templateHash": "3437426767852386957"
             }
           },
           "parameters": {
@@ -1550,8 +1550,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.23.1.45101",
-              "templateHash": "10237086546056836748"
+              "version": "0.26.54.24096",
+              "templateHash": "1982908953667930081"
             }
           },
           "parameters": {
@@ -1631,8 +1631,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.23.1.45101",
-              "templateHash": "11550215848462636831"
+              "version": "0.26.54.24096",
+              "templateHash": "17840002788661398173"
             }
           },
           "parameters": {
@@ -1723,8 +1723,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.23.1.45101",
-              "templateHash": "13038152426206092530"
+              "version": "0.26.54.24096",
+              "templateHash": "2749508208779935962"
             }
           },
           "parameters": {
@@ -1948,8 +1948,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.23.1.45101",
-                      "templateHash": "7947371311517908168"
+                      "version": "0.26.54.24096",
+                      "templateHash": "12161814309671133191"
                     }
                   },
                   "parameters": {
@@ -2172,8 +2172,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.23.1.45101",
-              "templateHash": "3387092201658744577"
+              "version": "0.26.54.24096",
+              "templateHash": "6964921601616201083"
             }
           },
           "parameters": {
@@ -2376,8 +2376,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.23.1.45101",
-                      "templateHash": "7947371311517908168"
+                      "version": "0.26.54.24096",
+                      "templateHash": "12161814309671133191"
                     }
                   },
                   "parameters": {
@@ -2559,6 +2559,9 @@
         },
         "mode": "Incremental",
         "parameters": {
+          "bastion_name": {
+            "value": "Bastion_Hub"
+          },
           "bastion_SubnetID": {
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'VirtualNetworkHub'), '2022-09-01').outputs.bastion_SubnetID.value]"
           },
@@ -2572,8 +2575,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.23.1.45101",
-              "templateHash": "16363490596801265941"
+              "version": "0.26.54.24096",
+              "templateHash": "8619796571247764854"
             }
           },
           "parameters": {
@@ -2585,16 +2588,8 @@
             },
             "bastion_name": {
               "type": "string",
-              "defaultValue": "bastion",
               "metadata": {
                 "description": "Name of the Azure Bastion"
-              }
-            },
-            "bastion_vip_name": {
-              "type": "string",
-              "defaultValue": "bastion_vip",
-              "metadata": {
-                "description": "Name of the Public IP Address attached to the Azure Bastion"
               }
             },
             "bastion_SubnetID": {
@@ -2636,7 +2631,7 @@
                     "properties": {
                       "privateIPAllocationMethod": "Dynamic",
                       "publicIPAddress": {
-                        "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('bastion_vip_name'))]"
+                        "id": "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_VIP', parameters('bastion_name')))]"
                       },
                       "subnet": {
                         "id": "[parameters('bastion_SubnetID')]"
@@ -2646,13 +2641,13 @@
                 ]
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Network/publicIPAddresses', parameters('bastion_vip_name'))]"
+                "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_VIP', parameters('bastion_name')))]"
               ]
             },
             {
               "type": "Microsoft.Network/publicIPAddresses",
               "apiVersion": "2022-09-01",
-              "name": "[parameters('bastion_vip_name')]",
+              "name": "[format('{0}_VIP', parameters('bastion_name'))]",
               "location": "[parameters('location')]",
               "sku": {
                 "name": "Standard",

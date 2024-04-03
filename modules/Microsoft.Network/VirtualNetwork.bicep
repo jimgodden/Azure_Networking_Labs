@@ -347,21 +347,3 @@ output virtualNetwork_AddressPrefix string = virtualNetwork.properties.addressSp
 output routeTable_Name string = routeTable.name
 
 output networkSecurityGroup_Name string = networkSecurityGroup.name
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

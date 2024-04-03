@@ -15,23 +15,3 @@ resource virtualWAN 'Microsoft.Network/virtualWans@2022-07-01' = {
 }
 
 output virtualWAN_ID string = virtualWAN.id
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -374,6 +374,3 @@ module TransitSecondary_to_OnPrem_conn '../../modules/Microsoft.Network/Connecti
     lngOptionalTag: 'Secondary'
   }
 }
-
-
-

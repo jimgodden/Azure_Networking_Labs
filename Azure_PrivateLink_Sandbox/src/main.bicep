@@ -42,12 +42,6 @@ param usingAzureFirewall bool = true
 @secure()
 param vpn_SharedKey string
 
-@description('''DNS Zone to be hosted On Prem and with a forwarding rule on the DNS Private Resolver.
-Must end with a period (.)
-Example:
-contoso.com.''')
-param onpremResolvableDomainName string = 'contoso.com.'
-
 var virtualMachine_ScriptFileLocation = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
 
 
@@ -356,30 +350,3 @@ module Hub_to_OnPrem_conn '../../modules/Microsoft.Network/Connection_and_LocalN
     vpn_SharedKey: vpn_SharedKey
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
