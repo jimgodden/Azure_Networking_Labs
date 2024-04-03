@@ -1,11 +1,11 @@
 @description('Azure Datacenter location for the resources and primary route')
-param locationPrimary string = resourceGroup().location
+param locationPrimary string = 'eastus2'
 
 @description('Azure Datacenter location for the alternative route')
-param locationSecondary string
+param locationSecondary string = 'westus2'
 
 @description('Azure Datacenter location for the "On Prem" resources')
-param locationOnPrem string
+param locationOnPrem string = 'eastus'
 
 @description('Username for the admin account of the Virtual Machines')
 param virtualMachine_AdminUsername string
@@ -87,17 +87,6 @@ module transitPrimary_To_Dummy_Peering '../../modules/Microsoft.Network/VirtualN
     OnPrem_to_TransitPrimary_conn
   ]
 }
-// module transitSecondary_To_Dummy_Peering '../../modules/Microsoft.Network/VirtualNetworkPeeringHub2Spoke.bicep' = {
-//   name: 'transitSecondaryToDummyPeering'
-//   params: {
-//     virtualNetwork_Hub_Name: virtualNetwork_Transit_secondary.outputs.virtualNetwork_Name
-//     virtualNetwork_Spoke_Name: virtualNetwork_Dummy.outputs.virtualNetwork_Name
-//   }
-//   dependsOn: [
-//     TransitPrimary_to_OnPrem_conn
-//     OnPrem_to_TransitPrimary_conn
-//   ]
-// }
 module transitPrimary_To_Hub_Peering '../../modules/Microsoft.Network/VirtualNetworkPeeringHub2Spoke.bicep' = {
   name: 'transitPrimaryToHubPeering'
   params: {

@@ -5,25 +5,27 @@
     "_generator": {
       "name": "bicep",
       "version": "0.26.54.24096",
-      "templateHash": "2270600099767217974"
+      "templateHash": "5338920423496672532"
     }
   },
   "parameters": {
     "locationPrimary": {
       "type": "string",
-      "defaultValue": "[resourceGroup().location]",
+      "defaultValue": "eastus2",
       "metadata": {
         "description": "Azure Datacenter location for the resources and primary route"
       }
     },
     "locationSecondary": {
       "type": "string",
+      "defaultValue": "westus2",
       "metadata": {
         "description": "Azure Datacenter location for the alternative route"
       }
     },
     "locationOnPrem": {
       "type": "string",
+      "defaultValue": "eastus",
       "metadata": {
         "description": "Azure Datacenter location for the \"On Prem\" resources"
       }

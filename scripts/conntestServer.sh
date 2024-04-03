@@ -25,14 +25,3 @@ pip install azure-storage-blob
 nohup $local_folder_path/capture_and_upload_server.sh 5001 $storage_account_name $storage_account_key $container_name $local_folder_path &
 
 nohup $local_folder_path/conntest -s -p 5001 &
-
-
-
-
-
-
-
-
-
-
-

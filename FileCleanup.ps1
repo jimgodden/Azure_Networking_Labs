@@ -1,5 +1,5 @@
 # List of file extensions to consider
-$fileExtensions = @(".txt", ".md", ".bicep", ".bicepparam", ".json", ".ps1")
+$fileExtensions = @(".txt", ".md", ".bicep", ".bicepparam", ".json", ".ps1", ".sh")
 
 # Function to ensure each file has at least one newline at the end
 function Remove-ExtraNewlines {
