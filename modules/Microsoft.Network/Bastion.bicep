@@ -2,10 +2,7 @@
 param location string
 
 @description('Name of the Azure Bastion')
-param bastion_name string = 'bastion'
-
-@description('Name of the Public IP Address attached to the Azure Bastion')
-param bastion_vip_name string = 'bastion_vip'
+param bastion_name string
 
 @description('Resource ID of the subnet the Azure Bastion will be placed in.  The name of the subnet must be "AzureBastionSubnet"')
 param bastion_SubnetID string
@@ -47,7 +44,7 @@ resource bastion 'Microsoft.Network/bastionHosts@2022-09-01' = {
 }
 
 resource bastion_vip 'Microsoft.Network/publicIPAddresses@2022-09-01' = {
-  name: bastion_vip_name
+  name: '${bastion_name}_VIP'
   location: location
   sku: {
     name: 'Standard'

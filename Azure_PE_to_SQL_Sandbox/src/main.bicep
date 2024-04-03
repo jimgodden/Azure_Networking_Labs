@@ -107,6 +107,7 @@ module udrToAzFW '../../modules/Microsoft.Network/RouteTable.bicep' = if (isUsin
 module bastion '../../modules/Microsoft.Network/Bastion.bicep' = {
   name: 'bastion'
   params: {
+    bastion_name: 'Hub_Bastion'
     bastion_SubnetID: virtualNetwork.outputs.bastion_SubnetID
     location: location
   }

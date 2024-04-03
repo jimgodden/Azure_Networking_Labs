@@ -128,6 +128,7 @@ module webServVM_Ubn '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.bi
 module hubBastion '../../modules/Microsoft.Network/Bastion.bicep' = {
   name: 'hubBastion'
   params: {
+    bastion_name: 'Bastion_Hub'
     bastion_SubnetID: virtualNetwork_Hub.outputs.bastion_SubnetID
     location: location
   }

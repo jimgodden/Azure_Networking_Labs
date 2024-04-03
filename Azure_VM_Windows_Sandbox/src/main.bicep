@@ -45,6 +45,7 @@ module virtualMachine_Windows '../../modules/Microsoft.Compute/WindowsServer2022
 module bastion '../../modules/Microsoft.Network/Bastion.bicep' = {
   name: 'bastion'
   params: {
+    bastion_name: 'hub_bastion'
     bastion_SubnetID: virtualNetwork.outputs.bastion_SubnetID
     location: location
   }

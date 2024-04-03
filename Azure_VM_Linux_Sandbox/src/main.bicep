@@ -43,6 +43,7 @@ module virtualMachine_Windows '../../modules/Microsoft.Compute/Ubuntu20/VirtualM
 module bastion '../../modules/Microsoft.Network/Bastion.bicep' = {
   name: 'bastion'
   params: {
+    bastion_name: 'Hub_Bastion'
     bastion_SubnetID: virtualNetwork.outputs.bastion_SubnetID
     location: location
   }

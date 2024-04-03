@@ -173,6 +173,7 @@ module pcapReviewVM '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMa
 module clientBastion '../../modules/Microsoft.Network/Bastion.bicep' = {
   name: 'clientBastion'
   params: {
+    bastion_name: 'clientBastion'
     bastion_SubnetID: virtualNetwork_Client.outputs.bastion_SubnetID
     location: locationClient
   }

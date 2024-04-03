@@ -245,6 +245,7 @@ module destinationAzFW '../../modules/Microsoft.Network/AzureFirewall.bicep' = i
 module sourceBastion '../../modules/Microsoft.Network/Bastion.bicep' = {
   name: 'srcBastion'
   params: {
+    bastion_name: 'srcBastion'
     bastion_SubnetID: virtualNetwork_Source.outputs.bastion_SubnetID
     location: srcLocation
     bastion_SKU: 'Standard'
