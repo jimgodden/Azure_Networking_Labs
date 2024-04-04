@@ -52,14 +52,6 @@ module virtualNetwork_Transit_secondary '../../modules/Microsoft.Network/Virtual
     virtualNetwork_Name: 'transit_VNet_secondary'
   }
 }
-module virtualNetwork_Dummy '../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
-  name: 'dummy_VNet'
-  params: {
-    virtualNetwork_AddressPrefix: '10.111.0.0/16' // This will send routes for the spoke VNET to On Prem through the VNG
-    location: locationSecondary
-    virtualNetwork_Name: 'dummy_VNet'
-  }
-}
 module virtualNetwork_Hub '../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
   name: 'hub_VNet'
   params: {
@@ -75,17 +67,6 @@ module virtualNetwork_Spoke '../../modules/Microsoft.Network/VirtualNetwork.bice
     location: locationPrimary
     virtualNetwork_Name: 'spoke_VNet'
   }
-}
-module transitPrimary_To_Dummy_Peering '../../modules/Microsoft.Network/VirtualNetworkPeeringHub2Spoke.bicep' = {
-  name: 'transitPrimaryToDummyPeering'
-  params: {
-    virtualNetwork_Hub_Name: virtualNetwork_Transit_primary.outputs.virtualNetwork_Name
-    virtualNetwork_Spoke_Name: virtualNetwork_Dummy.outputs.virtualNetwork_Name
-  }
-  dependsOn: [
-    TransitPrimary_to_OnPrem_conn
-    OnPrem_to_TransitPrimary_conn
-  ]
 }
 module transitPrimary_To_Hub_Peering '../../modules/Microsoft.Network/VirtualNetworkPeeringHub2Spoke.bicep' = {
   name: 'transitPrimaryToHubPeering'
@@ -125,9 +106,7 @@ module udrToAzFW_TransitPrimary '../../modules/Microsoft.Network/RouteTable.bice
   name: 'udrToAzFW_TransitPrimary'
   params: {
     addressPrefixs: [
-      virtualNetwork_Hub.outputs.virtualNetwork_AddressPrefix
-      virtualNetwork_Spoke.outputs.virtualNetwork_AddressPrefix
-      virtualNetwork_OnPremHub.outputs.virtualNetwork_AddressPrefix
+      '10.0.0.0/8'
     ]
     nextHopType: 'VirtualAppliance'
     routeTable_Name: virtualNetwork_Transit_primary.outputs.routeTable_Name
@@ -142,9 +121,7 @@ module udrToAzFW_TransitSecondary '../../modules/Microsoft.Network/RouteTable.bi
   name: 'udrToAzFW_TransitSecondary'
   params: {
     addressPrefixs: [
-      virtualNetwork_Hub.outputs.virtualNetwork_AddressPrefix
-      virtualNetwork_Spoke.outputs.virtualNetwork_AddressPrefix
-      virtualNetwork_OnPremHub.outputs.virtualNetwork_AddressPrefix
+      '10.0.0.0/8'
     ]
     nextHopType: 'VirtualAppliance'
     routeTable_Name: virtualNetwork_Transit_primary.outputs.routeTable_Name
@@ -159,9 +136,7 @@ module udrToAzFW_Hub '../../modules/Microsoft.Network/RouteTable.bicep' = {
   name: 'udrToAzFW_Hub'
   params: {
     addressPrefixs: [
-      virtualNetwork_Transit_primary.outputs.virtualNetwork_AddressPrefix
-      virtualNetwork_Transit_secondary.outputs.virtualNetwork_AddressPrefix
-      virtualNetwork_OnPremHub.outputs.virtualNetwork_AddressPrefix
+      '10.0.0.0/8'
     ]
     nextHopType: 'VirtualAppliance'
     routeTable_Name: virtualNetwork_Hub.outputs.routeTable_Name
@@ -176,10 +151,7 @@ module udrToAzFW_Spoke '../../modules/Microsoft.Network/RouteTable.bicep' = {
   name: 'udrToAzFW_Spoke'
   params: {
     addressPrefixs: [
-      virtualNetwork_Hub.outputs.virtualNetwork_AddressPrefix
-      virtualNetwork_Transit_primary.outputs.virtualNetwork_AddressPrefix
-      virtualNetwork_Transit_secondary.outputs.virtualNetwork_AddressPrefix
-      virtualNetwork_OnPremHub.outputs.virtualNetwork_AddressPrefix
+      '10.0.0.0/8'
     ]
     nextHopType: 'VirtualAppliance'
     routeTable_Name: virtualNetwork_Spoke.outputs.routeTable_Name
@@ -243,15 +215,34 @@ module dnsPrivateResolverForwardingRuleSet '../../modules/Microsoft.Network/DNSP
     outboundEndpoint_ID: dnsPrivateResolver.outputs.dnsPrivateResolver_Outbound_Endpoint_ID
     domainName: onpremResolvableDomainName
     location: locationPrimary
-    targetDNSServers: [for i in range(0, 2): {
-      port: 53
-      ipaddress: OnPremVM_WinDNS[i].outputs.networkInterface_PrivateIPAddress
-    }]
+    targetDNSServers:[
+      {
+        port: 53
+        ipaddress: OnPremVM_WinDNS.outputs.networkInterface_PrivateIPAddress
+      }
+    ]
     virtualNetwork_IDs: [
       virtualNetwork_Spoke.outputs.virtualNetwork_ID
     ]
   }
 }
+
+
+// module dnsPrivateResolverForwardingRuleSet '../../modules/Microsoft.Network/DNSPrivateResolverRuleSet.bicep' = {
+//   name: 'dnsPrivateResolverForwardingRuleSet'
+//   params: {
+//     outboundEndpoint_ID: dnsPrivateResolver.outputs.dnsPrivateResolver_Outbound_Endpoint_ID
+//     domainName: onpremResolvableDomainName
+//     location: locationPrimary
+//     targetDNSServers: [for i in range(0, 2): {
+//       port: 53
+//       ipaddress: OnPremVM_WinDNS[i].outputs.networkInterface_PrivateIPAddress
+//     }]
+//     virtualNetwork_IDs: [
+//       virtualNetwork_Spoke.outputs.virtualNetwork_ID
+//     ]
+//   }
+// }
 
 module virtualNetwork_OnPremHub '../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
   name: 'onprem_VNet'
@@ -263,21 +254,37 @@ module virtualNetwork_OnPremHub '../../modules/Microsoft.Network/VirtualNetwork.
 }
 
 // DNS Servers for "On Prem"
-module OnPremVM_WinDNS '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = [for i in range(0, 2) : {
-  name: 'OnPremWinDNS${i}'
+module OnPremVM_WinDNS '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
+  name: 'OnPremWinDNS'
   params: {
     acceleratedNetworking: acceleratedNetworking
     location: locationOnPrem
     subnet_ID: virtualNetwork_OnPremHub.outputs.general_SubnetID
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
-    virtualMachine_Name: 'OnPrem-WinDNS${i}'
+    virtualMachine_Name: 'OnPrem-WinDNS'
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
     virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_DNS.ps1'
     commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username ${virtualMachine_AdminUsername} -SampleDNSZoneName ${onpremResolvableDomainName} -SampleHostName "a" -SampleARecord "172.16.0.1" -PrivateDNSZone "privatelink.blob.core.windows.net" -ConditionalForwarderIPAddress ${dnsPrivateResolver.outputs.privateDNSResolver_Inbound_Endpoint_IPAddress}'
   }
-} ]
+}
+
+// module OnPremVM_WinDNS '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = [for i in range(0, 2) : {
+//   name: 'OnPremWinDNS${i}'
+//   params: {
+//     acceleratedNetworking: acceleratedNetworking
+//     location: locationOnPrem
+//     subnet_ID: virtualNetwork_OnPremHub.outputs.general_SubnetID
+//     virtualMachine_AdminPassword: virtualMachine_AdminPassword
+//     virtualMachine_AdminUsername: virtualMachine_AdminUsername
+//     virtualMachine_Name: 'OnPrem-WinDNS${i}'
+//     virtualMachine_Size: virtualMachine_Size
+//     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
+//     virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_DNS.ps1'
+//     commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username ${virtualMachine_AdminUsername} -SampleDNSZoneName ${onpremResolvableDomainName} -SampleHostName "a" -SampleARecord "172.16.0.1" -PrivateDNSZone "privatelink.blob.core.windows.net" -ConditionalForwarderIPAddress ${dnsPrivateResolver.outputs.privateDNSResolver_Inbound_Endpoint_IPAddress}'
+//   }
+// } ]
 
 // Virtual Network Gateways for On Prem, Primary Transit, and Secondary Transit
 module virtualNetworkGateway_OnPrem '../../modules/Microsoft.Network/VirtualNetworkGateway.bicep' = {

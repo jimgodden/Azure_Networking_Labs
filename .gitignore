@@ -21,5 +21,5 @@ Azure_TrafficManager_Sandbox/iteration.txt
 Azure_TrafficManager_Sandbox/main.parameters.bicepparam
 Azure_Multiple_VNETs_Sandbox/iteration.txt
 Azure_Multiple_VNETs_Sandbox/main.parameters.bicepparam
-PrivateResolver_Sandbox_RG/iteration.txt
-PrivateResolver_Sandbox_RG/main.parameters.bicepparam
+PrivateResolver_Sandbox/iteration.txt
+PrivateResolver_Sandbox/main.parameters.bicepparam

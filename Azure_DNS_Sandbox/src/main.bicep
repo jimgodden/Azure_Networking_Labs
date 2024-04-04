@@ -44,30 +44,30 @@ Example:
 contoso.com.''')
 param onpremResolvableDomainName string = 'contoso.com.'
 
-module virtualNetwork_Hub '../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
-  name: 'hub_VNet'
+module VirtualNetwork_Hub '../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
+  name: 'Hub_VNet'
   params: {
     virtualNetwork_AddressPrefix: '10.0.0.0/16'
     location: location
-    virtualNetwork_Name: 'hub_VNet'
+    virtualNetwork_Name: 'Hub_VNet'
   }
 }
 
-module virtualNetwork_Spoke '../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
-  name: 'spoke_VNet'
+module VirtualNetwork_Spoke '../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
+  name: 'Spoke_VNet'
   params: {
     virtualNetwork_AddressPrefix: '10.1.0.0/16'
-    dnsServers: [for i in range(0, 2) : hub_WinVMs[i].outputs.networkInterface_PrivateIPAddress]
+    dnsServers: [for i in range(0, 2) : Hub_WinVMs[i].outputs.networkInterface_PrivateIPAddress]
     location: location
-    virtualNetwork_Name: 'spoke_VNet'
+    virtualNetwork_Name: 'Spoke_VNet'
   }
 }
 
-module hub_To_Spoke_Peering '../../modules/Microsoft.Network/VirtualNetworkPeeringHub2Spoke.bicep' = {
-  name: 'hubToSpokePeering'
+module Hub_To_Spoke_Peering '../../modules/Microsoft.Network/VirtualNetworkPeeringHub2Spoke.bicep' = {
+  name: 'HubToSpokePeering'
   params: {
-    virtualNetwork_Hub_Name: virtualNetwork_Hub.outputs.virtualNetwork_Name
-    virtualNetwork_Spoke_Name: virtualNetwork_Spoke.outputs.virtualNetwork_Name
+    virtualNetwork_Hub_Name: VirtualNetwork_Hub.outputs.virtualNetwork_Name
+    virtualNetwork_Spoke_Name: VirtualNetwork_Spoke.outputs.virtualNetwork_Name
   }
   dependsOn: [
     Hub_to_OnPrem_conn
@@ -75,15 +75,15 @@ module hub_To_Spoke_Peering '../../modules/Microsoft.Network/VirtualNetworkPeeri
   ]
 }
 
-module hub_WinVMs '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = [ for i in range(0, 2) : {
-  name: 'hub-WinVM${i}'
+module Hub_WinVMs '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = [ for i in range(0, 2) : {
+  name: 'Hub-WinDns${i}'
   params: {
     acceleratedNetworking: acceleratedNetworking
     location: location
-    subnet_ID: virtualNetwork_Hub.outputs.general_SubnetID
+    subnet_ID: VirtualNetwork_Hub.outputs.general_SubnetID
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
-    virtualMachine_Name: 'hub-WinVM${i}'
+    virtualMachine_Name: 'Hub-WinDns${i}'
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
     virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_DNS.ps1'
@@ -91,61 +91,26 @@ module hub_WinVMs '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMach
   }
 } ]
 
-module spoke_WinVM '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
-  name: 'spoke-WinVM'
+module Spoke_WinVM '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
+  name: 'spoke-WinIis'
   params: {
     acceleratedNetworking: acceleratedNetworking
     location: location
-    subnet_ID: virtualNetwork_Spoke.outputs.general_SubnetID
+    subnet_ID: VirtualNetwork_Spoke.outputs.general_SubnetID
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
-    virtualMachine_Name: 'spoke-Web-VM'
+    virtualMachine_Name: 'Spoke-WinIis'
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
     virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_WebServer.ps1'
     commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_WebServer.ps1 -Username ${virtualMachine_AdminUsername}'
   }
   dependsOn: [
-    hub_To_Spoke_Peering
+    Hub_To_Spoke_Peering
   ]
 }
 
-module spoke_WinVM_client '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
-  name: 'spoke-WinVM-client'
-  params: {
-    acceleratedNetworking: acceleratedNetworking
-    location: location
-    subnet_ID: virtualNetwork_Spoke.outputs.general_SubnetID
-    virtualMachine_AdminPassword: virtualMachine_AdminPassword
-    virtualMachine_AdminUsername: virtualMachine_AdminUsername
-    virtualMachine_Name: 'spoke-client-VM'
-    virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_WebServer.ps1'
-    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_WebServer.ps1 -Username ${virtualMachine_AdminUsername}'
-  }
-  dependsOn: [
-    hub_To_Spoke_Peering
-  ]
-}
-
-module privateLink '../../modules/Microsoft.Network/PrivateLink.bicep' = {
-  name: 'privateLink'
-  params: {
-    acceleratedNetworking: acceleratedNetworking
-    internalLoadBalancer_SubnetID: virtualNetwork_Spoke.outputs.general_SubnetID
-    location: location
-    networkInterface_IPConfig_Names: [spoke_WinVM.outputs.networkInterface_IPConfig0_Name]
-    networkInterface_Names: [spoke_WinVM.outputs.networkInterface_Name]
-    networkInterface_SubnetID: virtualNetwork_Spoke.outputs.general_SubnetID
-    privateEndpoint_SubnetID: virtualNetwork_Spoke.outputs.privateEndpoint_SubnetID
-    privateLink_SubnetID: virtualNetwork_Spoke.outputs.privateLinkService_SubnetID
-    privateLink_Name: 'spoke_PrivateLink'
-    privateEndpoint_name: 'hub_PrivateEndpoint_to_PrivateLink'
-  }
-}
-
-module storageAccount '../../modules/Microsoft.Storage/StorageAccount.bicep' = {
+module StorageAccount '../../modules/Microsoft.Storage/StorageAccount.bicep' = {
   name: 'storageAccount'
   params: {
     location: location
@@ -153,43 +118,43 @@ module storageAccount '../../modules/Microsoft.Storage/StorageAccount.bicep' = {
   }
 }
 
-module hub_StorageAccount_Blob_PrivateEndpoint '../../modules/Microsoft.Network/PrivateEndpoint.bicep' = {
-  name: 'hub_StorageAccount_Blob_PrivateEndpoint'
+module Hub_StorageAccount_Blob_PrivateEndpoint '../../modules/Microsoft.Network/PrivateEndpoint.bicep' = {
+  name: 'Hub_StorageAccount_Blob_PrivateEndpoint'
   params: {
     groupID: 'blob'
     location: location
     privateDNSZone_Name: 'privatelink.blob.${environment().suffixes.storage}'
-    privateEndpoint_Name: 'hub_${storageAccount_Name}_blob_pe'
-    privateEndpoint_SubnetID: virtualNetwork_Hub.outputs.privateEndpoint_SubnetID
-    privateLinkServiceId: storageAccount.outputs.storageAccount_ID
-    virtualNetwork_IDs: [virtualNetwork_Hub.outputs.virtualNetwork_ID]
+    privateEndpoint_Name: 'Hub_${storageAccount_Name}_blob_pe'
+    privateEndpoint_SubnetID: VirtualNetwork_Hub.outputs.privateEndpoint_SubnetID
+    privateLinkServiceId: StorageAccount.outputs.storageAccount_ID
+    virtualNetwork_IDs: [VirtualNetwork_Hub.outputs.virtualNetwork_ID]
   }
 }
 
-module hubBastion '../../modules/Microsoft.Network/Bastion.bicep' = {
-  name: 'hubBastion'
+module Hub_Bastion '../../modules/Microsoft.Network/Bastion.bicep' = {
+  name: 'Hub_Bastion'
   params: {
-    bastion_SubnetID: virtualNetwork_Hub.outputs.bastion_SubnetID
+    bastion_SubnetID: VirtualNetwork_Hub.outputs.bastion_SubnetID
     location: location
-    bastion_name: 'hub_bastion'
+    bastion_name: 'Hub_bastion'
   }
 }
 
-module dnsPrivateResolver '../../modules/Microsoft.Network/DNSPrivateResolver.bicep' = {
-  name: 'dnsPrivateResolver'
+module Hub_DnsPrivateResolver '../../modules/Microsoft.Network/DNSPrivateResolver.bicep' = {
+  name: 'Hub_DNSPrivateResolver'
   params: {
-    dnsPrivateResolver_Name: 'hub_DNSPrivateResolver'
-    dnsPrivateResolver_Inbound_SubnetID: virtualNetwork_Hub.outputs.privateResolver_Inbound_SubnetID
-    dnsPrivateResolver_Outbound_SubnetID: virtualNetwork_Hub.outputs.privateResolver_Outbound_SubnetID
+    dnsPrivateResolver_Name: 'Hub_DNSPrivateResolver'
+    dnsPrivateResolver_Inbound_SubnetID: VirtualNetwork_Hub.outputs.privateResolver_Inbound_SubnetID
+    dnsPrivateResolver_Outbound_SubnetID: VirtualNetwork_Hub.outputs.privateResolver_Outbound_SubnetID
     location: location
-    virtualNetwork_ID: virtualNetwork_Hub.outputs.virtualNetwork_ID
+    virtualNetwork_ID: VirtualNetwork_Hub.outputs.virtualNetwork_ID
   }
 }
 
-module dnsPrivateResolverForwardingRuleSet '../../modules/Microsoft.Network/DNSPrivateResolverRuleSet.bicep' = {
+module DnsPrivateResolverForwardingRuleSet '../../modules/Microsoft.Network/DNSPrivateResolverRuleSet.bicep' = {
   name: 'dnsPrivateResolverForwardingRuleSet'
   params: {
-    outboundEndpoint_ID: dnsPrivateResolver.outputs.dnsPrivateResolver_Outbound_Endpoint_ID
+    outboundEndpoint_ID: Hub_DnsPrivateResolver.outputs.dnsPrivateResolver_Outbound_Endpoint_ID
     domainName: onpremResolvableDomainName
     location: location
     targetDNSServers: [for i in range(0, 2): {
@@ -197,34 +162,34 @@ module dnsPrivateResolverForwardingRuleSet '../../modules/Microsoft.Network/DNSP
       ipaddress: OnPremVM_WinDNS[i].outputs.networkInterface_PrivateIPAddress
     }]
     virtualNetwork_IDs: [
-      virtualNetwork_Hub.outputs.virtualNetwork_ID 
-      virtualNetwork_Spoke.outputs.virtualNetwork_ID 
+      VirtualNetwork_Hub.outputs.virtualNetwork_ID 
+      VirtualNetwork_Spoke.outputs.virtualNetwork_ID 
     ]
   }
 }
 
-module privateDNSZone_AzureVMsDotCom '../../modules/Microsoft.Network/PrivateDNSZone.bicep' = {
+module PrivateDNSZone_AzureVMsDotCom '../../modules/Microsoft.Network/PrivateDNSZone.bicep' = {
   name: 'PrivateDNSZone'
   params: {
     privateDNSZone_Name: privateDNSZone_Name
-    virtualNetworkIDs: [virtualNetwork_Hub.outputs.virtualNetwork_ID, virtualNetwork_Spoke.outputs.virtualNetwork_ID]
+    virtualNetworkIDs: [VirtualNetwork_Hub.outputs.virtualNetwork_ID, VirtualNetwork_Spoke.outputs.virtualNetwork_ID]
     registrationEnabled: true
   }
 }
 
-module dnsZone_TestDotCom '../../modules/Microsoft.Network/DNSZone.bicep' = {
+module PublicDnsZone_TestDotCom '../../modules/Microsoft.Network/DNSZone.bicep' = {
   name: 'DNSZone'
   params: {
     dnsZone_Name: publicDNSZone_Name
   }
 }
 
-module virtualNetwork_OnPremHub '../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
-  name: 'onprem_VNet'
+module VirtualNetwork_OnPremHub '../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
+  name: 'OnPrem_VNet'
   params: {
     virtualNetwork_AddressPrefix: '10.100.0.0/16'
     location: location
-    virtualNetwork_Name: 'onprem_VNet'
+    virtualNetwork_Name: 'OnPrem_VNet'
   }
 }
 
@@ -233,34 +198,34 @@ module OnPremVM_WinDNS '../../modules/Microsoft.Compute/WindowsServer2022/Virtua
   params: {
     acceleratedNetworking: acceleratedNetworking
     location: location
-    subnet_ID: virtualNetwork_OnPremHub.outputs.general_SubnetID
+    subnet_ID: VirtualNetwork_OnPremHub.outputs.general_SubnetID
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
-    virtualMachine_Name: 'OnPrem-WinDNS${i}'
+    virtualMachine_Name: 'OnPrem-WinDns${i}'
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
     virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_DNS.ps1'
-    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username ${virtualMachine_AdminUsername} -SampleDNSZoneName ${onpremResolvableDomainName} -SampleHostName "a" -SampleARecord "172.16.0.1" -PrivateDNSZone "privatelink.blob.core.windows.net" -ConditionalForwarderIPAddress ${dnsPrivateResolver.outputs.privateDNSResolver_Inbound_Endpoint_IPAddress}'
+    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username ${virtualMachine_AdminUsername} -SampleDNSZoneName ${onpremResolvableDomainName} -SampleHostName "a" -SampleARecord "172.16.0.1" -PrivateDNSZone "privatelink.blob.core.windows.net" -ConditionalForwarderIPAddress ${Hub_DnsPrivateResolver.outputs.privateDNSResolver_Inbound_Endpoint_IPAddress}'
   }
 } ]
 
-module virtualNetworkGateway_OnPrem '../../modules/Microsoft.Network/VirtualNetworkGateway.bicep' = {
+module VirtualNetworkGateway_OnPrem '../../modules/Microsoft.Network/VirtualNetworkGateway.bicep' = {
   name: 'OnPremVirtualNetworkGateway'
   params: {
     location: location
     virtualNetworkGateway_ASN: 65000
     virtualNetworkGateway_Name: 'OnPrem_VNG'
-    virtualNetworkGateway_Subnet_ResourceID: virtualNetwork_OnPremHub.outputs.gateway_SubnetID
+    virtualNetworkGateway_Subnet_ResourceID: VirtualNetwork_OnPremHub.outputs.gateway_SubnetID
   }
 }
 
-module virtualNetworkGateway_Hub '../../modules/Microsoft.Network/VirtualNetworkGateway.bicep' = {
+module VirtualNetworkGateway_Hub '../../modules/Microsoft.Network/VirtualNetworkGateway.bicep' = {
   name: 'HubVirtualNetworkGateway'
   params: {
     location: location
     virtualNetworkGateway_ASN: 65001
     virtualNetworkGateway_Name: 'Hub_VNG'
-    virtualNetworkGateway_Subnet_ResourceID: virtualNetwork_Hub.outputs.gateway_SubnetID
+    virtualNetworkGateway_Subnet_ResourceID: VirtualNetwork_Hub.outputs.gateway_SubnetID
   }
 }
 
@@ -268,11 +233,11 @@ module OnPrem_to_Hub_conn '../../modules/Microsoft.Network/Connection_and_LocalN
   name: 'OnPrem_to_Hub_conn'
   params: {
     location: location
-    virtualNetworkGateway_ID: virtualNetworkGateway_OnPrem.outputs.virtualNetworkGateway_ResourceID
-    vpn_Destination_ASN: virtualNetworkGateway_Hub.outputs.virtualNetworkGateway_ASN
-    vpn_Destination_BGPIPAddress: virtualNetworkGateway_Hub.outputs.virtualNetworkGateway_BGPAddress
-    vpn_Destination_Name: virtualNetworkGateway_Hub.outputs.virtualNetworkGateway_Name
-    vpn_Destination_PublicIPAddress: virtualNetworkGateway_Hub.outputs.virtualNetworkGateway_PublicIPAddress
+    virtualNetworkGateway_ID: VirtualNetworkGateway_OnPrem.outputs.virtualNetworkGateway_ResourceID
+    vpn_Destination_ASN: VirtualNetworkGateway_Hub.outputs.virtualNetworkGateway_ASN
+    vpn_Destination_BGPIPAddress: VirtualNetworkGateway_Hub.outputs.virtualNetworkGateway_BGPAddress
+    vpn_Destination_Name: VirtualNetworkGateway_Hub.outputs.virtualNetworkGateway_Name
+    vpn_Destination_PublicIPAddress: VirtualNetworkGateway_Hub.outputs.virtualNetworkGateway_PublicIPAddress
     vpn_SharedKey: vpn_SharedKey
   }
 }
@@ -281,11 +246,11 @@ module Hub_to_OnPrem_conn '../../modules/Microsoft.Network/Connection_and_LocalN
   name: 'Hub_to_OnPrem_conn'
   params: {
     location: location
-    virtualNetworkGateway_ID: virtualNetworkGateway_Hub.outputs.virtualNetworkGateway_ResourceID
-    vpn_Destination_ASN: virtualNetworkGateway_OnPrem.outputs.virtualNetworkGateway_ASN
-    vpn_Destination_BGPIPAddress: virtualNetworkGateway_OnPrem.outputs.virtualNetworkGateway_BGPAddress
-    vpn_Destination_Name: virtualNetworkGateway_OnPrem.outputs.virtualNetworkGateway_Name
-    vpn_Destination_PublicIPAddress: virtualNetworkGateway_OnPrem.outputs.virtualNetworkGateway_PublicIPAddress
+    virtualNetworkGateway_ID: VirtualNetworkGateway_Hub.outputs.virtualNetworkGateway_ResourceID
+    vpn_Destination_ASN: VirtualNetworkGateway_OnPrem.outputs.virtualNetworkGateway_ASN
+    vpn_Destination_BGPIPAddress: VirtualNetworkGateway_OnPrem.outputs.virtualNetworkGateway_BGPAddress
+    vpn_Destination_Name: VirtualNetworkGateway_OnPrem.outputs.virtualNetworkGateway_Name
+    vpn_Destination_PublicIPAddress: VirtualNetworkGateway_OnPrem.outputs.virtualNetworkGateway_PublicIPAddress
     vpn_SharedKey: vpn_SharedKey
   }
 }
