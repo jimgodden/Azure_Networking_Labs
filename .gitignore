@@ -23,3 +23,10 @@ Azure_Multiple_VNETs_Sandbox/iteration.txt
 Azure_Multiple_VNETs_Sandbox/main.parameters.bicepparam
 PrivateResolver_Sandbox/iteration.txt
 PrivateResolver_Sandbox/main.parameters.bicepparam
+PL_Test/iteration.txt
+PL_Test/main.parameters.bicepparam
+LinuxDNS_Sandbox
+LinuxDNS_Sandbox/iteration.txt
+LinuxDNS_Sandbox/main.parameters.bicepparam
+PrivateDNSZone_Sandbox/iteration.txt
+PrivateDNSZone_Sandbox/main.parameters.bicepparam

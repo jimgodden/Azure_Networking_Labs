@@ -26,7 +26,7 @@ module virtualNetwork '../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
   }
 }
 
-module virtualMachine_Windows '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.bicep' = {
+module virtualMachine_Linux '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.bicep' = {
   name: 'linuxVM'
   params: {
     acceleratedNetworking: acceleratedNetworking
@@ -36,6 +36,8 @@ module virtualMachine_Windows '../../modules/Microsoft.Compute/Ubuntu20/VirtualM
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'linuxVM'
     virtualMachine_Size: virtualMachine_Size
+    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
+    virtualMachine_ScriptFileName: 'Ubuntu20_DNS_Config.sh'
     commandToExecute: ''
   }
 }

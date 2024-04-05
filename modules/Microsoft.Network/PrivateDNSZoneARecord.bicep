@@ -7,6 +7,9 @@ param ARecord_name string
 @description('IPv4 Address of the A record.')
 param ipv4Address string
 
+@description('Time to Live for the A record in seconds.  Default is 3600 (1 hour).')
+param ttlInSeconds int = 3600
+
 resource PrivateDNSZone 'Microsoft.Network/privateDnsZones@2020-06-01' existing = {
   name: PrivateDNSZone_Name
 }
@@ -20,5 +23,6 @@ resource ARecord 'Microsoft.Network/privateDnsZones/A@2020-06-01' = {
         ipv4Address: ipv4Address
       }
     ]
+    ttl: ttlInSeconds
   }
 }

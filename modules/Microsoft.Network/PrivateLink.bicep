@@ -131,7 +131,7 @@ resource internalLoadBalancer 'Microsoft.Network/loadBalancers@2022-09-01' = {
   }
 }
 
-resource privateendpoint 'Microsoft.Network/privateEndpoints@2022-09-01' = {
+resource privateEndpoint 'Microsoft.Network/privateEndpoints@2022-09-01' = {
   name: privateEndpoint_name
   location: location
   properties: {
@@ -179,4 +179,4 @@ resource privateLink 'Microsoft.Network/privateLinkServices@2022-09-01' = {
 }
 
 output internalLoadBalancer_FrontendIPAddress string = internalLoadBalancer.properties.frontendIPConfigurations[0].properties.privateIPAddress
-output privateEndpoint_NetworkInterface_Name string = privateendpoint.properties.customNetworkInterfaceName
+output privateEndpoint_NetworkInterface_Name string = privateEndpoint.properties.customNetworkInterfaceName

@@ -195,10 +195,10 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2022-11-01' =
       minCapacity: 0
       maxCapacity: 2
     }
-    // firewallPolicy: {
-    //   id: applicationGatewayWAF.id
-    // }
+    firewallPolicy: {
+      id: applicationGatewayWAF.id
+    }
   }
 }
 
-output ApplicationGateway_FrontendIP_Private string = applicationGateway.properties.frontendIPConfigurations[0].properties.privateIPAddress
+output ApplicationGateway_FrontendIP_Private string = applicationGateway_PrivateIPAddress
