@@ -34,10 +34,6 @@ param privateDNSZone_Name string = 'azure-contoso.com'
 @description('Name of the DNS Zone for public DNS resolution.')
 param publicDNSZone_Name string = 'DNSSandboxTest${uniqueString(resourceGroup().id)}.com'
 
-@description('VPN Shared Key used for authenticating VPN connections')
-@secure()
-param vpn_SharedKey string
-
 @description('''DNS Zone to be hosted On Prem and with a forwarding rule on the DNS Private Resolver.
 Must end with a period (.)
 Example:
@@ -57,39 +53,79 @@ module VirtualNetwork_Spoke '../../modules/Microsoft.Network/VirtualNetwork.bice
   name: 'Spoke_VNet'
   params: {
     virtualNetwork_AddressPrefix: '10.1.0.0/16'
-    dnsServers: [for i in range(0, 2) : Hub_WinVMs[i].outputs.networkInterface_PrivateIPAddress]
+    dnsServers: [ Hub_DnsPrivateResolver.outputs.privateDNSResolver_Inbound_Endpoint_IPAddress ]
     location: location
     virtualNetwork_Name: 'Spoke_VNet'
   }
 }
 
-module Hub_To_Spoke_Peering '../../modules/Microsoft.Network/VirtualNetworkPeeringHub2Spoke.bicep' = {
+module Hub_To_Spoke_Peering '../../modules/Microsoft.Network/VirtualNetworkPeeringSpoke2Spoke.bicep' = {
   name: 'HubToSpokePeering'
   params: {
-    virtualNetwork_Hub_Name: VirtualNetwork_Hub.outputs.virtualNetwork_Name
-    virtualNetwork_Spoke_Name: VirtualNetwork_Spoke.outputs.virtualNetwork_Name
+    virtualNetwork1_Name: VirtualNetwork_Hub.outputs.virtualNetwork_Name
+    virtualNetwork2_Name: VirtualNetwork_Spoke.outputs.virtualNetwork_Name
   }
-  dependsOn: [
-    Hub_to_OnPrem_conn
-    OnPrem_to_Hub_conn
-  ]
 }
 
-module Hub_WinVMs '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = [ for i in range(0, 2) : {
-  name: 'Hub-WinDns${i}'
+module Hub_to_OnPrem_Peering '../../modules/Microsoft.Network/VirtualNetworkPeeringSpoke2Spoke.bicep' = {
+  name: 'HubToOnPremPeering'
+  params: {
+    virtualNetwork1_Name: VirtualNetwork_Hub.outputs.virtualNetwork_Name
+    virtualNetwork2_Name: VirtualNetwork_OnPremHub.outputs.virtualNetwork_Name
+  }
+}
+
+module Hub_WinDnsVm '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
+  name: 'Hub-WinDnsVm'
   params: {
     acceleratedNetworking: acceleratedNetworking
     location: location
     subnet_ID: VirtualNetwork_Hub.outputs.general_SubnetID
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
-    virtualMachine_Name: 'Hub-WinDns${i}'
+    virtualMachine_Name: 'Hub-WinDnsVm'
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
     virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_DNS.ps1'
     commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username ${virtualMachine_AdminUsername}'
   }
-} ]
+}
+
+
+module Hub_WinClientVM '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
+  name: 'Hub-WinClientVM'
+  params: {
+    acceleratedNetworking: acceleratedNetworking
+    location: location
+    subnet_ID: VirtualNetwork_Spoke.outputs.general_SubnetID
+    virtualMachine_AdminPassword: virtualMachine_AdminPassword
+    virtualMachine_AdminUsername: virtualMachine_AdminUsername
+    virtualMachine_Name: 'Hub-WinClient'
+    virtualMachine_Size: virtualMachine_Size
+    virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
+    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_General.ps1'
+    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_General.ps1 -Username ${virtualMachine_AdminUsername}'
+  }
+}
+
+module Spoke_WinClientVM '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
+  name: 'spoke-WinClientVM'
+  params: {
+    acceleratedNetworking: acceleratedNetworking
+    location: location
+    subnet_ID: VirtualNetwork_Spoke.outputs.general_SubnetID
+    virtualMachine_AdminPassword: virtualMachine_AdminPassword
+    virtualMachine_AdminUsername: virtualMachine_AdminUsername
+    virtualMachine_Name: 'Spoke-WinClient'
+    virtualMachine_Size: virtualMachine_Size
+    virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
+    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_General.ps1'
+    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_General.ps1 -Username ${virtualMachine_AdminUsername}'
+  }
+  dependsOn: [
+    Hub_To_Spoke_Peering
+  ]
+}
 
 module Spoke_WinVM '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
   name: 'spoke-WinIis'
@@ -157,10 +193,10 @@ module DnsPrivateResolverForwardingRuleSet '../../modules/Microsoft.Network/DNSP
     outboundEndpoint_ID: Hub_DnsPrivateResolver.outputs.dnsPrivateResolver_Outbound_Endpoint_ID
     domainName: onpremResolvableDomainName
     location: location
-    targetDNSServers: [for i in range(0, 2): {
+    targetDNSServers: [ {
       port: 53
-      ipaddress: OnPremVM_WinDNS[i].outputs.networkInterface_PrivateIPAddress
-    }]
+      ipaddress: OnPremVM_WinDNS.outputs.networkInterface_PrivateIPAddress
+    } ]
     virtualNetwork_IDs: [
       VirtualNetwork_Hub.outputs.virtualNetwork_ID 
       VirtualNetwork_Spoke.outputs.virtualNetwork_ID 
@@ -193,64 +229,34 @@ module VirtualNetwork_OnPremHub '../../modules/Microsoft.Network/VirtualNetwork.
   }
 }
 
-module OnPremVM_WinDNS '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = [for i in range(0, 2) : {
-  name: 'OnPremWinDNS${i}'
+module OnPremVM_WinDNS '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
+  name: 'OnPremWinDNS'
   params: {
     acceleratedNetworking: acceleratedNetworking
     location: location
     subnet_ID: VirtualNetwork_OnPremHub.outputs.general_SubnetID
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
-    virtualMachine_Name: 'OnPrem-WinDns${i}'
+    virtualMachine_Name: 'OnPrem-WinDns'
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
     virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_DNS.ps1'
     commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username ${virtualMachine_AdminUsername} -SampleDNSZoneName ${onpremResolvableDomainName} -SampleHostName "a" -SampleARecord "172.16.0.1" -PrivateDNSZone "privatelink.blob.core.windows.net" -ConditionalForwarderIPAddress ${Hub_DnsPrivateResolver.outputs.privateDNSResolver_Inbound_Endpoint_IPAddress}'
   }
-} ]
-
-module VirtualNetworkGateway_OnPrem '../../modules/Microsoft.Network/VirtualNetworkGateway.bicep' = {
-  name: 'OnPremVirtualNetworkGateway'
-  params: {
-    location: location
-    virtualNetworkGateway_ASN: 65000
-    virtualNetworkGateway_Name: 'OnPrem_VNG'
-    virtualNetworkGateway_Subnet_ResourceID: VirtualNetwork_OnPremHub.outputs.gateway_SubnetID
-  }
 }
 
-module VirtualNetworkGateway_Hub '../../modules/Microsoft.Network/VirtualNetworkGateway.bicep' = {
-  name: 'HubVirtualNetworkGateway'
+module OnPrem_WinClientVM '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
+  name: 'OnPrem-WinClientVM'
   params: {
+    acceleratedNetworking: acceleratedNetworking
     location: location
-    virtualNetworkGateway_ASN: 65001
-    virtualNetworkGateway_Name: 'Hub_VNG'
-    virtualNetworkGateway_Subnet_ResourceID: VirtualNetwork_Hub.outputs.gateway_SubnetID
-  }
-}
-
-module OnPrem_to_Hub_conn '../../modules/Microsoft.Network/Connection_and_LocalNetworkGateway.bicep' = {
-  name: 'OnPrem_to_Hub_conn'
-  params: {
-    location: location
-    virtualNetworkGateway_ID: VirtualNetworkGateway_OnPrem.outputs.virtualNetworkGateway_ResourceID
-    vpn_Destination_ASN: VirtualNetworkGateway_Hub.outputs.virtualNetworkGateway_ASN
-    vpn_Destination_BGPIPAddress: VirtualNetworkGateway_Hub.outputs.virtualNetworkGateway_BGPAddress
-    vpn_Destination_Name: VirtualNetworkGateway_Hub.outputs.virtualNetworkGateway_Name
-    vpn_Destination_PublicIPAddress: VirtualNetworkGateway_Hub.outputs.virtualNetworkGateway_PublicIPAddress
-    vpn_SharedKey: vpn_SharedKey
-  }
-}
-
-module Hub_to_OnPrem_conn '../../modules/Microsoft.Network/Connection_and_LocalNetworkGateway.bicep' = {
-  name: 'Hub_to_OnPrem_conn'
-  params: {
-    location: location
-    virtualNetworkGateway_ID: VirtualNetworkGateway_Hub.outputs.virtualNetworkGateway_ResourceID
-    vpn_Destination_ASN: VirtualNetworkGateway_OnPrem.outputs.virtualNetworkGateway_ASN
-    vpn_Destination_BGPIPAddress: VirtualNetworkGateway_OnPrem.outputs.virtualNetworkGateway_BGPAddress
-    vpn_Destination_Name: VirtualNetworkGateway_OnPrem.outputs.virtualNetworkGateway_Name
-    vpn_Destination_PublicIPAddress: VirtualNetworkGateway_OnPrem.outputs.virtualNetworkGateway_PublicIPAddress
-    vpn_SharedKey: vpn_SharedKey
+    subnet_ID: VirtualNetwork_Spoke.outputs.general_SubnetID
+    virtualMachine_AdminPassword: virtualMachine_AdminPassword
+    virtualMachine_AdminUsername: virtualMachine_AdminUsername
+    virtualMachine_Name: 'OnPrem-WinClien'
+    virtualMachine_Size: virtualMachine_Size
+    virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
+    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_General.ps1'
+    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_General.ps1 -Username ${virtualMachine_AdminUsername}'
   }
 }

@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.26.54.24096",
-      "templateHash": "9269896797250676740"
+      "templateHash": "17703391865178938145"
     }
   },
   "parameters": {
@@ -976,7 +976,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.26.54.24096",
-              "templateHash": "5016052238124140301"
+              "templateHash": "4233971658434384310"
             }
           },
           "parameters": {
@@ -1207,9 +1207,13 @@
                 "autoscaleConfiguration": {
                   "minCapacity": 0,
                   "maxCapacity": 2
+                },
+                "firewallPolicy": {
+                  "id": "[resourceId('Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies', parameters('applicationGatewayWAF_Name'))]"
                 }
               },
               "dependsOn": [
+                "[resourceId('Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies', parameters('applicationGatewayWAF_Name'))]",
                 "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIP_ApplicationGateway_Name'))]"
               ]
             }
@@ -1217,7 +1221,7 @@
           "outputs": {
             "ApplicationGateway_FrontendIP_Private": {
               "type": "string",
-              "value": "[reference(resourceId('Microsoft.Network/applicationGateways', parameters('applicationGateway_Name')), '2022-11-01').frontendIPConfigurations[0].properties.privateIPAddress]"
+              "value": "[parameters('applicationGateway_PrivateIPAddress')]"
             }
           }
         }
@@ -1632,7 +1636,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.26.54.24096",
-              "templateHash": "17840002788661398173"
+              "templateHash": "7931216883459364233"
             }
           },
           "parameters": {
@@ -1653,6 +1657,13 @@
               "metadata": {
                 "description": "IPv4 Address of the A record."
               }
+            },
+            "ttlInSeconds": {
+              "type": "int",
+              "defaultValue": 3600,
+              "metadata": {
+                "description": "Time to Live for the A record in seconds.  Default is 3600 (1 hour)."
+              }
             }
           },
           "resources": [
@@ -1665,7 +1676,8 @@
                   {
                     "ipv4Address": "[parameters('ipv4Address')]"
                   }
-                ]
+                ],
+                "ttl": "[parameters('ttlInSeconds')]"
               }
             }
           ]
@@ -2173,7 +2185,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.26.54.24096",
-              "templateHash": "6964921601616201083"
+              "templateHash": "11897612985281525380"
             }
           },
           "parameters": {
@@ -2233,9 +2245,8 @@
             },
             "virtualMachine_ScriptFileName": {
               "type": "string",
-              "defaultValue": "Ubuntu20_DNS_Config.sh",
               "metadata": {
-                "description": "Name of the file to be ran while the Virtual Machine is being created\r\nExample: WinServ2022_ConfigScript_General.ps1"
+                "description": "Name of the file to be ran while the Virtual Machine is being created\r\nExample: Ubuntu20_DNS_Config.sh"
               }
             },
             "commandToExecute": {

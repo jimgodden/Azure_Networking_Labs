@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.26.54.24096",
-      "templateHash": "14025202156273177464"
+      "templateHash": "7545259486803482927"
     }
   },
   "parameters": {
@@ -510,6 +510,12 @@
           "virtualMachine_Size": {
             "value": "[parameters('virtualMachine_Size')]"
           },
+          "virtualMachine_ScriptFileLocation": {
+            "value": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/"
+          },
+          "virtualMachine_ScriptFileName": {
+            "value": "Ubuntu20_DNS_Config.sh"
+          },
           "commandToExecute": {
             "value": ""
           }
@@ -521,7 +527,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.26.54.24096",
-              "templateHash": "6964921601616201083"
+              "templateHash": "11897612985281525380"
             }
           },
           "parameters": {
@@ -581,9 +587,8 @@
             },
             "virtualMachine_ScriptFileName": {
               "type": "string",
-              "defaultValue": "Ubuntu20_DNS_Config.sh",
               "metadata": {
-                "description": "Name of the file to be ran while the Virtual Machine is being created\r\nExample: WinServ2022_ConfigScript_General.ps1"
+                "description": "Name of the file to be ran while the Virtual Machine is being created\r\nExample: Ubuntu20_DNS_Config.sh"
               }
             },
             "commandToExecute": {
