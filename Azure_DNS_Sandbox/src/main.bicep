@@ -106,6 +106,9 @@ module Hub_WinClientVM '../../modules/Microsoft.Compute/WindowsServer2022/Virtua
     virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_General.ps1'
     commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_General.ps1 -Username ${virtualMachine_AdminUsername}'
   }
+  dependsOn: [
+    Hub_WinDnsVm
+  ]
 }
 
 module Spoke_WinClientVM '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
@@ -124,10 +127,11 @@ module Spoke_WinClientVM '../../modules/Microsoft.Compute/WindowsServer2022/Virt
   }
   dependsOn: [
     Hub_To_Spoke_Peering
+    Spoke_WinVmIis
   ]
 }
 
-module Spoke_WinVM '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
+module Spoke_WinVmIis '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
   name: 'spoke-WinIis'
   params: {
     acceleratedNetworking: acceleratedNetworking
@@ -195,7 +199,7 @@ module DnsPrivateResolverForwardingRuleSet '../../modules/Microsoft.Network/DNSP
     location: location
     targetDNSServers: [ {
       port: 53
-      ipaddress: OnPremVM_WinDNS.outputs.networkInterface_PrivateIPAddress
+      ipaddress: OnPrem_WinDnsVm.outputs.networkInterface_PrivateIPAddress
     } ]
     virtualNetwork_IDs: [
       VirtualNetwork_Hub.outputs.virtualNetwork_ID 
@@ -229,7 +233,7 @@ module VirtualNetwork_OnPremHub '../../modules/Microsoft.Network/VirtualNetwork.
   }
 }
 
-module OnPremVM_WinDNS '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
+module OnPrem_WinDnsVm '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
   name: 'OnPremWinDNS'
   params: {
     acceleratedNetworking: acceleratedNetworking
@@ -259,4 +263,7 @@ module OnPrem_WinClientVM '../../modules/Microsoft.Compute/WindowsServer2022/Vir
     virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_General.ps1'
     commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_General.ps1 -Username ${virtualMachine_AdminUsername}'
   }
+  dependsOn: [
+    OnPrem_WinDnsVm
+  ]
 }

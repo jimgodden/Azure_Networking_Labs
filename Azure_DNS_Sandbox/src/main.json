@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.26.54.24096",
-      "templateHash": "3958102120465062006"
+      "templateHash": "67926769668153350"
     }
   },
   "parameters": {
@@ -1991,6 +1991,7 @@
         }
       },
       "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'Hub-WinDnsVm')]",
         "[resourceId('Microsoft.Resources/deployments', 'Spoke_VNet')]"
       ]
     },
@@ -2441,6 +2442,7 @@
       },
       "dependsOn": [
         "[resourceId('Microsoft.Resources/deployments', 'HubToSpokePeering')]",
+        "[resourceId('Microsoft.Resources/deployments', 'spoke-WinIis')]",
         "[resourceId('Microsoft.Resources/deployments', 'Spoke_VNet')]"
       ]
     },
@@ -5103,6 +5105,7 @@
         }
       },
       "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'OnPremWinDNS')]",
         "[resourceId('Microsoft.Resources/deployments', 'Spoke_VNet')]"
       ]
     }
