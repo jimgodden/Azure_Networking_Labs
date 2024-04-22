@@ -228,9 +228,6 @@ module OnPrem_VirtualNetwork '../../modules/Microsoft.Network/VirtualNetwork.bic
   name: 'OnPrem_VNet'
   params: {
     virtualNetwork_AddressPrefix: '10.100.0.0/16' // Update the dnsServers if you update the address prefix
-    dnsServers: [
-      '10.100.0.4' // This must be updated if you update the address prefix
-    ]
     location: location
     virtualNetwork_Name: 'OnPrem_VNet'
   }
@@ -269,4 +266,16 @@ module OnPrem_WinClientVM '../../modules/Microsoft.Compute/WindowsServer2022/Vir
   dependsOn: [
     OnPrem_WinDnsVm
   ]
+}
+
+module OnPrem_VirtualNetwork_DnsUpdate '../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
+  name: 'OnPrem_VNet_Dns_Update'
+  params: {
+    virtualNetwork_AddressPrefix: '10.100.0.0/16' 
+    dnsServers: [
+      OnPrem_WinDnsVm.outputs.networkInterface_PrivateIPAddress
+    ]
+    location: location
+    virtualNetwork_Name: 'OnPrem_VNet'
+  }
 }
