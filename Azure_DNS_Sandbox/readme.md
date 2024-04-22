@@ -80,7 +80,7 @@ Note: The domain name will change if you alter the parameter "privateDNSZone_Nam
 
 The link below can be used to quickly deploy the lab directly to your subscription.
 
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjimgodden%2FAzure_Networking_Labs%2Fmain%2FAzure_PrivateLink_Sandbox%2Fsrc%2Fmain.json)
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjimgodden%2FAzure_Networking_Labs%2Fmain%2FAzure_DNS_Sandbox%2Fsrc%2Fmain.json)
 
 
 Below is a diagram of the infrastructure
