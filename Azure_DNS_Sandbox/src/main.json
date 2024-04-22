@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.26.54.24096",
-      "templateHash": "67926769668153350"
+      "templateHash": "13903380601211079204"
     }
   },
   "parameters": {
@@ -2442,8 +2442,8 @@
       },
       "dependsOn": [
         "[resourceId('Microsoft.Resources/deployments', 'HubToSpokePeering')]",
-        "[resourceId('Microsoft.Resources/deployments', 'spoke-WinIis')]",
-        "[resourceId('Microsoft.Resources/deployments', 'Spoke_VNet')]"
+        "[resourceId('Microsoft.Resources/deployments', 'Spoke_VNet')]",
+        "[resourceId('Microsoft.Resources/deployments', 'spoke-WinIis')]"
       ]
     },
     {
@@ -3224,8 +3224,8 @@
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Resources/deployments', 'storageAccount')]",
-        "[resourceId('Microsoft.Resources/deployments', 'Hub_VNet')]"
+        "[resourceId('Microsoft.Resources/deployments', 'Hub_VNet')]",
+        "[resourceId('Microsoft.Resources/deployments', 'storageAccount')]"
       ]
     },
     {
@@ -3622,8 +3622,8 @@
       },
       "dependsOn": [
         "[resourceId('Microsoft.Resources/deployments', 'Hub_DNSPrivateResolver')]",
-        "[resourceId('Microsoft.Resources/deployments', 'OnPremWinDNS')]",
         "[resourceId('Microsoft.Resources/deployments', 'Hub_VNet')]",
+        "[resourceId('Microsoft.Resources/deployments', 'OnPremWinDNS')]",
         "[resourceId('Microsoft.Resources/deployments', 'Spoke_VNet')]"
       ]
     },
@@ -3786,6 +3786,11 @@
         "parameters": {
           "virtualNetwork_AddressPrefix": {
             "value": "10.100.0.0/16"
+          },
+          "dnsServers": {
+            "value": [
+              "10.100.0.4"
+            ]
           },
           "location": {
             "value": "[parameters('location')]"
