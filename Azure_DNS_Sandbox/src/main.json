@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.26.54.24096",
-      "templateHash": "6645969465659749665"
+      "templateHash": "3157042150694002413"
     }
   },
   "parameters": {
@@ -5105,7 +5105,7 @@
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Resources/deployments', 'OnPremWinDNS')]",
+        "[resourceId('Microsoft.Resources/deployments', 'OnPrem_VNet_Dns_Update')]",
         "[resourceId('Microsoft.Resources/deployments', 'Spoke_VNet')]"
       ]
     },

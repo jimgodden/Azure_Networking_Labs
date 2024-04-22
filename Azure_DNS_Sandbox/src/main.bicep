@@ -264,7 +264,7 @@ module OnPrem_WinClientVM '../../modules/Microsoft.Compute/WindowsServer2022/Vir
     commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_General.ps1 -Username ${virtualMachine_AdminUsername}'
   }
   dependsOn: [
-    OnPrem_WinDnsVm
+    OnPrem_VirtualNetwork_DnsUpdate
   ]
 }
 
