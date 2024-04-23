@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.26.54.24096",
-      "templateHash": "16524158326880070032"
+      "templateHash": "8250780961100564564"
     }
   },
   "parameters": {
@@ -32,7 +32,7 @@
       "type": "string",
       "defaultValue": "Standard_B2ms",
       "metadata": {
-        "description": "Password for the Virtual Machine Admin User"
+        "description": "Size of the Virtual Machines"
       }
     },
     "acceleratedNetworking": {

@@ -8,7 +8,7 @@ param virtualMachine_AdminUsername string
 @secure()
 param virtualMachine_AdminPassword string
 
-@description('Password for the Virtual Machine Admin User')
+@description('Size of the Virtual Machines')
 param virtualMachine_Size string = 'Standard_B2ms' // 'Standard_D2s_v3' // 'Standard_D16lds_v5'
 
 @description('''True enables Accelerated Networking and False disabled it.  
@@ -236,7 +236,7 @@ module OnPrem_VirtualNetwork '../../modules/Microsoft.Network/VirtualNetwork.bic
 module OnPrem_VirtualNetwork_DnsUpdate '../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
   name: 'OnPrem_VNet_Dns_Update'
   params: {
-    virtualNetwork_AddressPrefix: '10.100.0.0/16' 
+    virtualNetwork_AddressPrefix: '10.100.0.0/16' // Update the OnPrem_WinClientVM_IPAddress if this is changed
     dnsServers: [
       OnPrem_WinDnsVm.outputs.networkInterface_PrivateIPAddress
     ]
