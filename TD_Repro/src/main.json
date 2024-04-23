@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.26.54.24096",
-      "templateHash": "11394680710402637156"
+      "templateHash": "13671947439115023217"
     }
   },
   "parameters": {
@@ -1069,7 +1069,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.26.54.24096",
-              "templateHash": "11897612985281525380"
+              "templateHash": "10589466410935484420"
             }
           },
           "parameters": {
@@ -1118,6 +1118,24 @@
               "type": "string",
               "metadata": {
                 "description": "The Resource ID of the subnet to which the Network Interface will be assigned."
+              }
+            },
+            "privateIPAllocationMethod": {
+              "type": "string",
+              "defaultValue": "Dynamic",
+              "allowedValues": [
+                "Dynamic",
+                "Static"
+              ],
+              "metadata": {
+                "description": "Sets the allocation mode of the IP Address of the Network Interface to either Dynamic or Static."
+              }
+            },
+            "privateIPAddress": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "Enter the Static IP Address here if privateIPAllocationMethod is set to Static."
               }
             },
             "virtualMachine_ScriptFileLocation": {
@@ -1263,6 +1281,12 @@
                   },
                   "subnet_ID": {
                     "value": "[parameters('subnet_ID')]"
+                  },
+                  "privateIPAddress": {
+                    "value": "[parameters('privateIPAddress')]"
+                  },
+                  "privateIPAllocationMethod": {
+                    "value": "[parameters('privateIPAllocationMethod')]"
                   }
                 },
                 "template": {
@@ -1272,7 +1296,7 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.26.54.24096",
-                      "templateHash": "12161814309671133191"
+                      "templateHash": "8478081662235371654"
                     }
                   },
                   "parameters": {
@@ -1289,6 +1313,24 @@
                       "type": "bool",
                       "metadata": {
                         "description": "True enables Accelerated Networking and False disabled it.  Not all virtualMachine sizes support Accel Net"
+                      }
+                    },
+                    "privateIPAllocationMethod": {
+                      "type": "string",
+                      "defaultValue": "Dynamic",
+                      "allowedValues": [
+                        "Dynamic",
+                        "Static"
+                      ],
+                      "metadata": {
+                        "description": "Sets the allocation mode of the IP Address of the Network Interface to either Dynamic or Static."
+                      }
+                    },
+                    "privateIPAddress": {
+                      "type": "string",
+                      "defaultValue": "",
+                      "metadata": {
+                        "description": "Enter the Static IP Address here if privateIPAllocationMethod is set to Static."
                       }
                     },
                     "subnet_ID": {
@@ -1317,12 +1359,13 @@
                           {
                             "name": "ipconfig0",
                             "properties": {
-                              "privateIPAllocationMethod": "Dynamic",
+                              "privateIPAllocationMethod": "[parameters('privateIPAllocationMethod')]",
                               "subnet": {
                                 "id": "[parameters('subnet_ID')]"
                               },
                               "primary": true,
-                              "privateIPAddressVersion": "IPv4"
+                              "privateIPAddressVersion": "IPv4",
+                              "privateIPAddress": "[parameters('privateIPAddress')]"
                             }
                           }
                         ],
@@ -1343,12 +1386,13 @@
                           {
                             "name": "ipconfig0",
                             "properties": {
-                              "privateIPAllocationMethod": "Dynamic",
+                              "privateIPAllocationMethod": "[parameters('privateIPAllocationMethod')]",
                               "subnet": {
                                 "id": "[parameters('subnet_ID')]"
                               },
                               "primary": true,
                               "privateIPAddressVersion": "IPv4",
+                              "privateIPAddress": "[parameters('privateIPAddress')]",
                               "publicIPAddress": {
                                 "id": "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP', parameters('networkInterface_Name')))]"
                               }
@@ -1501,7 +1545,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.26.54.24096",
-              "templateHash": "11897612985281525380"
+              "templateHash": "10589466410935484420"
             }
           },
           "parameters": {
@@ -1550,6 +1594,24 @@
               "type": "string",
               "metadata": {
                 "description": "The Resource ID of the subnet to which the Network Interface will be assigned."
+              }
+            },
+            "privateIPAllocationMethod": {
+              "type": "string",
+              "defaultValue": "Dynamic",
+              "allowedValues": [
+                "Dynamic",
+                "Static"
+              ],
+              "metadata": {
+                "description": "Sets the allocation mode of the IP Address of the Network Interface to either Dynamic or Static."
+              }
+            },
+            "privateIPAddress": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "Enter the Static IP Address here if privateIPAllocationMethod is set to Static."
               }
             },
             "virtualMachine_ScriptFileLocation": {
@@ -1695,6 +1757,12 @@
                   },
                   "subnet_ID": {
                     "value": "[parameters('subnet_ID')]"
+                  },
+                  "privateIPAddress": {
+                    "value": "[parameters('privateIPAddress')]"
+                  },
+                  "privateIPAllocationMethod": {
+                    "value": "[parameters('privateIPAllocationMethod')]"
                   }
                 },
                 "template": {
@@ -1704,7 +1772,7 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.26.54.24096",
-                      "templateHash": "12161814309671133191"
+                      "templateHash": "8478081662235371654"
                     }
                   },
                   "parameters": {
@@ -1721,6 +1789,24 @@
                       "type": "bool",
                       "metadata": {
                         "description": "True enables Accelerated Networking and False disabled it.  Not all virtualMachine sizes support Accel Net"
+                      }
+                    },
+                    "privateIPAllocationMethod": {
+                      "type": "string",
+                      "defaultValue": "Dynamic",
+                      "allowedValues": [
+                        "Dynamic",
+                        "Static"
+                      ],
+                      "metadata": {
+                        "description": "Sets the allocation mode of the IP Address of the Network Interface to either Dynamic or Static."
+                      }
+                    },
+                    "privateIPAddress": {
+                      "type": "string",
+                      "defaultValue": "",
+                      "metadata": {
+                        "description": "Enter the Static IP Address here if privateIPAllocationMethod is set to Static."
                       }
                     },
                     "subnet_ID": {
@@ -1749,12 +1835,13 @@
                           {
                             "name": "ipconfig0",
                             "properties": {
-                              "privateIPAllocationMethod": "Dynamic",
+                              "privateIPAllocationMethod": "[parameters('privateIPAllocationMethod')]",
                               "subnet": {
                                 "id": "[parameters('subnet_ID')]"
                               },
                               "primary": true,
-                              "privateIPAddressVersion": "IPv4"
+                              "privateIPAddressVersion": "IPv4",
+                              "privateIPAddress": "[parameters('privateIPAddress')]"
                             }
                           }
                         ],
@@ -1775,12 +1862,13 @@
                           {
                             "name": "ipconfig0",
                             "properties": {
-                              "privateIPAllocationMethod": "Dynamic",
+                              "privateIPAllocationMethod": "[parameters('privateIPAllocationMethod')]",
                               "subnet": {
                                 "id": "[parameters('subnet_ID')]"
                               },
                               "primary": true,
                               "privateIPAddressVersion": "IPv4",
+                              "privateIPAddress": "[parameters('privateIPAddress')]",
                               "publicIPAddress": {
                                 "id": "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP', parameters('networkInterface_Name')))]"
                               }
@@ -1927,7 +2015,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.26.54.24096",
-              "templateHash": "2749508208779935962"
+              "templateHash": "6714683067488481026"
             }
           },
           "parameters": {
@@ -2001,6 +2089,24 @@
               "defaultValue": false,
               "metadata": {
                 "description": "Adds a Public IP to the Network Interface of the Virtual Machine"
+              }
+            },
+            "privateIPAllocationMethod": {
+              "type": "string",
+              "defaultValue": "Dynamic",
+              "allowedValues": [
+                "Dynamic",
+                "Static"
+              ],
+              "metadata": {
+                "description": "Sets the allocation mode of the IP Address of the Network Interface to either Dynamic or Static."
+              }
+            },
+            "privateIPAddress": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "Enter the Static IP Address here if privateIPAllocationMethod is set to Static."
               }
             }
           },
@@ -2143,6 +2249,12 @@
                   },
                   "addPublicIPAddress": {
                     "value": "[parameters('addPublicIPAddress')]"
+                  },
+                  "privateIPAllocationMethod": {
+                    "value": "[parameters('privateIPAllocationMethod')]"
+                  },
+                  "privateIPAddress": {
+                    "value": "[parameters('privateIPAddress')]"
                   }
                 },
                 "template": {
@@ -2152,7 +2264,7 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.26.54.24096",
-                      "templateHash": "12161814309671133191"
+                      "templateHash": "8478081662235371654"
                     }
                   },
                   "parameters": {
@@ -2169,6 +2281,24 @@
                       "type": "bool",
                       "metadata": {
                         "description": "True enables Accelerated Networking and False disabled it.  Not all virtualMachine sizes support Accel Net"
+                      }
+                    },
+                    "privateIPAllocationMethod": {
+                      "type": "string",
+                      "defaultValue": "Dynamic",
+                      "allowedValues": [
+                        "Dynamic",
+                        "Static"
+                      ],
+                      "metadata": {
+                        "description": "Sets the allocation mode of the IP Address of the Network Interface to either Dynamic or Static."
+                      }
+                    },
+                    "privateIPAddress": {
+                      "type": "string",
+                      "defaultValue": "",
+                      "metadata": {
+                        "description": "Enter the Static IP Address here if privateIPAllocationMethod is set to Static."
                       }
                     },
                     "subnet_ID": {
@@ -2197,12 +2327,13 @@
                           {
                             "name": "ipconfig0",
                             "properties": {
-                              "privateIPAllocationMethod": "Dynamic",
+                              "privateIPAllocationMethod": "[parameters('privateIPAllocationMethod')]",
                               "subnet": {
                                 "id": "[parameters('subnet_ID')]"
                               },
                               "primary": true,
-                              "privateIPAddressVersion": "IPv4"
+                              "privateIPAddressVersion": "IPv4",
+                              "privateIPAddress": "[parameters('privateIPAddress')]"
                             }
                           }
                         ],
@@ -2223,12 +2354,13 @@
                           {
                             "name": "ipconfig0",
                             "properties": {
-                              "privateIPAllocationMethod": "Dynamic",
+                              "privateIPAllocationMethod": "[parameters('privateIPAllocationMethod')]",
                               "subnet": {
                                 "id": "[parameters('subnet_ID')]"
                               },
                               "primary": true,
                               "privateIPAddressVersion": "IPv4",
+                              "privateIPAddress": "[parameters('privateIPAddress')]",
                               "publicIPAddress": {
                                 "id": "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP', parameters('networkInterface_Name')))]"
                               }

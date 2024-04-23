@@ -26,6 +26,16 @@ param acceleratedNetworking bool
 @description('The Resource ID of the subnet to which the Network Interface will be assigned.')
 param subnet_ID string
 
+@description('Sets the allocation mode of the IP Address of the Network Interface to either Dynamic or Static.')
+@allowed([
+  'Dynamic'
+  'Static'
+])
+param privateIPAllocationMethod string = 'Dynamic'
+
+@description('Enter the Static IP Address here if privateIPAllocationMethod is set to Static.')
+param privateIPAddress string = ''
+
 @description('''Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /
 Example: https://example.com/scripts/''')
 param virtualMachine_ScriptFileLocation string = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
@@ -47,6 +57,8 @@ module networkInterface '../../Microsoft.Network/NetworkInterface.bicep' = {
     location: location
     networkInterface_Name: networkInterface_Name
     subnet_ID: subnet_ID
+    privateIPAddress: privateIPAddress
+    privateIPAllocationMethod: privateIPAllocationMethod
   }
 }
 

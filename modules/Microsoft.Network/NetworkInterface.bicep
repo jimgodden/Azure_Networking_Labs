@@ -6,6 +6,16 @@ param networkInterface_Name string
 @description('True enables Accelerated Networking and False disabled it.  Not all virtualMachine sizes support Accel Net')
 param acceleratedNetworking bool
 
+@description('Sets the allocation mode of the IP Address of the Network Interface to either Dynamic or Static.')
+@allowed([
+  'Dynamic'
+  'Static'
+])
+param privateIPAllocationMethod string = 'Dynamic'
+
+@description('Enter the Static IP Address here if privateIPAllocationMethod is set to Static.')
+param privateIPAddress string = ''
+
 @description('The Resource ID of the subnet to which the Network Interface will be assigned.')
 param subnet_ID string
 
@@ -20,12 +30,13 @@ resource networkInterfaceWithoutPubIP 'Microsoft.Network/networkInterfaces@2022-
       {
         name: 'ipconfig0'
         properties: {
-          privateIPAllocationMethod: 'Dynamic'
+          privateIPAllocationMethod: privateIPAllocationMethod
           subnet: {
             id: subnet_ID
           }
           primary: true
           privateIPAddressVersion: 'IPv4'
+          privateIPAddress: privateIPAddress
         }
       }
     ]
@@ -44,12 +55,13 @@ resource networkInterfaceWithPubIP 'Microsoft.Network/networkInterfaces@2022-09-
       {
         name: 'ipconfig0'
         properties: {
-          privateIPAllocationMethod: 'Dynamic'
+          privateIPAllocationMethod: privateIPAllocationMethod
           subnet: {
             id: subnet_ID
           }
           primary: true
           privateIPAddressVersion: 'IPv4'
+          privateIPAddress: privateIPAddress
           publicIPAddress: { 
             id: publicIPAddress.id 
           }

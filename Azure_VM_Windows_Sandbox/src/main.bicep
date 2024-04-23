@@ -19,7 +19,6 @@ param acceleratedNetworking bool = false
 
 var virtualMachine_ScriptFileLocation = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
 
-
 module virtualNetwork '../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
   name: 'vnet'
   params: {

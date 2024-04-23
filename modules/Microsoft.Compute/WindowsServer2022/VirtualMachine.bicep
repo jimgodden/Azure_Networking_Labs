@@ -46,6 +46,16 @@ param commandToExecute string
 @description('Adds a Public IP to the Network Interface of the Virtual Machine')
 param addPublicIPAddress bool = false
 
+@description('Sets the allocation mode of the IP Address of the Network Interface to either Dynamic or Static.')
+@allowed([
+  'Dynamic'
+  'Static'
+])
+param privateIPAllocationMethod string = 'Dynamic'
+
+@description('Enter the Static IP Address here if privateIPAllocationMethod is set to Static.')
+param privateIPAddress string = ''
+
 
 module networkInterface '../../Microsoft.Network/NetworkInterface.bicep' = {
   name: networkInterface_Name
@@ -55,6 +65,8 @@ module networkInterface '../../Microsoft.Network/NetworkInterface.bicep' = {
     networkInterface_Name: networkInterface_Name
     subnet_ID: subnet_ID
     addPublicIPAddress: addPublicIPAddress
+    privateIPAllocationMethod: privateIPAllocationMethod
+    privateIPAddress: privateIPAddress
   }
 }
 
