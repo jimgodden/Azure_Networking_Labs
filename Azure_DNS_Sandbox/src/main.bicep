@@ -88,6 +88,8 @@ module Hub_WinDnsVm '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMa
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
     virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_DNS.ps1'
     commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username ${virtualMachine_AdminUsername}'
+    privateIPAddress: cidrHost( Hub_VirtualNetwork.outputs.general_Subnet_AddressPrefix, 3 )
+    privateIPAllocationMethod: 'Static'
   }
 }
 
@@ -105,29 +107,11 @@ module Hub_WinClientVM '../../modules/Microsoft.Compute/WindowsServer2022/Virtua
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
     virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_General.ps1'
     commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_General.ps1 -Username ${virtualMachine_AdminUsername}'
+    privateIPAddress: cidrHost( Hub_VirtualNetwork.outputs.general_Subnet_AddressPrefix, 4 )
+    privateIPAllocationMethod: 'Static'
   }
   dependsOn: [
-    Hub_WinDnsVm
-  ]
-}
-
-module Spoke_WinClientVM '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
-  name: 'spoke-WinClientVM'
-  params: {
-    acceleratedNetworking: acceleratedNetworking
-    location: location
-    subnet_ID: Spoke_VirtualNetwork.outputs.general_SubnetID
-    virtualMachine_AdminPassword: virtualMachine_AdminPassword
-    virtualMachine_AdminUsername: virtualMachine_AdminUsername
-    virtualMachine_Name: 'Spoke-WinClient'
-    virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_General.ps1'
-    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_General.ps1 -Username ${virtualMachine_AdminUsername}'
-  }
-  dependsOn: [
-    Hub_To_Spoke_Peering
-    Spoke_WinIisVm
+    DnsPrivateResolverForwardingRuleSet
   ]
 }
 
@@ -144,9 +128,33 @@ module Spoke_WinIisVm '../../modules/Microsoft.Compute/WindowsServer2022/Virtual
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
     virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_WebServer.ps1'
     commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_WebServer.ps1 -Username ${virtualMachine_AdminUsername} -FQDN Spoke-WinIis.${privateDNSZone_Name}'
+    privateIPAddress: cidrHost( Spoke_VirtualNetwork.outputs.general_Subnet_AddressPrefix, 3 )
+    privateIPAllocationMethod: 'Static'
   }
   dependsOn: [
     Hub_To_Spoke_Peering
+  ]
+}
+
+module Spoke_WinClientVM '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
+  name: 'spoke-WinClientVM'
+  params: {
+    acceleratedNetworking: acceleratedNetworking
+    location: location
+    subnet_ID: Spoke_VirtualNetwork.outputs.general_SubnetID
+    virtualMachine_AdminPassword: virtualMachine_AdminPassword
+    virtualMachine_AdminUsername: virtualMachine_AdminUsername
+    virtualMachine_Name: 'Spoke-WinClient'
+    virtualMachine_Size: virtualMachine_Size
+    virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
+    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_General.ps1'
+    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_General.ps1 -Username ${virtualMachine_AdminUsername}'
+    privateIPAddress: cidrHost( Spoke_VirtualNetwork.outputs.general_Subnet_AddressPrefix, 4 )
+    privateIPAllocationMethod: 'Static'
+  }
+  dependsOn: [
+    Hub_To_Spoke_Peering
+    Spoke_WinIisVm
   ]
 }
 
@@ -245,8 +253,6 @@ module OnPrem_VirtualNetwork_DnsUpdate '../../modules/Microsoft.Network/VirtualN
   }
 }
 
-var OnPrem_WinClientVM_IPAddress = '10.100.0.5'
-
 module OnPrem_WinDnsVm '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
   name: 'OnPremWinDNS'
   params: {
@@ -259,7 +265,9 @@ module OnPrem_WinDnsVm '../../modules/Microsoft.Compute/WindowsServer2022/Virtua
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
     virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_DNS.ps1'
-    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username ${virtualMachine_AdminUsername} -SampleDNSZoneName ${onpremResolvableDomainName} -SampleARecord ${OnPrem_WinClientVM_IPAddress} -PrivateDNSZone "privatelink.blob.core.windows.net" -ConditionalForwarderIPAddress ${Hub_DnsPrivateResolver.outputs.privateDNSResolver_Inbound_Endpoint_IPAddress}'
+    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username ${virtualMachine_AdminUsername} -SampleDNSZoneName ${onpremResolvableDomainName} -SampleARecord ${cidrHost( OnPrem_VirtualNetwork.outputs.general_Subnet_AddressPrefix, 4 )} -PrivateDNSZone "privatelink.blob.core.windows.net" -ConditionalForwarderIPAddress ${Hub_DnsPrivateResolver.outputs.privateDNSResolver_Inbound_Endpoint_IPAddress}'
+    privateIPAddress: cidrHost( OnPrem_VirtualNetwork.outputs.general_Subnet_AddressPrefix, 3 )
+    privateIPAllocationMethod: 'Static'
   }
 }
 
@@ -276,6 +284,8 @@ module OnPrem_WinClientVM '../../modules/Microsoft.Compute/WindowsServer2022/Vir
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
     virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_General.ps1'
     commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_General.ps1 -Username ${virtualMachine_AdminUsername}'
+    privateIPAddress: cidrHost( OnPrem_VirtualNetwork.outputs.general_Subnet_AddressPrefix, 4 )
+    privateIPAllocationMethod: 'Static'
   }
   dependsOn: [
     OnPrem_VirtualNetwork_DnsUpdate
