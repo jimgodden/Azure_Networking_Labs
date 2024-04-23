@@ -1,4 +1,4 @@
-$namesInJson = Get-Content -Raw -Path .\ProjectNames.json | ConvertFrom-Json
+$namesInJson = Get-Content -Raw -Path .\Tools\ProjectNames.json | ConvertFrom-Json
 
 $ProjectNames = @()
 

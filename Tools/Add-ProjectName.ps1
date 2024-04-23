@@ -3,7 +3,7 @@ param (
     [string]$ProjectName
 )
 
-$jsonPath = ".\ProjectNames.json"
+$jsonPath = ".\Tools\ProjectNames.json"
 
 # Load the existing json content
 $jsonContent = Get-Content -Path $jsonPath -Raw | ConvertFrom-json

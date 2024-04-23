@@ -32,6 +32,9 @@ param azureFirewall_SKU string = 'Basic'
 @description('If true, an Azure Firewall will be deployed in both source and destination')
 param isUsingAzureFirewall bool = true
 
+var virtualMachine_ScriptFileLocation = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
+
+
 
 module sql '../../modules/Microsoft.Sql/Server.bicep' = {
   name: 'sql'
@@ -75,7 +78,7 @@ module clientVM_Windows '../../modules/Microsoft.Compute/WindowsServer2022/Virtu
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'ClientVM'
     virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
+    virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
     virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_General.ps1'
     commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_General.ps1 -Username ${virtualMachine_AdminUsername}'
   }

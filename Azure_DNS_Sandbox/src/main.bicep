@@ -1,4 +1,4 @@
-@description('Azure Datacenter location for the Hub and Spoke A resources')
+@description('Azure Datacenter location for all resources')
 param location string = resourceGroup().location
 
 @description('Username for the admin account of the Virtual Machines')
@@ -10,8 +10,6 @@ param virtualMachine_AdminPassword string
 
 @description('Password for the Virtual Machine Admin User')
 param virtualMachine_Size string = 'Standard_B2ms' // 'Standard_D2s_v3' // 'Standard_D16lds_v5'
-
-param virtualMachine_ScriptFileLocation string = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
 
 @description('''True enables Accelerated Networking and False disabled it.  
 Not all VM sizes support Accel Net (i.e. Standard_B2ms).  
@@ -39,6 +37,8 @@ Must end with a period (.)
 Example:
 contoso.com.''')
 param onpremResolvableDomainName string = 'contoso.com.'
+
+var virtualMachine_ScriptFileLocation = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
 
 module Hub_VirtualNetwork '../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
   name: 'Hub_VNet'
@@ -83,7 +83,7 @@ module Hub_WinDnsVm '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMa
     subnet_ID: Hub_VirtualNetwork.outputs.general_SubnetID
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
-    virtualMachine_Name: 'Hub-WinDnsVm'
+    virtualMachine_Name: 'Hub-WinDns'
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
     virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_DNS.ps1'
@@ -97,7 +97,7 @@ module Hub_WinClientVM '../../modules/Microsoft.Compute/WindowsServer2022/Virtua
   params: {
     acceleratedNetworking: acceleratedNetworking
     location: location
-    subnet_ID: Spoke_VirtualNetwork.outputs.general_SubnetID
+    subnet_ID: Hub_VirtualNetwork.outputs.general_SubnetID
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'Hub-WinClient'
@@ -203,7 +203,6 @@ module DnsPrivateResolverForwardingRuleSet '../../modules/Microsoft.Network/DNSP
     } ]
     virtualNetwork_IDs: [
       Hub_VirtualNetwork.outputs.virtualNetwork_ID 
-      Spoke_VirtualNetwork.outputs.virtualNetwork_ID 
     ]
   }
 }
@@ -227,11 +226,26 @@ module PublicDnsZone_TestDotCom '../../modules/Microsoft.Network/DNSZone.bicep' 
 module OnPrem_VirtualNetwork '../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
   name: 'OnPrem_VNet'
   params: {
-    virtualNetwork_AddressPrefix: '10.100.0.0/16' // Update the dnsServers if you update the address prefix
+    virtualNetwork_AddressPrefix: '10.100.0.0/16'
     location: location
     virtualNetwork_Name: 'OnPrem_VNet'
   }
 }
+
+// Updates the VNET to use the OnPrem-WinDNS VM's IP for DNS resolution after the VM has been created
+module OnPrem_VirtualNetwork_DnsUpdate '../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
+  name: 'OnPrem_VNet_Dns_Update'
+  params: {
+    virtualNetwork_AddressPrefix: '10.100.0.0/16' 
+    dnsServers: [
+      OnPrem_WinDnsVm.outputs.networkInterface_PrivateIPAddress
+    ]
+    location: location
+    virtualNetwork_Name: 'OnPrem_VNet'
+  }
+}
+
+var OnPrem_WinClientVM_IPAddress = '10.100.0.5'
 
 module OnPrem_WinDnsVm '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
   name: 'OnPremWinDNS'
@@ -245,7 +259,7 @@ module OnPrem_WinDnsVm '../../modules/Microsoft.Compute/WindowsServer2022/Virtua
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
     virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_DNS.ps1'
-    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username ${virtualMachine_AdminUsername} -SampleDNSZoneName ${onpremResolvableDomainName} -SampleHostName "a" -SampleARecord "172.16.0.1" -PrivateDNSZone "privatelink.blob.core.windows.net" -ConditionalForwarderIPAddress ${Hub_DnsPrivateResolver.outputs.privateDNSResolver_Inbound_Endpoint_IPAddress}'
+    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username ${virtualMachine_AdminUsername} -SampleDNSZoneName ${onpremResolvableDomainName} -SampleARecord ${OnPrem_WinClientVM_IPAddress} -PrivateDNSZone "privatelink.blob.core.windows.net" -ConditionalForwarderIPAddress ${Hub_DnsPrivateResolver.outputs.privateDNSResolver_Inbound_Endpoint_IPAddress}'
   }
 }
 
@@ -266,16 +280,4 @@ module OnPrem_WinClientVM '../../modules/Microsoft.Compute/WindowsServer2022/Vir
   dependsOn: [
     OnPrem_VirtualNetwork_DnsUpdate
   ]
-}
-
-module OnPrem_VirtualNetwork_DnsUpdate '../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
-  name: 'OnPrem_VNet_Dns_Update'
-  params: {
-    virtualNetwork_AddressPrefix: '10.100.0.0/16' 
-    dnsServers: [
-      OnPrem_WinDnsVm.outputs.networkInterface_PrivateIPAddress
-    ]
-    location: location
-    virtualNetwork_Name: 'OnPrem_VNet'
-  }
 }

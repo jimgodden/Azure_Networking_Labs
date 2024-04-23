@@ -1,8 +1,8 @@
-@description('Azure Datacenter location for the Hub and Server A resources')
+@description('Azure Datacenter location for the client side resources')
 param locationClient string = 'westeurope'
 
 @description('''
-Azure Datacenter location for the Server B resources.  
+Azure Datacenter location for the Server side resources.  
 Use the same region as locationClient if you do not want to test multi-region
 ''')
 param locationServer string = 'westeurope'
@@ -14,7 +14,7 @@ param virtualMachine_AdminUsername string
 @secure()
 param virtualMachine_AdminPassword string
 
-@description('Password for the Virtual Machine Admin User')
+@description('Size of the Virtual Machines')
 param virtualMachine_Size string = 'Standard_D2s_v3'
 
 @description('''True enables Accelerated Networking and False disabled it.  

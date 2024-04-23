@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.26.54.24096",
-      "templateHash": "1255208364358574177"
+      "templateHash": "1298326894408133151"
     }
   },
   "parameters": {
@@ -49,10 +49,6 @@
         "description": "Password for the Virtual Machine Admin User"
       }
     },
-    "virtualMachine_ScriptFileLocation": {
-      "type": "string",
-      "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/"
-    },
     "acceleratedNetworking": {
       "type": "bool",
       "defaultValue": false,
@@ -73,6 +69,9 @@
         "description": "DNS Zone to be hosted On Prem and with a forwarding rule on the DNS Private Resolver.\r\nMust end with a period (.)\r\nExample:\r\ncontoso.com."
       }
     }
+  },
+  "variables": {
+    "virtualMachine_ScriptFileLocation": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/"
   },
   "resources": [
     {
@@ -2625,7 +2624,7 @@
             "value": "[parameters('virtualMachine_Size')]"
           },
           "virtualMachine_ScriptFileLocation": {
-            "value": "[parameters('virtualMachine_ScriptFileLocation')]"
+            "value": "[variables('virtualMachine_ScriptFileLocation')]"
           },
           "virtualMachine_ScriptFileName": {
             "value": "WinServ2022_ConfigScript_General.ps1"
@@ -4024,7 +4023,7 @@
             "value": "[parameters('virtualMachine_Size')]"
           },
           "virtualMachine_ScriptFileLocation": {
-            "value": "[parameters('virtualMachine_ScriptFileLocation')]"
+            "value": "[variables('virtualMachine_ScriptFileLocation')]"
           },
           "virtualMachine_ScriptFileName": {
             "value": "WinServ2022_ConfigScript_DNS.ps1"

@@ -17,6 +17,9 @@ I'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net.
 ''')
 param acceleratedNetworking bool = false
 
+var virtualMachine_ScriptFileLocation = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
+
+
 module virtualNetwork '../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
   name: 'vnet'
   params: {
@@ -36,7 +39,7 @@ module virtualMachine_Linux '../../modules/Microsoft.Compute/Ubuntu20/VirtualMac
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'linuxVM'
     virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
+    virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
     virtualMachine_ScriptFileName: 'Ubuntu20_DNS_Config.sh'
     commandToExecute: ''
   }

@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.26.54.24096",
-      "templateHash": "9027498986915527802"
+      "templateHash": "12670824837191162571"
     }
   },
   "parameters": {
@@ -73,6 +73,9 @@
         "description": "If true, an Azure Firewall will be deployed in both source and destination"
       }
     }
+  },
+  "variables": {
+    "virtualMachine_ScriptFileLocation": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/"
   },
   "resources": [
     {
@@ -815,7 +818,7 @@
             "value": "[parameters('virtualMachine_Size')]"
           },
           "virtualMachine_ScriptFileLocation": {
-            "value": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/"
+            "value": "[variables('virtualMachine_ScriptFileLocation')]"
           },
           "virtualMachine_ScriptFileName": {
             "value": "WinServ2022_ConfigScript_General.ps1"

@@ -1,1 +1,1 @@
-.\deployment.ps1 -DeploymentName "TD_Repro"
+.\Tools\deployment.ps1 -DeploymentName "TD_Repro"

@@ -21,6 +21,9 @@ param virtualMachine_AdminPassword string
 @secure()
 param vpn_SharedKey string
 
+// var virtualMachine_ScriptFileLocation = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
+
+
 module virtualWAN '../../modules/Microsoft.Network/VirtualWAN.bicep' = {
   name: 'virtualWAN'
   params: {

@@ -4,7 +4,7 @@
 
 The link below can be used to quickly deploy the lab directly to your subscription.
 
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjimgodden%2FAzure_Networking_Labs%2Fmain%2FAzure_DNS_Sandbox%2Fsrc%2Fmain.json)
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjimgodden%2FAzure_Networking_Labs%2F%2FAzure_PrivateResolver-Distributed_Sandbox%2Fsrc%2Fmain.json)
 
 ## Scenarios
 
@@ -71,8 +71,8 @@ All Virtual Machines are running Windows Server 2022 with the following installe
 
 Hub and Spoke Virtual Machines can be accessed via Bastion.
 
-OnPrem-WinDns is running as a Windows DNS Server.  
-It is hosting zone "contoso.com." with an A Record that resolves to 10.100.0.5 
+OnPrem-WinDns0 and OnPrem-WinDns1 are running as DNS Servers.  
+They are hosting zone "contoso.com." with an A Record of "a" that resolves to 172.16.0.1  
 
 Hub-WinDns0 and Hub-WinDns1 are running as DNS Servers.  
 They are forwarding all queries received to 168.63.129.16
@@ -83,6 +83,6 @@ Note: The domain name will change if you alter the parameter "privateDNSZone_Nam
 
 ## Infrastructure
 
-Below is a diagram of the infrastructure
+Diagram of the infrastructure
 
 ![Diagram of the infrastructure](diagram.drawio.png)

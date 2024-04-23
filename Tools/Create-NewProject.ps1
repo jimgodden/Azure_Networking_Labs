@@ -13,7 +13,7 @@ New-Item -ItemType File -Path ".\$ProjectName\src" -Name "main.bicep"
 New-Item -ItemType File -Path ".\$ProjectName\src" -Name "main.json"
 
 New-Item -ItemType File -Path ".\$ProjectName" -Name "${ProjectName}-deployment.ps1"
-Set-Content -Path ".\$ProjectName\${ProjectName}-deployment.ps1" -Value ".\deployment.ps1 -DeploymentName $ProjectName"
+Set-Content -Path ".\$ProjectName\${ProjectName}-deployment.ps1" -Value ".\Tools\deployment.ps1 -DeploymentName $ProjectName"
 
 New-Item -ItemType File -Path ".\$ProjectName" -Name "diagram.drawio.png"
 
@@ -23,6 +23,8 @@ Set-Content -Path ".\$ProjectName\iteration.txt" -Value "1"
 New-Item -ItemType File -Path ".\$ProjectName" -Name "main.parameters.bicepparam"
 $bicepParamInitializer = "using './src/main.bicep' /*Provide a path to a bicep template*/"
 Set-Content -Path ".\$ProjectName\main.parameters.bicepparam" -Value $bicepParamInitializer
+
+.\Tools\Add-ProjectName.ps1 -ProjectName $ProjectName
 
 New-Item -ItemType File -Path ".\$ProjectName" -Name "readme.md"
 $deployButton = .\Create-AzureDeployButton.ps1 -BranchName $BranchName -DirectoryName $ProjectName

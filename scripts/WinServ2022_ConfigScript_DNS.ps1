@@ -1,7 +1,6 @@
 param (
     [string]$Username,
     [string]$SampleDNSZoneName,
-    [string]$SampleHostName,
     [string]$SampleARecord,
     [string]$PrivateDNSZone,
     [string]$ConditionalForwarderIPAddress
@@ -10,7 +9,6 @@ param (
 Start-Job -ScriptBlock {
 
     $SampleDNSZoneName = $using:SampleDNSZoneName
-    $SampleHostName = $using:SampleHostName
     $SampleARecord = $using:SampleARecord
     $PrivateDNSZone = $using:PrivateDNSZone
     $ConditionalForwarderIPAddress = $using:ConditionalForwarderIPAddress
@@ -20,9 +18,8 @@ Start-Job -ScriptBlock {
 
     Import-Module DnsServer
 
-    if ($null -ne $SampleDNSZoneName -and $null -ne $SampleDNSZoneName -and $null -ne $SampleARecord) {
-        Add-DnsServerPrimaryZone -Name $SampleDNSZoneName -ZoneFile "${SampleDNSZoneName}dns" -PassThru
-        Add-DnsServerResourceRecordA -ZoneName $SampleDNSZoneName -Name $SampleHostName -IPv4Address $SampleARecord -CreatePtr
+    if ($null -ne $SampleDNSZoneName -and $null -ne $SampleARecord) {
+        Add-DnsServerPrimaryZone -Name $SampleDNSZoneName -ZoneFile "${SampleDNSZoneName}dns" -IPv4Address $SampleARecord -PassThru 
     }
 
     if ($null -eq $PrivateDNSZone -and $null -eq $ConditionalForwarderIPAddress) {
