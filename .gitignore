@@ -19,9 +19,7 @@ Azure_PE_to_SQL_Sandbox/iteration.txt
 Azure_PE_to_SQL_Sandbox/main.parameters.bicepparam
 Azure_TrafficManager_Sandbox/iteration.txt
 Azure_TrafficManager_Sandbox/main.parameters.bicepparam
-
 PrivateResolver_Sandbox/iteration.txt
 PrivateResolver_Sandbox/main.parameters.bicepparam
-
 Azure_PrivateResolver-Distributed_Sandbox/iteration.txt
 Azure_PrivateResolver-Distributed_Sandbox/main.parameters.bicepparam
