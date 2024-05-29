@@ -78,7 +78,7 @@ module storageAccount '../../modules/Microsoft.Storage/StorageAccount.bicep' = {
 module storageAccountContainers '../../modules/Microsoft.Storage/Container.bicep' = {
   name: 'storageAccountContainers'
   params: {
-    container_Names: ['unfilteredcaptures', 'needsreview', 'ignore']
+    container_Names: ['results']
     storageAccount_BlobServices_Name: storageAccount.outputs.storageAccount_BlobServices_Name
     storageAccount_Name: storageAccount.outputs.storageAccount_Name
   }
@@ -99,9 +99,3 @@ module StorageAccount_Blob_PrivateEndpoint '../../modules/Microsoft.Network/Priv
   }
 }
 
-module PrivateEndpointNetworkInterface '../../modules/Microsoft.Network/PrivateEndpointNetworkInterface.bicep' = {
-  name: 'PE_NIC'
-  params: {
-    existing_PrivateEndpoint_NetworkInterface_Name: StorageAccount_Blob_PrivateEndpoint.outputs.privateEndpoint_NetworkInterface_Name
-  }
-}

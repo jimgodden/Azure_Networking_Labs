@@ -10,7 +10,8 @@ Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManage
 
 # List of Scripts that are stored in my GitHub Repository for general use
 $filesToDownload = @(
-    "ManyVMsRepro_ChocoInstalls.ps1"
+    "ManyVMsRepro_ChocoInstalls.ps1",
+    "ManyVMsRepro_3_of_3.ps1"
 )
 
 # Downloads the general use scripts from the GitHub Repository
@@ -21,11 +22,11 @@ foreach ($fileToDownload in $filesToDownload) {
 # Creates a task that installs several packages using chocolatey after the computer has been restarted
 $currentTimePlusTwoMinutes = (Get-Date).AddMinutes(2)
 $chocoTaskName = "ChocoInstalls"
-$chocoTaskAction = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-NoProfile -ExecutionPolicy Bypass -File `"C:\ChocoInstalls.ps1`""
+$chocoTaskAction = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-NoProfile -ExecutionPolicy Bypass -File `"C:\ManyVMsRepro_ChocoInstalls.ps1`""
 $chocoTaskTrigger = New-ScheduledTaskTrigger -Once -At $currentTimePlusTwoMinutes
 Register-ScheduledTask -TaskName $chocoTaskName -Action $chocoTaskAction -Trigger $chocoTaskTrigger -User "NT AUTHORITY\SYSTEM" -Force
 
-# Creates a task that installs several packages using chocolatey after the computer has been restarted
+# Creates a task that runs a script to repro
 $timeDelay = (Get-Date).AddMinutes(10)
 $TaskName = "ReproIssueAndLog"
 $TaskAction = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-NoProfile -ExecutionPolicy Bypass -File `"C:\ManyVMsRepro_3_of_3.ps1 -StorageAccountName $StorageAccountName -StorageAccountKey $StorageAccountKey -ContainerName $ContainerName -PrivateEndpointIP $PrivateEndpointIP`""
