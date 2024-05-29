@@ -56,6 +56,8 @@ param privateIPAllocationMethod string = 'Dynamic'
 @description('Enter the Static IP Address here if privateIPAllocationMethod is set to Static.')
 param privateIPAddress string = ''
 
+param tagValues object = {}
+
 
 module networkInterface '../../Microsoft.Network/NetworkInterface.bicep' = {
   name: networkInterface_Name
@@ -67,6 +69,7 @@ module networkInterface '../../Microsoft.Network/NetworkInterface.bicep' = {
     addPublicIPAddress: addPublicIPAddress
     privateIPAllocationMethod: privateIPAllocationMethod
     privateIPAddress: privateIPAddress
+    tagValues: tagValues
   }
 }
 
@@ -134,6 +137,7 @@ resource virtualMachine_Windows 'Microsoft.Compute/virtualMachines@2022-11-01' =
       }
     }
   }
+  tags: tagValues
 }
 
 resource virtualMachine_NetworkWatcherExtension 'Microsoft.Compute/virtualMachines/extensions@2022-11-01' = {
@@ -146,15 +150,13 @@ resource virtualMachine_NetworkWatcherExtension 'Microsoft.Compute/virtualMachin
     type: 'NetworkWatcherAgentWindows'
     typeHandlerVersion: '1.4'
   }
+  tags: tagValues
 }
 
 resource virtualMachine_CustomScriptExtension 'Microsoft.Compute/virtualMachines/extensions@2021-11-01' = {
   parent: virtualMachine_Windows
   name: 'installcustomscript'
   location: location
-  tags: {
-    displayName: 'install software for Windows virtualMachine'
-  }
   properties: {
     publisher: 'Microsoft.Compute'
     type: 'CustomScriptExtension'
@@ -169,6 +171,7 @@ resource virtualMachine_CustomScriptExtension 'Microsoft.Compute/virtualMachines
       commandToExecute: commandToExecute
     }
   }
+  tags: tagValues
 }
 
 output virtualMachine_Name string = virtualMachine_Windows.name

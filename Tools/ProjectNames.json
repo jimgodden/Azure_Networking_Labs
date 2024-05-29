@@ -34,5 +34,29 @@
   },
   {
     "Name": "Azure_PrivateResolver-Distributed_Sandbox"
+  },
+  {
+    "Name": "Training-PrivateDNSZone"
+  },
+  {
+    "Name": "Training-PrivateResolver_Centralized"
+  },
+  {
+    "Name": "Training-PrivateResolver_Distributed"
+  },
+  {
+    "Name": "Training-PrivateDNSZone-Complete"
+  },
+  {
+    "Name": "Training-PrivateResolver_Centralized-Complete"
+  },
+  {
+    "Name": "Training-PrivateResolver_Distributed-Complete"
+  },
+  {
+    "Name": "ManyVMsRepro"
+  },
+  {
+    "Name": "ManyVMsInfra"
   }
 ]

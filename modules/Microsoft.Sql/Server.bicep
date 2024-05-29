@@ -11,6 +11,8 @@ param sql_AdministratorPassword string
 @description('Name of the SQL Server')
 param sqlServer_Name string
 
+param tagValues object = {}
+
 resource sqlServer 'Microsoft.Sql/servers@2023-05-01-preview' = {
   name: sqlServer_Name
   location: location
@@ -22,6 +24,7 @@ resource sqlServer 'Microsoft.Sql/servers@2023-05-01-preview' = {
     publicNetworkAccess: 'Disabled'
     restrictOutboundNetworkAccess: 'Disabled'
   }
+  tags: tagValues
 }
 
 resource sqlServer_Database 'Microsoft.Sql/servers/databases@2023-05-01-preview' = {
@@ -43,6 +46,7 @@ resource sqlServer_Database 'Microsoft.Sql/servers/databases@2023-05-01-preview'
     isLedgerOn: false
     availabilityZone: 'NoPreference'
   }
+  tags: tagValues
 }
 
 output sqlServer_ID string = sqlServer.id

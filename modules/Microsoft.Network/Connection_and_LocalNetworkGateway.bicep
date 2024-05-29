@@ -26,6 +26,8 @@ param lngOptionalTag string = ''
 @description('Source Virtual Network Gateway ID')
 param virtualNetworkGateway_ID string
 
+param tagValues object = {}
+
 var virtualNetworkGateway_ID_Split = split(virtualNetworkGateway_ID, '/')
 var virtualNetworkGateway_Name = virtualNetworkGateway_ID_Split[8] 
 
@@ -69,6 +71,7 @@ resource connection 'Microsoft.Network/connections@2022-11-01' = {
       dpdTimeoutSeconds: 45
       connectionMode: 'Default'
   }
+  tags: tagValues
 }
 
 resource localNetworkGateway 'Microsoft.Network/localNetworkGateways@2022-11-01' = {
@@ -82,4 +85,5 @@ resource localNetworkGateway 'Microsoft.Network/localNetworkGateways@2022-11-01'
       bgpPeeringAddress: vpn_Destination_BGPIPAddress
     }
   }
+  tags: tagValues
 }

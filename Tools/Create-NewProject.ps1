@@ -27,7 +27,7 @@ Set-Content -Path ".\$ProjectName\main.parameters.bicepparam" -Value $bicepParam
 .\Tools\Add-ProjectName.ps1 -ProjectName $ProjectName
 
 New-Item -ItemType File -Path ".\$ProjectName" -Name "readme.md"
-$deployButton = .\Create-AzureDeployButton.ps1 -BranchName $BranchName -DirectoryName $ProjectName
+$deployButton = .\Tools\Create-AzureDeployButton.ps1 -BranchName $BranchName -DirectoryName $ProjectName
 $readmeInitializer = @"
 $deployButton
 

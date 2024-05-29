@@ -19,6 +19,8 @@ param groupID string
 Example: privatelink.blob.${environment().suffixes.storage}''')
 param privateDNSZone_Name string
 
+param tagValues object = {}
+
 @description('Reads the last portion of the Service ID to get the name of the resource')
 var resource_Name = last(split(privateLinkServiceId, '/'))
 
@@ -41,11 +43,13 @@ resource privateEndpoint 'Microsoft.Network/privateEndpoints@2023-05-01' = {
       id: privateEndpoint_SubnetID
     }
   }
+  tags: tagValues
 }
 
 resource privateDNSZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
   name: privateDNSZone_Name
   location: 'global'
+  tags: tagValues
 }
 
 resource privateDNSZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2023-04-01' = {
@@ -73,4 +77,8 @@ resource virtualNetworkLink_File 'Microsoft.Network/privateDnsZones/virtualNetwo
       id: virtualNetwork_ID
     }
   }
+  tags: tagValues
 }]
+
+output privateEndpoint_NetworkInterface_Name string = privateEndpoint.properties.customNetworkInterfaceName
+

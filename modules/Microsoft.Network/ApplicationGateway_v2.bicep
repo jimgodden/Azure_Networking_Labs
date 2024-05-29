@@ -18,6 +18,8 @@ param applicationGatewayWAF_Name string = '${applicationGateway_Name}_WAF'
 @description('FQDN of the website in the backend pool of the Application Gateway')
 param backendPoolFQDNs array
 
+param tagValues object = {}
+
 @description('Application Gateway sub resource IDs')
 var frontendID = resourceId('Microsoft.Network/applicationGateways/frontendIPConfigurations', applicationGateway_Name, 'fip_private')
 var frontendPortID = resourceId('Microsoft.Network/applicationGateways/frontendPorts', applicationGateway_Name, 'port_80')
@@ -57,6 +59,7 @@ resource applicationGatewayWAF 'Microsoft.Network/ApplicationGatewayWebApplicati
       exclusions: []
     }
   }
+  tags: tagValues
 }
 
 resource publicIP_ApplicationGateway 'Microsoft.Network/publicIPAddresses@2022-11-01' = {
@@ -72,6 +75,7 @@ resource publicIP_ApplicationGateway 'Microsoft.Network/publicIPAddresses@2022-1
     idleTimeoutInMinutes: 4
     ipTags: []
   }
+  tags: tagValues
 }
 
 resource applicationGateway 'Microsoft.Network/applicationGateways@2022-11-01' = {
@@ -199,6 +203,7 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2022-11-01' =
       id: applicationGatewayWAF.id
     }
   }
+  tags: tagValues
 }
 
 output ApplicationGateway_FrontendIP_Private string = applicationGateway_PrivateIPAddress

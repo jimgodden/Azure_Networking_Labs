@@ -22,6 +22,8 @@ param inboundEndpoint_Name string = 'endpoint-inbound'
 @description('name that will be used for the private resolver outbound endpoint')
 param outboundEndpoint_Name string = 'endpoint-outbound'
 
+param tagValues object = {}
+
 resource dnsPrivateResolver 'Microsoft.Network/dnsResolvers@2022-07-01' = {
   name: dnsPrivateResolver_Name
   location: location
@@ -30,6 +32,7 @@ resource dnsPrivateResolver 'Microsoft.Network/dnsResolvers@2022-07-01' = {
       id: virtualNetwork_ID
     }
   }
+  tags: tagValues
 }
 
 resource inboundEndpoint 'Microsoft.Network/dnsResolvers/inboundEndpoints@2022-07-01' = {
@@ -46,6 +49,7 @@ resource inboundEndpoint 'Microsoft.Network/dnsResolvers/inboundEndpoints@2022-0
       }
     ]
   }
+  tags: tagValues
 }
 
 resource outboundEndpoint 'Microsoft.Network/dnsResolvers/outboundEndpoints@2022-07-01' = {
@@ -57,38 +61,8 @@ resource outboundEndpoint 'Microsoft.Network/dnsResolvers/outboundEndpoints@2022
       id: dnsPrivateResolver_Outbound_SubnetID
     }
   }
+  tags: tagValues
 }
-
-// resource dnsForwardingRuleSet 'Microsoft.Network/dnsForwardingRulesets@2022-07-01' = {
-//   name: dnsForwardingRuleSet_Name
-//   location: location
-//   properties: {
-//     dnsResolverOutboundEndpoints: [
-//       {
-//         id: outboundEndpoint.id
-//       }
-//     ]
-//   }
-// }
-
-// resource resolverLink 'Microsoft.Network/dnsForwardingRulesets/virtualNetworkLinks@2022-07-01' = {
-//   parent: dnsForwardingRuleSet
-//   name: '${virtualNetwork_Name}_link'
-//   properties: {
-//     virtualNetwork: {
-//       id: virtualNetwork_ID
-//     }
-//   }
-// }
-
-// resource fwRules 'Microsoft.Network/dnsForwardingRulesets/forwardingRules@2022-07-01' = {
-//   parent: dnsForwardingRuleSet
-//   name: forwardingRule_Name
-//   properties: {
-//     domainName: domainName
-//     targetDnsServers: targetDNSServers
-//   }
-// }
 
 output dnsPrivateResolver_Outbound_Endpoint_ID string = outboundEndpoint.id
 output privateDNSResolver_Inbound_Endpoint_IPAddress string = inboundEndpoint.properties.ipConfigurations[0].privateIpAddress

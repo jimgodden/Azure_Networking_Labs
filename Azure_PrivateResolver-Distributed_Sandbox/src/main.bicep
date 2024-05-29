@@ -64,6 +64,9 @@ module Hub_To_SpokeB_Peering '../../modules/Microsoft.Network/VirtualNetworkPeer
     virtualNetwork1_Name: Hub_VirtualNetwork.outputs.virtualNetwork_Name
     virtualNetwork2_Name: SpokeB_VirtualNetwork.outputs.virtualNetwork_Name
   }
+  dependsOn: [
+    Hub_To_SpokeA_Peering
+  ]
 }
 
 module Hub_WinClientVM '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
@@ -144,7 +147,7 @@ module DnsPrivateResolverForwardingRuleSet '../../modules/Microsoft.Network/DNSP
   name: 'dnsPrivateResolverForwardingRuleSet'
   params: {
     outboundEndpoint_ID: Hub_DnsPrivateResolver.outputs.dnsPrivateResolver_Outbound_Endpoint_ID
-    domainName: privateDNSZone_Name
+    domainName: '${privateDNSZone_Name}.' // Domain names must have a trailing dot
     location: location
     targetDNSServers: [ {
       port: 53

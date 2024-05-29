@@ -14,6 +14,8 @@ param bastion_SubnetID string
 ])
 param bastion_SKU string = 'Basic'
 
+param tagValues object = {}
+
 resource bastion 'Microsoft.Network/bastionHosts@2022-09-01' = {
   name: bastion_name
   location: location
@@ -41,6 +43,7 @@ resource bastion 'Microsoft.Network/bastionHosts@2022-09-01' = {
       }
     ]
   }
+  tags: tagValues
 }
 
 resource bastion_vip 'Microsoft.Network/publicIPAddresses@2022-09-01' = {
@@ -56,4 +59,5 @@ resource bastion_vip 'Microsoft.Network/publicIPAddresses@2022-09-01' = {
     idleTimeoutInMinutes: 4
     ipTags: []
   }
+  tags: tagValues
 }

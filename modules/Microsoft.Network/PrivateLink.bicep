@@ -36,6 +36,8 @@ param tcpPort int = 443
 
 param enableTcpReset bool = false
 
+param tagValues object = {}
+
 // Modifies the existing Virtual Machine NIC to add it to the backend pool of the Load Balancer behind the Private Link Service
 resource networkInterface 'Microsoft.Network/networkInterfaces@2023-04-01' = [for i in range(0, length(networkInterface_Names)): {
   name: '${networkInterface_Names[i]}'
@@ -62,6 +64,7 @@ resource networkInterface 'Microsoft.Network/networkInterfaces@2023-04-01' = [fo
     disableTcpStateTracking: false
     nicType: 'Standard'
   }
+  tags: tagValues
 } ]
 
 resource internalLoadBalancer 'Microsoft.Network/loadBalancers@2022-09-01' = {
@@ -129,6 +132,7 @@ resource internalLoadBalancer 'Microsoft.Network/loadBalancers@2022-09-01' = {
     outboundRules: []
     inboundNatPools: []
   }
+  tags: tagValues
 }
 
 resource privateEndpoint 'Microsoft.Network/privateEndpoints@2022-09-01' = {
@@ -150,6 +154,7 @@ resource privateEndpoint 'Microsoft.Network/privateEndpoints@2022-09-01' = {
 
     }
   }
+  tags: tagValues
 }
 
 resource privateLink 'Microsoft.Network/privateLinkServices@2022-09-01' = {
@@ -176,6 +181,7 @@ resource privateLink 'Microsoft.Network/privateLinkServices@2022-09-01' = {
       }
     ]
   }
+  tags: tagValues
 }
 
 output internalLoadBalancer_FrontendIPAddress string = internalLoadBalancer.properties.frontendIPConfigurations[0].properties.privateIPAddress

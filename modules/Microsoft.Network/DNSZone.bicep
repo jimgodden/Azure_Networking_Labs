@@ -1,8 +1,11 @@
 param dnsZone_Name string
 
+param tagValues object = {}
+
 resource DNSZone 'Microsoft.Network/dnsZones@2018-05-01' = {
   name: dnsZone_Name
   location: 'global'
+  tags: tagValues
 }
 
 resource DNSZoneARecord 'Microsoft.Network/dnsZones/A@2018-05-01' = {

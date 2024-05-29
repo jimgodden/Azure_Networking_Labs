@@ -13,6 +13,8 @@ param virtualNetworkGateway_ASN int
 @description('Virtual Network Resource ID')
 param virtualNetworkGateway_Subnet_ResourceID string
 
+param tagValues object = {}
+
 resource virtualNetworkGateway_PublicIPAddress 'Microsoft.Network/publicIPAddresses@2022-11-01' = {
   name: '${virtualNetworkGateway_Name}_PIP'
   location: location
@@ -26,6 +28,7 @@ resource virtualNetworkGateway_PublicIPAddress 'Microsoft.Network/publicIPAddres
     idleTimeoutInMinutes: 4
     ipTags: []
   }
+  tags: tagValues
 }
 
 resource virtualNetworkGateway 'Microsoft.Network/virtualNetworkGateways@2023-02-01' = {
@@ -67,6 +70,7 @@ resource virtualNetworkGateway 'Microsoft.Network/virtualNetworkGateways@2023-02
     allowRemoteVnetTraffic: false
     allowVirtualWanTraffic: false
   }
+  tags: tagValues
 }
 
 output virtualNetworkGateway_ResourceID string = virtualNetworkGateway.id

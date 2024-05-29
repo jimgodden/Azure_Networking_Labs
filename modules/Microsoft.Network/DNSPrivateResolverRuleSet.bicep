@@ -1,34 +1,4 @@
-@description('the location for resolver VNET and dns private resolver - Azure DNS Private Resolver available in specific region, refer the documenation to select the supported region for this deployment. For more information https://docs.microsoft.com/azure/dns/dns-private-resolver-overview#regional-availability')
-// @allowed([
-//   'australiaeast'
-//   'uksouth'
-//   'northeurope'
-//   'southcentralus'
-//   'westus3'
-//   'eastus'
-//   'northcentralus'
-//   'westcentralus'
-//   'eastus2'
-//   'westeurope'
-//   'centralus'
-//   'canadacentral'
-//   'brazilsouth'
-//   'francecentral'
-//   'swedencentral'
-//   'switzerlandnorth'
-//   'eastasia'
-//   'southeastasia'
-//   'japaneast'
-//   'koreacentral'
-//   'southafricanorth'
-//   'centralindia'
-//   'westus'
-//   'canadaeast'
-//   'qatarcentral'
-//   'uaenorth'
-//   'australiasoutheast'
-//   'polandcentral'
-// ])
+@description('the location for resolver VNET and dns private resolver')
 param location string
 
 @description('Resource ID of the Virtual Network to which the DNS Private resolver\'s ruleset will be linked.')
@@ -40,9 +10,8 @@ param outboundEndpoint_ID string
 @description('Name of the forwarding ruleset.')
 param dnsForwardingRuleSet_Name string = 'forwardingRule'
 
-@description('the target domain name for the forwarding ruleset')
+@description('the target domain name for the forwarding ruleset.  Must end with a dot')
 param domainName string
-
 
 @description('''the list of target DNS servers ip address and the port number for conditional forwarding
 Format to be used:
@@ -57,6 +26,8 @@ Format to be used:
 ''')
 param targetDNSServers array
 
+param tagValues object = {}
+
 resource dnsForwardingRuleSet 'Microsoft.Network/dnsForwardingRulesets@2022-07-01' = {
   name: dnsForwardingRuleSet_Name
   location: location
@@ -67,6 +38,7 @@ resource dnsForwardingRuleSet 'Microsoft.Network/dnsForwardingRulesets@2022-07-0
       }
     ]
   }
+  tags: tagValues
 }
 
 resource resolverLink 'Microsoft.Network/dnsForwardingRulesets/virtualNetworkLinks@2022-07-01' = [ for virtualNetwork_ID in virtualNetwork_IDs : {

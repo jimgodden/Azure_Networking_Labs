@@ -25,7 +25,7 @@ param azureFirewall_SKU string = 'Basic'
 @description('Deploys a VPN Gateway to the Virtual Hub if true')
 param usingVPN bool
 
-
+param tagValues object = {}
 
 resource virtualHub 'Microsoft.Network/virtualHubs@2022-07-01' = {
   name: virtualHub_Name
@@ -38,6 +38,7 @@ resource virtualHub 'Microsoft.Network/virtualHubs@2022-07-01' = {
     allowBranchToBranchTraffic: false
     hubRoutingPreference: 'VpnGateway'
   }
+  tags: tagValues
 }
 
 resource virtualHub_RouteTable_Default 'Microsoft.Network/virtualHubs/hubRouteTables@2022-07-01' = {
@@ -75,6 +76,7 @@ resource vpnGateway 'Microsoft.Network/vpnGateways@2022-07-01' = if (usingVPN) {
     enableBgpRouteTranslationForNat: false
     isRoutingPreferenceInternet: false
   }
+  tags: tagValues
 }
 
 resource azureFirewall_Policy 'Microsoft.Network/firewallPolicies@2022-07-01' = if (usingAzureFirewall) {
@@ -85,6 +87,7 @@ resource azureFirewall_Policy 'Microsoft.Network/firewallPolicies@2022-07-01' = 
       tier: azureFirewall_SKU
     }
   }
+  tags: tagValues
 }
 
 resource azureFirewall 'Microsoft.Network/azureFirewalls@2022-07-01' = if (usingAzureFirewall) {
@@ -108,6 +111,7 @@ resource azureFirewall 'Microsoft.Network/azureFirewalls@2022-07-01' = if (using
       id: azureFirewall_Policy.id
     }
   }
+  tags: tagValues
 }
 
 

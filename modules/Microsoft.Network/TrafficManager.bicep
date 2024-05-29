@@ -1,4 +1,3 @@
-
 param trafficManagerProfile_Name string
 
 #disable-next-line no-hardcoded-env-urls
@@ -11,8 +10,7 @@ param customHeader_Name string
 @description('Full FQDN of the Custom Header.')
 param customHeader_Value string
 
-
-
+param tagValues object = {}
 
 resource trafficManagerProfile 'Microsoft.Network/trafficmanagerprofiles@2018-04-01' = {
   name: trafficManagerProfile_Name
@@ -39,4 +37,5 @@ resource trafficManagerProfile 'Microsoft.Network/trafficmanagerprofiles@2018-04
       ]
     }
   }
+  tags: tagValues
 }

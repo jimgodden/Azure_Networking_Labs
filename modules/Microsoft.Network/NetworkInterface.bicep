@@ -22,6 +22,8 @@ param subnet_ID string
 @description('Adds a Public IP to the Network Interface of the Virtual Machine if true.')
 param addPublicIPAddress bool = false
 
+param tagValues object = {}
+
 resource networkInterfaceWithoutPubIP 'Microsoft.Network/networkInterfaces@2022-09-01' = if (!addPublicIPAddress) {
   name: networkInterface_Name
   location: location
@@ -45,6 +47,7 @@ resource networkInterfaceWithoutPubIP 'Microsoft.Network/networkInterfaces@2022-
     disableTcpStateTracking: false
     nicType: 'Standard'
   }
+  tags: tagValues
 }
 
 resource networkInterfaceWithPubIP 'Microsoft.Network/networkInterfaces@2022-09-01' = if (addPublicIPAddress) {
@@ -73,6 +76,7 @@ resource networkInterfaceWithPubIP 'Microsoft.Network/networkInterfaces@2022-09-
     disableTcpStateTracking: false
     nicType: 'Standard'
   }
+  tags: tagValues
 }
 
 resource publicIPAddress 'Microsoft.Network/publicIPAddresses@2023-06-01' = if (addPublicIPAddress) {
@@ -88,6 +92,7 @@ resource publicIPAddress 'Microsoft.Network/publicIPAddresses@2023-06-01' = if (
     idleTimeoutInMinutes: 4
     ipTags: []
   }
+  tags: tagValues
 }
 
 output networkInterface_Name string = addPublicIPAddress ? networkInterfaceWithoutPubIP.name : networkInterfaceWithPubIP.name

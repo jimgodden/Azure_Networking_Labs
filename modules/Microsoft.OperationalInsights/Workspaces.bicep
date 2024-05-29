@@ -4,7 +4,7 @@ param location string
 @description('Name of the Log Analytics Workspace.')
 param Workspaces_name string
 
-
+param tagValues object = {}
 
 resource LogAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
   name: Workspaces_name
@@ -34,6 +34,7 @@ resource LogAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2022-10
   //     dailyQuotaGb: int
   //   }
   // }
+  tags: tagValues
 }
 
 output LogAnalyticsWorkspace_Name string = LogAnalyticsWorkspace.name

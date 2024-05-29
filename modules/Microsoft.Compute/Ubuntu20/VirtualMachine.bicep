@@ -47,6 +47,8 @@ param virtualMachine_ScriptFileName string
 
 param commandToExecute string
 
+param tagValues object = {}
+
 @description('Joins the file path and the file name together')
 var virtualMachine_ScriptFileUri = '${virtualMachine_ScriptFileLocation}${virtualMachine_ScriptFileName}'
 
@@ -59,6 +61,7 @@ module networkInterface '../../Microsoft.Network/NetworkInterface.bicep' = {
     subnet_ID: subnet_ID
     privateIPAddress: privateIPAddress
     privateIPAllocationMethod: privateIPAllocationMethod
+    tagValues: tagValues
   }
 }
 
@@ -116,6 +119,7 @@ resource virtualMachine_Linux 'Microsoft.Compute/virtualMachines@2023-03-01' = {
       }
     }
   }
+  tags: tagValues
 }
 
 resource virtualMachine_NetworkWatcherExtension 'Microsoft.Compute/virtualMachines/extensions@2022-11-01' = {
@@ -128,15 +132,13 @@ resource virtualMachine_NetworkWatcherExtension 'Microsoft.Compute/virtualMachin
     type: 'NetworkWatcherAgentLinux'
     typeHandlerVersion: '1.4'
   }
+  tags: tagValues
 }
 
 resource vm_CustomScriptExtension 'Microsoft.Compute/virtualMachines/extensions@2021-11-01' = {
   parent: virtualMachine_Linux
   name: 'installcustomscript'
   location: location
-  tags: {
-    displayName: 'install software for Linux VM'
-  }
   properties: {
     publisher: 'Microsoft.Azure.Extensions'
     type: 'CustomScript'
@@ -151,6 +153,7 @@ resource vm_CustomScriptExtension 'Microsoft.Compute/virtualMachines/extensions@
       commandToExecute: commandToExecute
     }
   }
+  tags: tagValues
 }
 
 output virtualMachine_Name string = virtualMachine_Linux.name

@@ -21,6 +21,8 @@ param azureFirewall_Subnet_ID string
 @description('Resource ID of the Azure Firewall Management Subnet.  Note: The subnet name must be "AzureFirewallManagementSubnet')
 param azureFirewall_ManagementSubnet_ID string
 
+param tagValues object = {}
+
 resource azureFirewall_PIP 'Microsoft.Network/publicIPAddresses@2022-11-01' = {
   name: '${azureFirewall_Name}_PIP'
   location: location
@@ -34,6 +36,7 @@ resource azureFirewall_PIP 'Microsoft.Network/publicIPAddresses@2022-11-01' = {
     idleTimeoutInMinutes: 4
     ipTags: []
   }
+  tags: tagValues
 }
 
 resource azureFirewall_Management_PIP 'Microsoft.Network/publicIPAddresses@2022-11-01' = {
@@ -49,6 +52,7 @@ resource azureFirewall_Management_PIP 'Microsoft.Network/publicIPAddresses@2022-
     idleTimeoutInMinutes: 4
     ipTags: []
   }
+  tags: tagValues
 }
 
 resource azureFirewallPolicy 'Microsoft.Network/firewallPolicies@2022-07-01' = {
@@ -59,6 +63,7 @@ resource azureFirewallPolicy 'Microsoft.Network/firewallPolicies@2022-07-01' = {
       tier: azureFirewall_SKU
     }
   }
+  tags: tagValues
 }
 
 resource azureFirewall 'Microsoft.Network/azureFirewalls@2022-11-01' = {
@@ -98,6 +103,7 @@ resource azureFirewall 'Microsoft.Network/azureFirewalls@2022-11-01' = {
       id: azureFirewallPolicy.id
     }
   }
+  tags: tagValues
 }
 
 

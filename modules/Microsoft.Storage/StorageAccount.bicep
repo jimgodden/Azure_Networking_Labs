@@ -10,6 +10,8 @@ Storage account name restrictions:
 @maxLength(24)
 param storageAccount_Name string
 
+param tagValues object = {}
+
 // Grabs the FQDN of the Blob but removes the extra that we don't need
 // Original value https://{storageAccount_Name}.blob.core.windows.net/
 // Output {storageAccount_Name}.blob.core.windows.net
@@ -64,6 +66,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
     }
     accessTier: 'Hot'
   }
+  tags: tagValues
 }
 
 resource storageAccount_BlobServices 'Microsoft.Storage/storageAccounts/blobServices@2023-01-01' = {

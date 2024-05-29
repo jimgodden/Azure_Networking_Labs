@@ -17,6 +17,8 @@ param virtualNetwork_Name string
 @description('Subnet ID of the Subnet that the App Service will be vnet injected into')
 param appServiceSubnet_ID string
 
+param tagValues object = {}
+
 resource appServicePlan 'Microsoft.Web/serverfarms@2022-09-01' = {
   name: appServicePlan_Name
   location: location
@@ -40,6 +42,7 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2022-09-01' = {
     targetWorkerSizeId: 0
     zoneRedundant: false
   }
+  tags: tagValues
 }
 
 
@@ -197,6 +200,7 @@ resource site 'Microsoft.Web/sites@2022-09-01' = {
     virtualNetworkSubnetId: appServiceSubnet_ID // might not need this one since
     keyVaultReferenceIdentity: 'SystemAssigned'
   }
+  tags: tagValues
 }
 
 resource appServiceEnvironment_Subnet_Link 'Microsoft.Web/sites/virtualNetworkConnections@2022-09-01' = {

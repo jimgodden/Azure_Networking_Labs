@@ -18,6 +18,8 @@ param routeTable_Name string = '${virtualNetwork_Name}_RT_General'
 
 param virtualNetwork_AddressPrefix string
 
+param tagValues object = {}
+
 var subnet_AddressRangeCIDRs = [for i in range(0, 255): cidrSubnet(virtualNetwork_AddressPrefix, 24, i) ]
 
 var subnet_Names = [
@@ -194,6 +196,7 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2022-09-01' = {
     ]
     enableDdosProtection: false
   }
+  tags: tagValues
 }
 
 resource routeTable 'Microsoft.Network/routeTables@2023-02-01' = {
@@ -202,6 +205,7 @@ resource routeTable 'Microsoft.Network/routeTables@2023-02-01' = {
   properties: {
     disableBgpRoutePropagation: false
   }
+  tags: tagValues
 }
 
 resource networkSecurityGroup 'Microsoft.Network/networkSecurityGroups@2022-09-01' = {
@@ -209,6 +213,7 @@ resource networkSecurityGroup 'Microsoft.Network/networkSecurityGroups@2022-09-0
   location: location
   properties: {
   }
+  tags: tagValues
 }
 
 resource networkSecurityGroup_ApplicationGateway 'Microsoft.Network/networkSecurityGroups@2022-11-01' = {
@@ -254,6 +259,7 @@ resource networkSecurityGroup_ApplicationGateway 'Microsoft.Network/networkSecur
       }
     ]
   }
+  tags: tagValues
 }
 
 // resource networkSecurityGroup_ApplicationGateway_AppGWSpecificRule 'Microsoft.Network/networkSecurityGroups/securityRules@2022-11-01' = {

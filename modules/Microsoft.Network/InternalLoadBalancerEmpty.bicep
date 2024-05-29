@@ -13,6 +13,8 @@ param tcpPort int = 443
 @description('Set to true to enable TCP Resets from the Load Balancer for idle connections')
 param enableTcpReset bool = false
 
+param tagValues object = {}
+
 resource internalLoadBalancer 'Microsoft.Network/loadBalancers@2022-09-01' = {
   name: internalLoadBalancer_Name
   location: location
@@ -78,6 +80,7 @@ resource internalLoadBalancer 'Microsoft.Network/loadBalancers@2022-09-01' = {
     outboundRules: []
     inboundNatPools: []
   }
+  tags: tagValues
 }
 
 output frontendIPAddress string = internalLoadBalancer.properties.frontendIPConfigurations[0].properties.privateIPAddress
