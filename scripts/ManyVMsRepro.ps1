@@ -3,9 +3,11 @@ param (
     [string]$PrivateEndpointIP
 )
 
-Install-Module -Name Az -AllowClobber
+Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
 
-Import-Module -Name Az -Force
+Install-Module -Name Az.Storage -Allowclobber -Force
+
+Import-Module -Name Az.Storage -Force
 
 New-Item -Path C:\ -ItemType Directory -Name "Results"
 

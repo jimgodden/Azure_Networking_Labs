@@ -22,11 +22,11 @@ param acceleratedNetworking bool = true
 
 @maxValue(1000)
 @description('Number of Virtual Machines to be used as the source of the traffic')
-param startingNumberOfVirtualMachines int = 1
+param startingNumberOfVirtualMachines int = 4
 
 @maxValue(1000)
 @description('Number of Virtual Machines to be used as the source of the traffic')
-param endingNumberOfVirtualMachines int = 3
+param endingNumberOfVirtualMachines int = 5
 
 @description('SAS URI of a blob from a Storage Account with Upload permissions.')
 param blobSASURI string = 'https://stortempduz4ohpmmi3r2.blob.core.windows.net/results?sp=w&st=2024-05-30T03:41:54Z&se=2024-05-30T11:41:54Z&spr=https&sv=2022-11-02&sr=c&sig=dEYAEuDvd2yySPodd2rh8NDNNmORR%2B4%2FjO2sGka8bug%3D'
@@ -46,7 +46,7 @@ module SourceVM '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachin
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
     virtualMachine_ScriptFileName: 'ManyVMsRepro.ps1'
-    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File ManyVMsRepro.ps1 -SASURI ${blobSASURI} -PrivateEndpointIP 10.1.0.5'
+    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File ManyVMsRepro.ps1 -SASURI "${blobSASURI}" -PrivateEndpointIP "10.1.0.5"'
   }
 } ]
 
