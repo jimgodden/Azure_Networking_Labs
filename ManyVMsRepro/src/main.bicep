@@ -1,6 +1,9 @@
 @description('Azure Datacenter location for the resources')
 param location string = 'eastus'
 
+@description('Resource ID of the subnet within a Virtual Network')
+param subnet_ID string = '/subscriptions/a2c8e9b2-b8d3-4f38-8a72-642d0012c518/resourceGroups/manyvmsinfra_6/providers/Microsoft.Network/virtualNetworks/VNet/subnets/General'
+
 @description('Username for the admin account of the Virtual Machines')
 param virtualMachine_AdminUsername string
 
@@ -19,83 +22,31 @@ param acceleratedNetworking bool = true
 
 @maxValue(1000)
 @description('Number of Virtual Machines to be used as the source of the traffic')
-param numberOfVMs int = 10
+param startingNumberOfVirtualMachines int = 1
 
-@description('''
-Storage account name restrictions:
-- Storage account names must be between 3 and 24 characters in length and may contain numbers and lowercase letters only.
-- Your storage account name must be unique within Azure. No two storage accounts can have the same name.
-''')
-@minLength(3)
-@maxLength(24)
-param storageAccount_Name string = 'stortemp${uniqueString(resourceGroup().id)}'
+@maxValue(1000)
+@description('Number of Virtual Machines to be used as the source of the traffic')
+param endingNumberOfVirtualMachines int = 3
+
+@description('SAS URI of a blob from a Storage Account with Upload permissions.')
+param blobSASURI string = 'https://stortempduz4ohpmmi3r2.blob.core.windows.net/results?sp=w&st=2024-05-30T03:41:54Z&se=2024-05-30T11:41:54Z&spr=https&sv=2022-11-02&sr=c&sig=dEYAEuDvd2yySPodd2rh8NDNNmORR%2B4%2FjO2sGka8bug%3D'
 
 var virtualMachine_ScriptFileLocation = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
 
 
-module virtualNetwork '../../modules/Microsoft.Network/VirtualNetworkBigSubnets.bicep' = {
-  name: 'VNet'
-  params: {
-    virtualNetwork_AddressPrefix: '10.0.0.0/8'
-    location: location
-    virtualNetwork_Name: 'VNet'
-  }
-}
-
-module SourceVM '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep'  = [ for i in range(1, numberOfVMs): {
+module SourceVM '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep'  = [ for i in range(startingNumberOfVirtualMachines, endingNumberOfVirtualMachines): {
   name: 'SourceVM-${i}'
   params: {
     acceleratedNetworking: acceleratedNetworking
     location: location
-    subnet_ID: virtualNetwork.outputs.general_SubnetID
+    subnet_ID: subnet_ID
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
-    virtualMachine_Name: 'SourceVM-${i}'
+    virtualMachine_Name: 'VM-${i}'
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    virtualMachine_ScriptFileName: 'ManyVMsRepro_1_of_3.ps1'
-    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File ManyVMsRepro_1_of_3.ps1 -StorageAccountName ${storageAccount.outputs.storageAccount_Name} -StorageAccountKey ${storageAccount.outputs.storageAccount_key0} -ContainerName ${storageAccountContainers.outputs.container_Names[0]} -PrivateEndpointIP 10.1.0.5'
+    virtualMachine_ScriptFileName: 'ManyVMsRepro.ps1'
+    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File ManyVMsRepro.ps1 -SASURI ${blobSASURI} -PrivateEndpointIP 10.1.0.5'
   }
 } ]
-
-module Bastion '../../modules/Microsoft.Network/Bastion.bicep' = {
-  name: 'Bastion'
-  params: {
-    bastion_name: 'Bastion'
-    bastion_SubnetID: virtualNetwork.outputs.bastion_SubnetID
-    location: location
-  }
-}
-
-module storageAccount '../../modules/Microsoft.Storage/StorageAccount.bicep' = {
-  name: 'storageAccount'
-  params: {
-    location: location
-    storageAccount_Name: storageAccount_Name
-  }
-}
-
-module storageAccountContainers '../../modules/Microsoft.Storage/Container.bicep' = {
-  name: 'storageAccountContainers'
-  params: {
-    container_Names: ['results']
-    storageAccount_BlobServices_Name: storageAccount.outputs.storageAccount_BlobServices_Name
-    storageAccount_Name: storageAccount.outputs.storageAccount_Name
-  }
-}
-
-module StorageAccount_Blob_PrivateEndpoint '../../modules/Microsoft.Network/PrivateEndpoint.bicep' = {
-  name: 'StorageAccount_Blob_PrivateEndpoint'
-  params: {
-    groupID: 'blob'
-    location: location
-    privateDNSZone_Name: 'privatelink.blob.${environment().suffixes.storage}'
-    privateEndpoint_Name: '${storageAccount_Name}_blob_pe'
-    privateEndpoint_SubnetID: virtualNetwork.outputs.privateEndpoint_SubnetID
-    privateLinkServiceId: storageAccount.outputs.storageAccount_ID
-    virtualNetwork_IDs: [
-      virtualNetwork.outputs.virtualNetwork_ID
-    ]  
-  }
-}
 

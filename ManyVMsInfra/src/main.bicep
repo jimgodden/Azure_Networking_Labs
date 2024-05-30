@@ -1,25 +1,25 @@
 @description('Azure Datacenter location for the resources')
 param location string = 'eastus'
 
-@description('Username for the admin account of the Virtual Machines')
-param virtualMachine_AdminUsername string
+// @description('Username for the admin account of the Virtual Machines')
+// param virtualMachine_AdminUsername string
 
-@description('Password for the admin account of the Virtual Machines')
-@secure()
-param virtualMachine_AdminPassword string
+// @description('Password for the admin account of the Virtual Machines')
+// @secure()
+// param virtualMachine_AdminPassword string
 
-@description('Size of the Virtual Machines')
-param virtualMachine_Size string = 'Standard_E4d_v5'
+// @description('Size of the Virtual Machines')
+// param virtualMachine_Size string = 'Standard_E4d_v5'
 
-@description('''True enables Accelerated Networking and False disabled it.  
-Not all VM sizes support Accel Net (i.e. Standard_B2ms).  
-I'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net.
-''')
-param acceleratedNetworking bool = true
+// @description('''True enables Accelerated Networking and False disabled it.  
+// Not all VM sizes support Accel Net (i.e. Standard_B2ms).  
+// I'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net.
+// ''')
+// param acceleratedNetworking bool = true
 
-@maxValue(1000)
-@description('Number of Virtual Machines to be used as the source of the traffic')
-param numberOfVMs int = 10
+// @maxValue(1000)
+// @description('Number of Virtual Machines to be used as the source of the traffic')
+// param numberOfVMs int = 10
 
 @description('''
 Storage account name restrictions:
@@ -30,7 +30,7 @@ Storage account name restrictions:
 @maxLength(24)
 param storageAccount_Name string = 'stortemp${uniqueString(resourceGroup().id)}'
 
-var virtualMachine_ScriptFileLocation = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
+// var virtualMachine_ScriptFileLocation = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
 
 
 module virtualNetwork '../../modules/Microsoft.Network/VirtualNetworkBigSubnets.bicep' = {
@@ -42,21 +42,21 @@ module virtualNetwork '../../modules/Microsoft.Network/VirtualNetworkBigSubnets.
   }
 }
 
-module SourceVM '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep'  = [ for i in range(1, numberOfVMs): {
-  name: 'SourceVM-${i}'
-  params: {
-    acceleratedNetworking: acceleratedNetworking
-    location: location
-    subnet_ID: virtualNetwork.outputs.general_SubnetID
-    virtualMachine_AdminPassword: virtualMachine_AdminPassword
-    virtualMachine_AdminUsername: virtualMachine_AdminUsername
-    virtualMachine_Name: 'SourceVM-${i}'
-    virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    virtualMachine_ScriptFileName: 'ManyVMsRepro_1_of_3.ps1'
-    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File ManyVMsRepro_1_of_3.ps1 -StorageAccountName ${storageAccount.outputs.storageAccount_Name} -StorageAccountKey ${storageAccount.outputs.storageAccount_key0} -ContainerName ${storageAccountContainers.outputs.container_Names[0]} -PrivateEndpointIP 10.1.0.5'
-  }
-} ]
+// module SourceVM '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep'  = [ for i in range(1, numberOfVMs): {
+//   name: 'SourceVM-${i}'
+//   params: {
+//     acceleratedNetworking: acceleratedNetworking
+//     location: location
+//     subnet_ID: virtualNetwork.outputs.general_SubnetID
+//     virtualMachine_AdminPassword: virtualMachine_AdminPassword
+//     virtualMachine_AdminUsername: virtualMachine_AdminUsername
+//     virtualMachine_Name: 'SourceVM-${i}'
+//     virtualMachine_Size: virtualMachine_Size
+//     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
+//     virtualMachine_ScriptFileName: 'ManyVMsRepro_1_of_3.ps1'
+//     commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File ManyVMsRepro_1_of_3.ps1 -StorageAccountName ${storageAccount.outputs.storageAccount_Name} -StorageAccountKey ${storageAccount.outputs.storageAccount_key0} -ContainerName ${storageAccountContainers.outputs.container_Names[0]} -PrivateEndpointIP 10.1.0.5'
+//   }
+// } ]
 
 module Bastion '../../modules/Microsoft.Network/Bastion.bicep' = {
   name: 'Bastion'
