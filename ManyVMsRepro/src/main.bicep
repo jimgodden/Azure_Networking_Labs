@@ -2,7 +2,7 @@
 param location string = 'eastus'
 
 @description('Resource ID of the subnet within a Virtual Network')
-param subnet_ID string = '/subscriptions/a2c8e9b2-b8d3-4f38-8a72-642d0012c518/resourceGroups/manyvmsinfra_6/providers/Microsoft.Network/virtualNetworks/VNet/subnets/General'
+param subnet_ID string = ''
 
 @description('Username for the admin account of the Virtual Machines')
 param virtualMachine_AdminUsername string
@@ -22,19 +22,26 @@ param acceleratedNetworking bool = true
 
 @maxValue(1000)
 @description('Number of Virtual Machines to be used as the source of the traffic')
-param startingNumberOfVirtualMachines int = 4
+param startingNumberOfVirtualMachines int = 0
 
 @maxValue(1000)
 @description('Number of Virtual Machines to be used as the source of the traffic')
-param endingNumberOfVirtualMachines int = 5
+param numberOfVirtualMachinesToBeCreated int = 50
 
-@description('SAS URI of a blob from a Storage Account with Upload permissions.')
-param blobSASURI string = 'https://stortempduz4ohpmmi3r2.blob.core.windows.net/results?sp=w&st=2024-05-30T03:41:54Z&se=2024-05-30T11:41:54Z&spr=https&sv=2022-11-02&sr=c&sig=dEYAEuDvd2yySPodd2rh8NDNNmORR%2B4%2FjO2sGka8bug%3D'
+// @description('SAS URI of a blob from a Storage Account with Upload permissions.')
+// param blobSASURI string = ''
+
+param storageAccountName string = ''
+param storageAccountKey0 string = ''
+param storageAccountContainerName string = ''
+param privateEndpointIP string = ''
+
+// param blobEndpointFQDN string = ''
 
 var virtualMachine_ScriptFileLocation = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
 
 
-module SourceVM '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep'  = [ for i in range(startingNumberOfVirtualMachines, endingNumberOfVirtualMachines): {
+module SourceVM '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep'  = [ for i in range(startingNumberOfVirtualMachines, numberOfVirtualMachinesToBeCreated): {
   name: 'SourceVM-${i}'
   params: {
     acceleratedNetworking: acceleratedNetworking
@@ -46,7 +53,8 @@ module SourceVM '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachin
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
     virtualMachine_ScriptFileName: 'ManyVMsRepro.ps1'
-    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File ManyVMsRepro.ps1 -SASURI "${blobSASURI}" -PrivateEndpointIP "10.1.0.5"'
+    // commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File ManyVMsRepro.ps1 -SASURI "${blobSASURI}" -PrivateEndpointIP "${blobEndpointFQDN}"'
+    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File ManyVMsRepro.ps1 -storageAccountName "${storageAccountName}" -storageAccountKey0 "${storageAccountKey0}" -storageAccountContainerName "${storageAccountContainerName}" -PrivateEndpointIP "${privateEndpointIP}"'
   }
 } ]
 

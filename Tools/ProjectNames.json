@@ -36,6 +36,9 @@
     "Name": "Azure_PrivateResolver-Distributed_Sandbox"
   },
   {
+    "Name": "Azure_PrivateResolver-Centralized_Sandbox"
+  },
+  {
     "Name": "Training-PrivateDNSZone"
   },
   {

@@ -20,7 +20,7 @@ param virtualNetwork_AddressPrefix string
 
 param tagValues object = {}
 
-var subnet_AddressRangeCIDRs = [for i in range(0, 255): cidrSubnet(virtualNetwork_AddressPrefix, 16, i) ]
+var subnet_AddressRangeCIDRs = [for i in range(0, 255): cidrSubnet(virtualNetwork_AddressPrefix, 20, i) ]
 
 var subnet_Names = [
   'General'

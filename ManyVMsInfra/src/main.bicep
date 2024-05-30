@@ -36,7 +36,7 @@ param storageAccount_Name string = 'stortemp${uniqueString(resourceGroup().id)}'
 module virtualNetwork '../../modules/Microsoft.Network/VirtualNetworkBigSubnets.bicep' = {
   name: 'VNet'
   params: {
-    virtualNetwork_AddressPrefix: '10.0.0.0/8'
+    virtualNetwork_AddressPrefix: '100.64.0.0/10'
     location: location
     virtualNetwork_Name: 'VNet'
   }
@@ -99,3 +99,9 @@ module StorageAccount_Blob_PrivateEndpoint '../../modules/Microsoft.Network/Priv
   }
 }
 
+output subnetID string = virtualNetwork.outputs.general_SubnetID
+output storageAccountName string = storageAccount.outputs.storageAccount_Name
+output storageAccountKey0 string = storageAccount.outputs.storageAccount_key0
+output storageAccountContainerName string = storageAccountContainers.outputs.container_Names[0]
+output formattedStorageAccountAccessString string = '$ctx = New-AzStorageContext -StorageAccountName "${storageAccount.outputs.storageAccount_Name}" -StorageAccountKey "${storageAccount.outputs.storageAccount_key0}" -Protocol Https'
+output formattedBlobUploadString string = 'Set-AzStorageBlobContent -File "Path/To/Your/File" -Container "${storageAccountContainers.outputs.container_Names[0]}" -Blob "Foldername/YourFileName" -Context $ctx'

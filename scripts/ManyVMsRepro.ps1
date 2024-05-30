@@ -1,5 +1,12 @@
+# param (
+#     [string]$SASURI,
+#     [string]$PrivateEndpointIP
+# )
+
 param (
-    [string]$SASURI,
+    [string]$StorageAccountName,
+    [string]$StorageAccountKey0,
+    [string]$StorageAccountContainerName,
     [string]$PrivateEndpointIP
 )
 
@@ -11,12 +18,14 @@ Import-Module -Name Az.Storage -Force
 
 New-Item -Path C:\ -ItemType Directory -Name "Results"
 
-$uri = [System.Uri] $SASURI
-$storageAccountName = $uri.DnsSafeHost.Split(".")[0]
-$container = $uri.LocalPath.Substring(1)
-$sasToken = $uri.Query
+# $uri = [System.Uri] $SASURI
+# $storageAccountName = $uri.DnsSafeHost.Split(".")[0]
+# $container = $uri.LocalPath.Substring(1)
+# $sasToken = $uri.Query
 
-$storageContext = New-AzStorageContext -StorageAccountName $storageAccountName -SasToken $sasToken
+# $storageContext = New-AzStorageContext -StorageAccountName $storageAccountName -SasToken $sasToken
+
+$storageContext = New-AzStorageContext -StorageAccountName $StorageAccountName -StorageAccountKey $StorageAccountKey0 -Protocol Https
 
 for ($i = 0; $i -lt 10; $i++) {
     $destinationIP = $PrivateEndpointIP
@@ -32,7 +41,8 @@ for ($i = 0; $i -lt 10; $i++) {
         $fileName = "${env:COMPUTERNAME}.txt"
         $filePath = "C:\Results\${fileName}"
         Set-Content -Path $filePath -Value "${env:COMPUTERNAME} failed at $(Get-Date)"
-        Set-AzStorageBlobContent -File $filePath -Container $container -Context $storageContext -Force
+        Set-AzStorageBlobContent -File $filePath -Container $StorageAccountContainerName -Context $storageContext -Force
+        return
     }
 
     $tcpClient.Close()

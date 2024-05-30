@@ -23,6 +23,8 @@ PrivateResolver_Sandbox/iteration.txt
 PrivateResolver_Sandbox/main.parameters.bicepparam
 Azure_PrivateResolver-Distributed_Sandbox/iteration.txt
 Azure_PrivateResolver-Distributed_Sandbox/main.parameters.bicepparam
+Azure_PrivateResolver-Centralized_Sandbox/iteration.txt
+Azure_PrivateResolver-Centralized_Sandbox/main.parameters.bicepparam
 Training-PrivateDNSZone/iteration.txt
 Training-PrivateDNSZone/main.parameters.bicepparam
 Training-PrivateResolver_Centralized/iteration.txt
