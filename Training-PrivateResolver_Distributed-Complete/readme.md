@@ -18,4 +18,3 @@ Azure DNS Private Resolver - [Distributed DNS Architecture](https://learn.micros
 Diagram of the infrastructure
 
 ![Diagram of the infrastructure](diagram.drawio.png)
-

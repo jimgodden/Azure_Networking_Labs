@@ -61,5 +61,8 @@
   },
   {
     "Name": "ManyVMsInfra"
+  },
+  {
+    "Name": "ConnMonTest"
   }
 ]

@@ -41,3 +41,5 @@ ManyVMsRepro/iteration.txt
 ManyVMsRepro/main.parameters.bicepparam
 ManyVMsInfra/iteration.txt
 ManyVMsInfra/main.parameters.bicepparam
+ConnMonTest/iteration.txt
+ConnMonTest/main.parameters.bicepparam

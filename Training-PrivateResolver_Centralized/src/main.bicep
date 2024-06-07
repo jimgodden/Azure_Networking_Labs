@@ -209,3 +209,5 @@ module OnPrem_WinClientVM '../../modules/Microsoft.Compute/WindowsServer2022/Vir
     OnPrem_VirtualNetwork_DnsUpdate
   ]
 }
+
+output deleteScript string = '$rgName = ${resourceGroup().name}; $tag = ${tagValues}'

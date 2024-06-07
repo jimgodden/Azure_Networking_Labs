@@ -81,4 +81,3 @@ resource virtualNetworkLink_File 'Microsoft.Network/privateDnsZones/virtualNetwo
 }]
 
 output privateEndpoint_NetworkInterface_Name string = privateEndpoint.properties.customNetworkInterfaceName
-

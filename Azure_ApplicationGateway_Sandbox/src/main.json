@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.26.54.24096",
-      "templateHash": "16651769391382804308"
+      "version": "0.27.1.19265",
+      "templateHash": "9291503229680273067"
     }
   },
   "parameters": {
@@ -78,8 +78,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.26.54.24096",
-              "templateHash": "8929284134504673363"
+              "version": "0.27.1.19265",
+              "templateHash": "13620256258335063275"
             }
           },
           "parameters": {
@@ -118,6 +118,10 @@
             },
             "virtualNetwork_AddressPrefix": {
               "type": "string"
+            },
+            "tagValues": {
+              "type": "object",
+              "defaultValue": {}
             }
           },
           "variables": {
@@ -305,6 +309,7 @@
                 ],
                 "enableDdosProtection": false
               },
+              "tags": "[parameters('tagValues')]",
               "dependsOn": [
                 "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroup_Default_Name'))]",
                 "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}_NSG_ApplicationGateway', parameters('virtualNetwork_Name')))]",
@@ -318,14 +323,16 @@
               "location": "[parameters('location')]",
               "properties": {
                 "disableBgpRoutePropagation": false
-              }
+              },
+              "tags": "[parameters('tagValues')]"
             },
             {
               "type": "Microsoft.Network/networkSecurityGroups",
               "apiVersion": "2022-09-01",
               "name": "[parameters('networkSecurityGroup_Default_Name')]",
               "location": "[parameters('location')]",
-              "properties": {}
+              "properties": {},
+              "tags": "[parameters('tagValues')]"
             },
             {
               "type": "Microsoft.Network/networkSecurityGroups",
@@ -371,7 +378,8 @@
                     }
                   }
                 ]
-              }
+              },
+              "tags": "[parameters('tagValues')]"
             }
           ],
           "outputs": {
@@ -537,8 +545,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.26.54.24096",
-              "templateHash": "6714683067488481026"
+              "version": "0.27.1.19265",
+              "templateHash": "6229747222239287384"
             }
           },
           "parameters": {
@@ -631,6 +639,10 @@
               "metadata": {
                 "description": "Enter the Static IP Address here if privateIPAllocationMethod is set to Static."
               }
+            },
+            "tagValues": {
+              "type": "object",
+              "defaultValue": {}
             }
           },
           "variables": {
@@ -703,6 +715,7 @@
                   }
                 }
               },
+              "tags": "[parameters('tagValues')]",
               "dependsOn": [
                 "[resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name'))]"
               ]
@@ -718,6 +731,7 @@
                 "type": "NetworkWatcherAgentWindows",
                 "typeHandlerVersion": "1.4"
               },
+              "tags": "[parameters('tagValues')]",
               "dependsOn": [
                 "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachine_Name'))]"
               ]
@@ -727,9 +741,6 @@
               "apiVersion": "2021-11-01",
               "name": "[format('{0}/{1}', parameters('virtualMachine_Name'), 'installcustomscript')]",
               "location": "[parameters('location')]",
-              "tags": {
-                "displayName": "install software for Windows virtualMachine"
-              },
               "properties": {
                 "publisher": "Microsoft.Compute",
                 "type": "CustomScriptExtension",
@@ -744,6 +755,7 @@
                   "commandToExecute": "[parameters('commandToExecute')]"
                 }
               },
+              "tags": "[parameters('tagValues')]",
               "dependsOn": [
                 "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachine_Name'))]"
               ]
@@ -778,6 +790,9 @@
                   },
                   "privateIPAddress": {
                     "value": "[parameters('privateIPAddress')]"
+                  },
+                  "tagValues": {
+                    "value": "[parameters('tagValues')]"
                   }
                 },
                 "template": {
@@ -786,8 +801,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.26.54.24096",
-                      "templateHash": "8478081662235371654"
+                      "version": "0.27.1.19265",
+                      "templateHash": "13708112360299910000"
                     }
                   },
                   "parameters": {
@@ -836,6 +851,10 @@
                       "metadata": {
                         "description": "Adds a Public IP to the Network Interface of the Virtual Machine if true."
                       }
+                    },
+                    "tagValues": {
+                      "type": "object",
+                      "defaultValue": {}
                     }
                   },
                   "resources": [
@@ -864,7 +883,8 @@
                         "enableIPForwarding": false,
                         "disableTcpStateTracking": false,
                         "nicType": "Standard"
-                      }
+                      },
+                      "tags": "[parameters('tagValues')]"
                     },
                     {
                       "condition": "[parameters('addPublicIPAddress')]",
@@ -895,6 +915,7 @@
                         "disableTcpStateTracking": false,
                         "nicType": "Standard"
                       },
+                      "tags": "[parameters('tagValues')]",
                       "dependsOn": [
                         "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP', parameters('networkInterface_Name')))]"
                       ]
@@ -914,7 +935,8 @@
                         "publicIPAllocationMethod": "Static",
                         "idleTimeoutInMinutes": 4,
                         "ipTags": []
-                      }
+                      },
+                      "tags": "[parameters('tagValues')]"
                     }
                   ],
                   "outputs": {
@@ -1019,8 +1041,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.26.54.24096",
-              "templateHash": "4233971658434384310"
+              "version": "0.27.1.19265",
+              "templateHash": "5585245373760734498"
             }
           },
           "parameters": {
@@ -1064,6 +1086,10 @@
               "metadata": {
                 "description": "FQDN of the website in the backend pool of the Application Gateway"
               }
+            },
+            "tagValues": {
+              "type": "object",
+              "defaultValue": {}
             }
           },
           "variables": {
@@ -1106,7 +1132,8 @@
                   ],
                   "exclusions": []
                 }
-              }
+              },
+              "tags": "[parameters('tagValues')]"
             },
             {
               "type": "Microsoft.Network/publicIPAddresses",
@@ -1122,7 +1149,8 @@
                 "publicIPAllocationMethod": "Static",
                 "idleTimeoutInMinutes": 4,
                 "ipTags": []
-              }
+              },
+              "tags": "[parameters('tagValues')]"
             },
             {
               "type": "Microsoft.Network/applicationGateways",
@@ -1256,6 +1284,7 @@
                   "id": "[resourceId('Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies', parameters('applicationGatewayWAF_Name'))]"
                 }
               },
+              "tags": "[parameters('tagValues')]",
               "dependsOn": [
                 "[resourceId('Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies', parameters('applicationGatewayWAF_Name'))]",
                 "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIP_ApplicationGateway_Name'))]"
@@ -1309,8 +1338,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.26.54.24096",
-              "templateHash": "3437426767852386957"
+              "version": "0.27.1.19265",
+              "templateHash": "6156074762068005849"
             }
           },
           "parameters": {
@@ -1343,6 +1372,10 @@
               "metadata": {
                 "description": "Subnet ID of the Subnet that the App Service will be vnet injected into"
               }
+            },
+            "tagValues": {
+              "type": "object",
+              "defaultValue": {}
             }
           },
           "variables": {
@@ -1373,7 +1406,8 @@
                 "targetWorkerCount": 0,
                 "targetWorkerSizeId": 0,
                 "zoneRedundant": false
-              }
+              },
+              "tags": "[parameters('tagValues')]"
             },
             {
               "type": "Microsoft.Web/sites/basicPublishingCredentialsPolicies",
@@ -1541,6 +1575,7 @@
                 "virtualNetworkSubnetId": "[parameters('appServiceSubnet_ID')]",
                 "keyVaultReferenceIdentity": "SystemAssigned"
               },
+              "tags": "[parameters('tagValues')]",
               "dependsOn": [
                 "[resourceId('Microsoft.Web/serverfarms', parameters('appServicePlan_Name'))]"
               ]
@@ -1598,8 +1633,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.26.54.24096",
-              "templateHash": "1982908953667930081"
+              "version": "0.27.1.19265",
+              "templateHash": "12857053651702160797"
             }
           },
           "parameters": {
@@ -1610,6 +1645,10 @@
               "type": "bool",
               "defaultValue": false
             },
+            "tagValues": {
+              "type": "object",
+              "defaultValue": {}
+            },
             "virtualNetworkIDs": {
               "type": "array"
             }
@@ -1619,7 +1658,8 @@
               "type": "Microsoft.Network/privateDnsZones",
               "apiVersion": "2020-06-01",
               "name": "[parameters('privateDNSZone_Name')]",
-              "location": "global"
+              "location": "global",
+              "tags": "[parameters('tagValues')]"
             },
             {
               "copy": {
@@ -1636,6 +1676,7 @@
                   "id": "[parameters('virtualNetworkIDs')[copyIndex()]]"
                 }
               },
+              "tags": "[parameters('tagValues')]",
               "dependsOn": [
                 "[resourceId('Microsoft.Network/privateDnsZones', parameters('privateDNSZone_Name'))]"
               ]
@@ -1679,8 +1720,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.26.54.24096",
-              "templateHash": "7931216883459364233"
+              "version": "0.27.1.19265",
+              "templateHash": "4470620727353681823"
             }
           },
           "parameters": {
@@ -1779,8 +1820,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.26.54.24096",
-              "templateHash": "6714683067488481026"
+              "version": "0.27.1.19265",
+              "templateHash": "6229747222239287384"
             }
           },
           "parameters": {
@@ -1873,6 +1914,10 @@
               "metadata": {
                 "description": "Enter the Static IP Address here if privateIPAllocationMethod is set to Static."
               }
+            },
+            "tagValues": {
+              "type": "object",
+              "defaultValue": {}
             }
           },
           "variables": {
@@ -1945,6 +1990,7 @@
                   }
                 }
               },
+              "tags": "[parameters('tagValues')]",
               "dependsOn": [
                 "[resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name'))]"
               ]
@@ -1960,6 +2006,7 @@
                 "type": "NetworkWatcherAgentWindows",
                 "typeHandlerVersion": "1.4"
               },
+              "tags": "[parameters('tagValues')]",
               "dependsOn": [
                 "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachine_Name'))]"
               ]
@@ -1969,9 +2016,6 @@
               "apiVersion": "2021-11-01",
               "name": "[format('{0}/{1}', parameters('virtualMachine_Name'), 'installcustomscript')]",
               "location": "[parameters('location')]",
-              "tags": {
-                "displayName": "install software for Windows virtualMachine"
-              },
               "properties": {
                 "publisher": "Microsoft.Compute",
                 "type": "CustomScriptExtension",
@@ -1986,6 +2030,7 @@
                   "commandToExecute": "[parameters('commandToExecute')]"
                 }
               },
+              "tags": "[parameters('tagValues')]",
               "dependsOn": [
                 "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachine_Name'))]"
               ]
@@ -2020,6 +2065,9 @@
                   },
                   "privateIPAddress": {
                     "value": "[parameters('privateIPAddress')]"
+                  },
+                  "tagValues": {
+                    "value": "[parameters('tagValues')]"
                   }
                 },
                 "template": {
@@ -2028,8 +2076,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.26.54.24096",
-                      "templateHash": "8478081662235371654"
+                      "version": "0.27.1.19265",
+                      "templateHash": "13708112360299910000"
                     }
                   },
                   "parameters": {
@@ -2078,6 +2126,10 @@
                       "metadata": {
                         "description": "Adds a Public IP to the Network Interface of the Virtual Machine if true."
                       }
+                    },
+                    "tagValues": {
+                      "type": "object",
+                      "defaultValue": {}
                     }
                   },
                   "resources": [
@@ -2106,7 +2158,8 @@
                         "enableIPForwarding": false,
                         "disableTcpStateTracking": false,
                         "nicType": "Standard"
-                      }
+                      },
+                      "tags": "[parameters('tagValues')]"
                     },
                     {
                       "condition": "[parameters('addPublicIPAddress')]",
@@ -2137,6 +2190,7 @@
                         "disableTcpStateTracking": false,
                         "nicType": "Standard"
                       },
+                      "tags": "[parameters('tagValues')]",
                       "dependsOn": [
                         "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP', parameters('networkInterface_Name')))]"
                       ]
@@ -2156,7 +2210,8 @@
                         "publicIPAllocationMethod": "Static",
                         "idleTimeoutInMinutes": 4,
                         "ipTags": []
-                      }
+                      },
+                      "tags": "[parameters('tagValues')]"
                     }
                   ],
                   "outputs": {
@@ -2272,8 +2327,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.26.54.24096",
-              "templateHash": "10589466410935484420"
+              "version": "0.27.1.19265",
+              "templateHash": "10304099176932813497"
             }
           },
           "parameters": {
@@ -2357,6 +2412,10 @@
             },
             "commandToExecute": {
               "type": "string"
+            },
+            "tagValues": {
+              "type": "object",
+              "defaultValue": {}
             }
           },
           "variables": {
@@ -2419,6 +2478,7 @@
                   }
                 }
               },
+              "tags": "[parameters('tagValues')]",
               "dependsOn": [
                 "[resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name'))]"
               ]
@@ -2434,6 +2494,7 @@
                 "type": "NetworkWatcherAgentLinux",
                 "typeHandlerVersion": "1.4"
               },
+              "tags": "[parameters('tagValues')]",
               "dependsOn": [
                 "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachine_Name'))]"
               ]
@@ -2443,9 +2504,6 @@
               "apiVersion": "2021-11-01",
               "name": "[format('{0}/{1}', parameters('virtualMachine_Name'), 'installcustomscript')]",
               "location": "[parameters('location')]",
-              "tags": {
-                "displayName": "install software for Linux VM"
-              },
               "properties": {
                 "publisher": "Microsoft.Azure.Extensions",
                 "type": "CustomScript",
@@ -2460,6 +2518,7 @@
                   "commandToExecute": "[parameters('commandToExecute')]"
                 }
               },
+              "tags": "[parameters('tagValues')]",
               "dependsOn": [
                 "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachine_Name'))]"
               ]
@@ -2491,6 +2550,9 @@
                   },
                   "privateIPAllocationMethod": {
                     "value": "[parameters('privateIPAllocationMethod')]"
+                  },
+                  "tagValues": {
+                    "value": "[parameters('tagValues')]"
                   }
                 },
                 "template": {
@@ -2499,8 +2561,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.26.54.24096",
-                      "templateHash": "8478081662235371654"
+                      "version": "0.27.1.19265",
+                      "templateHash": "13708112360299910000"
                     }
                   },
                   "parameters": {
@@ -2549,6 +2611,10 @@
                       "metadata": {
                         "description": "Adds a Public IP to the Network Interface of the Virtual Machine if true."
                       }
+                    },
+                    "tagValues": {
+                      "type": "object",
+                      "defaultValue": {}
                     }
                   },
                   "resources": [
@@ -2577,7 +2643,8 @@
                         "enableIPForwarding": false,
                         "disableTcpStateTracking": false,
                         "nicType": "Standard"
-                      }
+                      },
+                      "tags": "[parameters('tagValues')]"
                     },
                     {
                       "condition": "[parameters('addPublicIPAddress')]",
@@ -2608,6 +2675,7 @@
                         "disableTcpStateTracking": false,
                         "nicType": "Standard"
                       },
+                      "tags": "[parameters('tagValues')]",
                       "dependsOn": [
                         "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP', parameters('networkInterface_Name')))]"
                       ]
@@ -2627,7 +2695,8 @@
                         "publicIPAllocationMethod": "Static",
                         "idleTimeoutInMinutes": 4,
                         "ipTags": []
-                      }
+                      },
+                      "tags": "[parameters('tagValues')]"
                     }
                   ],
                   "outputs": {
@@ -2718,8 +2787,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.26.54.24096",
-              "templateHash": "8619796571247764854"
+              "version": "0.27.1.19265",
+              "templateHash": "11394564574041274025"
             }
           },
           "parameters": {
@@ -2751,6 +2820,10 @@
               "metadata": {
                 "description": "SKU of the Azure Bastion"
               }
+            },
+            "tagValues": {
+              "type": "object",
+              "defaultValue": {}
             }
           },
           "resources": [
@@ -2783,6 +2856,7 @@
                   }
                 ]
               },
+              "tags": "[parameters('tagValues')]",
               "dependsOn": [
                 "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_VIP', parameters('bastion_name')))]"
               ]
@@ -2801,7 +2875,8 @@
                 "publicIPAllocationMethod": "Static",
                 "idleTimeoutInMinutes": 4,
                 "ipTags": []
-              }
+              },
+              "tags": "[parameters('tagValues')]"
             }
           ]
         }

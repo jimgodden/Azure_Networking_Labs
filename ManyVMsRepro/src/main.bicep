@@ -28,15 +28,10 @@ param startingNumberOfVirtualMachines int = 0
 @description('Number of Virtual Machines to be used as the source of the traffic')
 param numberOfVirtualMachinesToBeCreated int = 50
 
-// @description('SAS URI of a blob from a Storage Account with Upload permissions.')
-// param blobSASURI string = ''
-
 param storageAccountName string = ''
 param storageAccountKey0 string = ''
 param storageAccountContainerName string = ''
 param privateEndpointIP string = ''
-
-// param blobEndpointFQDN string = ''
 
 var virtualMachine_ScriptFileLocation = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
 
@@ -53,8 +48,6 @@ module SourceVM '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachin
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
     virtualMachine_ScriptFileName: 'ManyVMsRepro.ps1'
-    // commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File ManyVMsRepro.ps1 -SASURI "${blobSASURI}" -PrivateEndpointIP "${blobEndpointFQDN}"'
     commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File ManyVMsRepro.ps1 -storageAccountName "${storageAccountName}" -storageAccountKey0 "${storageAccountKey0}" -storageAccountContainerName "${storageAccountContainerName}" -PrivateEndpointIP "${privateEndpointIP}"'
   }
 } ]
-

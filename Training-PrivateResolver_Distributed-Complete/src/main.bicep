@@ -184,3 +184,5 @@ module PrivateDNSZone_AzureVMsDotCom '../../modules/Microsoft.Network/PrivateDNS
     tagValues: tagValues
   }
 }
+
+output deleteScript string = '$rgName = ${resourceGroup().name}; $tag = ${tagValues}'

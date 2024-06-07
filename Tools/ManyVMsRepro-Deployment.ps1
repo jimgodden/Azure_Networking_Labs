@@ -11,11 +11,13 @@ Write-Host "Process finished at: $(Get-Date -Format "HH:mm K")"
 
 # Set-AzStorageAccount -ResourceGroupName $rgName -Name $infraDeployment.Outputs.storageAccountName.Value -AllowBlobPublicAccess $true
 
+
+
 $subnet_ID = $infraDeployment.Outputs.subnetID.value
 $storageAccountName = $infraDeployment.Outputs.storageAccountName.Value
 $storageAccountKey0 = $infraDeployment.Outputs.storageAccountKey0.Value
 $StorageAccountContainerName = $infraDeployment.Outputs.storageAccountContainerName.Value
-$privateEndpointIP = $infraDeployment.Outputs.storageAccountName.Value + ".blo.core.windows.net"
+$privateEndpointIP = $infraDeployment.Outputs.storageAccountName.Value + ".blob.core.windows.net"
 
 $location = "eastus"
 $TemplateFile = "C:\Users\jamesgodden\OneDrive - Microsoft\Programming\Azure_Networking_Labs\ManyVMsRepro\src\main.bicep"
@@ -40,7 +42,7 @@ for ($i = 0; $i -lt 450; $i+=50) {
 
 # Gets all Azure Resource Groups with the name Sandbox and removes them without waiting for the finish
 # $rgs = Get-AzResourceGroup -Name Repro-VMs*
-$rgs = Get-AzResourceGroup -Name Repro-VMs*
+$rgs = Get-AzResourceGroup -Name Repro-*
 
 foreach ($rg in $rgs) {
     $rgName = $rg.ResourceGroupName
