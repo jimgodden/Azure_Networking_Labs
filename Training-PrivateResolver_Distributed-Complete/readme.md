@@ -4,7 +4,7 @@
 
 The link below can be used to quickly deploy the lab directly to your subscription.
 
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjimgodden%2FAzure_Networking_Labs%2F%2FTraining-PrivateResolver_Distributed-Complete%2Fsrc%2Fmain.json)
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjimgodden%2FAzure_Networking_Labs%2Fmain%2FTraining-PrivateResolver_Distributed-Complete%2Fsrc%2Fmain.json)
 
 Average time to deploy: 8 minutes
 

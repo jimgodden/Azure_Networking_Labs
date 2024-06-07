@@ -1,8 +1,9 @@
 # Creates an empty Bicep deployment with all of the needed files to get started quickly.
 
 param(
-    
+    [Parameter(Mandatory)]
     [string]$ProjectName,
+    [Parameter(Mandatory)]
     [string]$BranchName
 )
 

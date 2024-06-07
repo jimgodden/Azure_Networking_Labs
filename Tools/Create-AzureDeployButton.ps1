@@ -1,5 +1,7 @@
 param(
+    [Parameter(Mandatory)]
     [string]$BranchName = "main",
+    [Parameter(Mandatory)]
     [string]$DirectoryName
 )
 
