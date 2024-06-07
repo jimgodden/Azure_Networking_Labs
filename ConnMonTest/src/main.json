@@ -5,15 +5,29 @@
     "_generator": {
       "name": "bicep",
       "version": "0.27.1.19265",
-      "templateHash": "9177748625294360389"
+      "templateHash": "17208678341694779483"
     }
   },
   "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "eastus2",
+      "metadata": {
+        "description": "Location of the connection monitor.  Should be created in the same region as the Virtual Machine."
+      }
+    },
     "srcEndpointVmResource_Id": {
-      "type": "string"
+      "type": "string",
+      "metadata": {
+        "description": "Resource Id of a Virtual Machine to use as a source Endpoint.  Must have the Network Watcher extension installed."
+      }
     },
     "uniqueIdentifier": {
-      "type": "string"
+      "type": "string",
+      "defaultValue": "test",
+      "metadata": {
+        "description": "Unique Identifier that can be used if running this test multiple times.  This is optional."
+      }
     }
   },
   "resources": [
@@ -66,7 +80,7 @@
           }
         ]
       },
-      "location": "eastus2"
+      "location": "[parameters('location')]"
     }
   ]
 }

@@ -1,6 +1,11 @@
+@description('Location of the connection monitor.  Should be created in the same region as the Virtual Machine.')
+param location string = 'eastus2'
+
+@description('Resource Id of a Virtual Machine to use as a source Endpoint.  Must have the Network Watcher extension installed.')
 param srcEndpointVmResource_Id string
 
-param uniqueIdentifier string
+@description('Unique Identifier that can be used if running this test multiple times.  This is optional.')
+param uniqueIdentifier string = 'test'
 
 resource connmon 'Microsoft.Network/networkWatchers/connectionMonitors@2023-11-01' = {
   name: 'NetworkWatcher_eastus2/${uniqueIdentifier}connmon'
@@ -56,5 +61,5 @@ resource connmon 'Microsoft.Network/networkWatchers/connectionMonitors@2023-11-0
       }
     ]
   }
-  location: 'eastus2'
+  location: location
 }
