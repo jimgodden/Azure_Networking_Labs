@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.27.1.19265",
-      "templateHash": "7107283927239282401"
+      "templateHash": "8549480963268207323"
     }
   },
   "parameters": {
@@ -538,7 +538,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.27.1.19265",
-              "templateHash": "6229747222239287384"
+              "templateHash": "16559789963094496200"
             }
           },
           "parameters": {
@@ -966,6 +966,10 @@
               "type": "string",
               "value": "[parameters('virtualMachine_Name')]"
             },
+            "virtualMachine_Id": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachine_Name'))]"
+            },
             "networkInterface_Name": {
               "type": "string",
               "value": "[reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2022-09-01').outputs.networkInterface_Name.value]"
@@ -1121,5 +1125,11 @@
         "[resourceId('Microsoft.Resources/deployments', 'vnet')]"
       ]
     }
-  ]
+  ],
+  "outputs": {
+    "vmResourceId": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Resources/deployments', 'winVM'), '2022-09-01').outputs.virtualMachine_Id.value]"
+    }
+  }
 }

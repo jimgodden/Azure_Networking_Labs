@@ -175,6 +175,7 @@ resource virtualMachine_CustomScriptExtension 'Microsoft.Compute/virtualMachines
 }
 
 output virtualMachine_Name string = virtualMachine_Windows.name
+output virtualMachine_Id string = virtualMachine_Windows.id
 
 output networkInterface_Name string = networkInterface.outputs.networkInterface_Name
 output networkInterface_ID string = networkInterface.outputs.networkInterface_ID

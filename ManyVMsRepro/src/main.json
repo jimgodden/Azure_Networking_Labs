@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.27.1.19265",
-      "templateHash": "9451067334081333558"
+      "templateHash": "5314553179345970763"
     }
   },
   "parameters": {
@@ -138,7 +138,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.27.1.19265",
-              "templateHash": "6229747222239287384"
+              "templateHash": "16559789963094496200"
             }
           },
           "parameters": {
@@ -565,6 +565,10 @@
             "virtualMachine_Name": {
               "type": "string",
               "value": "[parameters('virtualMachine_Name')]"
+            },
+            "virtualMachine_Id": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachine_Name'))]"
             },
             "networkInterface_Name": {
               "type": "string",

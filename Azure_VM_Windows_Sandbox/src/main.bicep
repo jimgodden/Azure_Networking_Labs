@@ -52,3 +52,5 @@ module bastion '../../modules/Microsoft.Network/Bastion.bicep' = {
     location: location
   }
 }
+
+output vmResourceId string = virtualMachine_Windows.outputs.virtualMachine_Id

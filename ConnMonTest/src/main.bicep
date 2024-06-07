@@ -1,13 +1,15 @@
+param srcEndpointVmResource_Id string
 
-@description('Generated from /subscriptions/1a283126-08f5-4fff-8784-19fe92c7422e/resourceGroups/networkwatcherrg/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus2/connectionMonitors/portalconnmon')
-resource bicepconnmon 'Microsoft.Network/networkWatchers/connectionMonitors@2023-11-01' = {
-  name: 'NetworkWatcher_eastus2/bicepconnmon'
+param uniqueIdentifier string
+
+resource connmon 'Microsoft.Network/networkWatchers/connectionMonitors@2023-11-01' = {
+  name: 'NetworkWatcher_eastus2/${uniqueIdentifier}connmon'
   properties: {
     endpoints: [
       {
-        name: 'winVM(Azure_VM_Windows_Sandbox_16)'
+        name: '${last(split(srcEndpointVmResource_Id, '/'))}(${split(srcEndpointVmResource_Id, '/')[3]})'
         type: 'AzureVM'
-        resourceId: '/subscriptions/1a283126-08f5-4fff-8784-19fe92c7422e/resourceGroups/Azure_VM_Windows_Sandbox_16/providers/Microsoft.Compute/virtualMachines/winVM'
+        resourceId: srcEndpointVmResource_Id
       }
       {
         name: '8.8.8.8'
@@ -17,7 +19,7 @@ resource bicepconnmon 'Microsoft.Network/networkWatchers/connectionMonitors@2023
     ]
     testConfigurations: [
       {
-        name: 'biceptestconfig'
+        name: '${uniqueIdentifier}testconfig'
         testFrequencySec: 60
         protocol: 'Tcp'
         tcpConfiguration: {
@@ -32,13 +34,13 @@ resource bicepconnmon 'Microsoft.Network/networkWatchers/connectionMonitors@2023
     ]
     testGroups: [
       {
-        name: 'biceptestgroup'
+        name: '${uniqueIdentifier}testgroup'
         disable: false
         testConfigurations: [
-          'biceptestconfig'
+          '${uniqueIdentifier}testconfig'
         ]
         sources: [
-          'winVM(Azure_VM_Windows_Sandbox_16)'
+          '${last(split(srcEndpointVmResource_Id, '/'))}(${split(srcEndpointVmResource_Id, '/')[3]})'
         ]
         destinations: [
           '8.8.8.8'
@@ -48,9 +50,9 @@ resource bicepconnmon 'Microsoft.Network/networkWatchers/connectionMonitors@2023
     outputs: [
       {
         type: 'Workspace'
-        workspaceSettings: {
-          workspaceResourceId: '/subscriptions/1a283126-08f5-4fff-8784-19fe92c7422e/resourceGroups/DefaultResourceGroup-EUS2/providers/Microsoft.OperationalInsights/workspaces/DefaultWorkspace-1a283126-08f5-4fff-8784-19fe92c7422e-EUS2'
-        }
+        // workspaceSettings: {
+        //   workspaceResourceId: '/subscriptions/1a283126-08f5-4fff-8784-19fe92c7422e/resourceGroups/DefaultResourceGroup-EUS2/providers/Microsoft.OperationalInsights/workspaces/DefaultWorkspace-1a283126-08f5-4fff-8784-19fe92c7422e-EUS2'
+        // }
       }
     ]
   }

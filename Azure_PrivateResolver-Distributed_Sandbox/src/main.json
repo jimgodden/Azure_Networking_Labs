@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.27.1.19265",
-      "templateHash": "1543617110985900303"
+      "templateHash": "10153038044457124261"
     }
   },
   "parameters": {
@@ -1572,7 +1572,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.27.1.19265",
-              "templateHash": "6229747222239287384"
+              "templateHash": "16559789963094496200"
             }
           },
           "parameters": {
@@ -1999,6 +1999,10 @@
             "virtualMachine_Name": {
               "type": "string",
               "value": "[parameters('virtualMachine_Name')]"
+            },
+            "virtualMachine_Id": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachine_Name'))]"
             },
             "networkInterface_Name": {
               "type": "string",
@@ -2079,7 +2083,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.27.1.19265",
-              "templateHash": "6229747222239287384"
+              "templateHash": "16559789963094496200"
             }
           },
           "parameters": {
@@ -2506,6 +2510,10 @@
             "virtualMachine_Name": {
               "type": "string",
               "value": "[parameters('virtualMachine_Name')]"
+            },
+            "virtualMachine_Id": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachine_Name'))]"
             },
             "networkInterface_Name": {
               "type": "string",
@@ -2587,7 +2595,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.27.1.19265",
-              "templateHash": "6229747222239287384"
+              "templateHash": "16559789963094496200"
             }
           },
           "parameters": {
@@ -3014,6 +3022,10 @@
             "virtualMachine_Name": {
               "type": "string",
               "value": "[parameters('virtualMachine_Name')]"
+            },
+            "virtualMachine_Id": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachine_Name'))]"
             },
             "networkInterface_Name": {
               "type": "string",
