@@ -26,12 +26,6 @@ Storage account name restrictions:
 @maxLength(24)
 param storageAccount_Name string = 'storagedns${uniqueString(resourceGroup().id)}'
 
-@description('''DNS Zone to be hosted On Prem and with a forwarding rule on the DNS Private Resolver.
-Must end with a period (.)
-Example:
-contoso.com.''')
-param onpremResolvableDomainName string = 'contoso.com.'
-
 @description('VPN Shared Key used for authenticating VPN connections')
 @secure()
 param vpn_SharedKey string
