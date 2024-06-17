@@ -87,8 +87,8 @@ module Hub_WinDnsVm '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMa
     virtualMachine_Name: 'Hub-WinDns'
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_DNS.ps1'
-    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username ${virtualMachine_AdminUsername}'
+    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_DNS-Training.ps1'
+    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS-Training.ps1 -Username ${virtualMachine_AdminUsername}'
     privateIPAddress: cidrHost( Hub_VirtualNetwork.outputs.general_Subnet_AddressPrefix, 3 )
     privateIPAllocationMethod: 'Static'
     tagValues: tagValues
@@ -246,8 +246,8 @@ module OnPrem_WinDnsVm '../../modules/Microsoft.Compute/WindowsServer2022/Virtua
     virtualMachine_Name: 'OnPrem-WinDns'
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_DNS.ps1'
-    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username ${virtualMachine_AdminUsername} -SampleDNSZoneName ${onpremResolvableDomainName} -SampleARecord ${cidrHost( OnPrem_VirtualNetwork.outputs.general_Subnet_AddressPrefix, 4 )}'
+    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_DNS-Training.ps1'
+    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS-Training.ps1 -Username ${virtualMachine_AdminUsername} -SampleDNSZoneName ${onpremResolvableDomainName} -SampleARecord ${cidrHost( OnPrem_VirtualNetwork.outputs.general_Subnet_AddressPrefix, 4 )}'
     privateIPAddress: cidrHost( OnPrem_VirtualNetwork.outputs.general_Subnet_AddressPrefix, 3 )
     privateIPAllocationMethod: 'Static'
     tagValues: tagValues
