@@ -64,11 +64,11 @@ After completing the steps above, you will need to restart the ClientVMs for the
 Once everything above is complete, you can validate by running the following PowerShell commands on both OnPrem-WinClien and Spoke-WinClient:
  
 Resolve-DNSName contoso.com  
-Resolve-DNSName spoke-winiis.azure-contoso.com  
+Resolve-DNSName Spoke-WinClient.azure-contoso.com  
 Resolve-DNSName \<Name of the Storage Account\>.blob.core.windows.net  
  
 You should get the following results
  
 contoso.com - 10.100.0.6  
-spoke-winiis.azure-contoso.com - 10.1.0.4  
+Spoke-WinClient.azure-contoso.com - 10.1.0.4  
 \<Name of the Storage Account\>.blob.core.windows.net - 10.0.1.4  
