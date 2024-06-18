@@ -43,3 +43,5 @@ ManyVMsInfra/iteration.txt
 ManyVMsInfra/main.parameters.bicepparam
 ConnMonTest/iteration.txt
 ConnMonTest/main.parameters.bicepparam
+Training-Azure_DNS/iteration.txt
+Training-Azure_DNS/main.parameters.bicepparam

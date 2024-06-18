@@ -64,5 +64,8 @@
   },
   {
     "Name": "ConnMonTest"
+  },
+  {
+    "Name": "Training-Azure_DNS"
   }
 ]
