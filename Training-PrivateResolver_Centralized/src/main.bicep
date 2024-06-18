@@ -24,13 +24,7 @@ Storage account name restrictions:
 ''')
 @minLength(3)
 @maxLength(24)
-param storageAccount_Name string = 'storagedns${uniqueString(resourceGroup().id)}'
-
-@description('''DNS Zone to be hosted On Prem and with a forwarding rule on the DNS Private Resolver.
-Must end with a period (.)
-Example:
-contoso.com.''')
-param onpremResolvableDomainName string = 'contoso.com.'
+param storageAccount_Name string
 
 param tagValues object = {
   Training: 'PrivateResolver_Centralized'
@@ -155,20 +149,6 @@ module OnPrem_VirtualNetwork '../../modules/Microsoft.Network/VirtualNetwork.bic
   }
 }
 
-// Updates the VNET to use the OnPrem-WinDNS VM's IP for DNS resolution after the VM has been created
-module OnPrem_VirtualNetwork_DnsUpdate '../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
-  name: 'OnPrem_VNet_Dns_Update'
-  params: {
-    virtualNetwork_AddressPrefix: '10.100.0.0/16'
-    dnsServers: [
-      OnPrem_WinDnsVm.outputs.networkInterface_PrivateIPAddress
-    ]
-    location: location
-    virtualNetwork_Name: 'OnPrem_VNet'
-    tagValues: tagValues
-  }
-}
-
 module OnPrem_WinDnsVm '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
   name: 'OnPremWinDNS'
   params: {
@@ -180,8 +160,8 @@ module OnPrem_WinDnsVm '../../modules/Microsoft.Compute/WindowsServer2022/Virtua
     virtualMachine_Name: 'OnPrem-WinDns'
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_DNS.ps1'
-    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username ${virtualMachine_AdminUsername} -SampleDNSZoneName ${onpremResolvableDomainName} -SampleARecord ${cidrHost( OnPrem_VirtualNetwork.outputs.general_Subnet_AddressPrefix, 4 )}'
+    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_General.ps1'
+    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_General.ps1 -Username ${virtualMachine_AdminUsername}'
     privateIPAddress: cidrHost( OnPrem_VirtualNetwork.outputs.general_Subnet_AddressPrefix, 3 )
     privateIPAllocationMethod: 'Static'
     tagValues: tagValues
@@ -205,9 +185,6 @@ module OnPrem_WinClientVM '../../modules/Microsoft.Compute/WindowsServer2022/Vir
     privateIPAllocationMethod: 'Static'
     tagValues: tagValues
   }
-  dependsOn: [
-    OnPrem_VirtualNetwork_DnsUpdate
-  ]
 }
 
 output deleteScript string = '$rgName = ${resourceGroup().name}; $tag = ${tagValues}'
