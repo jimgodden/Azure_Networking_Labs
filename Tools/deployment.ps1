@@ -5,6 +5,18 @@ param(
     [string]$DeploymentName
 )
 
+# Specifies the account and subscription where the deployment will take place.
+Try {
+    if (!$subID) {
+        $subID = Read-Host "Please enter the Subscription ID that you want to deploy this Resource Group to: "
+    }
+}
+Catch { Write-Host "No Resource Group of name '${rgName}' exists." }
+# if (!$subID) {
+#     $subID = Read-Host "Please enter the Subscription ID that you want to deploy this Resource Group to: "
+# }
+Set-AzContext -Subscription $subID -Tenant $tenantID
+
 $deploymentFilePath = ".\${DeploymentName}\"
 $mainBicepFile = "${deploymentFilePath}src\main.bicep"
 $mainParameterFile = "${deploymentFilePath}main.parameters.bicepparam"
@@ -56,18 +68,6 @@ else {
     $iteration = [int](Get-Content $iterationFile)
     $rgName = "${DeploymentName}_${iteration}"
 }
-
-# Specifies the account and subscription where the deployment will take place.
-Try {
-    if (!$subID) {
-        $subID = Read-Host "Please enter the Subscription ID that you want to deploy this Resource Group to: "
-    }
-}
-Catch { Write-Host "No Resource Group of name '${rgName}' exists." }
-# if (!$subID) {
-#     $subID = Read-Host "Please enter the Subscription ID that you want to deploy this Resource Group to: "
-# }
-Set-AzContext -Subscription $subID -Tenant $tenantID
 
 Write-Host "`nCreating Resource Group ${rgName}"
 New-AzResourceGroup -Name $rgName -Location $location

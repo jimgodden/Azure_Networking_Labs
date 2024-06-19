@@ -40,12 +40,12 @@ Diagram of the infrastructure
 
 1. Configure OnPrem-WinDns as a custom Windows DNS Server
 2. Create a Forwarder in the OnPrem-WinDns custom DNS Server for 168.63.129.16
-4. Create a Forward Lookup Zone in the OnPrem-WinDns custom DNS Server for "contoso.com"
+3. Create a Forward Lookup Zone in the OnPrem-WinDns custom DNS Server for "contoso.com"
     1. Add an A Record for contoso.com with the value "10.100.0.6"
-2. Create a Private DNS Zone named privatelink.blob.core.windows.net for the Storage Account's Blob Private Endpoint
+4. Create a Private DNS Zone named privatelink.blob.core.windows.net for the Storage Account's Blob Private Endpoint
     1. Link the Private DNS Zone to the Hub_VNET
     2. Link the Private Endpoint to the Private DNS Zone
-3. Create a Private DNS Zone named "azure-contoso.com"
+5. Create a Private DNS Zone named "azure-contoso.com"
     1. Link the Private DNS Zone to the Hub_VNET and Spoke_VNET
         1. Enable registration for both VNETs listed above
 6. Create a Private DNS Resolver in the Hub_VNET
@@ -53,22 +53,21 @@ Diagram of the infrastructure
     2. Create an Outbound Endpoint in the DNS Private Resolver in the PrivateResolver_Outbound subnet
         1. Within the Outbound Endpoint, create a rule to forward queries for contoso.com. to OnPrem-WinDns
 7. Link the newly created outbound ruleset of the DNS Private Resolver to the Spoke_VNET
-5. Create a Conditional Forwarder in the OnPrem-WinDns custom DNS Server for azure-contoso.com to forward to the Inbound Endpoint of the DNS Private Resolver
-6. Create a Conditional Forwarder in the OnPrem-WinDns custom DNS Server for blob.core.windows.net to forward to the Inbound Endpoint of the DNS Private Resolver
-7. Configure the OnPrem_VNET to use OnPrem-WinDns instead of Azure Default for DNS resolution.
-8. Configure the Hub_VNET to use the Inbound Endpoint of the DNS Private Resolver instead of Azure Default for DNS resolution.
-9. Configure the Spoke_VNET to use Inbound Endpoint of the DNS Private Resolver instead of Azure Default for DNS resolution.
+8. Create a Conditional Forwarder in the OnPrem-WinDns custom DNS Server for azure-contoso.com to forward to the Inbound Endpoint of the DNS Private Resolver
+9. Create a Conditional Forwarder in the OnPrem-WinDns custom DNS Server for blob.core.windows.net to forward to the Inbound Endpoint of the DNS Private Resolver
+10. Configure the OnPrem_VNET to use OnPrem-WinDns instead of Azure Default for DNS resolution.
+11. Configure the Hub_VNET to use the Inbound Endpoint of the DNS Private Resolver instead of Azure Default for DNS resolution.
+12. Configure the Spoke_VNET to use Inbound Endpoint of the DNS Private Resolver instead of Azure Default for DNS resolution.
 
 After completing the steps above, you will need to restart the ClientVMs for them to get the correct DNS configurations.  
  
 Once everything above is complete, you can validate by running the following PowerShell commands on both OnPrem-WinClien and Spoke-WinClient:
+
+https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/DNSTestScript.ps1
  
-Resolve-DNSName contoso.com  
-Resolve-DNSName Spoke-WinClient.azure-contoso.com  
-Resolve-DNSName \<Name of the Storage Account\>.blob.core.windows.net  
- 
-You should get the following results
- 
-contoso.com - 10.100.0.6  
-Spoke-WinClient.azure-contoso.com - 10.1.0.4  
-\<Name of the Storage Account\>.blob.core.windows.net - 10.0.1.4  
+You should get the following result:
+
+Result for Contoso.com: 10.100.0.6  
+Result for Spoke-WinClient: 10.1.0.4  
+Result for \<StorageAccountName\>.blob.core.windows.net: 10.0.1.4  
+These Queries were run at $(Get-Date -AsUTC)  

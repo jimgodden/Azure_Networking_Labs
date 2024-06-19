@@ -67,5 +67,8 @@
   },
   {
     "Name": "Training-Azure_DNS"
+  },
+  {
+    "Name": "Training-BGP_Lab"
   }
 ]

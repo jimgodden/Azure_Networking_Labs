@@ -45,3 +45,5 @@ ConnMonTest/iteration.txt
 ConnMonTest/main.parameters.bicepparam
 Training-Azure_DNS/iteration.txt
 Training-Azure_DNS/main.parameters.bicepparam
+Training-BGP_Lab/iteration.txt
+Training-BGP_Lab/main.parameters.bicepparam
