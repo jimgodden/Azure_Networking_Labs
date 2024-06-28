@@ -35,6 +35,11 @@ $mainBicepFile = "${deploymentFilePath}src\main.bicep"
 $mainParameterFile = "${deploymentFilePath}main.parameters.bicepparam"
 $iterationFile = "${deploymentFilePath}iteration.txt"
 
+# Switches off the Parameter file option in the deployment if the parameter file does not exist
+if (!(Test-Path $mainParameterFile)) {
+    $DeployWithParamFile = $false
+}
+
 $iteration = [int](Get-Content $iterationFile)
 $rgName = "${DeploymentName}_${iteration}"
 
