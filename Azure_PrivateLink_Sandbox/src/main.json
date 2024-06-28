@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.27.1.19265",
-      "templateHash": "8874912743565063173"
+      "templateHash": "5180391818507035873"
     }
   },
   "parameters": {
@@ -110,7 +110,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.27.1.19265",
-              "templateHash": "13620256258335063275"
+              "templateHash": "4237243581776694674"
             }
           },
           "parameters": {
@@ -518,9 +518,17 @@
               "type": "string",
               "value": "[parameters('routeTable_Name')]"
             },
+            "routeTable_ID": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/routeTables', parameters('routeTable_Name'))]"
+            },
             "networkSecurityGroup_Name": {
               "type": "string",
               "value": "[parameters('networkSecurityGroup_Default_Name')]"
+            },
+            "networkSecurityGroup_ID": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroup_Default_Name'))]"
             }
           }
         }
@@ -562,7 +570,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.27.1.19265",
-              "templateHash": "13620256258335063275"
+              "templateHash": "4237243581776694674"
             }
           },
           "parameters": {
@@ -970,9 +978,17 @@
               "type": "string",
               "value": "[parameters('routeTable_Name')]"
             },
+            "routeTable_ID": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/routeTables', parameters('routeTable_Name'))]"
+            },
             "networkSecurityGroup_Name": {
               "type": "string",
               "value": "[parameters('networkSecurityGroup_Default_Name')]"
+            },
+            "networkSecurityGroup_ID": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroup_Default_Name'))]"
             }
           }
         }
@@ -1017,7 +1033,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.27.1.19265",
-              "templateHash": "13620256258335063275"
+              "templateHash": "4237243581776694674"
             }
           },
           "parameters": {
@@ -1425,9 +1441,17 @@
               "type": "string",
               "value": "[parameters('routeTable_Name')]"
             },
+            "routeTable_ID": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/routeTables', parameters('routeTable_Name'))]"
+            },
             "networkSecurityGroup_Name": {
               "type": "string",
               "value": "[parameters('networkSecurityGroup_Default_Name')]"
+            },
+            "networkSecurityGroup_ID": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroup_Default_Name'))]"
             }
           }
         }
@@ -1648,7 +1672,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.27.1.19265",
-              "templateHash": "16559789963094496200"
+              "templateHash": "15809475316512000192"
             }
           },
           "parameters": {
@@ -1904,12 +1928,15 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.27.1.19265",
-                      "templateHash": "13708112360299910000"
+                      "templateHash": "2935355341485697608"
                     }
                   },
                   "parameters": {
                     "location": {
-                      "type": "string"
+                      "type": "string",
+                      "metadata": {
+                        "description": "Azure Datacenter that the resource is deployed to"
+                      }
                     },
                     "networkInterface_Name": {
                       "type": "string",
@@ -2159,7 +2186,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.27.1.19265",
-              "templateHash": "16559789963094496200"
+              "templateHash": "15809475316512000192"
             }
           },
           "parameters": {
@@ -2415,12 +2442,15 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.27.1.19265",
-                      "templateHash": "13708112360299910000"
+                      "templateHash": "2935355341485697608"
                     }
                   },
                   "parameters": {
                     "location": {
-                      "type": "string"
+                      "type": "string",
+                      "metadata": {
+                        "description": "Azure Datacenter that the resource is deployed to"
+                      }
                     },
                     "networkInterface_Name": {
                       "type": "string",
@@ -2671,7 +2701,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.27.1.19265",
-              "templateHash": "16559789963094496200"
+              "templateHash": "15809475316512000192"
             }
           },
           "parameters": {
@@ -2927,12 +2957,15 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.27.1.19265",
-                      "templateHash": "13708112360299910000"
+                      "templateHash": "2935355341485697608"
                     }
                   },
                   "parameters": {
                     "location": {
-                      "type": "string"
+                      "type": "string",
+                      "metadata": {
+                        "description": "Azure Datacenter that the resource is deployed to"
+                      }
                     },
                     "networkInterface_Name": {
                       "type": "string",
@@ -4661,7 +4694,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.27.1.19265",
-              "templateHash": "13620256258335063275"
+              "templateHash": "4237243581776694674"
             }
           },
           "parameters": {
@@ -5069,9 +5102,17 @@
               "type": "string",
               "value": "[parameters('routeTable_Name')]"
             },
+            "routeTable_ID": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/routeTables', parameters('routeTable_Name'))]"
+            },
             "networkSecurityGroup_Name": {
               "type": "string",
               "value": "[parameters('networkSecurityGroup_Default_Name')]"
+            },
+            "networkSecurityGroup_ID": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroup_Default_Name'))]"
             }
           }
         }
@@ -5129,7 +5170,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.27.1.19265",
-              "templateHash": "16559789963094496200"
+              "templateHash": "15809475316512000192"
             }
           },
           "parameters": {
@@ -5385,12 +5426,15 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.27.1.19265",
-                      "templateHash": "13708112360299910000"
+                      "templateHash": "2935355341485697608"
                     }
                   },
                   "parameters": {
                     "location": {
-                      "type": "string"
+                      "type": "string",
+                      "metadata": {
+                        "description": "Azure Datacenter that the resource is deployed to"
+                      }
                     },
                     "networkInterface_Name": {
                       "type": "string",
@@ -5623,7 +5667,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.27.1.19265",
-              "templateHash": "467307573071925764"
+              "templateHash": "5625462848695914846"
             }
           },
           "parameters": {
@@ -5642,8 +5686,32 @@
             "virtualNetworkGateway_SKU": {
               "type": "string",
               "defaultValue": "VpnGw1",
+              "allowedValues": [
+                "Basic",
+                "VpnGw1",
+                "VpnGw2",
+                "VpnGw3",
+                "VpnGw4",
+                "VpnGw5",
+                "VpnGw1AZ",
+                "VpnGw2AZ",
+                "VpnGw3AZ",
+                "VpnGw4AZ",
+                "VpnGw5AZ"
+              ],
               "metadata": {
                 "description": "SKU of the Virtual Network Gateway"
+              }
+            },
+            "vpnGatewayGeneration": {
+              "type": "string",
+              "defaultValue": "Generation1",
+              "allowedValues": [
+                "Generation1",
+                "Generation2"
+              ],
+              "metadata": {
+                "description": "Generation of the Virtual Network Gateway SKU\r\nGeneration1: Basic, VpnGw1-3, VpnGw1-3AZ\r\nGeneration2: VpnGw2-5, VpnGw2-5Az"
               }
             },
             "virtualNetworkGateway_ASN": {
@@ -5658,16 +5726,43 @@
                 "description": "Virtual Network Resource ID"
               }
             },
+            "activeActive": {
+              "type": "bool",
+              "defaultValue": false,
+              "metadata": {
+                "description": "Configures the Virtual Network Gateway as Active Active with two Public IP Addresses if True.  Default is False."
+              }
+            },
             "tagValues": {
               "type": "object",
               "defaultValue": {}
             }
           },
+          "variables": {
+            "ipConfiguration": "[if(parameters('activeActive'), createArray(createObject('name', 'vNetGatewayConfig1', 'properties', createObject('privateIPAllocationMethod', 'Dynamic', 'subnet', createObject('id', parameters('virtualNetworkGateway_Subnet_ResourceID')), 'publicIPAddress', createObject('id', resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP_01', parameters('virtualNetworkGateway_Name')))))), createObject('properties', createObject('name', 'vNetGatewayConfig2', 'privateIPAllocationMethod', 'Dynamic', 'subnet', createObject('id', parameters('virtualNetworkGateway_Subnet_ResourceID')), 'publicIPAddress', createObject('id', resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP_02', parameters('virtualNetworkGateway_Name'))))))), createArray(createObject('name', 'vNetGatewayConfig1', 'properties', createObject('privateIPAllocationMethod', 'Dynamic', 'subnet', createObject('id', parameters('virtualNetworkGateway_Subnet_ResourceID')), 'publicIPAddress', createObject('id', resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP_01', parameters('virtualNetworkGateway_Name'))))))))]"
+          },
           "resources": [
             {
               "type": "Microsoft.Network/publicIPAddresses",
               "apiVersion": "2022-11-01",
-              "name": "[format('{0}_PIP', parameters('virtualNetworkGateway_Name'))]",
+              "name": "[format('{0}_PIP_01', parameters('virtualNetworkGateway_Name'))]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Standard",
+                "tier": "Regional"
+              },
+              "properties": {
+                "publicIPAddressVersion": "IPv4",
+                "publicIPAllocationMethod": "Static",
+                "idleTimeoutInMinutes": 4,
+                "ipTags": []
+              },
+              "tags": "[parameters('tagValues')]"
+            },
+            {
+              "type": "Microsoft.Network/publicIPAddresses",
+              "apiVersion": "2022-11-01",
+              "name": "[format('{0}_PIP_02', parameters('virtualNetworkGateway_Name'))]",
               "location": "[parameters('location')]",
               "sku": {
                 "name": "Standard",
@@ -5688,20 +5783,7 @@
               "location": "[parameters('location')]",
               "properties": {
                 "enablePrivateIpAddress": false,
-                "ipConfigurations": [
-                  {
-                    "name": "default",
-                    "properties": {
-                      "privateIPAllocationMethod": "Dynamic",
-                      "publicIPAddress": {
-                        "id": "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP', parameters('virtualNetworkGateway_Name')))]"
-                      },
-                      "subnet": {
-                        "id": "[parameters('virtualNetworkGateway_Subnet_ResourceID')]"
-                      }
-                    }
-                  }
-                ],
+                "ipConfigurations": "[variables('ipConfiguration')]",
                 "natRules": [],
                 "virtualNetworkGatewayPolicyGroups": [],
                 "enableBgpRouteTranslationForNat": false,
@@ -5713,18 +5795,19 @@
                 "gatewayType": "Vpn",
                 "vpnType": "RouteBased",
                 "enableBgp": true,
-                "activeActive": false,
+                "activeActive": "[parameters('activeActive')]",
                 "bgpSettings": {
                   "asn": "[parameters('virtualNetworkGateway_ASN')]",
                   "peerWeight": 0
                 },
-                "vpnGatewayGeneration": "Generation1",
+                "vpnGatewayGeneration": "[parameters('vpnGatewayGeneration')]",
                 "allowRemoteVnetTraffic": false,
                 "allowVirtualWanTraffic": false
               },
               "tags": "[parameters('tagValues')]",
               "dependsOn": [
-                "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP', parameters('virtualNetworkGateway_Name')))]"
+                "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP_01', parameters('virtualNetworkGateway_Name')))]",
+                "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP_02', parameters('virtualNetworkGateway_Name')))]"
               ]
             }
           ],
@@ -5737,17 +5820,29 @@
               "type": "string",
               "value": "[parameters('virtualNetworkGateway_Name')]"
             },
-            "virtualNetworkGateway_PublicIPAddress": {
-              "type": "string",
-              "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP', parameters('virtualNetworkGateway_Name'))), '2022-11-01').ipAddress]"
-            },
             "virtualNetworkGateway_BGPAddress": {
               "type": "string",
               "value": "[reference(resourceId('Microsoft.Network/virtualNetworkGateways', parameters('virtualNetworkGateway_Name')), '2023-02-01').bgpSettings.bgpPeeringAddress]"
             },
+            "virtualNetworkGateway_ActiveActive_BGPAddress1": {
+              "type": "string",
+              "value": "[if(parameters('activeActive'), reference(resourceId('Microsoft.Network/virtualNetworkGateways', parameters('virtualNetworkGateway_Name')), '2023-02-01').bgpSettings.bgpPeeringAddresses[0].defaultBgpIpAddresses[0], '')]"
+            },
+            "virtualNetworkGateway_ActiveActive_BGPAddress2": {
+              "type": "string",
+              "value": "[if(parameters('activeActive'), reference(resourceId('Microsoft.Network/virtualNetworkGateways', parameters('virtualNetworkGateway_Name')), '2023-02-01').bgpSettings.bgpPeeringAddresses[1].defaultBgpIpAddresses[0], '')]"
+            },
             "virtualNetworkGateway_ASN": {
               "type": "int",
               "value": "[reference(resourceId('Microsoft.Network/virtualNetworkGateways', parameters('virtualNetworkGateway_Name')), '2023-02-01').bgpSettings.asn]"
+            },
+            "virtualNetworkGateway_PublicIPAddress": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP_01', parameters('virtualNetworkGateway_Name'))), '2022-11-01').ipAddress]"
+            },
+            "virtualNetworkGateway_ActiveActive_PublicIPAddress02": {
+              "type": "string",
+              "value": "[if(parameters('activeActive'), reference(resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP_02', parameters('virtualNetworkGateway_Name'))), '2022-11-01').ipAddress, '')]"
             }
           }
         }
@@ -5786,7 +5881,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.27.1.19265",
-              "templateHash": "467307573071925764"
+              "templateHash": "5625462848695914846"
             }
           },
           "parameters": {
@@ -5805,8 +5900,32 @@
             "virtualNetworkGateway_SKU": {
               "type": "string",
               "defaultValue": "VpnGw1",
+              "allowedValues": [
+                "Basic",
+                "VpnGw1",
+                "VpnGw2",
+                "VpnGw3",
+                "VpnGw4",
+                "VpnGw5",
+                "VpnGw1AZ",
+                "VpnGw2AZ",
+                "VpnGw3AZ",
+                "VpnGw4AZ",
+                "VpnGw5AZ"
+              ],
               "metadata": {
                 "description": "SKU of the Virtual Network Gateway"
+              }
+            },
+            "vpnGatewayGeneration": {
+              "type": "string",
+              "defaultValue": "Generation1",
+              "allowedValues": [
+                "Generation1",
+                "Generation2"
+              ],
+              "metadata": {
+                "description": "Generation of the Virtual Network Gateway SKU\r\nGeneration1: Basic, VpnGw1-3, VpnGw1-3AZ\r\nGeneration2: VpnGw2-5, VpnGw2-5Az"
               }
             },
             "virtualNetworkGateway_ASN": {
@@ -5821,16 +5940,43 @@
                 "description": "Virtual Network Resource ID"
               }
             },
+            "activeActive": {
+              "type": "bool",
+              "defaultValue": false,
+              "metadata": {
+                "description": "Configures the Virtual Network Gateway as Active Active with two Public IP Addresses if True.  Default is False."
+              }
+            },
             "tagValues": {
               "type": "object",
               "defaultValue": {}
             }
           },
+          "variables": {
+            "ipConfiguration": "[if(parameters('activeActive'), createArray(createObject('name', 'vNetGatewayConfig1', 'properties', createObject('privateIPAllocationMethod', 'Dynamic', 'subnet', createObject('id', parameters('virtualNetworkGateway_Subnet_ResourceID')), 'publicIPAddress', createObject('id', resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP_01', parameters('virtualNetworkGateway_Name')))))), createObject('properties', createObject('name', 'vNetGatewayConfig2', 'privateIPAllocationMethod', 'Dynamic', 'subnet', createObject('id', parameters('virtualNetworkGateway_Subnet_ResourceID')), 'publicIPAddress', createObject('id', resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP_02', parameters('virtualNetworkGateway_Name'))))))), createArray(createObject('name', 'vNetGatewayConfig1', 'properties', createObject('privateIPAllocationMethod', 'Dynamic', 'subnet', createObject('id', parameters('virtualNetworkGateway_Subnet_ResourceID')), 'publicIPAddress', createObject('id', resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP_01', parameters('virtualNetworkGateway_Name'))))))))]"
+          },
           "resources": [
             {
               "type": "Microsoft.Network/publicIPAddresses",
               "apiVersion": "2022-11-01",
-              "name": "[format('{0}_PIP', parameters('virtualNetworkGateway_Name'))]",
+              "name": "[format('{0}_PIP_01', parameters('virtualNetworkGateway_Name'))]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Standard",
+                "tier": "Regional"
+              },
+              "properties": {
+                "publicIPAddressVersion": "IPv4",
+                "publicIPAllocationMethod": "Static",
+                "idleTimeoutInMinutes": 4,
+                "ipTags": []
+              },
+              "tags": "[parameters('tagValues')]"
+            },
+            {
+              "type": "Microsoft.Network/publicIPAddresses",
+              "apiVersion": "2022-11-01",
+              "name": "[format('{0}_PIP_02', parameters('virtualNetworkGateway_Name'))]",
               "location": "[parameters('location')]",
               "sku": {
                 "name": "Standard",
@@ -5851,20 +5997,7 @@
               "location": "[parameters('location')]",
               "properties": {
                 "enablePrivateIpAddress": false,
-                "ipConfigurations": [
-                  {
-                    "name": "default",
-                    "properties": {
-                      "privateIPAllocationMethod": "Dynamic",
-                      "publicIPAddress": {
-                        "id": "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP', parameters('virtualNetworkGateway_Name')))]"
-                      },
-                      "subnet": {
-                        "id": "[parameters('virtualNetworkGateway_Subnet_ResourceID')]"
-                      }
-                    }
-                  }
-                ],
+                "ipConfigurations": "[variables('ipConfiguration')]",
                 "natRules": [],
                 "virtualNetworkGatewayPolicyGroups": [],
                 "enableBgpRouteTranslationForNat": false,
@@ -5876,18 +6009,19 @@
                 "gatewayType": "Vpn",
                 "vpnType": "RouteBased",
                 "enableBgp": true,
-                "activeActive": false,
+                "activeActive": "[parameters('activeActive')]",
                 "bgpSettings": {
                   "asn": "[parameters('virtualNetworkGateway_ASN')]",
                   "peerWeight": 0
                 },
-                "vpnGatewayGeneration": "Generation1",
+                "vpnGatewayGeneration": "[parameters('vpnGatewayGeneration')]",
                 "allowRemoteVnetTraffic": false,
                 "allowVirtualWanTraffic": false
               },
               "tags": "[parameters('tagValues')]",
               "dependsOn": [
-                "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP', parameters('virtualNetworkGateway_Name')))]"
+                "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP_01', parameters('virtualNetworkGateway_Name')))]",
+                "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP_02', parameters('virtualNetworkGateway_Name')))]"
               ]
             }
           ],
@@ -5900,17 +6034,29 @@
               "type": "string",
               "value": "[parameters('virtualNetworkGateway_Name')]"
             },
-            "virtualNetworkGateway_PublicIPAddress": {
-              "type": "string",
-              "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP', parameters('virtualNetworkGateway_Name'))), '2022-11-01').ipAddress]"
-            },
             "virtualNetworkGateway_BGPAddress": {
               "type": "string",
               "value": "[reference(resourceId('Microsoft.Network/virtualNetworkGateways', parameters('virtualNetworkGateway_Name')), '2023-02-01').bgpSettings.bgpPeeringAddress]"
             },
+            "virtualNetworkGateway_ActiveActive_BGPAddress1": {
+              "type": "string",
+              "value": "[if(parameters('activeActive'), reference(resourceId('Microsoft.Network/virtualNetworkGateways', parameters('virtualNetworkGateway_Name')), '2023-02-01').bgpSettings.bgpPeeringAddresses[0].defaultBgpIpAddresses[0], '')]"
+            },
+            "virtualNetworkGateway_ActiveActive_BGPAddress2": {
+              "type": "string",
+              "value": "[if(parameters('activeActive'), reference(resourceId('Microsoft.Network/virtualNetworkGateways', parameters('virtualNetworkGateway_Name')), '2023-02-01').bgpSettings.bgpPeeringAddresses[1].defaultBgpIpAddresses[0], '')]"
+            },
             "virtualNetworkGateway_ASN": {
               "type": "int",
               "value": "[reference(resourceId('Microsoft.Network/virtualNetworkGateways', parameters('virtualNetworkGateway_Name')), '2023-02-01').bgpSettings.asn]"
+            },
+            "virtualNetworkGateway_PublicIPAddress": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP_01', parameters('virtualNetworkGateway_Name'))), '2022-11-01').ipAddress]"
+            },
+            "virtualNetworkGateway_ActiveActive_PublicIPAddress02": {
+              "type": "string",
+              "value": "[if(parameters('activeActive'), reference(resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP_02', parameters('virtualNetworkGateway_Name'))), '2022-11-01').ipAddress, '')]"
             }
           }
         }

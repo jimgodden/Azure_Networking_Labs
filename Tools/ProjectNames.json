@@ -70,5 +70,17 @@
   },
   {
     "Name": "Training-BGP_Lab"
+  },
+  {
+    "Name": "Training-VPN_L300"
+  },
+  {
+    "Name": "Sandbox-NATGateway"
+  },
+  {
+    "Name": "Sandbox-VirtualNetworkManager"
+  },
+  {
+    "Name": "Sandbox-NetworkWatcher"
   }
 ]

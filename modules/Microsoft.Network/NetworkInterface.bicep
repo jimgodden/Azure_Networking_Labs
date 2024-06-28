@@ -1,3 +1,4 @@
+@description('Azure Datacenter that the resource is deployed to')
 param location string
 
 @description('Name of the Virtual Machines Network Interface')

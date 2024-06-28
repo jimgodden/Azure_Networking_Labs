@@ -1,4 +1,4 @@
-$location = "eastus"
+$location = "eastus" -Location "eastus2" -Location "eastus2"
 $rgName = "Repro-Infra"
 Write-Host "`nCreating Infra Resource Group ${rgName}"
 New-AzResourceGroup -Name $rgName -Location $location
@@ -49,3 +49,4 @@ foreach ($rg in $rgs) {
     Write-Host "Deleting the following Resource Group: ${rgName}"
     Remove-AzResourceGroup -Name $rgName -Force -AsJob
 }
+ -Location "eastus2"

@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.27.1.19265",
-      "templateHash": "18002822801042733430"
+      "templateHash": "12527533456901673364"
     }
   },
   "parameters": {
@@ -184,7 +184,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.27.1.19265",
-              "templateHash": "6566073585832844255"
+              "templateHash": "843781432667214474"
             }
           },
           "parameters": {
@@ -251,6 +251,13 @@
               "defaultValue": "",
               "metadata": {
                 "description": "Enter the Static IP Address here if privateIPAllocationMethod is set to Static."
+              }
+            },
+            "addPublicIPAddress": {
+              "type": "bool",
+              "defaultValue": false,
+              "metadata": {
+                "description": "Adds a Public IP to the Network Interface of the Virtual Machine"
               }
             },
             "tagValues": {
@@ -365,6 +372,9 @@
                   "privateIPAllocationMethod": {
                     "value": "[parameters('privateIPAllocationMethod')]"
                   },
+                  "addPublicIPAddress": {
+                    "value": "[parameters('addPublicIPAddress')]"
+                  },
                   "tagValues": {
                     "value": "[parameters('tagValues')]"
                   }
@@ -376,12 +386,15 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.27.1.19265",
-                      "templateHash": "13708112360299910000"
+                      "templateHash": "2935355341485697608"
                     }
                   },
                   "parameters": {
                     "location": {
-                      "type": "string"
+                      "type": "string",
+                      "metadata": {
+                        "description": "Azure Datacenter that the resource is deployed to"
+                      }
                     },
                     "networkInterface_Name": {
                       "type": "string",
@@ -567,6 +580,10 @@
             "networkInterface_PrivateIPAddress": {
               "type": "string",
               "value": "[reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2022-09-01').outputs.networkInterface_PrivateIPAddress.value]"
+            },
+            "networkInterface_PublicIPAddress": {
+              "type": "string",
+              "value": "[if(parameters('addPublicIPAddress'), reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2022-09-01').outputs.networkInterface_PublicIPAddress.value, '')]"
             }
           }
         }
@@ -620,7 +637,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.27.1.19265",
-              "templateHash": "6566073585832844255"
+              "templateHash": "843781432667214474"
             }
           },
           "parameters": {
@@ -687,6 +704,13 @@
               "defaultValue": "",
               "metadata": {
                 "description": "Enter the Static IP Address here if privateIPAllocationMethod is set to Static."
+              }
+            },
+            "addPublicIPAddress": {
+              "type": "bool",
+              "defaultValue": false,
+              "metadata": {
+                "description": "Adds a Public IP to the Network Interface of the Virtual Machine"
               }
             },
             "tagValues": {
@@ -801,6 +825,9 @@
                   "privateIPAllocationMethod": {
                     "value": "[parameters('privateIPAllocationMethod')]"
                   },
+                  "addPublicIPAddress": {
+                    "value": "[parameters('addPublicIPAddress')]"
+                  },
                   "tagValues": {
                     "value": "[parameters('tagValues')]"
                   }
@@ -812,12 +839,15 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.27.1.19265",
-                      "templateHash": "13708112360299910000"
+                      "templateHash": "2935355341485697608"
                     }
                   },
                   "parameters": {
                     "location": {
-                      "type": "string"
+                      "type": "string",
+                      "metadata": {
+                        "description": "Azure Datacenter that the resource is deployed to"
+                      }
                     },
                     "networkInterface_Name": {
                       "type": "string",
@@ -1003,6 +1033,10 @@
             "networkInterface_PrivateIPAddress": {
               "type": "string",
               "value": "[reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2022-09-01').outputs.networkInterface_PrivateIPAddress.value]"
+            },
+            "networkInterface_PublicIPAddress": {
+              "type": "string",
+              "value": "[if(parameters('addPublicIPAddress'), reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2022-09-01').outputs.networkInterface_PublicIPAddress.value, '')]"
             }
           }
         }
@@ -1056,7 +1090,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.27.1.19265",
-              "templateHash": "6566073585832844255"
+              "templateHash": "843781432667214474"
             }
           },
           "parameters": {
@@ -1123,6 +1157,13 @@
               "defaultValue": "",
               "metadata": {
                 "description": "Enter the Static IP Address here if privateIPAllocationMethod is set to Static."
+              }
+            },
+            "addPublicIPAddress": {
+              "type": "bool",
+              "defaultValue": false,
+              "metadata": {
+                "description": "Adds a Public IP to the Network Interface of the Virtual Machine"
               }
             },
             "tagValues": {
@@ -1237,6 +1278,9 @@
                   "privateIPAllocationMethod": {
                     "value": "[parameters('privateIPAllocationMethod')]"
                   },
+                  "addPublicIPAddress": {
+                    "value": "[parameters('addPublicIPAddress')]"
+                  },
                   "tagValues": {
                     "value": "[parameters('tagValues')]"
                   }
@@ -1248,12 +1292,15 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.27.1.19265",
-                      "templateHash": "13708112360299910000"
+                      "templateHash": "2935355341485697608"
                     }
                   },
                   "parameters": {
                     "location": {
-                      "type": "string"
+                      "type": "string",
+                      "metadata": {
+                        "description": "Azure Datacenter that the resource is deployed to"
+                      }
                     },
                     "networkInterface_Name": {
                       "type": "string",
@@ -1439,6 +1486,10 @@
             "networkInterface_PrivateIPAddress": {
               "type": "string",
               "value": "[reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2022-09-01').outputs.networkInterface_PrivateIPAddress.value]"
+            },
+            "networkInterface_PublicIPAddress": {
+              "type": "string",
+              "value": "[if(parameters('addPublicIPAddress'), reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2022-09-01').outputs.networkInterface_PublicIPAddress.value, '')]"
             }
           }
         }
@@ -1492,7 +1543,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.27.1.19265",
-              "templateHash": "6566073585832844255"
+              "templateHash": "843781432667214474"
             }
           },
           "parameters": {
@@ -1559,6 +1610,13 @@
               "defaultValue": "",
               "metadata": {
                 "description": "Enter the Static IP Address here if privateIPAllocationMethod is set to Static."
+              }
+            },
+            "addPublicIPAddress": {
+              "type": "bool",
+              "defaultValue": false,
+              "metadata": {
+                "description": "Adds a Public IP to the Network Interface of the Virtual Machine"
               }
             },
             "tagValues": {
@@ -1673,6 +1731,9 @@
                   "privateIPAllocationMethod": {
                     "value": "[parameters('privateIPAllocationMethod')]"
                   },
+                  "addPublicIPAddress": {
+                    "value": "[parameters('addPublicIPAddress')]"
+                  },
                   "tagValues": {
                     "value": "[parameters('tagValues')]"
                   }
@@ -1684,12 +1745,15 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.27.1.19265",
-                      "templateHash": "13708112360299910000"
+                      "templateHash": "2935355341485697608"
                     }
                   },
                   "parameters": {
                     "location": {
-                      "type": "string"
+                      "type": "string",
+                      "metadata": {
+                        "description": "Azure Datacenter that the resource is deployed to"
+                      }
                     },
                     "networkInterface_Name": {
                       "type": "string",
@@ -1875,6 +1939,10 @@
             "networkInterface_PrivateIPAddress": {
               "type": "string",
               "value": "[reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2022-09-01').outputs.networkInterface_PrivateIPAddress.value]"
+            },
+            "networkInterface_PublicIPAddress": {
+              "type": "string",
+              "value": "[if(parameters('addPublicIPAddress'), reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2022-09-01').outputs.networkInterface_PublicIPAddress.value, '')]"
             }
           }
         }

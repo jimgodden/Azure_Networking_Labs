@@ -36,6 +36,9 @@ param privateIPAllocationMethod string = 'Dynamic'
 @description('Enter the Static IP Address here if privateIPAllocationMethod is set to Static.')
 param privateIPAddress string = ''
 
+@description('Adds a Public IP to the Network Interface of the Virtual Machine')
+param addPublicIPAddress bool = false
+
 param tagValues object = {}
 
 param imageReference_Id string = '/subscriptions/1a283126-08f5-4fff-8784-19fe92c7422e/resourceGroups/Main/providers/Microsoft.Compute/galleries/ANP_ComputeGallery/images/VyOS-SharedImage/versions/1.0.0'
@@ -50,6 +53,7 @@ module networkInterface '../../Microsoft.Network/NetworkInterface.bicep' = {
     subnet_ID: subnet_ID
     privateIPAddress: privateIPAddress
     privateIPAllocationMethod: privateIPAllocationMethod
+    addPublicIPAddress: addPublicIPAddress
     tagValues: tagValues
   }
 }
@@ -129,3 +133,5 @@ output networkInterface_ID string = networkInterface.outputs.networkInterface_ID
 output networkInterface_IPConfig0_Name string = networkInterface.outputs.networkInterface_IPConfig0_Name
 output networkInterface_IPConfig0_ID string = networkInterface.outputs.networkInterface_IPConfig0_ID
 output networkInterface_PrivateIPAddress string = networkInterface.outputs.networkInterface_PrivateIPAddress
+
+output networkInterface_PublicIPAddress string = addPublicIPAddress ? networkInterface.outputs.networkInterface_PublicIPAddress : ''

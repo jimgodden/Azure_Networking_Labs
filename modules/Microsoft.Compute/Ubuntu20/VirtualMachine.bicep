@@ -36,6 +36,9 @@ param privateIPAllocationMethod string = 'Dynamic'
 @description('Enter the Static IP Address here if privateIPAllocationMethod is set to Static.')
 param privateIPAddress string = ''
 
+@description('Adds a Public IP to the Network Interface of the Virtual Machine')
+param addPublicIPAddress bool = false
+
 @description('''Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /
 Example: https://example.com/scripts/''')
 param virtualMachine_ScriptFileLocation string = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
@@ -60,6 +63,7 @@ module networkInterface '../../Microsoft.Network/NetworkInterface.bicep' = {
     networkInterface_Name: networkInterface_Name
     subnet_ID: subnet_ID
     privateIPAddress: privateIPAddress
+    addPublicIPAddress: addPublicIPAddress
     privateIPAllocationMethod: privateIPAllocationMethod
     tagValues: tagValues
   }
@@ -164,3 +168,5 @@ output networkInterface_ID string = networkInterface.outputs.networkInterface_ID
 output networkInterface_IPConfig0_Name string = networkInterface.outputs.networkInterface_IPConfig0_Name
 output networkInterface_IPConfig0_ID string = networkInterface.outputs.networkInterface_IPConfig0_ID
 output networkInterface_PrivateIPAddress string = networkInterface.outputs.networkInterface_PrivateIPAddress
+
+output networkInterface_PublicIPAddress string = addPublicIPAddress ? networkInterface.outputs.networkInterface_PublicIPAddress : ''

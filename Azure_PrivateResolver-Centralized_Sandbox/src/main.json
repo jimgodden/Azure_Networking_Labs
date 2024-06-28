@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.27.1.19265",
-      "templateHash": "4297612723431394146"
+      "templateHash": "7316354447917980781"
     }
   },
   "parameters": {
@@ -90,7 +90,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.27.1.19265",
-              "templateHash": "13620256258335063275"
+              "templateHash": "4237243581776694674"
             }
           },
           "parameters": {
@@ -498,9 +498,17 @@
               "type": "string",
               "value": "[parameters('routeTable_Name')]"
             },
+            "routeTable_ID": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/routeTables', parameters('routeTable_Name'))]"
+            },
             "networkSecurityGroup_Name": {
               "type": "string",
               "value": "[parameters('networkSecurityGroup_Default_Name')]"
+            },
+            "networkSecurityGroup_ID": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroup_Default_Name'))]"
             }
           }
         }
@@ -538,7 +546,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.27.1.19265",
-              "templateHash": "13620256258335063275"
+              "templateHash": "4237243581776694674"
             }
           },
           "parameters": {
@@ -946,9 +954,17 @@
               "type": "string",
               "value": "[parameters('routeTable_Name')]"
             },
+            "routeTable_ID": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/routeTables', parameters('routeTable_Name'))]"
+            },
             "networkSecurityGroup_Name": {
               "type": "string",
               "value": "[parameters('networkSecurityGroup_Default_Name')]"
+            },
+            "networkSecurityGroup_ID": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroup_Default_Name'))]"
             }
           }
         }
@@ -1151,7 +1167,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.27.1.19265",
-              "templateHash": "16559789963094496200"
+              "templateHash": "15809475316512000192"
             }
           },
           "parameters": {
@@ -1407,12 +1423,15 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.27.1.19265",
-                      "templateHash": "13708112360299910000"
+                      "templateHash": "2935355341485697608"
                     }
                   },
                   "parameters": {
                     "location": {
-                      "type": "string"
+                      "type": "string",
+                      "metadata": {
+                        "description": "Azure Datacenter that the resource is deployed to"
+                      }
                     },
                     "networkInterface_Name": {
                       "type": "string",
@@ -1669,7 +1688,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.27.1.19265",
-              "templateHash": "16559789963094496200"
+              "templateHash": "15809475316512000192"
             }
           },
           "parameters": {
@@ -1925,12 +1944,15 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.27.1.19265",
-                      "templateHash": "13708112360299910000"
+                      "templateHash": "2935355341485697608"
                     }
                   },
                   "parameters": {
                     "location": {
-                      "type": "string"
+                      "type": "string",
+                      "metadata": {
+                        "description": "Azure Datacenter that the resource is deployed to"
+                      }
                     },
                     "networkInterface_Name": {
                       "type": "string",
@@ -2925,7 +2947,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.27.1.19265",
-              "templateHash": "13620256258335063275"
+              "templateHash": "4237243581776694674"
             }
           },
           "parameters": {
@@ -3333,9 +3355,17 @@
               "type": "string",
               "value": "[parameters('routeTable_Name')]"
             },
+            "routeTable_ID": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/routeTables', parameters('routeTable_Name'))]"
+            },
             "networkSecurityGroup_Name": {
               "type": "string",
               "value": "[parameters('networkSecurityGroup_Default_Name')]"
+            },
+            "networkSecurityGroup_ID": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroup_Default_Name'))]"
             }
           }
         }
@@ -3373,7 +3403,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.27.1.19265",
-              "templateHash": "13620256258335063275"
+              "templateHash": "4237243581776694674"
             }
           },
           "parameters": {
@@ -3781,9 +3811,17 @@
               "type": "string",
               "value": "[parameters('routeTable_Name')]"
             },
+            "routeTable_ID": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/routeTables', parameters('routeTable_Name'))]"
+            },
             "networkSecurityGroup_Name": {
               "type": "string",
               "value": "[parameters('networkSecurityGroup_Default_Name')]"
+            },
+            "networkSecurityGroup_ID": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroup_Default_Name'))]"
             }
           }
         }
@@ -3846,7 +3884,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.27.1.19265",
-              "templateHash": "16559789963094496200"
+              "templateHash": "15809475316512000192"
             }
           },
           "parameters": {
@@ -4102,12 +4140,15 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.27.1.19265",
-                      "templateHash": "13708112360299910000"
+                      "templateHash": "2935355341485697608"
                     }
                   },
                   "parameters": {
                     "location": {
-                      "type": "string"
+                      "type": "string",
+                      "metadata": {
+                        "description": "Azure Datacenter that the resource is deployed to"
+                      }
                     },
                     "networkInterface_Name": {
                       "type": "string",
@@ -4364,7 +4405,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.27.1.19265",
-              "templateHash": "16559789963094496200"
+              "templateHash": "15809475316512000192"
             }
           },
           "parameters": {
@@ -4620,12 +4661,15 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.27.1.19265",
-                      "templateHash": "13708112360299910000"
+                      "templateHash": "2935355341485697608"
                     }
                   },
                   "parameters": {
                     "location": {
-                      "type": "string"
+                      "type": "string",
+                      "metadata": {
+                        "description": "Azure Datacenter that the resource is deployed to"
+                      }
                     },
                     "networkInterface_Name": {
                       "type": "string",

@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.27.1.19265",
-      "templateHash": "5314553179345970763"
+      "templateHash": "7531124188522690155"
     }
   },
   "parameters": {
@@ -138,7 +138,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.27.1.19265",
-              "templateHash": "16559789963094496200"
+              "templateHash": "15809475316512000192"
             }
           },
           "parameters": {
@@ -394,12 +394,15 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.27.1.19265",
-                      "templateHash": "13708112360299910000"
+                      "templateHash": "2935355341485697608"
                     }
                   },
                   "parameters": {
                     "location": {
-                      "type": "string"
+                      "type": "string",
+                      "metadata": {
+                        "description": "Azure Datacenter that the resource is deployed to"
+                      }
                     },
                     "networkInterface_Name": {
                       "type": "string",

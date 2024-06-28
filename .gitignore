@@ -48,3 +48,11 @@ Training-Azure_DNS/main.parameters.bicepparam
 Training-BGP_Lab/iteration.txt
 Training-BGP_Lab/main.parameters.bicepparam
 test.bicep
+Training-VPN_L300/iteration.txt
+Training-VPN_L300/main.parameters.bicepparam
+Sandbox-NATGateway/iteration.txt
+Sandbox-NATGateway/main.parameters.bicepparam
+Sandbox-VirtualNetworkManager/iteration.txt
+Sandbox-VirtualNetworkManager/main.parameters.bicepparam
+Sandbox-NetworkWatcher/iteration.txt
+Sandbox-NetworkWatcher/main.parameters.bicepparam
