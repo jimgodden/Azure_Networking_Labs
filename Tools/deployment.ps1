@@ -3,6 +3,8 @@
 #   Verifies that the Context is set for Azure PowerShell deployments
 #   Correctly formulates the deployment command to include all template and parameter files
 #   Provides timestamps and timespans to help track the length of time it takes to deploy the resources
+#   Provides links to the newly created Resource Group in the Azure Portal
+#   Manages the Tenant and Subscription that the resources will be deployed to
 
 param(
     [Parameter(Mandatory)]
@@ -10,7 +12,7 @@ param(
 
     [string]$Location = "eastus2",
 
-    [ValidateSet('MCAPS', 'Production')]
+    [ValidateSet('MCAPS', 'Personal', 'Production')]
     [string]$AzContextAcount = "MCAPS",
 
     [bool]$DeployWithParamFile = $true
@@ -26,6 +28,9 @@ if (!($context = Get-AzContext)) {
 if ($AzContextAcount -eq 'Production') {
     Switch-AzContext -Account 'Production'
 }
+if ($AzContextAcount -eq 'Personal') {
+    Switch-AzContext -Account 'Personal'
+}
 
 Write-Host "AzContext is set to the following:"
 Write-Host "Subscription: $($context.Subscription.Name) ($($context.Subscription.Id)) | Tenant: $($context.Tenant.Id)`n"
@@ -40,8 +45,18 @@ if (!(Test-Path $mainParameterFile)) {
     $DeployWithParamFile = $false
 }
 
-$iteration = [int](Get-Content $iterationFile)
-$rgName = "${DeploymentName}_${iteration}"
+if (Test-Path $iterationFile) {
+    $iteration = [int](Get-Content $iterationFile)
+    $rgName = "${DeploymentName}_${iteration}"
+}
+else {
+    New-Item -ItemType File -Path $iterationFile
+    Set-Content -Path $iterationFile -Value "1"
+    $iteration = 1
+    $rgName = "${DeploymentName}_${iteration}"
+}
+
+
 
 if (Get-AzResourceGroup -Name $rgName -ErrorAction SilentlyContinue) {
     $response = Read-Host "Resource Group ${rgName} already exists.  How do you want to handle this?  Below are the options.  Type the corresponding number and enter to choose.
