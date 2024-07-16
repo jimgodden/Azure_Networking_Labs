@@ -47,7 +47,7 @@ if (!(Test-Path $mainParameterFile)) {
 
 if (Test-Path $iterationFile) {
     $iteration = [int](Get-Content $iterationFile)
-    $rgName = "${DeploymentName}_${iteration}"
+    $rgName = "${DeploymentName}_RG_${iteration}"
 }
 else {
     New-Item -ItemType File -Path $iterationFile
@@ -70,14 +70,14 @@ if (Get-AzResourceGroup -Name $rgName -ErrorAction SilentlyContinue) {
         Remove-AzResourceGroup -Name $rgName -Force -AsJob
         Set-Content -Path $iterationFile -Value "$($iteration + 1)"
         $iteration = [int](Get-Content $iterationFile)
-        $rgName = "${DeploymentName}_${iteration}"
+        $rgName = "${DeploymentName}_RG_${iteration}"
         Write-Host "Creating $rgName"
     } 
     elseif ($response -eq "2") {
         Write-Host "`nDisregarding $rgName"
         Set-Content -Path $iterationFile -Value "$($iteration + 1)"
         $iteration = [int](Get-Content $iterationFile)
-        $rgName = "${DeploymentName}_${iteration}"
+        $rgName = "${DeploymentName}_RG_${iteration}"
         Write-Host "Creating $rgName"
     } 
     elseif ($response -eq "3") {
@@ -91,7 +91,7 @@ if (Get-AzResourceGroup -Name $rgName -ErrorAction SilentlyContinue) {
 else {
     Set-Content -Path $iterationFile -Value "$($iteration + 1)"
     $iteration = [int](Get-Content $iterationFile)
-    $rgName = "${DeploymentName}_${iteration}"
+    $rgName = "${DeploymentName}_RG_${iteration}"
 }
 
 New-AzResourceGroup -Name $rgName -Location $Location

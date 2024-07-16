@@ -16,4 +16,6 @@ while ($true) {
     }
 
     $tcpClient.Close()
+
+    Start-Sleep -Seconds 2
 }

@@ -75,7 +75,7 @@ module virtualMachine_Windows_dst '../../modules/Microsoft.Compute/WindowsServer
   params: {
     acceleratedNetworking: acceleratedNetworking
     location: location
-    subnet_ID: virtualNetwork_src.outputs.general_SubnetID
+    subnet_ID: virtualNetwork_dst.outputs.general_SubnetID
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'winVM-dst'
@@ -130,6 +130,9 @@ resource networkSecurityGroup_Expected 'Microsoft.Network/networkSecurityGroups/
     sourceAddressPrefixes: []
     destinationAddressPrefixes: []
   }
+  dependsOn: [
+    virtualNetwork_src
+  ]
 }
 
 resource networkSecurityGroup_Error 'Microsoft.Network/networkSecurityGroups/securityRules@2022-11-01' = {
@@ -149,6 +152,9 @@ resource networkSecurityGroup_Error 'Microsoft.Network/networkSecurityGroups/sec
     sourceAddressPrefixes: []
     destinationAddressPrefixes: []
   }
+  dependsOn: [
+    virtualNetwork_src
+  ]
 }
 
 module bastion '../../modules/Microsoft.Network/Bastion.bicep' = {
