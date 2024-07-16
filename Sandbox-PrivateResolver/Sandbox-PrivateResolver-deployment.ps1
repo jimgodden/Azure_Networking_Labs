@@ -1,1 +1,1 @@
-.\Tools\deployment.ps1 -DeploymentName "Sandbox_PrivateResolver" -Location "eastus2"
+.\Tools\deployment.ps1 -DeploymentName "Sandbox-PrivateResolver" -Location "eastus2"

@@ -1,1 +1,1 @@
-.\Tools\deployment.ps1 -DeploymentName "Sandbox_VM_Windows" -Location "eastus2"
+.\Tools\deployment.ps1 -DeploymentName "Sandbox-VM_Windows" -Location "eastus2"

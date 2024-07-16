@@ -1,1 +1,1 @@
-.\Tools\deployment.ps1 -DeploymentName "Sandbox_PrivateLink" -Location "eastus2"
+.\Tools\deployment.ps1 -DeploymentName "Sandbox-PrivateLink" -Location "eastus2"
