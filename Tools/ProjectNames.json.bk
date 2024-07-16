@@ -1,0 +1,86 @@
+[
+  {
+    "Name": "Azure_ApplicationGateway_Sandbox"
+  },
+  {
+    "Name": "Azure_DNS_Sandbox"
+  },
+  {
+    "Name": "Azure_PE_to_SQL_Sandbox"
+  },
+  {
+    "Name": "Azure_PrivateLink_Sandbox"
+  },
+  {
+    "Name": "Azure_TrafficManager_Sandbox"
+  },
+  {
+    "Name": "Azure_VirtualWAN_Sandbox"
+  },
+  {
+    "Name": "Azure_VM_Linux_Sandbox"
+  },
+  {
+    "Name": "Azure_VM_to_VM_Sandbox"
+  },
+  {
+    "Name": "Azure_VM_Windows_Sandbox"
+  },
+  {
+    "Name": "PrivateResolver_Sandbox"
+  },
+  {
+    "Name": "TD_Repro"
+  },
+  {
+    "Name": "Azure_PrivateResolver-Distributed_Sandbox"
+  },
+  {
+    "Name": "Azure_PrivateResolver-Centralized_Sandbox"
+  },
+  {
+    "Name": "Training-PrivateDNSZone"
+  },
+  {
+    "Name": "Training-PrivateResolver_Centralized"
+  },
+  {
+    "Name": "Training-PrivateResolver_Distributed"
+  },
+  {
+    "Name": "Training-PrivateDNSZone-Complete"
+  },
+  {
+    "Name": "Training-PrivateResolver_Centralized-Complete"
+  },
+  {
+    "Name": "Training-PrivateResolver_Distributed-Complete"
+  },
+  {
+    "Name": "ManyVMsRepro"
+  },
+  {
+    "Name": "ManyVMsInfra"
+  },
+  {
+    "Name": "ConnMonTest"
+  },
+  {
+    "Name": "Training-Azure_DNS"
+  },
+  {
+    "Name": "Training-BGP_Lab"
+  },
+  {
+    "Name": "Training-VPN_L300"
+  },
+  {
+    "Name": "Sandbox-NATGateway"
+  },
+  {
+    "Name": "Sandbox-VirtualNetworkManager"
+  },
+  {
+    "Name": "Sandbox-NetworkWatcher"
+  }
+]

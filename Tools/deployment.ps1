@@ -12,7 +12,7 @@ param(
 
     [string]$Location = "eastus2",
 
-    [ValidateSet('MCAPS', 'Personal', 'Production')]
+    [ValidateSet('MCAPS', 'Personal')]
     [string]$AzContextAcount = "MCAPS",
 
     [bool]$DeployWithParamFile = $true
@@ -25,8 +25,8 @@ if (!($context = Get-AzContext)) {
     return
 }
 
-if ($AzContextAcount -eq 'Production') {
-    Switch-AzContext -Account 'Production'
+if ($AzContextAcount -eq 'MCAPS') {
+    Switch-AzContext -Account 'MCAPS'
 }
 if ($AzContextAcount -eq 'Personal') {
     Switch-AzContext -Account 'Personal'
@@ -53,10 +53,8 @@ else {
     New-Item -ItemType File -Path $iterationFile
     Set-Content -Path $iterationFile -Value "1"
     $iteration = 1
-    $rgName = "${DeploymentName}_${iteration}"
+    $rgName = "${DeploymentName}_RG_${iteration}"
 }
-
-
 
 if (Get-AzResourceGroup -Name $rgName -ErrorAction SilentlyContinue) {
     $response = Read-Host "Resource Group ${rgName} already exists.  How do you want to handle this?  Below are the options.  Type the corresponding number and enter to choose.
