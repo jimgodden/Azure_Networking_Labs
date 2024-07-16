@@ -2,10 +2,11 @@
 
 param(
     [Parameter(Mandatory)]
-    [string]$ProjectName,
-    [Parameter(Mandatory)]
-    [string]$BranchName
+    [string]$ProjectName
 )
+
+# Gets the name of the current Git Branch
+$BranchName = git rev-parse --abbrev-ref HEAD
 
 # Creates a Directory for the project
 New-Item -ItemType Directory -Name $ProjectName

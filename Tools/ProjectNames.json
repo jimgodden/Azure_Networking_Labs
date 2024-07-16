@@ -67,5 +67,8 @@
   },
   {
     "Name": "Sandbox-PrivateResolver"
+  },
+  {
+    "Name": "Scenario-NSGFlowLogs"
   }
 ]
