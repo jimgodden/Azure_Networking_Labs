@@ -70,5 +70,8 @@
   },
   {
     "Name": "Scenario-NSGFlowLogs"
+  },
+  {
+    "Name": "Training-VPN_Lab"
   }
 ]

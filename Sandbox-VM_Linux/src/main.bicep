@@ -41,7 +41,7 @@ module virtualMachine_Linux '../../modules/Microsoft.Compute/Ubuntu20/VirtualMac
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
     virtualMachine_ScriptFileName: 'Ubuntu20_DNS_Config.sh'
-    commandToExecute: ''
+    commandToExecute: './Ubuntu20_DNS_Config.sh'
   }
 }
 
