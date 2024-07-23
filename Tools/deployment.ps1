@@ -11,10 +11,7 @@ param(
     [string]$DeploymentName,
 
     [string]$Location = "eastus2",
-
-    [ValidateSet('MCAPS', 'Personal')]
-    [string]$AzContextAcount = "MCAPS",
-
+    
     [bool]$DeployWithParamFile = $true
 )
 
@@ -25,20 +22,13 @@ if (!($context = Get-AzContext)) {
     return
 }
 
-if ($AzContextAcount -eq 'MCAPS') {
-    Switch-AzContext -Account 'MCAPS'
-}
-if ($AzContextAcount -eq 'Personal') {
-    Switch-AzContext -Account 'Personal'
-}
-
 Write-Host "AzContext is set to the following:"
 Write-Host "Subscription: $($context.Subscription.Name) ($($context.Subscription.Id)) | Tenant: $($context.Tenant.Id)`n"
 
-$deploymentFilePath = ".\${DeploymentName}\"
-$mainBicepFile = "${deploymentFilePath}src\main.bicep"
-$mainParameterFile = "${deploymentFilePath}main.parameters.bicepparam"
-$iterationFile = "${deploymentFilePath}iteration.txt"
+$deploymentFilePath = ".\${DeploymentName}"
+$mainBicepFile = "${deploymentFilePath}\src\main.bicep"
+$mainParameterFile = "${deploymentFilePath}\src\main.bicepparam"
+$iterationFile = "${deploymentFilePath}\iteration.txt"
 
 # Switches off the Parameter file option in the deployment if the parameter file does not exist
 if (!(Test-Path $mainParameterFile)) {
@@ -50,10 +40,9 @@ if (Test-Path $iterationFile) {
     $rgName = "${DeploymentName}_RG_${iteration}"
 }
 else {
+    $iteration = 0
     New-Item -ItemType File -Path $iterationFile
-    Set-Content -Path $iterationFile -Value "1"
-    $iteration = 1
-    $rgName = "${DeploymentName}_RG_${iteration}"
+    Set-Content -Path $iterationFile -Value "${iteration}"
 }
 
 if (Get-AzResourceGroup -Name $rgName -ErrorAction SilentlyContinue) {
