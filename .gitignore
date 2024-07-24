@@ -1,4 +1,5 @@
 **/iteration.txt
-**/main.parameters.bicepparam
+**/*.bicepparam
 build.ps1
 test.bicep
+/Tools/OrganizeParamFiles.ps1

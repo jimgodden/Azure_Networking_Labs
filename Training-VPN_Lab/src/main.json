@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.27.1.19265",
-      "templateHash": "14602550257448850917"
+      "templateHash": "15530373837682859976"
     }
   },
   "parameters": {
@@ -70,7 +70,7 @@
     },
     "isUsingAzureFirewall": {
       "type": "bool",
-      "defaultValue": true,
+      "defaultValue": false,
       "metadata": {
         "description": "If true, an Azure Firewall will be deployed in both source and destination"
       }

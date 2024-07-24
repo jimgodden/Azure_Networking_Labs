@@ -15,6 +15,12 @@ New-Item -ItemType Directory -Name $ProjectName
 New-Item -ItemType Directory -Path ".\$ProjectName" -Name "src"
 New-Item -ItemType File -Path ".\$ProjectName\src" -Name "main.bicep"
 New-Item -ItemType File -Path ".\$ProjectName\src" -Name "main.json"
+New-Item -ItemType File -Path ".\$ProjectName\src" -Name "main.bicepparam"
+
+# updates the main.bicepparam file with default information
+# Note: parameters must be manually added
+$bicepParamInitializer = "using './main.bicep' /*Provide a path to a bicep template*/"
+Set-Content -Path ".\$ProjectName\main.parameters.bicepparam" -Value $bicepParamInitializer
 
 # Creates a PowerShell script which can be run to easily deploy the project
 New-Item -ItemType File -Path ".\$ProjectName" -Name "${ProjectName}-deployment.ps1"
@@ -27,12 +33,6 @@ New-Item -ItemType File -Path ".\$ProjectName" -Name "diagram.drawio.png"
 # This ensures that the RG name is unique on each deployment
 New-Item -ItemType File -Path ".\$ProjectName" -Name "iteration.txt"
 Set-Content -Path ".\$ProjectName\iteration.txt" -Value "1"
-
-# Creates a .bicepparam file which holds all parameters for deployments
-# Note: parameters must be manually added
-New-Item -ItemType File -Path ".\$ProjectName" -Name "main.parameters.bicepparam"
-$bicepParamInitializer = "using './src/main.bicep' /*Provide a path to a bicep template*/"
-Set-Content -Path ".\$ProjectName\main.parameters.bicepparam" -Value $bicepParamInitializer
 
 # Adds a JSON object to a file that maintains a list of all projects
 .\Tools\Update-BicepProjectList.ps1 -ProjectName $ProjectName -Operation "Add"

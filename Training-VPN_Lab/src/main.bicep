@@ -32,7 +32,7 @@ param virtualNetworkGateway_ActiveActive bool = false
 param azureFirewall_SKU string = 'Basic'
 
 @description('If true, an Azure Firewall will be deployed in both source and destination')
-param isUsingAzureFirewall bool = true
+param isUsingAzureFirewall bool = false
 
 var virtualMachine_ScriptFileLocation = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
 
