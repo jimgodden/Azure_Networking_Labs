@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.27.1.19265",
-      "templateHash": "15530373837682859976"
+      "templateHash": "229702280995396878"
     }
   },
   "parameters": {
@@ -767,9 +767,6 @@
           "location": {
             "value": "[parameters('location')]"
           },
-          "networkInterface_Name": {
-            "value": "VM-Windows_NIC"
-          },
           "subnet_ID": {
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'vnet'), '2022-09-01').outputs.general_SubnetID.value]"
           },
@@ -792,7 +789,13 @@
             "value": "WinServ2022_ConfigScript_General.ps1"
           },
           "commandToExecute": {
-            "value": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_General.ps1 -Username {0}', parameters('virtualMachine_AdminUsername'))]"
+            "value": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username {0}', parameters('virtualMachine_AdminUsername'))]"
+          },
+          "privateIPAddress": {
+            "value": "[cidrHost(reference(resourceId('Microsoft.Resources/deployments', 'vnet'), '2022-09-01').outputs.general_Subnet_AddressPrefix.value, 3)]"
+          },
+          "privateIPAllocationMethod": {
+            "value": "Static"
           }
         },
         "template": {
@@ -1284,9 +1287,6 @@
           "location": {
             "value": "[parameters('location')]"
           },
-          "networkInterface_Name": {
-            "value": "VM-Linux_NIC"
-          },
           "subnet_ID": {
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'vnet'), '2022-09-01').outputs.general_SubnetID.value]"
           },
@@ -1310,6 +1310,12 @@
           },
           "commandToExecute": {
             "value": "./Ubuntu20_DNS_Config.sh"
+          },
+          "privateIPAddress": {
+            "value": "[cidrHost(reference(resourceId('Microsoft.Resources/deployments', 'vnet'), '2022-09-01').outputs.general_Subnet_AddressPrefix.value, 4)]"
+          },
+          "privateIPAllocationMethod": {
+            "value": "Static"
           }
         },
         "template": {

@@ -63,7 +63,6 @@ module virtualMachine_Windows '../../Modules/Microsoft.Compute/WindowsServer2022
   params: {
     acceleratedNetworking: acceleratedNetworking
     location: location
-    networkInterface_Name: 'VM-Windows_NIC'
     subnet_ID: virtualNetwork.outputs.general_SubnetID
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
@@ -71,7 +70,9 @@ module virtualMachine_Windows '../../Modules/Microsoft.Compute/WindowsServer2022
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
     virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_General.ps1'
-    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_General.ps1 -Username ${virtualMachine_AdminUsername}'
+    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username ${virtualMachine_AdminUsername}'
+    privateIPAddress: cidrHost( virtualNetwork.outputs.general_Subnet_AddressPrefix, 3 )
+    privateIPAllocationMethod: 'Static'
   }
 }
 
@@ -80,7 +81,6 @@ module virtualMachine_Linx '../../Modules/Microsoft.Compute/Ubuntu20/VirtualMach
   params: {
     acceleratedNetworking: acceleratedNetworking
     location: location
-    networkInterface_Name: 'VM-Linux_NIC'
     subnet_ID: virtualNetwork.outputs.general_SubnetID
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
@@ -89,6 +89,8 @@ module virtualMachine_Linx '../../Modules/Microsoft.Compute/Ubuntu20/VirtualMach
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
     virtualMachine_ScriptFileName: 'Ubuntu20_DNS_Config.sh'
     commandToExecute: './Ubuntu20_DNS_Config.sh'
+    privateIPAddress: cidrHost( virtualNetwork.outputs.general_Subnet_AddressPrefix, 4 )
+    privateIPAllocationMethod: 'Static'
   }
 }
 
