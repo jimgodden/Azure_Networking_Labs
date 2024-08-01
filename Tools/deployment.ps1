@@ -10,7 +10,8 @@ param(
     [Parameter(Mandatory)]
     [string]$DeploymentName,
 
-    [string]$Location = "eastus2",
+    [Parameter(Mandatory)]
+    [string]$Location,
     
     [bool]$DeployWithParamFile = $true
 )
