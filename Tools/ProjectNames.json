@@ -3,24 +3,6 @@
     "Name": "Azure_VirtualWAN_Sandbox"
   },
   {
-    "Name": "Training-PrivateDNSZone"
-  },
-  {
-    "Name": "Training-PrivateResolver_Centralized"
-  },
-  {
-    "Name": "Training-PrivateResolver_Distributed"
-  },
-  {
-    "Name": "Training-PrivateDNSZone-Complete"
-  },
-  {
-    "Name": "Training-PrivateResolver_Centralized-Complete"
-  },
-  {
-    "Name": "Training-PrivateResolver_Distributed-Complete"
-  },
-  {
     "Name": "Training-Azure_DNS"
   },
   {

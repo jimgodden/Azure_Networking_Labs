@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.27.1.19265",
-      "templateHash": "14005964677305455925"
+      "templateHash": "16504276648268121032"
     }
   },
   "parameters": {
@@ -30,7 +30,7 @@
     },
     "virtualMachine_Size": {
       "type": "string",
-      "defaultValue": "Standard_B2ms",
+      "defaultValue": "Standard_D2as_v4",
       "metadata": {
         "description": "Size of the Virtual Machines"
       }
@@ -42,9 +42,6 @@
         "description": "True enables Accelerated Networking and False disabled it.  \r\nNot all VM sizes support Accel Net (i.e. Standard_B2ms).  \r\nI'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net.\r\n"
       }
     }
-  },
-  "variables": {
-    "virtualMachine_ScriptFileLocation": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/"
   },
   "resources": [
     {
@@ -528,15 +525,6 @@
           },
           "virtualMachine_Size": {
             "value": "[parameters('virtualMachine_Size')]"
-          },
-          "virtualMachine_ScriptFileLocation": {
-            "value": "[variables('virtualMachine_ScriptFileLocation')]"
-          },
-          "virtualMachine_ScriptFileName": {
-            "value": "WinServ2022_ConfigScript_General.ps1"
-          },
-          "commandToExecute": {
-            "value": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_General.ps1 -Username {0}', parameters('virtualMachine_AdminUsername'))]"
           }
         },
         "template": {
@@ -546,12 +534,16 @@
             "_generator": {
               "name": "bicep",
               "version": "0.27.1.19265",
-              "templateHash": "15809475316512000192"
+              "templateHash": "91829794891651299"
             }
           },
           "parameters": {
             "location": {
               "type": "string"
+            },
+            "imageReference_Id": {
+              "type": "string",
+              "defaultValue": "/subscriptions/1a283126-08f5-4fff-8784-19fe92c7422e/resourceGroups/Sandbox-VM_Windows_RG_26/providers/Microsoft.Compute/galleries/testgallery/images/Windows2022-GeneralNetworkTroubleshooter/versions/1.0.0"
             },
             "virtualMachine_Name": {
               "type": "string",
@@ -597,24 +589,6 @@
                 "description": "The Resource ID of the subnet to which the Network Interface will be assigned."
               }
             },
-            "virtualMachine_ScriptFileLocation": {
-              "type": "string",
-              "metadata": {
-                "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\r\nExample: https://example.com/scripts/"
-              }
-            },
-            "virtualMachine_ScriptFileName": {
-              "type": "string",
-              "metadata": {
-                "description": "Name of the file to be ran while the Virtual Machine is being created\r\nExample: WinServ2022_ConfigScript_General.ps1"
-              }
-            },
-            "commandToExecute": {
-              "type": "string",
-              "metadata": {
-                "description": "'Command to execute while the Virtual Machine is being created.\r\nExample:\r\n'powershell.exe -ExecutionPolicy Unrestricted -File <file name.ps1>'\r\n"
-              }
-            },
             "addPublicIPAddress": {
               "type": "bool",
               "defaultValue": false,
@@ -645,9 +619,6 @@
               "defaultValue": {}
             }
           },
-          "variables": {
-            "virtualMachine_ScriptFileUri": "[format('{0}{1}', parameters('virtualMachine_ScriptFileLocation'), parameters('virtualMachine_ScriptFileName'))]"
-          },
           "resources": [
             {
               "type": "Microsoft.Compute/virtualMachines",
@@ -663,10 +634,7 @@
                 },
                 "storageProfile": {
                   "imageReference": {
-                    "publisher": "MicrosoftWindowsServer",
-                    "offer": "WindowsServer",
-                    "sku": "2022-datacenter-azure-edition",
-                    "version": "latest"
+                    "id": "[parameters('imageReference_Id')]"
                   },
                   "osDisk": {
                     "osType": "Windows",
@@ -730,30 +698,6 @@
                 "publisher": "Microsoft.Azure.NetworkWatcher",
                 "type": "NetworkWatcherAgentWindows",
                 "typeHandlerVersion": "1.4"
-              },
-              "tags": "[parameters('tagValues')]",
-              "dependsOn": [
-                "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachine_Name'))]"
-              ]
-            },
-            {
-              "type": "Microsoft.Compute/virtualMachines/extensions",
-              "apiVersion": "2021-11-01",
-              "name": "[format('{0}/{1}', parameters('virtualMachine_Name'), 'installcustomscript')]",
-              "location": "[parameters('location')]",
-              "properties": {
-                "publisher": "Microsoft.Compute",
-                "type": "CustomScriptExtension",
-                "typeHandlerVersion": "1.9",
-                "autoUpgradeMinorVersion": true,
-                "settings": {
-                  "fileUris": [
-                    "[variables('virtualMachine_ScriptFileUri')]"
-                  ]
-                },
-                "protectedSettings": {
-                  "commandToExecute": "[parameters('commandToExecute')]"
-                }
               },
               "tags": "[parameters('tagValues')]",
               "dependsOn": [

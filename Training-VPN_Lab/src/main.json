@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.27.1.19265",
-      "templateHash": "6286446377278546346"
+      "templateHash": "13379085353779184441"
     }
   },
   "parameters": {
@@ -47,6 +47,12 @@
       "defaultValue": "VpnGw1",
       "metadata": {
         "description": "SKU of the Virtual Network Gateway"
+      }
+    },
+    "vpn_SharedKey": {
+      "type": "securestring",
+      "metadata": {
+        "description": "VPN Shared Key used for authenticating VPN connections"
       }
     },
     "virtualNetworkGateway_ActiveActive": {
@@ -1637,6 +1643,314 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2022-09-01",
+      "name": "a-to-b-connection",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "virtualNetworkGateway_ID": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtualNetworkGatewayA'), '2022-09-01').outputs.virtualNetworkGateway_ResourceID.value]"
+          },
+          "vpn_Destination_LocalAddressPrefix": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'vnetB'), '2022-09-01').outputs.virtualNetwork_AddressPrefix.value]"
+          },
+          "vpn_Destination_Name": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtualNetworkGatewayB'), '2022-09-01').outputs.virtualNetworkGateway_Name.value]"
+          },
+          "vpn_Destination_PublicIPAddress": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtualNetworkGatewayB'), '2022-09-01').outputs.virtualNetworkGateway_PublicIPAddress.value]"
+          },
+          "vpn_SharedKey": {
+            "value": "[parameters('vpn_SharedKey')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.27.1.19265",
+              "templateHash": "793131539064925669"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string",
+              "metadata": {
+                "description": "Azure Datacenter that the source VNG is deployed"
+              }
+            },
+            "vpn_Destination_Name": {
+              "type": "string",
+              "metadata": {
+                "description": "Friendly name for the destination VPN device"
+              }
+            },
+            "vpn_Destination_PublicIPAddress": {
+              "type": "string",
+              "metadata": {
+                "description": "Public IP Address of the Destination VPN.  Use this or FQDN.  Not both."
+              }
+            },
+            "vpn_Destination_FQDN": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "FQDN of the Destination VPN.  Use this or Public IP Address.  Not both."
+              }
+            },
+            "vpn_Destination_LocalAddressPrefix": {
+              "type": "string",
+              "metadata": {
+                "description": "Address Prefix"
+              }
+            },
+            "vpn_SharedKey": {
+              "type": "securestring",
+              "metadata": {
+                "description": "VPN Shared Key used for authenticating VPN connections"
+              }
+            },
+            "lngOptionalTag": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "Option to add an additional identifier in case two LNGs of the same name might get created."
+              }
+            },
+            "virtualNetworkGateway_ID": {
+              "type": "string",
+              "metadata": {
+                "description": "Source Virtual Network Gateway ID"
+              }
+            },
+            "tagValues": {
+              "type": "object",
+              "defaultValue": {}
+            }
+          },
+          "variables": {
+            "virtualNetworkGateway_ID_Split": "[split(parameters('virtualNetworkGateway_ID'), '/')]",
+            "virtualNetworkGateway_Name": "[variables('virtualNetworkGateway_ID_Split')[8]]"
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Network/connections",
+              "apiVersion": "2022-11-01",
+              "name": "[format('{0}_to_{1}_Connection', variables('virtualNetworkGateway_Name'), parameters('vpn_Destination_Name'))]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "virtualNetworkGateway1": {
+                  "id": "[parameters('virtualNetworkGateway_ID')]",
+                  "properties": {}
+                },
+                "localNetworkGateway2": {
+                  "id": "[resourceId('Microsoft.Network/localNetworkGateways', format('{0}_LocalNetworkGateway{1}', parameters('vpn_Destination_Name'), parameters('lngOptionalTag')))]",
+                  "properties": {}
+                },
+                "connectionType": "IPsec",
+                "connectionProtocol": "IKEv2",
+                "routingWeight": 0,
+                "sharedKey": "[parameters('vpn_SharedKey')]",
+                "enableBgp": false,
+                "useLocalAzureIpAddress": false,
+                "usePolicyBasedTrafficSelectors": false,
+                "dpdTimeoutSeconds": 45,
+                "connectionMode": "Default"
+              },
+              "tags": "[parameters('tagValues')]",
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/localNetworkGateways', format('{0}_LocalNetworkGateway{1}', parameters('vpn_Destination_Name'), parameters('lngOptionalTag')))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Network/localNetworkGateways",
+              "apiVersion": "2022-11-01",
+              "name": "[format('{0}_LocalNetworkGateway{1}', parameters('vpn_Destination_Name'), parameters('lngOptionalTag'))]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "gatewayIpAddress": "[parameters('vpn_Destination_PublicIPAddress')]",
+                "fqdn": "[parameters('vpn_Destination_FQDN')]",
+                "localNetworkAddressSpace": {
+                  "addressPrefixes": [
+                    "[parameters('vpn_Destination_LocalAddressPrefix')]"
+                  ]
+                }
+              },
+              "tags": "[parameters('tagValues')]"
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'vnetB')]",
+        "[resourceId('Microsoft.Resources/deployments', 'virtualNetworkGatewayA')]",
+        "[resourceId('Microsoft.Resources/deployments', 'virtualNetworkGatewayB')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "b-to-a-connection",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "virtualNetworkGateway_ID": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtualNetworkGatewayB'), '2022-09-01').outputs.virtualNetworkGateway_ResourceID.value]"
+          },
+          "vpn_Destination_LocalAddressPrefix": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'vnetA'), '2022-09-01').outputs.virtualNetwork_AddressPrefix.value]"
+          },
+          "vpn_Destination_Name": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtualNetworkGatewayA'), '2022-09-01').outputs.virtualNetworkGateway_Name.value]"
+          },
+          "vpn_Destination_PublicIPAddress": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtualNetworkGatewayA'), '2022-09-01').outputs.virtualNetworkGateway_PublicIPAddress.value]"
+          },
+          "vpn_SharedKey": {
+            "value": "[parameters('vpn_SharedKey')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.27.1.19265",
+              "templateHash": "793131539064925669"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string",
+              "metadata": {
+                "description": "Azure Datacenter that the source VNG is deployed"
+              }
+            },
+            "vpn_Destination_Name": {
+              "type": "string",
+              "metadata": {
+                "description": "Friendly name for the destination VPN device"
+              }
+            },
+            "vpn_Destination_PublicIPAddress": {
+              "type": "string",
+              "metadata": {
+                "description": "Public IP Address of the Destination VPN.  Use this or FQDN.  Not both."
+              }
+            },
+            "vpn_Destination_FQDN": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "FQDN of the Destination VPN.  Use this or Public IP Address.  Not both."
+              }
+            },
+            "vpn_Destination_LocalAddressPrefix": {
+              "type": "string",
+              "metadata": {
+                "description": "Address Prefix"
+              }
+            },
+            "vpn_SharedKey": {
+              "type": "securestring",
+              "metadata": {
+                "description": "VPN Shared Key used for authenticating VPN connections"
+              }
+            },
+            "lngOptionalTag": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "Option to add an additional identifier in case two LNGs of the same name might get created."
+              }
+            },
+            "virtualNetworkGateway_ID": {
+              "type": "string",
+              "metadata": {
+                "description": "Source Virtual Network Gateway ID"
+              }
+            },
+            "tagValues": {
+              "type": "object",
+              "defaultValue": {}
+            }
+          },
+          "variables": {
+            "virtualNetworkGateway_ID_Split": "[split(parameters('virtualNetworkGateway_ID'), '/')]",
+            "virtualNetworkGateway_Name": "[variables('virtualNetworkGateway_ID_Split')[8]]"
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Network/connections",
+              "apiVersion": "2022-11-01",
+              "name": "[format('{0}_to_{1}_Connection', variables('virtualNetworkGateway_Name'), parameters('vpn_Destination_Name'))]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "virtualNetworkGateway1": {
+                  "id": "[parameters('virtualNetworkGateway_ID')]",
+                  "properties": {}
+                },
+                "localNetworkGateway2": {
+                  "id": "[resourceId('Microsoft.Network/localNetworkGateways', format('{0}_LocalNetworkGateway{1}', parameters('vpn_Destination_Name'), parameters('lngOptionalTag')))]",
+                  "properties": {}
+                },
+                "connectionType": "IPsec",
+                "connectionProtocol": "IKEv2",
+                "routingWeight": 0,
+                "sharedKey": "[parameters('vpn_SharedKey')]",
+                "enableBgp": false,
+                "useLocalAzureIpAddress": false,
+                "usePolicyBasedTrafficSelectors": false,
+                "dpdTimeoutSeconds": 45,
+                "connectionMode": "Default"
+              },
+              "tags": "[parameters('tagValues')]",
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/localNetworkGateways', format('{0}_LocalNetworkGateway{1}', parameters('vpn_Destination_Name'), parameters('lngOptionalTag')))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Network/localNetworkGateways",
+              "apiVersion": "2022-11-01",
+              "name": "[format('{0}_LocalNetworkGateway{1}', parameters('vpn_Destination_Name'), parameters('lngOptionalTag'))]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "gatewayIpAddress": "[parameters('vpn_Destination_PublicIPAddress')]",
+                "fqdn": "[parameters('vpn_Destination_FQDN')]",
+                "localNetworkAddressSpace": {
+                  "addressPrefixes": [
+                    "[parameters('vpn_Destination_LocalAddressPrefix')]"
+                  ]
+                }
+              },
+              "tags": "[parameters('tagValues')]"
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'vnetA')]",
+        "[resourceId('Microsoft.Resources/deployments', 'virtualNetworkGatewayA')]",
+        "[resourceId('Microsoft.Resources/deployments', 'virtualNetworkGatewayB')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
       "name": "virtualNetworkGatewayB",
       "properties": {
         "expressionEvaluationOptions": {
@@ -1852,6 +2166,314 @@
       },
       "dependsOn": [
         "[resourceId('Microsoft.Resources/deployments', 'vnetB')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "c-to-b-connection",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "virtualNetworkGateway_ID": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtualNetworkGatewayC'), '2022-09-01').outputs.virtualNetworkGateway_ResourceID.value]"
+          },
+          "vpn_Destination_LocalAddressPrefix": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'vnetB'), '2022-09-01').outputs.virtualNetwork_AddressPrefix.value]"
+          },
+          "vpn_Destination_Name": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtualNetworkGatewayB'), '2022-09-01').outputs.virtualNetworkGateway_Name.value]"
+          },
+          "vpn_Destination_PublicIPAddress": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtualNetworkGatewayB'), '2022-09-01').outputs.virtualNetworkGateway_PublicIPAddress.value]"
+          },
+          "vpn_SharedKey": {
+            "value": "[parameters('vpn_SharedKey')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.27.1.19265",
+              "templateHash": "793131539064925669"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string",
+              "metadata": {
+                "description": "Azure Datacenter that the source VNG is deployed"
+              }
+            },
+            "vpn_Destination_Name": {
+              "type": "string",
+              "metadata": {
+                "description": "Friendly name for the destination VPN device"
+              }
+            },
+            "vpn_Destination_PublicIPAddress": {
+              "type": "string",
+              "metadata": {
+                "description": "Public IP Address of the Destination VPN.  Use this or FQDN.  Not both."
+              }
+            },
+            "vpn_Destination_FQDN": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "FQDN of the Destination VPN.  Use this or Public IP Address.  Not both."
+              }
+            },
+            "vpn_Destination_LocalAddressPrefix": {
+              "type": "string",
+              "metadata": {
+                "description": "Address Prefix"
+              }
+            },
+            "vpn_SharedKey": {
+              "type": "securestring",
+              "metadata": {
+                "description": "VPN Shared Key used for authenticating VPN connections"
+              }
+            },
+            "lngOptionalTag": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "Option to add an additional identifier in case two LNGs of the same name might get created."
+              }
+            },
+            "virtualNetworkGateway_ID": {
+              "type": "string",
+              "metadata": {
+                "description": "Source Virtual Network Gateway ID"
+              }
+            },
+            "tagValues": {
+              "type": "object",
+              "defaultValue": {}
+            }
+          },
+          "variables": {
+            "virtualNetworkGateway_ID_Split": "[split(parameters('virtualNetworkGateway_ID'), '/')]",
+            "virtualNetworkGateway_Name": "[variables('virtualNetworkGateway_ID_Split')[8]]"
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Network/connections",
+              "apiVersion": "2022-11-01",
+              "name": "[format('{0}_to_{1}_Connection', variables('virtualNetworkGateway_Name'), parameters('vpn_Destination_Name'))]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "virtualNetworkGateway1": {
+                  "id": "[parameters('virtualNetworkGateway_ID')]",
+                  "properties": {}
+                },
+                "localNetworkGateway2": {
+                  "id": "[resourceId('Microsoft.Network/localNetworkGateways', format('{0}_LocalNetworkGateway{1}', parameters('vpn_Destination_Name'), parameters('lngOptionalTag')))]",
+                  "properties": {}
+                },
+                "connectionType": "IPsec",
+                "connectionProtocol": "IKEv2",
+                "routingWeight": 0,
+                "sharedKey": "[parameters('vpn_SharedKey')]",
+                "enableBgp": false,
+                "useLocalAzureIpAddress": false,
+                "usePolicyBasedTrafficSelectors": false,
+                "dpdTimeoutSeconds": 45,
+                "connectionMode": "Default"
+              },
+              "tags": "[parameters('tagValues')]",
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/localNetworkGateways', format('{0}_LocalNetworkGateway{1}', parameters('vpn_Destination_Name'), parameters('lngOptionalTag')))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Network/localNetworkGateways",
+              "apiVersion": "2022-11-01",
+              "name": "[format('{0}_LocalNetworkGateway{1}', parameters('vpn_Destination_Name'), parameters('lngOptionalTag'))]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "gatewayIpAddress": "[parameters('vpn_Destination_PublicIPAddress')]",
+                "fqdn": "[parameters('vpn_Destination_FQDN')]",
+                "localNetworkAddressSpace": {
+                  "addressPrefixes": [
+                    "[parameters('vpn_Destination_LocalAddressPrefix')]"
+                  ]
+                }
+              },
+              "tags": "[parameters('tagValues')]"
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'vnetB')]",
+        "[resourceId('Microsoft.Resources/deployments', 'virtualNetworkGatewayB')]",
+        "[resourceId('Microsoft.Resources/deployments', 'virtualNetworkGatewayC')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "b-to-c-connection",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "virtualNetworkGateway_ID": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtualNetworkGatewayB'), '2022-09-01').outputs.virtualNetworkGateway_ResourceID.value]"
+          },
+          "vpn_Destination_LocalAddressPrefix": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'vnetC'), '2022-09-01').outputs.virtualNetwork_AddressPrefix.value]"
+          },
+          "vpn_Destination_Name": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtualNetworkGatewayC'), '2022-09-01').outputs.virtualNetworkGateway_Name.value]"
+          },
+          "vpn_Destination_PublicIPAddress": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtualNetworkGatewayC'), '2022-09-01').outputs.virtualNetworkGateway_PublicIPAddress.value]"
+          },
+          "vpn_SharedKey": {
+            "value": "[parameters('vpn_SharedKey')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.27.1.19265",
+              "templateHash": "793131539064925669"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string",
+              "metadata": {
+                "description": "Azure Datacenter that the source VNG is deployed"
+              }
+            },
+            "vpn_Destination_Name": {
+              "type": "string",
+              "metadata": {
+                "description": "Friendly name for the destination VPN device"
+              }
+            },
+            "vpn_Destination_PublicIPAddress": {
+              "type": "string",
+              "metadata": {
+                "description": "Public IP Address of the Destination VPN.  Use this or FQDN.  Not both."
+              }
+            },
+            "vpn_Destination_FQDN": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "FQDN of the Destination VPN.  Use this or Public IP Address.  Not both."
+              }
+            },
+            "vpn_Destination_LocalAddressPrefix": {
+              "type": "string",
+              "metadata": {
+                "description": "Address Prefix"
+              }
+            },
+            "vpn_SharedKey": {
+              "type": "securestring",
+              "metadata": {
+                "description": "VPN Shared Key used for authenticating VPN connections"
+              }
+            },
+            "lngOptionalTag": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "Option to add an additional identifier in case two LNGs of the same name might get created."
+              }
+            },
+            "virtualNetworkGateway_ID": {
+              "type": "string",
+              "metadata": {
+                "description": "Source Virtual Network Gateway ID"
+              }
+            },
+            "tagValues": {
+              "type": "object",
+              "defaultValue": {}
+            }
+          },
+          "variables": {
+            "virtualNetworkGateway_ID_Split": "[split(parameters('virtualNetworkGateway_ID'), '/')]",
+            "virtualNetworkGateway_Name": "[variables('virtualNetworkGateway_ID_Split')[8]]"
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Network/connections",
+              "apiVersion": "2022-11-01",
+              "name": "[format('{0}_to_{1}_Connection', variables('virtualNetworkGateway_Name'), parameters('vpn_Destination_Name'))]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "virtualNetworkGateway1": {
+                  "id": "[parameters('virtualNetworkGateway_ID')]",
+                  "properties": {}
+                },
+                "localNetworkGateway2": {
+                  "id": "[resourceId('Microsoft.Network/localNetworkGateways', format('{0}_LocalNetworkGateway{1}', parameters('vpn_Destination_Name'), parameters('lngOptionalTag')))]",
+                  "properties": {}
+                },
+                "connectionType": "IPsec",
+                "connectionProtocol": "IKEv2",
+                "routingWeight": 0,
+                "sharedKey": "[parameters('vpn_SharedKey')]",
+                "enableBgp": false,
+                "useLocalAzureIpAddress": false,
+                "usePolicyBasedTrafficSelectors": false,
+                "dpdTimeoutSeconds": 45,
+                "connectionMode": "Default"
+              },
+              "tags": "[parameters('tagValues')]",
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/localNetworkGateways', format('{0}_LocalNetworkGateway{1}', parameters('vpn_Destination_Name'), parameters('lngOptionalTag')))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Network/localNetworkGateways",
+              "apiVersion": "2022-11-01",
+              "name": "[format('{0}_LocalNetworkGateway{1}', parameters('vpn_Destination_Name'), parameters('lngOptionalTag'))]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "gatewayIpAddress": "[parameters('vpn_Destination_PublicIPAddress')]",
+                "fqdn": "[parameters('vpn_Destination_FQDN')]",
+                "localNetworkAddressSpace": {
+                  "addressPrefixes": [
+                    "[parameters('vpn_Destination_LocalAddressPrefix')]"
+                  ]
+                }
+              },
+              "tags": "[parameters('tagValues')]"
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'vnetC')]",
+        "[resourceId('Microsoft.Resources/deployments', 'virtualNetworkGatewayB')]",
+        "[resourceId('Microsoft.Resources/deployments', 'virtualNetworkGatewayC')]"
       ]
     },
     {
