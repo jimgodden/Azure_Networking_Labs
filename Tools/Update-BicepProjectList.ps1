@@ -28,4 +28,4 @@ switch ($Operation) {
 }
 
 # Convert the updated content back to json and saves it
-$jsonContent | ConvertTo-json | Set-Content -Path $jsonPath
+$jsonContent | Sort-Object | ConvertTo-json | Set-Content -Path $jsonPath

@@ -17,6 +17,10 @@ I'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net.
 ''')
 param acceleratedNetworking bool = false
 
+@description('VPN Shared Key used for authenticating VPN connections')
+@secure()
+param vpn_SharedKey string
+
 @description('''
 Storage account name restrictions:
 - Storage account names must be between 3 and 24 characters in length and may contain numbers and lowercase letters only.
@@ -46,15 +50,53 @@ module virtualNetwork_dst '../../modules/Microsoft.Network/VirtualNetwork.bicep'
   }
 }
 
-module src_to_dst_vnetPeering '../../modules/Microsoft.Network/VirtualNetworkPeeringSpoke2Spoke.bicep' = {
-  name: 'vnetpeering'
+module vng_Src '../../modules/Microsoft.Network/VirtualNetworkGateway.bicep' = {
+  name: 'vng_src'
   params: {
-    virtualNetwork1_Name: virtualNetwork_src.outputs.virtualNetwork_Name
-    virtualNetwork2_Name: virtualNetwork_dst.outputs.virtualNetwork_Name
+    location: location
+    virtualNetworkGateway_ASN: 65530
+    virtualNetworkGateway_Name: 'Vng_Src'
+    virtualNetworkGateway_Subnet_ResourceID: virtualNetwork_src.outputs.gateway_SubnetID
   }
 }
 
-module virtualMachine_Windows_SRC '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
+module vng_Src_to_vng_Dst_connection '../../modules/Microsoft.Network/Connection_and_LocalNetworkGateway.bicep' = {
+  name: 'vng-src-to-vng-dst-connection'
+  params: {
+    location: location
+    virtualNetworkGateway_ID: vng_Src.outputs.virtualNetworkGateway_ResourceID
+    vpn_Destination_Name: vng_Dst.outputs.virtualNetworkGateway_Name
+    vpn_Destination_BGPIPAddress: vng_Dst.outputs.virtualNetworkGateway_BGPAddress
+    vpn_Destination_ASN: vng_Dst.outputs.virtualNetworkGateway_ASN
+    vpn_Destination_PublicIPAddress: vng_Dst.outputs.virtualNetworkGateway_PublicIPAddress
+    vpn_SharedKey: vpn_SharedKey
+  }
+}
+
+module vng_dst_to_vng_src_connection '../../modules/Microsoft.Network/Connection_and_LocalNetworkGateway.bicep' = {
+  name: 'b-to-a-connection'
+  params: {
+    location: location
+    virtualNetworkGateway_ID: vng_Dst.outputs.virtualNetworkGateway_ResourceID
+    vpn_Destination_Name: vng_Src.outputs.virtualNetworkGateway_Name
+    vpn_Destination_PublicIPAddress: vng_Src.outputs.virtualNetworkGateway_PublicIPAddress
+    vpn_Destination_BGPIPAddress: vng_Src.outputs.virtualNetworkGateway_BGPAddress
+    vpn_Destination_ASN: vng_Src.outputs.virtualNetworkGateway_ASN
+    vpn_SharedKey: vpn_SharedKey
+  }
+}
+
+module vng_Dst '../../modules/Microsoft.Network/VirtualNetworkGateway.bicep' = {
+  name: 'vng_Dst'
+  params: {
+    location: location
+    virtualNetworkGateway_ASN: 65531
+    virtualNetworkGateway_Name: 'virtualNetworkGatewayB'
+    virtualNetworkGateway_Subnet_ResourceID: virtualNetwork_dst.outputs.gateway_SubnetID
+  }
+}
+
+module virtualMachine_Windows_Src '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
   name: 'winVM-src'
   params: {
     acceleratedNetworking: acceleratedNetworking
@@ -70,7 +112,7 @@ module virtualMachine_Windows_SRC '../../modules/Microsoft.Compute/WindowsServer
   }
 }
 
-module virtualMachine_Windows_dst '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
+module virtualMachine_Windows_Dst '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
   name: 'winVM-dst'
   params: {
     acceleratedNetworking: acceleratedNetworking
@@ -94,76 +136,13 @@ module storageAccount '../../modules/Microsoft.Storage/StorageAccount.bicep' = {
   }
 }
 
-module workspace '../../modules/Microsoft.OperationalInsights/Workspaces.bicep' = {
-  name: 'workspace'
+
+
+module bastion_src '../../modules/Microsoft.Network/Bastion.bicep' = {
+  name: 'bastion_src'
   params: {
-    location: location
-    Workspaces_name: 'testworkspace'
-  }
-}
-
-module nsgFlowLogs_src '../../modules/Microsoft.Network/NSGFlowLogs.bicep' = {
-  name: 'nsgFLowLogs_src'
-  scope: resourceGroup('NetworkWatcherRG')
-  params: {
-    FlowLogs_TargetResourceId: virtualNetwork_src.outputs.networkSecurityGroup_ID
-    location: location
-    StorageAccount_Id: storageAccount.outputs.storageAccount_ID
-    workspaceResourceId: workspace.outputs.LogAnalyticsWorkspace_ID
-  }
-}
-
-resource networkSecurityGroup_Expected 'Microsoft.Network/networkSecurityGroups/securityRules@2022-11-01' = {
-  name: 'vnet-src_NSG_General/Expected'
-  properties: {
-    description: 'Expected'
-    protocol: '*'
-    sourcePortRange: '*'
-    destinationPortRange: '*'
-    sourceAddressPrefix: '10.0.0.4'
-    destinationAddressPrefix: '10.1.0.4'
-    access: 'Allow'
-    priority: 200
-    direction: 'Outbound'
-    sourcePortRanges: []
-    destinationPortRanges: []
-    sourceAddressPrefixes: []
-    destinationAddressPrefixes: []
-  }
-  dependsOn: [
-    virtualNetwork_src
-  ]
-}
-
-resource networkSecurityGroup_Error 'Microsoft.Network/networkSecurityGroups/securityRules@2022-11-01' = {
-  name: 'vnet-src_NSG_General/Error'
-  properties: {
-    description: 'Error'
-    protocol: '*'
-    sourcePortRange: '*'
-    destinationPortRange: '*'
-    sourceAddressPrefix: '10.0.0.0/24'
-    destinationAddressPrefix: '10.1.0.0/24'
-    access: 'Allow'
-    priority: 201
-    direction: 'Outbound'
-    sourcePortRanges: []
-    destinationPortRanges: []
-    sourceAddressPrefixes: []
-    destinationAddressPrefixes: []
-  }
-  dependsOn: [
-    virtualNetwork_src
-  ]
-}
-
-module bastion '../../modules/Microsoft.Network/Bastion.bicep' = {
-  name: 'bastion'
-  params: {
-    bastion_name: 'hub_bastion'
+    bastion_name: 'src_bastion'
     bastion_SubnetID: virtualNetwork_src.outputs.bastion_SubnetID
     location: location
   }
 }
-
-output vmResourceId string = virtualMachine_Windows_SRC.outputs.virtualMachine_Id

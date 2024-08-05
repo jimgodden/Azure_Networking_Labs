@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.27.1.19265",
-      "templateHash": "13379085353779184441"
+      "version": "0.29.47.4906",
+      "templateHash": "14810734712846392832"
     }
   },
   "parameters": {
@@ -93,8 +93,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.27.1.19265",
-              "templateHash": "4237243581776694674"
+              "version": "0.29.47.4906",
+              "templateHash": "9502503265789790679"
             }
           },
           "parameters": {
@@ -544,8 +544,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.27.1.19265",
-              "templateHash": "4237243581776694674"
+              "version": "0.29.47.4906",
+              "templateHash": "9502503265789790679"
             }
           },
           "parameters": {
@@ -995,8 +995,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.27.1.19265",
-              "templateHash": "4237243581776694674"
+              "version": "0.29.47.4906",
+              "templateHash": "9502503265789790679"
             }
           },
           "parameters": {
@@ -1455,8 +1455,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.27.1.19265",
-              "templateHash": "5625462848695914846"
+              "version": "0.29.47.4906",
+              "templateHash": "2266396396429279658"
             }
           },
           "parameters": {
@@ -1675,8 +1675,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.27.1.19265",
-              "templateHash": "793131539064925669"
+              "version": "0.29.47.4906",
+              "templateHash": "12052371023427762052"
             }
           },
           "parameters": {
@@ -1751,7 +1751,7 @@
                   "properties": {}
                 },
                 "localNetworkGateway2": {
-                  "id": "[resourceId('Microsoft.Network/localNetworkGateways', format('{0}_LocalNetworkGateway{1}', parameters('vpn_Destination_Name'), parameters('lngOptionalTag')))]",
+                  "id": "[resourceId('Microsoft.Network/localNetworkGateways', format('Lng_for_{0}_to_{1}{2}', variables('virtualNetworkGateway_Name'), parameters('vpn_Destination_Name'), parameters('lngOptionalTag')))]",
                   "properties": {}
                 },
                 "connectionType": "IPsec",
@@ -1766,13 +1766,13 @@
               },
               "tags": "[parameters('tagValues')]",
               "dependsOn": [
-                "[resourceId('Microsoft.Network/localNetworkGateways', format('{0}_LocalNetworkGateway{1}', parameters('vpn_Destination_Name'), parameters('lngOptionalTag')))]"
+                "[resourceId('Microsoft.Network/localNetworkGateways', format('Lng_for_{0}_to_{1}{2}', variables('virtualNetworkGateway_Name'), parameters('vpn_Destination_Name'), parameters('lngOptionalTag')))]"
               ]
             },
             {
               "type": "Microsoft.Network/localNetworkGateways",
               "apiVersion": "2022-11-01",
-              "name": "[format('{0}_LocalNetworkGateway{1}', parameters('vpn_Destination_Name'), parameters('lngOptionalTag'))]",
+              "name": "[format('Lng_for_{0}_to_{1}{2}', variables('virtualNetworkGateway_Name'), parameters('vpn_Destination_Name'), parameters('lngOptionalTag'))]",
               "location": "[parameters('location')]",
               "properties": {
                 "gatewayIpAddress": "[parameters('vpn_Destination_PublicIPAddress')]",
@@ -1829,8 +1829,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.27.1.19265",
-              "templateHash": "793131539064925669"
+              "version": "0.29.47.4906",
+              "templateHash": "12052371023427762052"
             }
           },
           "parameters": {
@@ -1905,7 +1905,7 @@
                   "properties": {}
                 },
                 "localNetworkGateway2": {
-                  "id": "[resourceId('Microsoft.Network/localNetworkGateways', format('{0}_LocalNetworkGateway{1}', parameters('vpn_Destination_Name'), parameters('lngOptionalTag')))]",
+                  "id": "[resourceId('Microsoft.Network/localNetworkGateways', format('Lng_for_{0}_to_{1}{2}', variables('virtualNetworkGateway_Name'), parameters('vpn_Destination_Name'), parameters('lngOptionalTag')))]",
                   "properties": {}
                 },
                 "connectionType": "IPsec",
@@ -1920,13 +1920,13 @@
               },
               "tags": "[parameters('tagValues')]",
               "dependsOn": [
-                "[resourceId('Microsoft.Network/localNetworkGateways', format('{0}_LocalNetworkGateway{1}', parameters('vpn_Destination_Name'), parameters('lngOptionalTag')))]"
+                "[resourceId('Microsoft.Network/localNetworkGateways', format('Lng_for_{0}_to_{1}{2}', variables('virtualNetworkGateway_Name'), parameters('vpn_Destination_Name'), parameters('lngOptionalTag')))]"
               ]
             },
             {
               "type": "Microsoft.Network/localNetworkGateways",
               "apiVersion": "2022-11-01",
-              "name": "[format('{0}_LocalNetworkGateway{1}', parameters('vpn_Destination_Name'), parameters('lngOptionalTag'))]",
+              "name": "[format('Lng_for_{0}_to_{1}{2}', variables('virtualNetworkGateway_Name'), parameters('vpn_Destination_Name'), parameters('lngOptionalTag'))]",
               "location": "[parameters('location')]",
               "properties": {
                 "gatewayIpAddress": "[parameters('vpn_Destination_PublicIPAddress')]",
@@ -1983,8 +1983,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.27.1.19265",
-              "templateHash": "5625462848695914846"
+              "version": "0.29.47.4906",
+              "templateHash": "2266396396429279658"
             }
           },
           "parameters": {
@@ -2203,8 +2203,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.27.1.19265",
-              "templateHash": "793131539064925669"
+              "version": "0.29.47.4906",
+              "templateHash": "12052371023427762052"
             }
           },
           "parameters": {
@@ -2279,7 +2279,7 @@
                   "properties": {}
                 },
                 "localNetworkGateway2": {
-                  "id": "[resourceId('Microsoft.Network/localNetworkGateways', format('{0}_LocalNetworkGateway{1}', parameters('vpn_Destination_Name'), parameters('lngOptionalTag')))]",
+                  "id": "[resourceId('Microsoft.Network/localNetworkGateways', format('Lng_for_{0}_to_{1}{2}', variables('virtualNetworkGateway_Name'), parameters('vpn_Destination_Name'), parameters('lngOptionalTag')))]",
                   "properties": {}
                 },
                 "connectionType": "IPsec",
@@ -2294,13 +2294,13 @@
               },
               "tags": "[parameters('tagValues')]",
               "dependsOn": [
-                "[resourceId('Microsoft.Network/localNetworkGateways', format('{0}_LocalNetworkGateway{1}', parameters('vpn_Destination_Name'), parameters('lngOptionalTag')))]"
+                "[resourceId('Microsoft.Network/localNetworkGateways', format('Lng_for_{0}_to_{1}{2}', variables('virtualNetworkGateway_Name'), parameters('vpn_Destination_Name'), parameters('lngOptionalTag')))]"
               ]
             },
             {
               "type": "Microsoft.Network/localNetworkGateways",
               "apiVersion": "2022-11-01",
-              "name": "[format('{0}_LocalNetworkGateway{1}', parameters('vpn_Destination_Name'), parameters('lngOptionalTag'))]",
+              "name": "[format('Lng_for_{0}_to_{1}{2}', variables('virtualNetworkGateway_Name'), parameters('vpn_Destination_Name'), parameters('lngOptionalTag'))]",
               "location": "[parameters('location')]",
               "properties": {
                 "gatewayIpAddress": "[parameters('vpn_Destination_PublicIPAddress')]",
@@ -2357,8 +2357,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.27.1.19265",
-              "templateHash": "793131539064925669"
+              "version": "0.29.47.4906",
+              "templateHash": "12052371023427762052"
             }
           },
           "parameters": {
@@ -2433,7 +2433,7 @@
                   "properties": {}
                 },
                 "localNetworkGateway2": {
-                  "id": "[resourceId('Microsoft.Network/localNetworkGateways', format('{0}_LocalNetworkGateway{1}', parameters('vpn_Destination_Name'), parameters('lngOptionalTag')))]",
+                  "id": "[resourceId('Microsoft.Network/localNetworkGateways', format('Lng_for_{0}_to_{1}{2}', variables('virtualNetworkGateway_Name'), parameters('vpn_Destination_Name'), parameters('lngOptionalTag')))]",
                   "properties": {}
                 },
                 "connectionType": "IPsec",
@@ -2448,13 +2448,13 @@
               },
               "tags": "[parameters('tagValues')]",
               "dependsOn": [
-                "[resourceId('Microsoft.Network/localNetworkGateways', format('{0}_LocalNetworkGateway{1}', parameters('vpn_Destination_Name'), parameters('lngOptionalTag')))]"
+                "[resourceId('Microsoft.Network/localNetworkGateways', format('Lng_for_{0}_to_{1}{2}', variables('virtualNetworkGateway_Name'), parameters('vpn_Destination_Name'), parameters('lngOptionalTag')))]"
               ]
             },
             {
               "type": "Microsoft.Network/localNetworkGateways",
               "apiVersion": "2022-11-01",
-              "name": "[format('{0}_LocalNetworkGateway{1}', parameters('vpn_Destination_Name'), parameters('lngOptionalTag'))]",
+              "name": "[format('Lng_for_{0}_to_{1}{2}', variables('virtualNetworkGateway_Name'), parameters('vpn_Destination_Name'), parameters('lngOptionalTag'))]",
               "location": "[parameters('location')]",
               "properties": {
                 "gatewayIpAddress": "[parameters('vpn_Destination_PublicIPAddress')]",
@@ -2511,8 +2511,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.27.1.19265",
-              "templateHash": "5625462848695914846"
+              "version": "0.29.47.4906",
+              "templateHash": "2266396396429279658"
             }
           },
           "parameters": {
@@ -2743,8 +2743,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.27.1.19265",
-              "templateHash": "15809475316512000192"
+              "version": "0.29.47.4906",
+              "templateHash": "14815089135664500033"
             }
           },
           "parameters": {
@@ -2999,8 +2999,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.27.1.19265",
-                      "templateHash": "2935355341485697608"
+                      "version": "0.29.47.4906",
+                      "templateHash": "5767829995467476688"
                     }
                   },
                   "parameters": {
@@ -3257,8 +3257,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.27.1.19265",
-              "templateHash": "15809475316512000192"
+              "version": "0.29.47.4906",
+              "templateHash": "14815089135664500033"
             }
           },
           "parameters": {
@@ -3513,8 +3513,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.27.1.19265",
-                      "templateHash": "2935355341485697608"
+                      "version": "0.29.47.4906",
+                      "templateHash": "5767829995467476688"
                     }
                   },
                   "parameters": {
@@ -3771,8 +3771,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.27.1.19265",
-              "templateHash": "15809475316512000192"
+              "version": "0.29.47.4906",
+              "templateHash": "14815089135664500033"
             }
           },
           "parameters": {
@@ -4027,8 +4027,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.27.1.19265",
-                      "templateHash": "2935355341485697608"
+                      "version": "0.29.47.4906",
+                      "templateHash": "5767829995467476688"
                     }
                   },
                   "parameters": {
@@ -4267,8 +4267,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.27.1.19265",
-              "templateHash": "11394564574041274025"
+              "version": "0.29.47.4906",
+              "templateHash": "6587979398516923784"
             }
           },
           "parameters": {
@@ -4394,8 +4394,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.27.1.19265",
-              "templateHash": "11394564574041274025"
+              "version": "0.29.47.4906",
+              "templateHash": "6587979398516923784"
             }
           },
           "parameters": {
@@ -4521,8 +4521,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.27.1.19265",
-              "templateHash": "11394564574041274025"
+              "version": "0.29.47.4906",
+              "templateHash": "6587979398516923784"
             }
           },
           "parameters": {

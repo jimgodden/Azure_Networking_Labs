@@ -72,7 +72,7 @@ resource connection 'Microsoft.Network/connections@2022-11-01' = {
 }
 
 resource localNetworkGateway 'Microsoft.Network/localNetworkGateways@2022-11-01' = {
-  name: '${vpn_Destination_Name}_LocalNetworkGateway${lngOptionalTag}'
+  name: 'Lng_for_${virtualNetworkGateway_Name}_to_${vpn_Destination_Name}${lngOptionalTag}'
   location: location
   properties: {
     gatewayIpAddress: vpn_Destination_PublicIPAddress
