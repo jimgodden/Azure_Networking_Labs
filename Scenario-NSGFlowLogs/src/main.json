@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.29.47.4906",
-      "templateHash": "12272385542321393282"
+      "templateHash": "4802561646731175331"
     }
   },
   "parameters": {
@@ -1109,10 +1109,10 @@
             "value": "[variables('virtualMachine_ScriptFileLocation')]"
           },
           "virtualMachine_ScriptFileName": {
-            "value": "WinServ2022_PsPing.ps1"
+            "value": "WinServ2022_LongRunningConnections_Client.ps1"
           },
           "commandToExecute": {
-            "value": "powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_PsPing.ps1 -DestinationIP \"10.1.0.4\" -DestinationPort 3389"
+            "value": "powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_LongRunningConnections_Client.ps1 -DestinationIP \"10.1.0.4\" -DestinationPort 5500"
           }
         },
         "template": {
@@ -1623,10 +1623,10 @@
             "value": "[variables('virtualMachine_ScriptFileLocation')]"
           },
           "virtualMachine_ScriptFileName": {
-            "value": "WinServ2022_ConfigScript_General.ps1"
+            "value": "WinServ2022_LongRunningConnections_Server.ps1"
           },
           "commandToExecute": {
-            "value": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_General.ps1 -Username {0}', parameters('virtualMachine_AdminUsername'))]"
+            "value": "powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_LongRunningConnections_Server.ps1 -LocalPort 5500"
           }
         },
         "template": {
@@ -2364,6 +2364,9 @@
           },
           "workspaceResourceId": {
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'workspace'), '2022-09-01').outputs.LogAnalyticsWorkspace_ID.value]"
+          },
+          "Nsg_FlowLogs_Version": {
+            "value": 2
           }
         },
         "template": {
@@ -2373,7 +2376,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.29.47.4906",
-              "templateHash": "12933619127636416877"
+              "templateHash": "13699449400243823095"
             }
           },
           "parameters": {
@@ -2393,6 +2396,13 @@
               "type": "string",
               "metadata": {
                 "description": "Resource Id of the target resource for the flow logs"
+              }
+            },
+            "Nsg_FlowLogs_Version": {
+              "type": "int",
+              "defaultValue": 1,
+              "metadata": {
+                "description": "NSG Flow Logs Version Number (1 or 2)."
               }
             },
             "workspaceResourceId": {
@@ -2428,6 +2438,7 @@
                 },
                 "targetResourceId": "[parameters('FlowLogs_TargetResourceId')]",
                 "format": {
+                  "version": "[parameters('Nsg_FlowLogs_Version')]",
                   "type": "JSON"
                 }
               },

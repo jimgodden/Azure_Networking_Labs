@@ -65,8 +65,8 @@ module virtualMachine_Windows_SRC '../../modules/Microsoft.Compute/WindowsServer
     virtualMachine_Name: 'winVM-src'
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    virtualMachine_ScriptFileName: 'WinServ2022_PsPing.ps1'
-    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_PsPing.ps1 -DestinationIP "10.1.0.4" -DestinationPort 3389'
+    virtualMachine_ScriptFileName: 'WinServ2022_LongRunningConnections_Client.ps1'
+    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_LongRunningConnections_Client.ps1 -DestinationIP "10.1.0.4" -DestinationPort 5500'
   }
 }
 
@@ -81,8 +81,8 @@ module virtualMachine_Windows_dst '../../modules/Microsoft.Compute/WindowsServer
     virtualMachine_Name: 'winVM-dst'
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_General.ps1'
-    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_General.ps1 -Username ${virtualMachine_AdminUsername}'
+    virtualMachine_ScriptFileName: 'WinServ2022_LongRunningConnections_Server.ps1'
+    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_LongRunningConnections_Server.ps1 -LocalPort 5500'
   }
 }
 
@@ -110,6 +110,7 @@ module nsgFlowLogs_src '../../modules/Microsoft.Network/NSGFlowLogs.bicep' = {
     location: location
     StorageAccount_Id: storageAccount.outputs.storageAccount_ID
     workspaceResourceId: workspace.outputs.LogAnalyticsWorkspace_ID
+    Nsg_FlowLogs_Version: 2
   }
 }
 
