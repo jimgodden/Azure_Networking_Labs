@@ -22,6 +22,10 @@ New-Item -ItemType File -Path ".\$ProjectName\src" -Name "main.bicepparam"
 $bicepParamInitializer = "using './main.bicep' /*Provide a path to a bicep template*/"
 Set-Content -Path ".\$ProjectName\src\main.bicepparam" -Value $bicepParamInitializer
 
+# Creates a PowerShell script which can be run to easily deploy the project
+New-Item -ItemType File -Path ".\$ProjectName" -Name "deployment.ps1"
+Set-Content -Path ".\$ProjectName\deployment.ps1" -Value ".\Tools\deployment.ps1 -DeploymentName `"${ProjectName}`" -Location `"eastus2`""
+
 # Creates a placeholder file for a diagram made with the drawio VS Code extension
 New-Item -ItemType File -Path ".\$ProjectName" -Name "diagram.drawio.png"
 

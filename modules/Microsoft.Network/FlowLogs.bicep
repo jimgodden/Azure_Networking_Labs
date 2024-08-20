@@ -4,19 +4,23 @@ param location string
 @description('Resource Id of the Storage Account for storing logs')
 param StorageAccount_Id string
 
+// @description('Name of the NSG Flow Log')
+// param FlowLogs_Name string
+
 @description('Resource Id of the target resource for the flow logs')
 param FlowLogs_TargetResourceId string
 
 @description('NSG Flow Logs Version Number (1 or 2).')
-param Nsg_FlowLogs_Version int = 1
+param FlowLogs_Version int = 2
 
 @description('Resource Id of the LogAnalyticsWorkspace for Advanced Diagnostic data storage.')
 param workspaceResourceId string
 
-// @description('Unique Identifier that can be used if running this test multiple times.  This is optional.')
-// param uniqueIdentifier string = 'test'
-
 param tagValues object = {}
+
+var FlowLogs_TargetID_Split = split(FlowLogs_TargetResourceId, '/')
+var FlowLogs_Target_Name = FlowLogs_TargetID_Split[8]
+var FlowLogs_Target_ResourceGroup = FlowLogs_TargetID_Split[4]
 
 resource networkWatcher 'Microsoft.Network/networkWatchers@2023-11-01' existing = {
   name: 'NetworkWatcher_${location}'
@@ -24,14 +28,14 @@ resource networkWatcher 'Microsoft.Network/networkWatchers@2023-11-01' existing 
 
 resource networkWatcher_FlowLogs 'Microsoft.Network/networkWatchers/flowLogs@2023-11-01' = {
   parent: networkWatcher
-  name: 'networkWatcher-FlowLogs'
+  name: '${FlowLogs_Target_ResourceGroup}_${FlowLogs_Target_Name}_Flowlog'
   location: location
   properties: {
     flowAnalyticsConfiguration: {
       networkWatcherFlowAnalyticsConfiguration: {
         enabled: true
         workspaceResourceId: workspaceResourceId
-        trafficAnalyticsInterval: 60
+        trafficAnalyticsInterval: 10
       }
     }
     enabled: true
@@ -42,7 +46,7 @@ resource networkWatcher_FlowLogs 'Microsoft.Network/networkWatchers/flowLogs@202
     }
     targetResourceId: FlowLogs_TargetResourceId
     format: {
-      version: Nsg_FlowLogs_Version
+      version: FlowLogs_Version
       type: 'JSON'
     }
   }

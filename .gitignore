@@ -2,4 +2,5 @@
 **/*.bicepparam
 build.ps1
 test.bicep
+ComputeGallery.bicep
 /Tools/OrganizeParamFiles.ps1
