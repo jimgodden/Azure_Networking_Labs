@@ -4,3 +4,4 @@ build.ps1
 test.bicep
 ComputeGallery.bicep
 /Tools/OrganizeParamFiles.ps1
+/Training-BGP_Lab/oldinstructions.txt
