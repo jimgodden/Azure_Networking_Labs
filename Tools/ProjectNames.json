@@ -3,63 +3,66 @@
     "Name": "Azure_VirtualWAN_Sandbox"
   },
   {
-    "Name": "Training-VPN_Lab"
-  },
-  {
-    "Name": "Training-Azure_DNS"
-  },
-  {
-    "Name": "Training-BGP_Lab"
-  },
-  {
-    "Name": "Training-VPN_L300"
-  },
-  {
-    "Name": "Sandbox-VirtualNetworkManager"
-  },
-  {
-    "Name": "Sandbox-NetworkWatcher"
-  },
-  {
-    "Name": "Scenario-ConnMonTest"
-  },
-  {
-    "Name": "Scenario-ManyVMsRepro"
-  },
-  {
-    "Name": "Scenario-VNGPacketCapture"
-  },
-  {
-    "Name": "Sandbox-ApplicationGateway_v2"
-  },
-  {
-    "Name": "Sandbox-PE_to_SQL"
-  },
-  {
-    "Name": "Sandbox-PrivateLink"
-  },
-  {
-    "Name": "Sandbox-TrafficManager"
-  },
-  {
-    "Name": "Sandbox-VM_Linux"
-  },
-  {
-    "Name": "Sandbox-VM_to_VM"
-  },
-  {
-    "Name": "Sandbox-VM_Windows"
-  },
-  {
-    "Name": "Sandbox-PrivateResolver"
+    "Name": "Sandbox-DNS"
   },
   {
     "Name": "Scenario-NSGFlowLogs"
   },
   {
-    "Name": "Sandbox-DNS"
+    "Name": "Sandbox-PrivateResolver"
+  },
+  {
+    "Name": "Sandbox-VM_Windows"
+  },
+  {
+    "Name": "Sandbox-VM_to_VM"
+  },
+  {
+    "Name": "Sandbox-VM_Linux"
+  },
+  {
+    "Name": "Sandbox-TrafficManager"
+  },
+  {
+    "Name": "Sandbox-PrivateLink"
+  },
+  {
+    "Name": "Sandbox-PE_to_SQL"
+  },
+  {
+    "Name": "Sandbox-ApplicationGateway_v2"
+  },
+  {
+    "Name": "Scenario-VNGPacketCapture"
+  },
+  {
+    "Name": "Scenario-ManyVMsRepro"
+  },
+  {
+    "Name": "Scenario-ConnMonTest"
+  },
+  {
+    "Name": "Sandbox-NetworkWatcher"
+  },
+  {
+    "Name": "Sandbox-VirtualNetworkManager"
+  },
+  {
+    "Name": "Training-VPN_L300"
+  },
+  {
+    "Name": "Training-BGP_Lab"
+  },
+  {
+    "Name": "Training-Azure_DNS"
+  },
+  {
+    "Name": "Training-VPN_Lab"
   },
   {
     "Name": "Scenario-AzureFrontDoor"
+  },
+  {
+    "Name": "Scenario-DnsZone"
   }
 ]
