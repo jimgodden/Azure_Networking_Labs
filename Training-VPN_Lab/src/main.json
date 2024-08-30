@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.29.47.4906",
-      "templateHash": "14810734712846392832"
+      "templateHash": "2310846362883420258"
     }
   },
   "parameters": {
@@ -54,16 +54,10 @@
       "metadata": {
         "description": "VPN Shared Key used for authenticating VPN connections"
       }
-    },
-    "virtualNetworkGateway_ActiveActive": {
-      "type": "bool",
-      "defaultValue": false,
-      "metadata": {
-        "description": "Set to true if you want to deploy the Virtual Network Gateway in an Active-Active configuration."
-      }
     }
   },
   "variables": {
+    "virtualNetworkGateway_ActiveActive": false,
     "virtualMachine_ScriptFileLocation": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/"
   },
   "resources": [
@@ -1446,7 +1440,7 @@
             "value": "[parameters('virtualNetworkGateway_SKU')]"
           },
           "activeActive": {
-            "value": "[parameters('virtualNetworkGateway_ActiveActive')]"
+            "value": "[variables('virtualNetworkGateway_ActiveActive')]"
           }
         },
         "template": {
@@ -1974,7 +1968,7 @@
             "value": "[parameters('virtualNetworkGateway_SKU')]"
           },
           "activeActive": {
-            "value": "[parameters('virtualNetworkGateway_ActiveActive')]"
+            "value": "[variables('virtualNetworkGateway_ActiveActive')]"
           }
         },
         "template": {
@@ -2502,7 +2496,7 @@
             "value": "[parameters('virtualNetworkGateway_SKU')]"
           },
           "activeActive": {
-            "value": "[parameters('virtualNetworkGateway_ActiveActive')]"
+            "value": "[variables('virtualNetworkGateway_ActiveActive')]"
           }
         },
         "template": {

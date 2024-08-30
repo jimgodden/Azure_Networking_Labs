@@ -24,8 +24,10 @@ param virtualNetworkGateway_SKU string = 'VpnGw1'
 @secure()
 param vpn_SharedKey string
 
-@description('Set to true if you want to deploy the Virtual Network Gateway in an Active-Active configuration.')
-param virtualNetworkGateway_ActiveActive bool = false
+// @description('Set to true if you want to deploy the Virtual Network Gateway in an Active-Active configuration.')
+// param virtualNetworkGateway_ActiveActive bool = false
+
+var virtualNetworkGateway_ActiveActive = false
 
 var virtualMachine_ScriptFileLocation = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
 
