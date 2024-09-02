@@ -14,7 +14,10 @@ function Set-Shortcut {
 }
 
 # ensures that Windows PowerShell is used
-Write-Host "Run this script in Windows PowerShell or else it will fail!"
+Write-Host "This script is installing the following:"
+Write-Host "Npcap - So that Wireshark can take packet captures"
+Write-Host "Windows Terminal - A new terminal application for Windows"
+Write-Host "`nAdditionally, the script will create shortcuts on the desktop for Wireshark and Windows Terminal."
 
 # Package required for installing Windows Terminal
 Add-AppxPackage "c:\Microsoft.VCLibs.x64.14.00.Desktop.appx"

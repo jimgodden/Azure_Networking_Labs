@@ -29,7 +29,12 @@ param vpn_SharedKey string
 
 var virtualNetworkGateway_ActiveActive = false
 
-var virtualMachine_ScriptFileLocation = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
+param virtualMachine_ScriptFiles array = [
+  'https://supportability.visualstudio.com/AzureNetworking/_git/AzureNetworking?path=/.LabBoxRepo/Hybrid/VPN_P2S_TransitiveRouting-Training/WinServ2022_ConfigScript_DNS.ps1'
+  'https://supportability.visualstudio.com/AzureNetworking/_git/AzureNetworking?path=/.LabBoxRepo/Hybrid/VPN_P2S_TransitiveRouting-Training/ChocoInstalls.ps1'
+  'https://supportability.visualstudio.com/AzureNetworking/_git/AzureNetworking?path=/.LabBoxRepo/Hybrid/VPN_P2S_TransitiveRouting-Training/WinServ2022_InitScript.ps1'
+  'https://supportability.visualstudio.com/AzureNetworking/_git/AzureNetworking?path=/.LabBoxRepo/Hybrid/VPN_P2S_TransitiveRouting-Training/WinServ2022_InstallTools.ps1'
+]
 
 // Virtual Networks
 module virtualNetworkA '../../Modules/Microsoft.Network/VirtualNetwork.bicep' = {
@@ -143,7 +148,7 @@ module virtualNetworkGatewayC '../../modules/Microsoft.Network/VirtualNetworkGat
   }
 }
 
-module virtualMachine_WindowsA '../../Modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
+module virtualMachine_WindowsA '../../Modules/Microsoft.Compute/WindowsServer2022/VirtualMachine_ForLabbox.bicep' = {
   name: 'VMWindowsA'
   params: {
     acceleratedNetworking: acceleratedNetworking
@@ -153,13 +158,12 @@ module virtualMachine_WindowsA '../../Modules/Microsoft.Compute/WindowsServer202
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'VM-A'
     virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_DNS.ps1'
+    virtualMachine_ScriptFiles: virtualMachine_ScriptFiles
     commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username ${virtualMachine_AdminUsername}'
   }
 }
 
-module virtualMachine_WindowsB '../../Modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
+module virtualMachine_WindowsB '../../Modules/Microsoft.Compute/WindowsServer2022/VirtualMachine_ForLabbox.bicep' = {
   name: 'VMWindowsB'
   params: {
     acceleratedNetworking: acceleratedNetworking
@@ -169,13 +173,12 @@ module virtualMachine_WindowsB '../../Modules/Microsoft.Compute/WindowsServer202
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'VM-B'
     virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_DNS.ps1'
+    virtualMachine_ScriptFiles: virtualMachine_ScriptFiles
     commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username ${virtualMachine_AdminUsername}'
   }
 }
 
-module virtualMachine_WindowsC '../../Modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
+module virtualMachine_WindowsC '../../Modules/Microsoft.Compute/WindowsServer2022/VirtualMachine_ForLabbox.bicep' = {
   name: 'VMWindowsC'
   params: {
     acceleratedNetworking: acceleratedNetworking
@@ -185,8 +188,7 @@ module virtualMachine_WindowsC '../../Modules/Microsoft.Compute/WindowsServer202
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'VM-C'
     virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_DNS.ps1'
+    virtualMachine_ScriptFiles: virtualMachine_ScriptFiles
     commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username ${virtualMachine_AdminUsername}'
   }
 }

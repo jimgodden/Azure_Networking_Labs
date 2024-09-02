@@ -43,6 +43,7 @@ function Get-SubGroupMembers {
             Write-Host "Unknown Issue with Member ID: $($member.Id) and Name: $($member.DisplayName)"
             $read = Read-Host "Pausing the script until you press Enter to exit."
             exit
+            $read
         }
     }
 

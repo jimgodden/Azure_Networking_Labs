@@ -14,9 +14,16 @@ $filesToDownload = @(
     "ChocoInstalls.ps1"
 )
 
-# Downloads the general use scripts from the GitHub Repository
+# Downloads the general use scripts from the GitHub Repository if they aren't already installed
 foreach ($fileToDownload in $filesToDownload) {
-    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/$fileToDownload" -OutFile "c:\$fileToDownload"
+    Start-Job -ScriptBlock {
+        $file = $using:fileToDownload
+        if (Test-Path -Path ".\$file") {
+            Move-Item -Path ".\$file" -Destination "C:\"
+        } else {
+            Invoke-WebRequest -Uri "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/$file" -OutFile "C:\$file"
+        }
+    }
 }
 
 # npcap for using Wireshark for taking packet captures
