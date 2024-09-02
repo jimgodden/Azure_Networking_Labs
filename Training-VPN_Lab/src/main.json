@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.29.47.4906",
-      "templateHash": "2310846362883420258"
+      "templateHash": "3378108328013981930"
     }
   },
   "parameters": {
@@ -54,11 +54,19 @@
       "metadata": {
         "description": "VPN Shared Key used for authenticating VPN connections"
       }
+    },
+    "virtualMachine_ScriptFiles": {
+      "type": "array",
+      "defaultValue": [
+        "https://supportability.visualstudio.com/AzureNetworking/_git/AzureNetworking?path=/.LabBoxRepo/Hybrid/VPN_P2S_TransitiveRouting-Training/WinServ2022_ConfigScript_DNS.ps1",
+        "https://supportability.visualstudio.com/AzureNetworking/_git/AzureNetworking?path=/.LabBoxRepo/Hybrid/VPN_P2S_TransitiveRouting-Training/ChocoInstalls.ps1",
+        "https://supportability.visualstudio.com/AzureNetworking/_git/AzureNetworking?path=/.LabBoxRepo/Hybrid/VPN_P2S_TransitiveRouting-Training/WinServ2022_InitScript.ps1",
+        "https://supportability.visualstudio.com/AzureNetworking/_git/AzureNetworking?path=/.LabBoxRepo/Hybrid/VPN_P2S_TransitiveRouting-Training/WinServ2022_InstallTools.ps1"
+      ]
     }
   },
   "variables": {
-    "virtualNetworkGateway_ActiveActive": false,
-    "virtualMachine_ScriptFileLocation": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/"
+    "virtualNetworkGateway_ActiveActive": false
   },
   "resources": [
     {
@@ -2721,11 +2729,8 @@
           "virtualMachine_Size": {
             "value": "[parameters('virtualMachine_Size')]"
           },
-          "virtualMachine_ScriptFileLocation": {
-            "value": "[variables('virtualMachine_ScriptFileLocation')]"
-          },
-          "virtualMachine_ScriptFileName": {
-            "value": "WinServ2022_ConfigScript_DNS.ps1"
+          "virtualMachine_ScriptFiles": {
+            "value": "[parameters('virtualMachine_ScriptFiles')]"
           },
           "commandToExecute": {
             "value": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username {0}', parameters('virtualMachine_AdminUsername'))]"
@@ -2738,7 +2743,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.29.47.4906",
-              "templateHash": "14815089135664500033"
+              "templateHash": "5168038671413269396"
             }
           },
           "parameters": {
@@ -2789,16 +2794,10 @@
                 "description": "The Resource ID of the subnet to which the Network Interface will be assigned."
               }
             },
-            "virtualMachine_ScriptFileLocation": {
-              "type": "string",
+            "virtualMachine_ScriptFiles": {
+              "type": "array",
               "metadata": {
-                "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\r\nExample: https://example.com/scripts/"
-              }
-            },
-            "virtualMachine_ScriptFileName": {
-              "type": "string",
-              "metadata": {
-                "description": "Name of the file to be ran while the Virtual Machine is being created\r\nExample: WinServ2022_ConfigScript_General.ps1"
+                "description": "Array of files to be ran while the Virtual Machine is being created.\r\nExample: \r\n[\r\n    https://example.com/scripts/file1.ps1,\r\n    https://example.com/scripts/file2.ps1\r\n]\r\n"
               }
             },
             "commandToExecute": {
@@ -2836,9 +2835,6 @@
               "type": "object",
               "defaultValue": {}
             }
-          },
-          "variables": {
-            "virtualMachine_ScriptFileUri": "[format('{0}{1}', parameters('virtualMachine_ScriptFileLocation'), parameters('virtualMachine_ScriptFileName'))]"
           },
           "resources": [
             {
@@ -2939,9 +2935,7 @@
                 "typeHandlerVersion": "1.9",
                 "autoUpgradeMinorVersion": true,
                 "settings": {
-                  "fileUris": [
-                    "[variables('virtualMachine_ScriptFileUri')]"
-                  ]
+                  "fileUris": "[parameters('virtualMachine_ScriptFiles')]"
                 },
                 "protectedSettings": {
                   "commandToExecute": "[parameters('commandToExecute')]"
@@ -3235,11 +3229,8 @@
           "virtualMachine_Size": {
             "value": "[parameters('virtualMachine_Size')]"
           },
-          "virtualMachine_ScriptFileLocation": {
-            "value": "[variables('virtualMachine_ScriptFileLocation')]"
-          },
-          "virtualMachine_ScriptFileName": {
-            "value": "WinServ2022_ConfigScript_DNS.ps1"
+          "virtualMachine_ScriptFiles": {
+            "value": "[parameters('virtualMachine_ScriptFiles')]"
           },
           "commandToExecute": {
             "value": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username {0}', parameters('virtualMachine_AdminUsername'))]"
@@ -3252,7 +3243,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.29.47.4906",
-              "templateHash": "14815089135664500033"
+              "templateHash": "5168038671413269396"
             }
           },
           "parameters": {
@@ -3303,16 +3294,10 @@
                 "description": "The Resource ID of the subnet to which the Network Interface will be assigned."
               }
             },
-            "virtualMachine_ScriptFileLocation": {
-              "type": "string",
+            "virtualMachine_ScriptFiles": {
+              "type": "array",
               "metadata": {
-                "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\r\nExample: https://example.com/scripts/"
-              }
-            },
-            "virtualMachine_ScriptFileName": {
-              "type": "string",
-              "metadata": {
-                "description": "Name of the file to be ran while the Virtual Machine is being created\r\nExample: WinServ2022_ConfigScript_General.ps1"
+                "description": "Array of files to be ran while the Virtual Machine is being created.\r\nExample: \r\n[\r\n    https://example.com/scripts/file1.ps1,\r\n    https://example.com/scripts/file2.ps1\r\n]\r\n"
               }
             },
             "commandToExecute": {
@@ -3350,9 +3335,6 @@
               "type": "object",
               "defaultValue": {}
             }
-          },
-          "variables": {
-            "virtualMachine_ScriptFileUri": "[format('{0}{1}', parameters('virtualMachine_ScriptFileLocation'), parameters('virtualMachine_ScriptFileName'))]"
           },
           "resources": [
             {
@@ -3453,9 +3435,7 @@
                 "typeHandlerVersion": "1.9",
                 "autoUpgradeMinorVersion": true,
                 "settings": {
-                  "fileUris": [
-                    "[variables('virtualMachine_ScriptFileUri')]"
-                  ]
+                  "fileUris": "[parameters('virtualMachine_ScriptFiles')]"
                 },
                 "protectedSettings": {
                   "commandToExecute": "[parameters('commandToExecute')]"
@@ -3749,11 +3729,8 @@
           "virtualMachine_Size": {
             "value": "[parameters('virtualMachine_Size')]"
           },
-          "virtualMachine_ScriptFileLocation": {
-            "value": "[variables('virtualMachine_ScriptFileLocation')]"
-          },
-          "virtualMachine_ScriptFileName": {
-            "value": "WinServ2022_ConfigScript_DNS.ps1"
+          "virtualMachine_ScriptFiles": {
+            "value": "[parameters('virtualMachine_ScriptFiles')]"
           },
           "commandToExecute": {
             "value": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username {0}', parameters('virtualMachine_AdminUsername'))]"
@@ -3766,7 +3743,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.29.47.4906",
-              "templateHash": "14815089135664500033"
+              "templateHash": "5168038671413269396"
             }
           },
           "parameters": {
@@ -3817,16 +3794,10 @@
                 "description": "The Resource ID of the subnet to which the Network Interface will be assigned."
               }
             },
-            "virtualMachine_ScriptFileLocation": {
-              "type": "string",
+            "virtualMachine_ScriptFiles": {
+              "type": "array",
               "metadata": {
-                "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\r\nExample: https://example.com/scripts/"
-              }
-            },
-            "virtualMachine_ScriptFileName": {
-              "type": "string",
-              "metadata": {
-                "description": "Name of the file to be ran while the Virtual Machine is being created\r\nExample: WinServ2022_ConfigScript_General.ps1"
+                "description": "Array of files to be ran while the Virtual Machine is being created.\r\nExample: \r\n[\r\n    https://example.com/scripts/file1.ps1,\r\n    https://example.com/scripts/file2.ps1\r\n]\r\n"
               }
             },
             "commandToExecute": {
@@ -3864,9 +3835,6 @@
               "type": "object",
               "defaultValue": {}
             }
-          },
-          "variables": {
-            "virtualMachine_ScriptFileUri": "[format('{0}{1}', parameters('virtualMachine_ScriptFileLocation'), parameters('virtualMachine_ScriptFileName'))]"
           },
           "resources": [
             {
@@ -3967,9 +3935,7 @@
                 "typeHandlerVersion": "1.9",
                 "autoUpgradeMinorVersion": true,
                 "settings": {
-                  "fileUris": [
-                    "[variables('virtualMachine_ScriptFileUri')]"
-                  ]
+                  "fileUris": "[parameters('virtualMachine_ScriptFiles')]"
                 },
                 "protectedSettings": {
                   "commandToExecute": "[parameters('commandToExecute')]"
