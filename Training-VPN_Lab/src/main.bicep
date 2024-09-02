@@ -29,7 +29,7 @@ param vpn_SharedKey string
 
 var virtualNetworkGateway_ActiveActive = false
 
-param virtualMachine_ScriptFiles array = [
+var virtualMachine_ScriptFiles = [
   'https://supportability.visualstudio.com/AzureNetworking/_git/AzureNetworking?path=/.LabBoxRepo/Hybrid/VPN_P2S_TransitiveRouting-Training/WinServ2022_ConfigScript_DNS.ps1'
   'https://supportability.visualstudio.com/AzureNetworking/_git/AzureNetworking?path=/.LabBoxRepo/Hybrid/VPN_P2S_TransitiveRouting-Training/ChocoInstalls.ps1'
   'https://supportability.visualstudio.com/AzureNetworking/_git/AzureNetworking?path=/.LabBoxRepo/Hybrid/VPN_P2S_TransitiveRouting-Training/WinServ2022_InitScript.ps1'

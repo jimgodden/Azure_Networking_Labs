@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.29.47.4906",
-      "templateHash": "3378108328013981930"
+      "templateHash": "14572591073338340346"
     }
   },
   "parameters": {
@@ -54,19 +54,16 @@
       "metadata": {
         "description": "VPN Shared Key used for authenticating VPN connections"
       }
-    },
-    "virtualMachine_ScriptFiles": {
-      "type": "array",
-      "defaultValue": [
-        "https://supportability.visualstudio.com/AzureNetworking/_git/AzureNetworking?path=/.LabBoxRepo/Hybrid/VPN_P2S_TransitiveRouting-Training/WinServ2022_ConfigScript_DNS.ps1",
-        "https://supportability.visualstudio.com/AzureNetworking/_git/AzureNetworking?path=/.LabBoxRepo/Hybrid/VPN_P2S_TransitiveRouting-Training/ChocoInstalls.ps1",
-        "https://supportability.visualstudio.com/AzureNetworking/_git/AzureNetworking?path=/.LabBoxRepo/Hybrid/VPN_P2S_TransitiveRouting-Training/WinServ2022_InitScript.ps1",
-        "https://supportability.visualstudio.com/AzureNetworking/_git/AzureNetworking?path=/.LabBoxRepo/Hybrid/VPN_P2S_TransitiveRouting-Training/WinServ2022_InstallTools.ps1"
-      ]
     }
   },
   "variables": {
-    "virtualNetworkGateway_ActiveActive": false
+    "virtualNetworkGateway_ActiveActive": false,
+    "virtualMachine_ScriptFiles": [
+      "https://supportability.visualstudio.com/AzureNetworking/_git/AzureNetworking?path=/.LabBoxRepo/Hybrid/VPN_P2S_TransitiveRouting-Training/WinServ2022_ConfigScript_DNS.ps1",
+      "https://supportability.visualstudio.com/AzureNetworking/_git/AzureNetworking?path=/.LabBoxRepo/Hybrid/VPN_P2S_TransitiveRouting-Training/ChocoInstalls.ps1",
+      "https://supportability.visualstudio.com/AzureNetworking/_git/AzureNetworking?path=/.LabBoxRepo/Hybrid/VPN_P2S_TransitiveRouting-Training/WinServ2022_InitScript.ps1",
+      "https://supportability.visualstudio.com/AzureNetworking/_git/AzureNetworking?path=/.LabBoxRepo/Hybrid/VPN_P2S_TransitiveRouting-Training/WinServ2022_InstallTools.ps1"
+    ]
   },
   "resources": [
     {
@@ -2730,7 +2727,7 @@
             "value": "[parameters('virtualMachine_Size')]"
           },
           "virtualMachine_ScriptFiles": {
-            "value": "[parameters('virtualMachine_ScriptFiles')]"
+            "value": "[variables('virtualMachine_ScriptFiles')]"
           },
           "commandToExecute": {
             "value": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username {0}', parameters('virtualMachine_AdminUsername'))]"
@@ -3230,7 +3227,7 @@
             "value": "[parameters('virtualMachine_Size')]"
           },
           "virtualMachine_ScriptFiles": {
-            "value": "[parameters('virtualMachine_ScriptFiles')]"
+            "value": "[variables('virtualMachine_ScriptFiles')]"
           },
           "commandToExecute": {
             "value": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username {0}', parameters('virtualMachine_AdminUsername'))]"
@@ -3730,7 +3727,7 @@
             "value": "[parameters('virtualMachine_Size')]"
           },
           "virtualMachine_ScriptFiles": {
-            "value": "[parameters('virtualMachine_ScriptFiles')]"
+            "value": "[variables('virtualMachine_ScriptFiles')]"
           },
           "commandToExecute": {
             "value": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username {0}', parameters('virtualMachine_AdminUsername'))]"
