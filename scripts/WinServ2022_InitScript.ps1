@@ -23,6 +23,7 @@ foreach ($fileToDownload in $filesToDownload) {
         } else {
             Invoke-WebRequest -Uri "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/$file" -OutFile "C:\$file"
         }
+        Start-Sleep -Seconds 5 # Wait for the file to be written to disk
     }
 }
 

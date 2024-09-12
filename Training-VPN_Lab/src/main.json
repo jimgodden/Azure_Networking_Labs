@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.29.47.4906",
-      "templateHash": "14572591073338340346"
+      "templateHash": "10907264766770126485"
     }
   },
   "parameters": {
@@ -58,12 +58,7 @@
   },
   "variables": {
     "virtualNetworkGateway_ActiveActive": false,
-    "virtualMachine_ScriptFiles": [
-      "https://supportability.visualstudio.com/AzureNetworking/_git/AzureNetworking?path=/.LabBoxRepo/Hybrid/VPN_P2S_TransitiveRouting-Training/WinServ2022_ConfigScript_DNS.ps1",
-      "https://supportability.visualstudio.com/AzureNetworking/_git/AzureNetworking?path=/.LabBoxRepo/Hybrid/VPN_P2S_TransitiveRouting-Training/ChocoInstalls.ps1",
-      "https://supportability.visualstudio.com/AzureNetworking/_git/AzureNetworking?path=/.LabBoxRepo/Hybrid/VPN_P2S_TransitiveRouting-Training/WinServ2022_InitScript.ps1",
-      "https://supportability.visualstudio.com/AzureNetworking/_git/AzureNetworking?path=/.LabBoxRepo/Hybrid/VPN_P2S_TransitiveRouting-Training/WinServ2022_InstallTools.ps1"
-    ]
+    "virtualMachine_ScriptFile": "https://supportability.visualstudio.com/AzureNetworking/_git/AzureNetworking?path=/.LabBoxRepo/Hybrid/VPN_P2S_TransitiveRouting-Training/WinServ2022_ConfigScript_DNS.ps1"
   },
   "resources": [
     {
@@ -2727,7 +2722,9 @@
             "value": "[parameters('virtualMachine_Size')]"
           },
           "virtualMachine_ScriptFiles": {
-            "value": "[variables('virtualMachine_ScriptFiles')]"
+            "value": [
+              "[variables('virtualMachine_ScriptFile')]"
+            ]
           },
           "commandToExecute": {
             "value": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username {0}', parameters('virtualMachine_AdminUsername'))]"
@@ -3227,7 +3224,9 @@
             "value": "[parameters('virtualMachine_Size')]"
           },
           "virtualMachine_ScriptFiles": {
-            "value": "[variables('virtualMachine_ScriptFiles')]"
+            "value": [
+              "[variables('virtualMachine_ScriptFile')]"
+            ]
           },
           "commandToExecute": {
             "value": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username {0}', parameters('virtualMachine_AdminUsername'))]"
@@ -3727,7 +3726,9 @@
             "value": "[parameters('virtualMachine_Size')]"
           },
           "virtualMachine_ScriptFiles": {
-            "value": "[variables('virtualMachine_ScriptFiles')]"
+            "value": [
+              "[variables('virtualMachine_ScriptFile')]"
+            ]
           },
           "commandToExecute": {
             "value": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username {0}', parameters('virtualMachine_AdminUsername'))]"

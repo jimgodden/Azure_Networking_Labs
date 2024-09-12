@@ -3,6 +3,9 @@
     "Name": "Azure_VirtualWAN_Sandbox"
   },
   {
+    "Name": "Sandbox-ApplicationGateway_v2"
+  },
+  {
     "Name": "Sandbox-DNS"
   },
   {
@@ -30,10 +33,10 @@
     "Name": "Sandbox-PE_to_SQL"
   },
   {
-    "Name": "Sandbox-ApplicationGateway_v2"
+    "Name": "Scenario-VNGPacketCapture"
   },
   {
-    "Name": "Scenario-VNGPacketCapture"
+    "Name": "Scenario-DnsZone"
   },
   {
     "Name": "Scenario-ManyVMsRepro"
@@ -63,6 +66,9 @@
     "Name": "Scenario-AzureFrontDoor"
   },
   {
-    "Name": "Scenario-DnsZone"
+    "Name": "Scenario-BastionDeveloperSKU"
+  },
+  {
+    "Name": "Scenario-LinuxAutoPacketCapture"
   }
 ]
