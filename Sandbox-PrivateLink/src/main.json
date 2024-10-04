@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.29.47.4906",
-      "templateHash": "4060421474169816257"
+      "templateHash": "8005978147015890186"
     }
   },
   "parameters": {
@@ -3220,7 +3220,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.29.47.4906",
-              "templateHash": "7474343619724251006"
+              "templateHash": "4916884026619316489"
             }
           },
           "parameters": {
@@ -3298,6 +3298,13 @@
               "defaultValue": 443,
               "metadata": {
                 "description": "TCP Port that will be used for connecting to the Virtual Machine behind the Private Link Service and Load Balancer"
+              }
+            },
+            "enableProxyProtocol": {
+              "type": "bool",
+              "defaultValue": false,
+              "metadata": {
+                "description": "True enables Proxy Protocol and False disables it"
               }
             },
             "enableTcpReset": {
@@ -3446,7 +3453,7 @@
               "name": "[parameters('privateLink_Name')]",
               "location": "[parameters('location')]",
               "properties": {
-                "enableProxyProtocol": false,
+                "enableProxyProtocol": "[parameters('enableProxyProtocol')]",
                 "loadBalancerFrontendIpConfigurations": [
                   {
                     "id": "[format('{0}/frontendIPConfigurations/fip', resourceId('Microsoft.Network/loadBalancers', parameters('internalLoadBalancer_Name')))]"
@@ -5667,7 +5674,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.29.47.4906",
-              "templateHash": "2266396396429279658"
+              "templateHash": "1552470538815387244"
             }
           },
           "parameters": {
@@ -5760,6 +5767,7 @@
               "tags": "[parameters('tagValues')]"
             },
             {
+              "condition": "[parameters('activeActive')]",
               "type": "Microsoft.Network/publicIPAddresses",
               "apiVersion": "2022-11-01",
               "name": "[format('{0}_PIP_02', parameters('virtualNetworkGateway_Name'))]",
@@ -5881,7 +5889,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.29.47.4906",
-              "templateHash": "2266396396429279658"
+              "templateHash": "1552470538815387244"
             }
           },
           "parameters": {
@@ -5974,6 +5982,7 @@
               "tags": "[parameters('tagValues')]"
             },
             {
+              "condition": "[parameters('activeActive')]",
               "type": "Microsoft.Network/publicIPAddresses",
               "apiVersion": "2022-11-01",
               "name": "[format('{0}_PIP_02', parameters('virtualNetworkGateway_Name'))]",

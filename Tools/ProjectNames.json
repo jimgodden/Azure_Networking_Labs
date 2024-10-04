@@ -36,9 +36,6 @@
     "Name": "Scenario-ManyVMsRepro"
   },
   {
-    "Name": "Scenario-vnettest"
-  },
-  {
     "Name": "Sandbox-ExternalLoadBalancer"
   },
   {

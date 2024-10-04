@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.29.47.4906",
-      "templateHash": "12261120588123839103"
+      "templateHash": "9260931785113561481"
     }
   },
   "parameters": {
@@ -533,10 +533,13 @@
             "value": "[variables('virtualMachine_ScriptFileLocation')]"
           },
           "virtualMachine_ScriptFileName": {
-            "value": "WinServ2022_ConfigScript_General.ps1"
+            "value": "WinServ2022_ConfigScript_DNS.ps1"
           },
           "commandToExecute": {
-            "value": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_General.ps1 -Username {0}', parameters('virtualMachine_AdminUsername'))]"
+            "value": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username {0}', parameters('virtualMachine_AdminUsername'))]"
+          },
+          "addPublicIPAddress": {
+            "value": true
           }
         },
         "template": {

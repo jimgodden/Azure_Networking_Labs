@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.29.47.4906",
-      "templateHash": "11388685470227161907"
+      "templateHash": "7787380333795451696"
     }
   },
   "parameters": {
@@ -1816,7 +1816,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.29.47.4906",
-              "templateHash": "5323690979919450506"
+              "templateHash": "17746901161844050368"
             }
           },
           "parameters": {
@@ -2578,7 +2578,7 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.29.47.4906",
-                      "templateHash": "2266396396429279658"
+                      "templateHash": "1552470538815387244"
                     }
                   },
                   "parameters": {
@@ -2671,6 +2671,7 @@
                       "tags": "[parameters('tagValues')]"
                     },
                     {
+                      "condition": "[parameters('activeActive')]",
                       "type": "Microsoft.Network/publicIPAddresses",
                       "apiVersion": "2022-11-01",
                       "name": "[format('{0}_PIP_02', parameters('virtualNetworkGateway_Name'))]",

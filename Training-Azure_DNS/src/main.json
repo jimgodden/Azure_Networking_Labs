@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.29.47.4906",
-      "templateHash": "1612444670002261763"
+      "templateHash": "1152600213949385289"
     }
   },
   "parameters": {
@@ -44,6 +44,7 @@
     },
     "storageAccount_Name": {
       "type": "string",
+      "defaultValue": "Insert Unique Name Here",
       "minLength": 3,
       "maxLength": 24,
       "metadata": {
@@ -4095,7 +4096,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.29.47.4906",
-              "templateHash": "2266396396429279658"
+              "templateHash": "1552470538815387244"
             }
           },
           "parameters": {
@@ -4188,6 +4189,7 @@
               "tags": "[parameters('tagValues')]"
             },
             {
+              "condition": "[parameters('activeActive')]",
               "type": "Microsoft.Network/publicIPAddresses",
               "apiVersion": "2022-11-01",
               "name": "[format('{0}_PIP_02', parameters('virtualNetworkGateway_Name'))]",
@@ -4315,7 +4317,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.29.47.4906",
-              "templateHash": "2266396396429279658"
+              "templateHash": "1552470538815387244"
             }
           },
           "parameters": {
@@ -4408,6 +4410,7 @@
               "tags": "[parameters('tagValues')]"
             },
             {
+              "condition": "[parameters('activeActive')]",
               "type": "Microsoft.Network/publicIPAddresses",
               "apiVersion": "2022-11-01",
               "name": "[format('{0}_PIP_02', parameters('virtualNetworkGateway_Name'))]",
