@@ -3,34 +3,73 @@
     "Name": "Azure_VirtualWAN_Sandbox"
   },
   {
-    "Name": "Sandbox-ApplicationGateway_v2"
+    "Name": "Scenario-AVNMPeeringDeleteTest"
   },
   {
-    "Name": "Sandbox-DNS"
+    "Name": "Scenario-BastionDeveloperSKU"
   },
   {
-    "Name": "Scenario-NSGFlowLogs"
+    "Name": "Scenario-AzureFrontDoor"
   },
   {
-    "Name": "Sandbox-PrivateResolver"
+    "Name": "Training-VPN_Lab"
   },
   {
-    "Name": "Sandbox-VM_Windows"
+    "Name": "Training-Azure_DNS"
   },
   {
-    "Name": "Sandbox-VM_to_VM"
+    "Name": "Training-BGP_Lab"
   },
   {
-    "Name": "Sandbox-VM_Linux"
+    "Name": "Training-VPN_L300"
   },
   {
-    "Name": "Sandbox-TrafficManager"
+    "Name": "Sandbox-VirtualNetworkManager"
+  },
+  {
+    "Name": "Sandbox-NetworkWatcher"
+  },
+  {
+    "Name": "Scenario-ConnMonTest"
+  },
+  {
+    "Name": "Scenario-ManyVMsRepro"
+  },
+  {
+    "Name": "Scenario-vnettest"
+  },
+  {
+    "Name": "Sandbox-ExternalLoadBalancer"
+  },
+  {
+    "Name": "Sandbox-InternalLoadBalancer"
   },
   {
     "Name": "Sandbox-PrivateLink"
   },
   {
-    "Name": "Sandbox-PE_to_SQL"
+    "Name": "Sandbox-TrafficManager"
+  },
+  {
+    "Name": "Sandbox-VM_Linux"
+  },
+  {
+    "Name": "Sandbox-VM_to_VM"
+  },
+  {
+    "Name": "Sandbox-VM_Windows"
+  },
+  {
+    "Name": "Sandbox-PrivateResolver"
+  },
+  {
+    "Name": "Scenario-NSGFlowLogs"
+  },
+  {
+    "Name": "Sandbox-DNS"
+  },
+  {
+    "Name": "Sandbox-ApplicationGateway_v2"
   },
   {
     "Name": "Scenario-VNGPacketCapture"
@@ -39,36 +78,12 @@
     "Name": "Scenario-DnsZone"
   },
   {
-    "Name": "Scenario-ManyVMsRepro"
-  },
-  {
-    "Name": "Scenario-ConnMonTest"
-  },
-  {
-    "Name": "Sandbox-NetworkWatcher"
-  },
-  {
-    "Name": "Sandbox-VirtualNetworkManager"
-  },
-  {
-    "Name": "Training-VPN_L300"
-  },
-  {
-    "Name": "Training-BGP_Lab"
-  },
-  {
-    "Name": "Training-Azure_DNS"
-  },
-  {
-    "Name": "Training-VPN_Lab"
-  },
-  {
-    "Name": "Scenario-AzureFrontDoor"
-  },
-  {
-    "Name": "Scenario-BastionDeveloperSKU"
-  },
-  {
     "Name": "Scenario-LinuxAutoPacketCapture"
+  },
+  {
+    "Name": "Sandbox-PE_to_SQL"
+  },
+  {
+    "Name": "Training-VNET-4_1"
   }
 ]

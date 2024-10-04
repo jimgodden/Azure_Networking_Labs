@@ -97,7 +97,7 @@ resource virtualNetworkGateway_PublicIPAddress01 'Microsoft.Network/publicIPAddr
   tags: tagValues
 }
 
-resource virtualNetworkGateway_PublicIPAddress02 'Microsoft.Network/publicIPAddresses@2022-11-01' = {
+resource virtualNetworkGateway_PublicIPAddress02 'Microsoft.Network/publicIPAddresses@2022-11-01' = if (activeActive) {
   name: '${virtualNetworkGateway_Name}_PIP_02'
   location: location
   sku: {

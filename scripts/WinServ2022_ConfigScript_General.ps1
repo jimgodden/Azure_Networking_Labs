@@ -12,4 +12,6 @@ Start-Job -ScriptBlock {
     powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\WinServ2022_InitScript.ps1" -Username $using:Username
 }
 
+Get-Job | Wait-Job
+
 Restart-Computer

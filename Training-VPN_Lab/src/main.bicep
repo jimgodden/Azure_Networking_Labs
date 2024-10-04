@@ -68,6 +68,37 @@ module virtualNetworkC '../../Modules/Microsoft.Network/VirtualNetwork.bicep' = 
   }
 }
 
+module virtualNetworkHub '../../Modules/Microsoft.Network/VirtualNetwork.bicep' = {
+  name: 'vnetHub'
+  params: {
+    virtualNetwork_AddressPrefix: '10.100.0.0/16'
+    location: location
+    virtualNetwork_Name: 'vnetHub'
+  }
+}
+
+module virtualNetworks_to_Bastion_Peerings '../../Modules/Microsoft.Network/BastionVirtualNetworkHubPeerings.bicep' = {
+  name: 'virtualNetworks_to_Bastion_Peerings'
+  params: {
+    bastion_VirtualNetwork_Id: virtualNetworkHub.outputs.virtualNetwork_ID
+    other_VirtualNetwork_Ids: [
+      virtualNetworkA.outputs.virtualNetwork_ID
+      virtualNetworkB.outputs.virtualNetwork_ID
+      virtualNetworkC.outputs.virtualNetwork_ID
+    ]
+  }
+}
+
+module bastion '../../modules/Microsoft.Network/Bastion.bicep' = {
+  name: 'Bastion'
+  params: {
+    bastion_name: 'Bastion'
+    bastion_SubnetID: virtualNetworkHub.outputs.bastion_SubnetID
+    location: location
+    bastion_SKU: 'Standard'
+  }
+}
+
 module virtualNetworkGatewayA '../../modules/Microsoft.Network/VirtualNetworkGateway.bicep' = {
   name: 'virtualNetworkGatewayA'
   params: {
@@ -197,32 +228,34 @@ module virtualMachine_WindowsC '../../Modules/Microsoft.Compute/WindowsServer202
   }
 }
 
-module bastionA '../../modules/Microsoft.Network/Bastion.bicep' = {
-  name: 'BastionA'
-  params: {
-    bastion_name: 'BastionA'
-    bastion_SubnetID: virtualNetworkA.outputs.bastion_SubnetID
-    location: location
-    bastion_SKU: 'Standard'
-  }
-}
 
-module bastionB '../../modules/Microsoft.Network/Bastion.bicep' = {
-  name: 'BastionB'
-  params: {
-    bastion_name: 'BastionB'
-    bastion_SubnetID: virtualNetworkB.outputs.bastion_SubnetID
-    location: location
-    bastion_SKU: 'Standard'
-  }
-}
 
-module bastionC '../../modules/Microsoft.Network/Bastion.bicep' = {
-  name: 'BastionC'
-  params: {
-    bastion_name: 'BastionC'
-    bastion_SubnetID: virtualNetworkC.outputs.bastion_SubnetID
-    location: location
-    bastion_SKU: 'Standard'
-  }
-}
+// module bastionA '../../modules/Microsoft.Network/Bastion.bicep' = {
+//   name: 'BastionA'
+//   params: {
+//     bastion_name: 'BastionA'
+//     bastion_SubnetID: virtualNetworkA.outputs.bastion_SubnetID
+//     location: location
+//     bastion_SKU: 'Standard'
+//   }
+// }
+
+// module bastionB '../../modules/Microsoft.Network/Bastion.bicep' = {
+//   name: 'BastionB'
+//   params: {
+//     bastion_name: 'BastionB'
+//     bastion_SubnetID: virtualNetworkB.outputs.bastion_SubnetID
+//     location: location
+//     bastion_SKU: 'Standard'
+//   }
+// }
+
+// module bastionC '../../modules/Microsoft.Network/Bastion.bicep' = {
+//   name: 'BastionC'
+//   params: {
+//     bastion_name: 'BastionC'
+//     bastion_SubnetID: virtualNetworkC.outputs.bastion_SubnetID
+//     location: location
+//     bastion_SKU: 'Standard'
+//   }
+// }

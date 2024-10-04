@@ -93,10 +93,10 @@ Write-Host "The deployment can be monitored by navigating to the URL below: "
 Write-Host -ForegroundColor Blue "https://portal.azure.com/#@/resource/subscriptions/$($context.Subscription.Id)/resourceGroups/${rgName}/deployments`n"
 
 if ($DeployWithParamFile) {
-    New-AzResourceGroupDeployment -ResourceGroupName $rgName -TemplateFile $mainBicepFile -TemplateParameterFile $mainParameterFile
+    $deployment = New-AzResourceGroupDeployment -ResourceGroupName $rgName -TemplateFile $mainBicepFile -TemplateParameterFile $mainParameterFile
 }
 else {
-    New-AzResourceGroupDeployment -ResourceGroupName $rgName -TemplateFile $mainBicepFile
+    $deployment = New-AzResourceGroupDeployment -ResourceGroupName $rgName -TemplateFile $mainBicepFile
 }
 
 $stopwatch.Stop()
@@ -106,3 +106,14 @@ Write-Host "Total time taken in minutes: $($stopwatch.Elapsed.TotalMinutes)"
 
 Write-Host "Below is a link to the newly created/modified Resource Group: "
 Write-Host -ForegroundColor Blue "https://portal.azure.com/#@/resource/subscriptions/$($context.Subscription.Id)/resourceGroups/${rgName}`n"
+
+# Define the message and title
+$message = "ProvisioningState: $($deployment.ProvisioningState)`nTimestamp: $(Get-Date -Format "HH:mm K")"
+$title = "Bicep Deployment: ${DeploymentName}"
+
+# Play the alert sound
+[System.Media.SystemSounds]::Exclamation.Play()
+
+# Show the message box
+Add-Type -AssemblyName System.Windows.Forms
+[System.Windows.Forms.MessageBox]::Show($message, $title, [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Exclamation)

@@ -24,7 +24,7 @@ Storage account name restrictions:
 ''')
 @minLength(3)
 @maxLength(24)
-param storageAccount_Name string
+param storageAccount_Name string = 'Insert Unique Name Here'
 
 @description('VPN Shared Key used for authenticating VPN connections')
 @secure()

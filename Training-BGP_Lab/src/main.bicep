@@ -123,6 +123,7 @@ module virtualMachine_VyOS_01 '../../modules/Microsoft.Compute/VyOS/VirtualMachi
     virtualMachine_Size: virtualMachine_Size
     privateIPAllocationMethod: 'Static'
     privateIPAddress: cidrHost( virtualNetwork.properties.subnets[1].properties.addressPrefix, 9 )
+    
   }
 }
 
