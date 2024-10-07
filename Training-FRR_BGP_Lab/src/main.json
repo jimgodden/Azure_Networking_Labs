@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.29.47.4906",
-      "templateHash": "14861099022133719552"
+      "templateHash": "1510364104981706247"
     }
   },
   "parameters": {
@@ -26,6 +26,13 @@
       "type": "securestring",
       "metadata": {
         "description": "Password for the admin account of the Virtual Machines"
+      }
+    },
+    "deployBastion": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Change this to true if you want an Azure Bastion deployed"
       }
     },
     "tagValues": {
@@ -185,6 +192,9 @@
           },
           "commandToExecute": {
             "value": "./frrconfig.sh"
+          },
+          "addPublicIPAddress": {
+            "value": true
           }
         },
         "template": {
@@ -689,6 +699,9 @@
           },
           "commandToExecute": {
             "value": "./frrconfig.sh"
+          },
+          "addPublicIPAddress": {
+            "value": true
           }
         },
         "template": {
@@ -1193,6 +1206,9 @@
           },
           "commandToExecute": {
             "value": "./frrconfig.sh"
+          },
+          "addPublicIPAddress": {
+            "value": true
           }
         },
         "template": {
@@ -1697,6 +1713,9 @@
           },
           "commandToExecute": {
             "value": "./frrconfig.sh"
+          },
+          "addPublicIPAddress": {
+            "value": true
           }
         },
         "template": {
@@ -2157,6 +2176,7 @@
       ]
     },
     {
+      "condition": "[parameters('deployBastion')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2022-09-01",
       "name": "bastion",

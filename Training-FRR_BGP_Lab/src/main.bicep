@@ -8,6 +8,9 @@ param virtualMachine_AdminUsername string
 @secure()
 param virtualMachine_AdminPassword string
 
+@description('Change this to true if you want an Azure Bastion deployed')
+param deployBastion bool = false
+
 @description('Size of the Virtual Machines')
 var virtualMachine_Size = 'Standard_B2ms' // 'Standard_D2s_v3' // 'Standard_D16lds_v5'
 
@@ -128,6 +131,7 @@ module VM01 '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.bicep' = {
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
     virtualMachine_ScriptFileName: 'frrconfig.sh'
     commandToExecute: './frrconfig.sh'
+    addPublicIPAddress: true
   }
 }
 
@@ -146,6 +150,7 @@ module VM02 '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.bicep' = {
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
     virtualMachine_ScriptFileName: 'frrconfig.sh'
     commandToExecute: './frrconfig.sh'
+    addPublicIPAddress: true
   }
 }
 
@@ -164,6 +169,7 @@ module VM03 '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.bicep' = {
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
     virtualMachine_ScriptFileName: 'frrconfig.sh'
     commandToExecute: './frrconfig.sh'
+    addPublicIPAddress: true
   }
 }
 
@@ -182,10 +188,11 @@ module VM04 '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.bicep' = {
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
     virtualMachine_ScriptFileName: 'frrconfig.sh'
     commandToExecute: './frrconfig.sh'
+    addPublicIPAddress: true
   }
 }
 
-module bastion '../../modules/Microsoft.Network/Bastion.bicep' = {
+module bastion '../../modules/Microsoft.Network/Bastion.bicep' = if (deployBastion) {
   name: 'bastion'
   params: {
     bastion_name: 'Bastion'
