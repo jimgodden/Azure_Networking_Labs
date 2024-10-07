@@ -128,7 +128,9 @@ resource nsgRule_AllowUserSSH 'Microsoft.Network/networkSecurityGroups/securityR
     priority: 100
     protocol: 'Tcp'
     sourceAddressPrefix: UserPublicIPAddress
+    sourcePortRange: '*'
     destinationAddressPrefix: '*'
+    destinationPortRange: '22'
   }
 }
 

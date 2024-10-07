@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.29.47.4906",
-      "templateHash": "4871325940768625040"
+      "templateHash": "7444056595700711305"
     }
   },
   "parameters": {
@@ -164,7 +164,9 @@
         "priority": 100,
         "protocol": "Tcp",
         "sourceAddressPrefix": "[parameters('UserPublicIPAddress')]",
-        "destinationAddressPrefix": "*"
+        "sourcePortRange": "*",
+        "destinationAddressPrefix": "*",
+        "destinationPortRange": "22"
       },
       "dependsOn": [
         "[resourceId('Microsoft.Network/networkSecurityGroups', 'primaryNSG')]"
