@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.29.47.4906",
-      "templateHash": "1510364104981706247"
+      "templateHash": "4871325940768625040"
     }
   },
   "parameters": {
@@ -33,6 +33,13 @@
       "defaultValue": false,
       "metadata": {
         "description": "Change this to true if you want an Azure Bastion deployed"
+      }
+    },
+    "UserPublicIPAddress": {
+      "type": "string",
+      "defaultValue": "Enter_your_public_IP_address_here",
+      "metadata": {
+        "description": "Public IP Address of the user.  This will be added to an NSG rule to allow SSH access to the VMs"
       }
     },
     "tagValues": {
@@ -146,6 +153,22 @@
       "location": "[parameters('location')]",
       "properties": {},
       "tags": "[parameters('tagValues')]"
+    },
+    {
+      "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+      "apiVersion": "2022-09-01",
+      "name": "[format('{0}/{1}', 'primaryNSG', 'AllowUserSSH')]",
+      "properties": {
+        "access": "Allow",
+        "direction": "Inbound",
+        "priority": 100,
+        "protocol": "Tcp",
+        "sourceAddressPrefix": "[parameters('UserPublicIPAddress')]",
+        "destinationAddressPrefix": "*"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkSecurityGroups', 'primaryNSG')]"
+      ]
     },
     {
       "type": "Microsoft.Resources/deployments",
