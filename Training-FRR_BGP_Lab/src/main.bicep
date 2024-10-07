@@ -154,7 +154,7 @@ module VM03 '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.bicep' = {
   params: {
     acceleratedNetworking: acceleratedNetworking
     location: location
-    subnet_ID: virtualNetwork.properties.subnets[2].id
+    subnet_ID: virtualNetwork.properties.subnets[3].id
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'VM03'
@@ -172,7 +172,7 @@ module VM04 '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.bicep' = {
   params: {
     acceleratedNetworking: acceleratedNetworking
     location: location
-    subnet_ID: virtualNetwork.properties.subnets[2].id
+    subnet_ID: virtualNetwork.properties.subnets[4].id
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'VM04'
