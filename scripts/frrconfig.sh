@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # add GPG key
 curl -s https://deb.frrouting.org/frr/keys.gpg | sudo tee /usr/share/keyrings/frrouting.gpg > /dev/null
 
@@ -9,26 +11,27 @@ echo deb '[signed-by=/usr/share/keyrings/frrouting.gpg]' https://deb.frrouting.o
      $(lsb_release -s -c) $FRRVER | sudo tee -a /etc/apt/sources.list.d/frr.list
 
 # update and install FRR
-sudo apt update && sudo apt install frr frr-pythontools
+sudo apt update
+sudo apt install frr frr-pythontools -y
 
 sed -i 's/bgpd=no/bgpd=yes/' /etc/frr/daemons
 
 sudo systemctl restart frr
 
 
-configure terminal 
-router bgp 65000
-bgp router-id
-neighbor 10.0.0.4 remote-as 65000
-neighbor 10.0.0.5 remote-as 65000
+# configure terminal 
+# router bgp 65000
+# bgp router-id
+# neighbor 10.0.0.4 remote-as 65000
+# neighbor 10.0.0.5 remote-as 65000
 
 
 
-# Configure BGP in FRR
-sudo vtysh -c "configure terminal"
-sudo vtysh -c "router bgp 65000"
-sudo vtysh -c "bgp router-id 10.100.1.4"
-sudo vtysh -c "neighbor 10.0.0.4 remote-as 65000"
-sudo vtysh -c "neighbor 10.0.0.5 remote-as 65000"
-sudo vtysh -c "exit"
-sudo systemctl restart frr
+# # Configure BGP in FRR
+# sudo vtysh -c "configure terminal"
+# sudo vtysh -c "router bgp 65000"
+# sudo vtysh -c "bgp router-id 10.100.1.4"
+# sudo vtysh -c "neighbor 10.0.0.4 remote-as 65000"
+# sudo vtysh -c "neighbor 10.0.0.5 remote-as 65000"
+# sudo vtysh -c "exit"
+# sudo systemctl restart frr
