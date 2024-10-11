@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.29.47.4906",
-      "templateHash": "7444056595700711305"
+      "templateHash": "76290984189251581"
     }
   },
   "parameters": {
@@ -26,20 +26,6 @@
       "type": "securestring",
       "metadata": {
         "description": "Password for the admin account of the Virtual Machines"
-      }
-    },
-    "deployBastion": {
-      "type": "bool",
-      "defaultValue": false,
-      "metadata": {
-        "description": "Change this to true if you want an Azure Bastion deployed"
-      }
-    },
-    "UserPublicIPAddress": {
-      "type": "string",
-      "defaultValue": "Enter_your_public_IP_address_here",
-      "metadata": {
-        "description": "Public IP Address of the user.  This will be added to an NSG rule to allow SSH access to the VMs"
       }
     },
     "tagValues": {
@@ -153,24 +139,6 @@
       "location": "[parameters('location')]",
       "properties": {},
       "tags": "[parameters('tagValues')]"
-    },
-    {
-      "type": "Microsoft.Network/networkSecurityGroups/securityRules",
-      "apiVersion": "2022-09-01",
-      "name": "[format('{0}/{1}', 'primaryNSG', 'AllowUserSSH')]",
-      "properties": {
-        "access": "Allow",
-        "direction": "Inbound",
-        "priority": 100,
-        "protocol": "Tcp",
-        "sourceAddressPrefix": "[parameters('UserPublicIPAddress')]",
-        "sourcePortRange": "*",
-        "destinationAddressPrefix": "*",
-        "destinationPortRange": "22"
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Network/networkSecurityGroups', 'primaryNSG')]"
-      ]
     },
     {
       "type": "Microsoft.Resources/deployments",
@@ -2201,7 +2169,6 @@
       ]
     },
     {
-      "condition": "[parameters('deployBastion')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2022-09-01",
       "name": "bastion",
@@ -2325,5 +2292,23 @@
         "[resourceId('Microsoft.Network/virtualNetworks', 'virtualNetwork')]"
       ]
     }
-  ]
+  ],
+  "outputs": {
+    "VM01_SSH_Config": {
+      "type": "string",
+      "value": "[format('VM01 SSH Command: ssh {0}@{1}', parameters('virtualMachine_AdminUsername'), reference(resourceId('Microsoft.Resources/deployments', 'VM01'), '2022-09-01').outputs.networkInterface_PublicIPAddress.value)]"
+    },
+    "VM02_SSH_Config": {
+      "type": "string",
+      "value": "[format('VM02 SSH Command: ssh {0}@{1}', parameters('virtualMachine_AdminUsername'), reference(resourceId('Microsoft.Resources/deployments', 'VM02'), '2022-09-01').outputs.networkInterface_PublicIPAddress.value)]"
+    },
+    "VM03_SSH_Config": {
+      "type": "string",
+      "value": "[format('VM03 SSH Command: ssh {0}@{1}', parameters('virtualMachine_AdminUsername'), reference(resourceId('Microsoft.Resources/deployments', 'VM03'), '2022-09-01').outputs.networkInterface_PublicIPAddress.value)]"
+    },
+    "VM04_SSH_Config": {
+      "type": "string",
+      "value": "[format('VM04 SSH Command: ssh {0}@{1}', parameters('virtualMachine_AdminUsername'), reference(resourceId('Microsoft.Resources/deployments', 'VM04'), '2022-09-01').outputs.networkInterface_PublicIPAddress.value)]"
+    }
+  }
 }

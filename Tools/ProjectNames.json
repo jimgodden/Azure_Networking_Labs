@@ -3,87 +3,90 @@
     "Name": "Azure_VirtualWAN_Sandbox"
   },
   {
-    "Name": "Sandbox-PE_to_SQL"
-  },
-  {
-    "Name": "Scenario-LinuxAutoPacketCapture"
-  },
-  {
-    "Name": "Scenario-DnsZone"
-  },
-  {
-    "Name": "Scenario-VNGPacketCapture"
-  },
-  {
-    "Name": "Sandbox-ApplicationGateway_v2"
-  },
-  {
-    "Name": "Sandbox-DNS"
-  },
-  {
-    "Name": "Scenario-NSGFlowLogs"
-  },
-  {
-    "Name": "Sandbox-PrivateResolver"
-  },
-  {
-    "Name": "Sandbox-VM_Windows"
-  },
-  {
-    "Name": "Sandbox-VM_to_VM"
-  },
-  {
-    "Name": "Sandbox-VM_Linux"
-  },
-  {
-    "Name": "Sandbox-TrafficManager"
-  },
-  {
-    "Name": "Training-VNET-4_1"
-  },
-  {
-    "Name": "Sandbox-PrivateLink"
-  },
-  {
-    "Name": "Sandbox-ExternalLoadBalancer"
-  },
-  {
-    "Name": "Scenario-ManyVMsRepro"
-  },
-  {
-    "Name": "Scenario-ConnMonTest"
-  },
-  {
-    "Name": "Sandbox-NetworkWatcher"
-  },
-  {
-    "Name": "Sandbox-VirtualNetworkManager"
-  },
-  {
-    "Name": "Training-VPN_L300"
-  },
-  {
-    "Name": "Training-BGP_Lab"
-  },
-  {
-    "Name": "Training-Azure_DNS"
-  },
-  {
-    "Name": "Training-VPN_Lab"
-  },
-  {
-    "Name": "Scenario-AzureFrontDoor"
-  },
-  {
-    "Name": "Scenario-BastionDeveloperSKU"
+    "Name": "Sandbox-InternalLoadBalancer"
   },
   {
     "Name": "Scenario-AVNMPeeringDeleteTest"
   },
   {
-    "Name": "Sandbox-InternalLoadBalancer"
+    "Name": "Scenario-BastionDeveloperSKU"
+  },
+  {
+    "Name": "Scenario-AzureFrontDoor"
+  },
+  {
+    "Name": "Training-VPN_Lab"
+  },
+  {
+    "Name": "Training-Azure_DNS"
+  },
+  {
+    "Name": "Training-BGP_Lab"
+  },
+  {
+    "Name": "Training-VPN_L300"
+  },
+  {
+    "Name": "Sandbox-VirtualNetworkManager"
+  },
+  {
+    "Name": "Sandbox-NetworkWatcher"
+  },
+  {
+    "Name": "Scenario-ConnMonTest"
+  },
+  {
+    "Name": "Scenario-ManyVMsRepro"
+  },
+  {
+    "Name": "Sandbox-ExternalLoadBalancer"
+  },
+  {
+    "Name": "Sandbox-PrivateLink"
+  },
+  {
+    "Name": "Training-VNET-4_1"
+  },
+  {
+    "Name": "Sandbox-TrafficManager"
+  },
+  {
+    "Name": "Sandbox-VM_Linux"
+  },
+  {
+    "Name": "Sandbox-VM_to_VM"
+  },
+  {
+    "Name": "Sandbox-VM_Windows"
+  },
+  {
+    "Name": "Sandbox-PrivateResolver"
+  },
+  {
+    "Name": "Scenario-NSGFlowLogs"
+  },
+  {
+    "Name": "Sandbox-DNS"
+  },
+  {
+    "Name": "Sandbox-ApplicationGateway_v2"
+  },
+  {
+    "Name": "Scenario-VNGPacketCapture"
+  },
+  {
+    "Name": "Scenario-DnsZone"
+  },
+  {
+    "Name": "Scenario-LinuxAutoPacketCapture"
+  },
+  {
+    "Name": "Sandbox-PE_to_SQL"
   },
   {
     "Name": "Training-FRR_BGP_Lab"
+  },
+  {
+    "Name": "Scenario-Bastion"
   }
 ]

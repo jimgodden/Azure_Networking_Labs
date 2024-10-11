@@ -8,11 +8,11 @@ param virtualMachine_AdminUsername string
 @secure()
 param virtualMachine_AdminPassword string
 
-@description('Change this to true if you want an Azure Bastion deployed')
-param deployBastion bool = false
+// @description('Change this to true if you want an Azure Bastion deployed')
+// param deployBastion bool = false
 
-@description('Public IP Address of the user.  This will be added to an NSG rule to allow SSH access to the VMs')
-param UserPublicIPAddress string = 'Enter_your_public_IP_address_here'
+// @description('Public IP Address of the user.  This will be added to an NSG rule to allow SSH access to the VMs')
+// param UserPublicIPAddress string = 'Enter_your_public_IP_address_here'
 
 @description('Size of the Virtual Machines')
 var virtualMachine_Size = 'Standard_B2ms' // 'Standard_D2s_v3' // 'Standard_D16lds_v5'
@@ -119,20 +119,20 @@ resource networkSecurityGroup 'Microsoft.Network/networkSecurityGroups@2022-09-0
   tags: tagValues
 }
 
-resource nsgRule_AllowUserSSH 'Microsoft.Network/networkSecurityGroups/securityRules@2022-09-01' = {
-  parent: networkSecurityGroup
-  name: 'AllowUserSSH'
-  properties: {
-    access: 'Allow'
-    direction: 'Inbound'
-    priority: 100
-    protocol: 'Tcp'
-    sourceAddressPrefix: UserPublicIPAddress
-    sourcePortRange: '*'
-    destinationAddressPrefix: '*'
-    destinationPortRange: '22'
-  }
-}
+// resource nsgRule_AllowUserSSH 'Microsoft.Network/networkSecurityGroups/securityRules@2022-09-01' = {
+//   parent: networkSecurityGroup
+//   name: 'AllowUserSSH'
+//   properties: {
+//     access: 'Allow'
+//     direction: 'Inbound'
+//     priority: 100
+//     protocol: 'Tcp'
+//     sourceAddressPrefix: UserPublicIPAddress
+//     sourcePortRange: '*'
+//     destinationAddressPrefix: '*'
+//     destinationPortRange: '22'
+//   }
+// }
 
 module VM01 '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.bicep' = {
   name: 'VM01'
@@ -210,7 +210,7 @@ module VM04 '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.bicep' = {
   }
 }
 
-module bastion '../../modules/Microsoft.Network/Bastion.bicep' = if (deployBastion) {
+module bastion '../../modules/Microsoft.Network/Bastion.bicep' = {          //if (deployBastion) {
   name: 'bastion'
   params: {
     bastion_name: 'Bastion'
@@ -218,3 +218,8 @@ module bastion '../../modules/Microsoft.Network/Bastion.bicep' = if (deployBasti
     location: location
   }
 }
+
+output VM01_SSH_Config string = 'VM01 SSH Command: ssh ${virtualMachine_AdminUsername}@${VM01.outputs.networkInterface_PublicIPAddress}'
+output VM02_SSH_Config string = 'VM02 SSH Command: ssh ${virtualMachine_AdminUsername}@${VM02.outputs.networkInterface_PublicIPAddress}'
+output VM03_SSH_Config string = 'VM03 SSH Command: ssh ${virtualMachine_AdminUsername}@${VM03.outputs.networkInterface_PublicIPAddress}'
+output VM04_SSH_Config string = 'VM04 SSH Command: ssh ${virtualMachine_AdminUsername}@${VM04.outputs.networkInterface_PublicIPAddress}'

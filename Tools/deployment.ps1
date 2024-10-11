@@ -117,3 +117,5 @@ $title = "Bicep Deployment: ${DeploymentName}"
 # Show the message box
 Add-Type -AssemblyName System.Windows.Forms
 [System.Windows.Forms.MessageBox]::Show($message, $title, [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Exclamation)
+
+$deployment.Outputs
