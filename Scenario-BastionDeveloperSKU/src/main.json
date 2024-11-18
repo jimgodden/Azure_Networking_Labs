@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.29.47.4906",
-      "templateHash": "3434187576711518204"
+      "version": "0.31.34.60546",
+      "templateHash": "15042901002519238713"
     }
   },
   "parameters": {
@@ -63,8 +63,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.29.47.4906",
-              "templateHash": "9502503265789790679"
+              "version": "0.31.34.60546",
+              "templateHash": "10263754388870337008"
             }
           },
           "parameters": {
@@ -84,7 +84,7 @@
               "type": "array",
               "defaultValue": [],
               "metadata": {
-                "description": "An Array of Custom DNS Server IP Addresses.  Azure Wireserver will be used if left as an empty array [].\r\nExample:\r\n[10.0.0.4, 10.0.0.5]\r\n"
+                "description": "An Array of Custom DNS Server IP Addresses.  Azure Wireserver will be used if left as an empty array [].\nExample:\n[10.0.0.4, 10.0.0.5]\n"
               }
             },
             "networkSecurityGroup_Default_Name": {

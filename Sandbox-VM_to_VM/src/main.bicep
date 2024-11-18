@@ -141,9 +141,9 @@ module virtualNetworkPeering_Source_to_Destination '../../modules/Microsoft.Netw
     virtualNetwork_Destination_Name: virtualNetwork_Source.outputs.virtualNetwork_Name
     virtualNetwork_Source_Name: virtualNetwork_Destination.outputs.virtualNetwork_Name
   }
-  dependsOn: [
-    sourceBastion
-  ]
+  // dependsOn: [
+  //   sourceBastion
+  // ]
 }
 
 module sourceVM_Windows '../../Modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = [ for i in range(1, numberOfSourceSideWindowsVMs):  if (isUsingWindows) {
@@ -224,9 +224,9 @@ module sourceAzFW '../../modules/Microsoft.Network/AzureFirewall.bicep' = if (is
     azureFirewall_Subnet_ID: virtualNetwork_Source.outputs.azureFirewall_SubnetID
     location: srcLocation
   }
-  dependsOn: [
-    sourceVirtualNetworkGateway
-  ]
+  // dependsOn: [
+  //   sourceVirtualNetworkGateway
+  // ]
 }
 
 module destinationAzFW '../../modules/Microsoft.Network/AzureFirewall.bicep' = if (isUsingAzureFirewall) {
@@ -244,12 +244,42 @@ module destinationAzFW '../../modules/Microsoft.Network/AzureFirewall.bicep' = i
   ]
 }
 
-module sourceBastion '../../modules/Microsoft.Network/Bastion.bicep' = {
-  name: 'srcBastion'
+// module sourceBastion '../../modules/Microsoft.Network/Bastion.bicep' = {
+//   name: 'srcBastion'
+//   params: {
+//     bastion_name: 'srcBastion'
+//     bastion_SubnetID: virtualNetwork_Source.outputs.bastion_SubnetID
+//     location: srcLocation
+//     bastion_SKU: 'Standard'
+//   }
+// }
+
+module bastionSpokeVNET '../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
+  name: 'bastionspokevnet'
   params: {
-    bastion_name: 'srcBastion'
-    bastion_SubnetID: virtualNetwork_Source.outputs.bastion_SubnetID
+    location: srcLocation
+    virtualNetwork_AddressPrefix: '10.200.0.0/16'
+    virtualNetwork_Name: 'bastionspokevnet'
+  }
+}
+
+module spokeBastion '../../modules/Microsoft.Network/Bastion.bicep' = {
+  name: 'spokeBastion'
+  params: {
+    bastion_name: 'spokeBastion'
+    bastion_SubnetID: bastionSpokeVNET.outputs.bastion_SubnetID
     location: srcLocation
     bastion_SKU: 'Standard'
   }
+}
+
+module virtualNetworkPeering_bastionspoke_to_source '../../modules/Microsoft.Network/VirtualNetworkPeering.bicep' = {
+  name: 'Source_to_bastionspoke_Peering'
+  params: {
+    virtualNetwork_Destination_Name: virtualNetwork_Source.outputs.virtualNetwork_Name
+    virtualNetwork_Source_Name: bastionSpokeVNET.outputs.virtualNetwork_Name
+  }
+  // dependsOn: [
+  //   sourceBastion
+  // ]
 }

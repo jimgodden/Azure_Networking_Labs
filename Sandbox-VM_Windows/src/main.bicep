@@ -15,7 +15,7 @@ param virtualMachine_Size string = 'Standard_D2as_v4' // 'Standard_B2ms' // 'Sta
 Not all VM sizes support Accel Net (i.e. Standard_B2ms).  
 I'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net.
 ''')
-param acceleratedNetworking bool = false
+param acceleratedNetworking bool = true
 
 var virtualMachine_ScriptFileLocation = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
 
@@ -52,8 +52,8 @@ module virtualMachine_Windows '../../modules/Microsoft.Compute/WindowsServer2022
     virtualMachine_Name: 'winVM'
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_DNS.ps1'
-    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username ${virtualMachine_AdminUsername}'
+    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_WebServer.ps1'
+    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_WebServer.ps1 -Username ${virtualMachine_AdminUsername}'
     addPublicIPAddress: true
   }
 }

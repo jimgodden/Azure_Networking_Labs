@@ -44,19 +44,35 @@ module virtualMachine_Windows '../../modules/Microsoft.Compute/WindowsServer2022
   }
 }
 
-module virtualMachine_Windows_backendpool '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
-  name: 'winVM-bep'
+module webVM '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
+  name: 'webVM'
   params: {
     acceleratedNetworking: acceleratedNetworking
     location: location
     subnet_ID: virtualNetwork.outputs.general_SubnetID
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
-    virtualMachine_Name: 'winVM-bep'
+    virtualMachine_Name: 'webVM'
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
     virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_WebServer.ps1'
     commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_WebServer.ps1 -Username ${virtualMachine_AdminUsername}'
+  }
+}
+
+module dnsVM '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
+  name: 'dnsVM'
+  params: {
+    acceleratedNetworking: acceleratedNetworking
+    location: location
+    subnet_ID: virtualNetwork.outputs.general_SubnetID
+    virtualMachine_AdminPassword: virtualMachine_AdminPassword
+    virtualMachine_AdminUsername: virtualMachine_AdminUsername
+    virtualMachine_Name: 'dnsVM'
+    virtualMachine_Size: virtualMachine_Size
+    virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
+    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_DNS.ps1'
+    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username ${virtualMachine_AdminUsername}'
   }
 }
 
@@ -65,10 +81,10 @@ module ilb '../../modules/Microsoft.Network/InternalLoadBalancer.bicep' = {
   params: {
     location: location
     internalLoadBalancer_SubnetID: virtualNetwork.outputs.general_SubnetID
-    networkInterface_IPConfig_Name: [virtualMachine_Windows_backendpool.outputs.networkInterface_IPConfig0_Name]
-    networkInterface_Name: [virtualMachine_Windows_backendpool.outputs.networkInterface_Name]
+    networkInterface_IPConfig_Name: [webVM.outputs.networkInterface_IPConfig0_Name]
+    networkInterface_Name: [webVM.outputs.networkInterface_Name]
     networkInterface_SubnetID: [virtualNetwork.outputs.general_SubnetID]
-    tcpPort: 500 // port that should not work intentionally used
+    tcpPort: 443 // port that should not work intentionally used
   }
 }
 

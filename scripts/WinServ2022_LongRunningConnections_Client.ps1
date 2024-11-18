@@ -5,13 +5,16 @@ param (
 
 Start-Sleep -seconds 600
 
-$counter = 1
+$DestinationIP = "13.77.81.16"
+$DestinationPort = 444
 
 # Create a TCP client socket
 $tcpClient = New-Object System.Net.Sockets.TcpClient
 
 # Connect to the destination VM
 $tcpClient.Connect($DestinationIP, $DestinationPort)
+
+$counter = 1
 
 # Send a sequence of numbers to the server
 while ($true) {

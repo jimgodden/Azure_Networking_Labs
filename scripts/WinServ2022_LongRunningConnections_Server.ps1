@@ -2,12 +2,18 @@ param (
     [int]$LocalPort
 )
 
-Start-Sleep -seconds 600
+$LocalPort = 444
+
+# Start-Sleep -seconds 600
 
 # Open TCP port $LocalPort on the firewall
 New-NetFirewallRule -DisplayName "Allow inbound TCP port ${LocalPort}" -Direction Inbound -LocalPort $LocalPort -Protocol TCP -Action Allow
 
 $localIP = "0.0.0.0"
+
+# $socket = New-Object System.Net.Sockets.Socket([System.Net.Sockets.AddressFamily]::InterNetwork, [System.Net.Sockets.SocketType]::Stream, [System.Net.Sockets.ProtocolType]::Tcp)
+# $socket.Bind((New-Object System.Net.IPEndPoint ([System.Net.IPAddress]::Parse($localIP), $LocalPort)))
+# $socket.Listen(10)
 
 # Create a TCP listener
 $tcpListener = New-Object System.Net.Sockets.TcpListener ([System.Net.IPAddress]::Parse($localIP), $LocalPort)

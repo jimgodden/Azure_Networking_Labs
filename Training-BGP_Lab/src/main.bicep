@@ -178,5 +178,6 @@ module bastion '../../modules/Microsoft.Network/Bastion.bicep' = {
     bastion_name: 'Bastion'
     bastion_SubnetID: virtualNetwork.properties.subnets[0].id
     location: location
+    bastion_SKU: 'Standard'
   }
 }

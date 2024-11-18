@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.29.47.4906",
-      "templateHash": "15060528635782474727"
+      "version": "0.31.34.60546",
+      "templateHash": "5691884375904477005"
     }
   },
   "parameters": {
@@ -183,8 +183,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.29.47.4906",
-              "templateHash": "5525445084399519645"
+              "version": "0.31.34.60546",
+              "templateHash": "18365672362978126361"
             }
           },
           "parameters": {
@@ -201,7 +201,7 @@
             "virtualMachine_Size": {
               "type": "string",
               "metadata": {
-                "description": "Size of the Virtual Machine\r\nExamples:\r\nB2ms - 2 Core 8GB Ram - Cannot use Accelerated Networking\r\nD2as_v5 2 Core 8GB Ram - Uses Accelerated Networking"
+                "description": "Size of the Virtual Machine\nExamples:\nB2ms - 2 Core 8GB Ram - Cannot use Accelerated Networking\nD2as_v5 2 Core 8GB Ram - Uses Accelerated Networking"
               }
             },
             "virtualMachine_AdminUsername": {
@@ -385,8 +385,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.29.47.4906",
-                      "templateHash": "5767829995467476688"
+                      "version": "0.31.34.60546",
+                      "templateHash": "752507168095095404"
                     }
                   },
                   "parameters": {
@@ -636,8 +636,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.29.47.4906",
-              "templateHash": "5525445084399519645"
+              "version": "0.31.34.60546",
+              "templateHash": "18365672362978126361"
             }
           },
           "parameters": {
@@ -654,7 +654,7 @@
             "virtualMachine_Size": {
               "type": "string",
               "metadata": {
-                "description": "Size of the Virtual Machine\r\nExamples:\r\nB2ms - 2 Core 8GB Ram - Cannot use Accelerated Networking\r\nD2as_v5 2 Core 8GB Ram - Uses Accelerated Networking"
+                "description": "Size of the Virtual Machine\nExamples:\nB2ms - 2 Core 8GB Ram - Cannot use Accelerated Networking\nD2as_v5 2 Core 8GB Ram - Uses Accelerated Networking"
               }
             },
             "virtualMachine_AdminUsername": {
@@ -838,8 +838,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.29.47.4906",
-                      "templateHash": "5767829995467476688"
+                      "version": "0.31.34.60546",
+                      "templateHash": "752507168095095404"
                     }
                   },
                   "parameters": {
@@ -1089,8 +1089,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.29.47.4906",
-              "templateHash": "5525445084399519645"
+              "version": "0.31.34.60546",
+              "templateHash": "18365672362978126361"
             }
           },
           "parameters": {
@@ -1107,7 +1107,7 @@
             "virtualMachine_Size": {
               "type": "string",
               "metadata": {
-                "description": "Size of the Virtual Machine\r\nExamples:\r\nB2ms - 2 Core 8GB Ram - Cannot use Accelerated Networking\r\nD2as_v5 2 Core 8GB Ram - Uses Accelerated Networking"
+                "description": "Size of the Virtual Machine\nExamples:\nB2ms - 2 Core 8GB Ram - Cannot use Accelerated Networking\nD2as_v5 2 Core 8GB Ram - Uses Accelerated Networking"
               }
             },
             "virtualMachine_AdminUsername": {
@@ -1291,8 +1291,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.29.47.4906",
-                      "templateHash": "5767829995467476688"
+                      "version": "0.31.34.60546",
+                      "templateHash": "752507168095095404"
                     }
                   },
                   "parameters": {
@@ -1542,8 +1542,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.29.47.4906",
-              "templateHash": "5525445084399519645"
+              "version": "0.31.34.60546",
+              "templateHash": "18365672362978126361"
             }
           },
           "parameters": {
@@ -1560,7 +1560,7 @@
             "virtualMachine_Size": {
               "type": "string",
               "metadata": {
-                "description": "Size of the Virtual Machine\r\nExamples:\r\nB2ms - 2 Core 8GB Ram - Cannot use Accelerated Networking\r\nD2as_v5 2 Core 8GB Ram - Uses Accelerated Networking"
+                "description": "Size of the Virtual Machine\nExamples:\nB2ms - 2 Core 8GB Ram - Cannot use Accelerated Networking\nD2as_v5 2 Core 8GB Ram - Uses Accelerated Networking"
               }
             },
             "virtualMachine_AdminUsername": {
@@ -1744,8 +1744,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.29.47.4906",
-                      "templateHash": "5767829995467476688"
+                      "version": "0.31.34.60546",
+                      "templateHash": "752507168095095404"
                     }
                   },
                   "parameters": {
@@ -1969,6 +1969,9 @@
           },
           "location": {
             "value": "[parameters('location')]"
+          },
+          "bastion_SKU": {
+            "value": "Standard"
           }
         },
         "template": {
@@ -1977,8 +1980,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.29.47.4906",
-              "templateHash": "6587979398516923784"
+              "version": "0.31.34.60546",
+              "templateHash": "11534259321289650232"
             }
           },
           "parameters": {

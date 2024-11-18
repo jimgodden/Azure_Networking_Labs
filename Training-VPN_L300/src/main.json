@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.29.47.4906",
-      "templateHash": "5427426407690479627"
+      "version": "0.31.34.60546",
+      "templateHash": "3861958348074059984"
     }
   },
   "parameters": {
@@ -357,8 +357,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.29.47.4906",
-              "templateHash": "1552470538815387244"
+              "version": "0.31.34.60546",
+              "templateHash": "13609541206309054438"
             }
           },
           "parameters": {
@@ -402,7 +402,7 @@
                 "Generation2"
               ],
               "metadata": {
-                "description": "Generation of the Virtual Network Gateway SKU\r\nGeneration1: Basic, VpnGw1-3, VpnGw1-3AZ\r\nGeneration2: VpnGw2-5, VpnGw2-5Az"
+                "description": "Generation of the Virtual Network Gateway SKU\nGeneration1: Basic, VpnGw1-3, VpnGw1-3AZ\nGeneration2: VpnGw2-5, VpnGw2-5Az"
               }
             },
             "virtualNetworkGateway_ASN": {
@@ -593,8 +593,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.29.47.4906",
-              "templateHash": "14815089135664500033"
+              "version": "0.31.34.60546",
+              "templateHash": "9107602116624813428"
             }
           },
           "parameters": {
@@ -611,7 +611,7 @@
             "virtualMachine_Size": {
               "type": "string",
               "metadata": {
-                "description": "Size of the Virtual Machine\r\nExamples:\r\nB2ms - 2 Core 8GB Ram - Cannot use Accelerated Networking\r\nD2as_v5 2 Core 8GB Ram - Uses Accelerated Networking"
+                "description": "Size of the Virtual Machine\nExamples:\nB2ms - 2 Core 8GB Ram - Cannot use Accelerated Networking\nD2as_v5 2 Core 8GB Ram - Uses Accelerated Networking"
               }
             },
             "virtualMachine_AdminUsername": {
@@ -648,19 +648,19 @@
             "virtualMachine_ScriptFileLocation": {
               "type": "string",
               "metadata": {
-                "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\r\nExample: https://example.com/scripts/"
+                "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\nExample: https://example.com/scripts/"
               }
             },
             "virtualMachine_ScriptFileName": {
               "type": "string",
               "metadata": {
-                "description": "Name of the file to be ran while the Virtual Machine is being created\r\nExample: WinServ2022_ConfigScript_General.ps1"
+                "description": "Name of the file to be ran while the Virtual Machine is being created\nExample: WinServ2022_ConfigScript_General.ps1"
               }
             },
             "commandToExecute": {
               "type": "string",
               "metadata": {
-                "description": "'Command to execute while the Virtual Machine is being created.\r\nExample:\r\n'powershell.exe -ExecutionPolicy Unrestricted -File <file name.ps1>'\r\n"
+                "description": "'Command to execute while the Virtual Machine is being created.\nExample:\n'powershell.exe -ExecutionPolicy Unrestricted -File <file name.ps1>'\n"
               }
             },
             "addPublicIPAddress": {
@@ -849,8 +849,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.29.47.4906",
-                      "templateHash": "5767829995467476688"
+                      "version": "0.31.34.60546",
+                      "templateHash": "752507168095095404"
                     }
                   },
                   "parameters": {
@@ -1107,8 +1107,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.29.47.4906",
-              "templateHash": "5525445084399519645"
+              "version": "0.31.34.60546",
+              "templateHash": "18365672362978126361"
             }
           },
           "parameters": {
@@ -1125,7 +1125,7 @@
             "virtualMachine_Size": {
               "type": "string",
               "metadata": {
-                "description": "Size of the Virtual Machine\r\nExamples:\r\nB2ms - 2 Core 8GB Ram - Cannot use Accelerated Networking\r\nD2as_v5 2 Core 8GB Ram - Uses Accelerated Networking"
+                "description": "Size of the Virtual Machine\nExamples:\nB2ms - 2 Core 8GB Ram - Cannot use Accelerated Networking\nD2as_v5 2 Core 8GB Ram - Uses Accelerated Networking"
               }
             },
             "virtualMachine_AdminUsername": {
@@ -1309,8 +1309,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.29.47.4906",
-                      "templateHash": "5767829995467476688"
+                      "version": "0.31.34.60546",
+                      "templateHash": "752507168095095404"
                     }
                   },
                   "parameters": {
@@ -1543,8 +1543,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.29.47.4906",
-              "templateHash": "6587979398516923784"
+              "version": "0.31.34.60546",
+              "templateHash": "11534259321289650232"
             }
           },
           "parameters": {
@@ -1670,8 +1670,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.29.47.4906",
-              "templateHash": "1552470538815387244"
+              "version": "0.31.34.60546",
+              "templateHash": "13609541206309054438"
             }
           },
           "parameters": {
@@ -1715,7 +1715,7 @@
                 "Generation2"
               ],
               "metadata": {
-                "description": "Generation of the Virtual Network Gateway SKU\r\nGeneration1: Basic, VpnGw1-3, VpnGw1-3AZ\r\nGeneration2: VpnGw2-5, VpnGw2-5Az"
+                "description": "Generation of the Virtual Network Gateway SKU\nGeneration1: Basic, VpnGw1-3, VpnGw1-3AZ\nGeneration2: VpnGw2-5, VpnGw2-5Az"
               }
             },
             "virtualNetworkGateway_ASN": {
@@ -1894,8 +1894,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.29.47.4906",
-              "templateHash": "8507299090323470876"
+              "version": "0.31.34.60546",
+              "templateHash": "13093071940664364514"
             }
           },
           "parameters": {

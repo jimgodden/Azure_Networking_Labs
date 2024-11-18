@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.29.47.4906",
-      "templateHash": "12900251804738947918"
+      "version": "0.31.34.60546",
+      "templateHash": "10094105650209749067"
     }
   },
   "parameters": {
@@ -77,8 +77,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.29.47.4906",
-              "templateHash": "9502503265789790679"
+              "version": "0.31.34.60546",
+              "templateHash": "10263754388870337008"
             }
           },
           "parameters": {
@@ -98,7 +98,7 @@
               "type": "array",
               "defaultValue": [],
               "metadata": {
-                "description": "An Array of Custom DNS Server IP Addresses.  Azure Wireserver will be used if left as an empty array [].\r\nExample:\r\n[10.0.0.4, 10.0.0.5]\r\n"
+                "description": "An Array of Custom DNS Server IP Addresses.  Azure Wireserver will be used if left as an empty array [].\nExample:\n[10.0.0.4, 10.0.0.5]\n"
               }
             },
             "networkSecurityGroup_Default_Name": {
@@ -528,8 +528,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.29.47.4906",
-              "templateHash": "6587979398516923784"
+              "version": "0.31.34.60546",
+              "templateHash": "11534259321289650232"
             }
           },
           "parameters": {
@@ -649,8 +649,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.29.47.4906",
-              "templateHash": "13156274279805455232"
+              "version": "0.31.34.60546",
+              "templateHash": "10683976484522786200"
             }
           },
           "parameters": {
@@ -725,8 +725,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.29.47.4906",
-              "templateHash": "10265562668198669548"
+              "version": "0.31.34.60546",
+              "templateHash": "7496262208104362868"
             }
           },
           "parameters": {
@@ -772,7 +772,7 @@
               "type": "bool",
               "defaultValue": false,
               "metadata": {
-                "description": "True enables Accelerated Networking and False disabled it.  \r\nNot all VM sizes support Accel Net (i.e. Standard_B2ms).  \r\nI'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net.\r\n"
+                "description": "True enables Accelerated Networking and False disabled it.  \nNot all VM sizes support Accel Net (i.e. Standard_B2ms).  \nI'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net.\n"
               }
             }
           },
@@ -803,8 +803,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.29.47.4906",
-                      "templateHash": "9502503265789790679"
+                      "version": "0.31.34.60546",
+                      "templateHash": "10263754388870337008"
                     }
                   },
                   "parameters": {
@@ -824,7 +824,7 @@
                       "type": "array",
                       "defaultValue": [],
                       "metadata": {
-                        "description": "An Array of Custom DNS Server IP Addresses.  Azure Wireserver will be used if left as an empty array [].\r\nExample:\r\n[10.0.0.4, 10.0.0.5]\r\n"
+                        "description": "An Array of Custom DNS Server IP Addresses.  Azure Wireserver will be used if left as an empty array [].\nExample:\n[10.0.0.4, 10.0.0.5]\n"
                       }
                     },
                     "networkSecurityGroup_Default_Name": {
@@ -1248,8 +1248,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.29.47.4906",
-                      "templateHash": "16731405896637240378"
+                      "version": "0.31.34.60546",
+                      "templateHash": "5001555378092958091"
                     }
                   },
                   "parameters": {
@@ -1375,8 +1375,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.29.47.4906",
-                      "templateHash": "14815089135664500033"
+                      "version": "0.31.34.60546",
+                      "templateHash": "9107602116624813428"
                     }
                   },
                   "parameters": {
@@ -1393,7 +1393,7 @@
                     "virtualMachine_Size": {
                       "type": "string",
                       "metadata": {
-                        "description": "Size of the Virtual Machine\r\nExamples:\r\nB2ms - 2 Core 8GB Ram - Cannot use Accelerated Networking\r\nD2as_v5 2 Core 8GB Ram - Uses Accelerated Networking"
+                        "description": "Size of the Virtual Machine\nExamples:\nB2ms - 2 Core 8GB Ram - Cannot use Accelerated Networking\nD2as_v5 2 Core 8GB Ram - Uses Accelerated Networking"
                       }
                     },
                     "virtualMachine_AdminUsername": {
@@ -1430,19 +1430,19 @@
                     "virtualMachine_ScriptFileLocation": {
                       "type": "string",
                       "metadata": {
-                        "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\r\nExample: https://example.com/scripts/"
+                        "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\nExample: https://example.com/scripts/"
                       }
                     },
                     "virtualMachine_ScriptFileName": {
                       "type": "string",
                       "metadata": {
-                        "description": "Name of the file to be ran while the Virtual Machine is being created\r\nExample: WinServ2022_ConfigScript_General.ps1"
+                        "description": "Name of the file to be ran while the Virtual Machine is being created\nExample: WinServ2022_ConfigScript_General.ps1"
                       }
                     },
                     "commandToExecute": {
                       "type": "string",
                       "metadata": {
-                        "description": "'Command to execute while the Virtual Machine is being created.\r\nExample:\r\n'powershell.exe -ExecutionPolicy Unrestricted -File <file name.ps1>'\r\n"
+                        "description": "'Command to execute while the Virtual Machine is being created.\nExample:\n'powershell.exe -ExecutionPolicy Unrestricted -File <file name.ps1>'\n"
                       }
                     },
                     "addPublicIPAddress": {
@@ -1631,8 +1631,8 @@
                           "metadata": {
                             "_generator": {
                               "name": "bicep",
-                              "version": "0.29.47.4906",
-                              "templateHash": "5767829995467476688"
+                              "version": "0.31.34.60546",
+                              "templateHash": "752507168095095404"
                             }
                           },
                           "parameters": {
@@ -1892,8 +1892,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.29.47.4906",
-                      "templateHash": "14815089135664500033"
+                      "version": "0.31.34.60546",
+                      "templateHash": "9107602116624813428"
                     }
                   },
                   "parameters": {
@@ -1910,7 +1910,7 @@
                     "virtualMachine_Size": {
                       "type": "string",
                       "metadata": {
-                        "description": "Size of the Virtual Machine\r\nExamples:\r\nB2ms - 2 Core 8GB Ram - Cannot use Accelerated Networking\r\nD2as_v5 2 Core 8GB Ram - Uses Accelerated Networking"
+                        "description": "Size of the Virtual Machine\nExamples:\nB2ms - 2 Core 8GB Ram - Cannot use Accelerated Networking\nD2as_v5 2 Core 8GB Ram - Uses Accelerated Networking"
                       }
                     },
                     "virtualMachine_AdminUsername": {
@@ -1947,19 +1947,19 @@
                     "virtualMachine_ScriptFileLocation": {
                       "type": "string",
                       "metadata": {
-                        "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\r\nExample: https://example.com/scripts/"
+                        "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\nExample: https://example.com/scripts/"
                       }
                     },
                     "virtualMachine_ScriptFileName": {
                       "type": "string",
                       "metadata": {
-                        "description": "Name of the file to be ran while the Virtual Machine is being created\r\nExample: WinServ2022_ConfigScript_General.ps1"
+                        "description": "Name of the file to be ran while the Virtual Machine is being created\nExample: WinServ2022_ConfigScript_General.ps1"
                       }
                     },
                     "commandToExecute": {
                       "type": "string",
                       "metadata": {
-                        "description": "'Command to execute while the Virtual Machine is being created.\r\nExample:\r\n'powershell.exe -ExecutionPolicy Unrestricted -File <file name.ps1>'\r\n"
+                        "description": "'Command to execute while the Virtual Machine is being created.\nExample:\n'powershell.exe -ExecutionPolicy Unrestricted -File <file name.ps1>'\n"
                       }
                     },
                     "addPublicIPAddress": {
@@ -2148,8 +2148,8 @@
                           "metadata": {
                             "_generator": {
                               "name": "bicep",
-                              "version": "0.29.47.4906",
-                              "templateHash": "5767829995467476688"
+                              "version": "0.31.34.60546",
+                              "templateHash": "752507168095095404"
                             }
                           },
                           "parameters": {
@@ -2392,8 +2392,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.29.47.4906",
-              "templateHash": "13331725584789095663"
+              "version": "0.31.34.60546",
+              "templateHash": "546517785603801671"
             }
           },
           "parameters": {
@@ -2471,8 +2471,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.29.47.4906",
-              "templateHash": "10265562668198669548"
+              "version": "0.31.34.60546",
+              "templateHash": "7496262208104362868"
             }
           },
           "parameters": {
@@ -2518,7 +2518,7 @@
               "type": "bool",
               "defaultValue": false,
               "metadata": {
-                "description": "True enables Accelerated Networking and False disabled it.  \r\nNot all VM sizes support Accel Net (i.e. Standard_B2ms).  \r\nI'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net.\r\n"
+                "description": "True enables Accelerated Networking and False disabled it.  \nNot all VM sizes support Accel Net (i.e. Standard_B2ms).  \nI'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net.\n"
               }
             }
           },
@@ -2549,8 +2549,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.29.47.4906",
-                      "templateHash": "9502503265789790679"
+                      "version": "0.31.34.60546",
+                      "templateHash": "10263754388870337008"
                     }
                   },
                   "parameters": {
@@ -2570,7 +2570,7 @@
                       "type": "array",
                       "defaultValue": [],
                       "metadata": {
-                        "description": "An Array of Custom DNS Server IP Addresses.  Azure Wireserver will be used if left as an empty array [].\r\nExample:\r\n[10.0.0.4, 10.0.0.5]\r\n"
+                        "description": "An Array of Custom DNS Server IP Addresses.  Azure Wireserver will be used if left as an empty array [].\nExample:\n[10.0.0.4, 10.0.0.5]\n"
                       }
                     },
                     "networkSecurityGroup_Default_Name": {
@@ -2994,8 +2994,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.29.47.4906",
-                      "templateHash": "16731405896637240378"
+                      "version": "0.31.34.60546",
+                      "templateHash": "5001555378092958091"
                     }
                   },
                   "parameters": {
@@ -3121,8 +3121,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.29.47.4906",
-                      "templateHash": "14815089135664500033"
+                      "version": "0.31.34.60546",
+                      "templateHash": "9107602116624813428"
                     }
                   },
                   "parameters": {
@@ -3139,7 +3139,7 @@
                     "virtualMachine_Size": {
                       "type": "string",
                       "metadata": {
-                        "description": "Size of the Virtual Machine\r\nExamples:\r\nB2ms - 2 Core 8GB Ram - Cannot use Accelerated Networking\r\nD2as_v5 2 Core 8GB Ram - Uses Accelerated Networking"
+                        "description": "Size of the Virtual Machine\nExamples:\nB2ms - 2 Core 8GB Ram - Cannot use Accelerated Networking\nD2as_v5 2 Core 8GB Ram - Uses Accelerated Networking"
                       }
                     },
                     "virtualMachine_AdminUsername": {
@@ -3176,19 +3176,19 @@
                     "virtualMachine_ScriptFileLocation": {
                       "type": "string",
                       "metadata": {
-                        "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\r\nExample: https://example.com/scripts/"
+                        "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\nExample: https://example.com/scripts/"
                       }
                     },
                     "virtualMachine_ScriptFileName": {
                       "type": "string",
                       "metadata": {
-                        "description": "Name of the file to be ran while the Virtual Machine is being created\r\nExample: WinServ2022_ConfigScript_General.ps1"
+                        "description": "Name of the file to be ran while the Virtual Machine is being created\nExample: WinServ2022_ConfigScript_General.ps1"
                       }
                     },
                     "commandToExecute": {
                       "type": "string",
                       "metadata": {
-                        "description": "'Command to execute while the Virtual Machine is being created.\r\nExample:\r\n'powershell.exe -ExecutionPolicy Unrestricted -File <file name.ps1>'\r\n"
+                        "description": "'Command to execute while the Virtual Machine is being created.\nExample:\n'powershell.exe -ExecutionPolicy Unrestricted -File <file name.ps1>'\n"
                       }
                     },
                     "addPublicIPAddress": {
@@ -3377,8 +3377,8 @@
                           "metadata": {
                             "_generator": {
                               "name": "bicep",
-                              "version": "0.29.47.4906",
-                              "templateHash": "5767829995467476688"
+                              "version": "0.31.34.60546",
+                              "templateHash": "752507168095095404"
                             }
                           },
                           "parameters": {
@@ -3638,8 +3638,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.29.47.4906",
-                      "templateHash": "14815089135664500033"
+                      "version": "0.31.34.60546",
+                      "templateHash": "9107602116624813428"
                     }
                   },
                   "parameters": {
@@ -3656,7 +3656,7 @@
                     "virtualMachine_Size": {
                       "type": "string",
                       "metadata": {
-                        "description": "Size of the Virtual Machine\r\nExamples:\r\nB2ms - 2 Core 8GB Ram - Cannot use Accelerated Networking\r\nD2as_v5 2 Core 8GB Ram - Uses Accelerated Networking"
+                        "description": "Size of the Virtual Machine\nExamples:\nB2ms - 2 Core 8GB Ram - Cannot use Accelerated Networking\nD2as_v5 2 Core 8GB Ram - Uses Accelerated Networking"
                       }
                     },
                     "virtualMachine_AdminUsername": {
@@ -3693,19 +3693,19 @@
                     "virtualMachine_ScriptFileLocation": {
                       "type": "string",
                       "metadata": {
-                        "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\r\nExample: https://example.com/scripts/"
+                        "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\nExample: https://example.com/scripts/"
                       }
                     },
                     "virtualMachine_ScriptFileName": {
                       "type": "string",
                       "metadata": {
-                        "description": "Name of the file to be ran while the Virtual Machine is being created\r\nExample: WinServ2022_ConfigScript_General.ps1"
+                        "description": "Name of the file to be ran while the Virtual Machine is being created\nExample: WinServ2022_ConfigScript_General.ps1"
                       }
                     },
                     "commandToExecute": {
                       "type": "string",
                       "metadata": {
-                        "description": "'Command to execute while the Virtual Machine is being created.\r\nExample:\r\n'powershell.exe -ExecutionPolicy Unrestricted -File <file name.ps1>'\r\n"
+                        "description": "'Command to execute while the Virtual Machine is being created.\nExample:\n'powershell.exe -ExecutionPolicy Unrestricted -File <file name.ps1>'\n"
                       }
                     },
                     "addPublicIPAddress": {
@@ -3894,8 +3894,8 @@
                           "metadata": {
                             "_generator": {
                               "name": "bicep",
-                              "version": "0.29.47.4906",
-                              "templateHash": "5767829995467476688"
+                              "version": "0.31.34.60546",
+                              "templateHash": "752507168095095404"
                             }
                           },
                           "parameters": {
@@ -4138,8 +4138,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.29.47.4906",
-              "templateHash": "13331725584789095663"
+              "version": "0.31.34.60546",
+              "templateHash": "546517785603801671"
             }
           },
           "parameters": {
@@ -4217,8 +4217,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.29.47.4906",
-              "templateHash": "10265562668198669548"
+              "version": "0.31.34.60546",
+              "templateHash": "7496262208104362868"
             }
           },
           "parameters": {
@@ -4264,7 +4264,7 @@
               "type": "bool",
               "defaultValue": false,
               "metadata": {
-                "description": "True enables Accelerated Networking and False disabled it.  \r\nNot all VM sizes support Accel Net (i.e. Standard_B2ms).  \r\nI'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net.\r\n"
+                "description": "True enables Accelerated Networking and False disabled it.  \nNot all VM sizes support Accel Net (i.e. Standard_B2ms).  \nI'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net.\n"
               }
             }
           },
@@ -4295,8 +4295,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.29.47.4906",
-                      "templateHash": "9502503265789790679"
+                      "version": "0.31.34.60546",
+                      "templateHash": "10263754388870337008"
                     }
                   },
                   "parameters": {
@@ -4316,7 +4316,7 @@
                       "type": "array",
                       "defaultValue": [],
                       "metadata": {
-                        "description": "An Array of Custom DNS Server IP Addresses.  Azure Wireserver will be used if left as an empty array [].\r\nExample:\r\n[10.0.0.4, 10.0.0.5]\r\n"
+                        "description": "An Array of Custom DNS Server IP Addresses.  Azure Wireserver will be used if left as an empty array [].\nExample:\n[10.0.0.4, 10.0.0.5]\n"
                       }
                     },
                     "networkSecurityGroup_Default_Name": {
@@ -4740,8 +4740,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.29.47.4906",
-                      "templateHash": "16731405896637240378"
+                      "version": "0.31.34.60546",
+                      "templateHash": "5001555378092958091"
                     }
                   },
                   "parameters": {
@@ -4867,8 +4867,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.29.47.4906",
-                      "templateHash": "14815089135664500033"
+                      "version": "0.31.34.60546",
+                      "templateHash": "9107602116624813428"
                     }
                   },
                   "parameters": {
@@ -4885,7 +4885,7 @@
                     "virtualMachine_Size": {
                       "type": "string",
                       "metadata": {
-                        "description": "Size of the Virtual Machine\r\nExamples:\r\nB2ms - 2 Core 8GB Ram - Cannot use Accelerated Networking\r\nD2as_v5 2 Core 8GB Ram - Uses Accelerated Networking"
+                        "description": "Size of the Virtual Machine\nExamples:\nB2ms - 2 Core 8GB Ram - Cannot use Accelerated Networking\nD2as_v5 2 Core 8GB Ram - Uses Accelerated Networking"
                       }
                     },
                     "virtualMachine_AdminUsername": {
@@ -4922,19 +4922,19 @@
                     "virtualMachine_ScriptFileLocation": {
                       "type": "string",
                       "metadata": {
-                        "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\r\nExample: https://example.com/scripts/"
+                        "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\nExample: https://example.com/scripts/"
                       }
                     },
                     "virtualMachine_ScriptFileName": {
                       "type": "string",
                       "metadata": {
-                        "description": "Name of the file to be ran while the Virtual Machine is being created\r\nExample: WinServ2022_ConfigScript_General.ps1"
+                        "description": "Name of the file to be ran while the Virtual Machine is being created\nExample: WinServ2022_ConfigScript_General.ps1"
                       }
                     },
                     "commandToExecute": {
                       "type": "string",
                       "metadata": {
-                        "description": "'Command to execute while the Virtual Machine is being created.\r\nExample:\r\n'powershell.exe -ExecutionPolicy Unrestricted -File <file name.ps1>'\r\n"
+                        "description": "'Command to execute while the Virtual Machine is being created.\nExample:\n'powershell.exe -ExecutionPolicy Unrestricted -File <file name.ps1>'\n"
                       }
                     },
                     "addPublicIPAddress": {
@@ -5123,8 +5123,8 @@
                           "metadata": {
                             "_generator": {
                               "name": "bicep",
-                              "version": "0.29.47.4906",
-                              "templateHash": "5767829995467476688"
+                              "version": "0.31.34.60546",
+                              "templateHash": "752507168095095404"
                             }
                           },
                           "parameters": {
@@ -5384,8 +5384,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.29.47.4906",
-                      "templateHash": "14815089135664500033"
+                      "version": "0.31.34.60546",
+                      "templateHash": "9107602116624813428"
                     }
                   },
                   "parameters": {
@@ -5402,7 +5402,7 @@
                     "virtualMachine_Size": {
                       "type": "string",
                       "metadata": {
-                        "description": "Size of the Virtual Machine\r\nExamples:\r\nB2ms - 2 Core 8GB Ram - Cannot use Accelerated Networking\r\nD2as_v5 2 Core 8GB Ram - Uses Accelerated Networking"
+                        "description": "Size of the Virtual Machine\nExamples:\nB2ms - 2 Core 8GB Ram - Cannot use Accelerated Networking\nD2as_v5 2 Core 8GB Ram - Uses Accelerated Networking"
                       }
                     },
                     "virtualMachine_AdminUsername": {
@@ -5439,19 +5439,19 @@
                     "virtualMachine_ScriptFileLocation": {
                       "type": "string",
                       "metadata": {
-                        "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\r\nExample: https://example.com/scripts/"
+                        "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\nExample: https://example.com/scripts/"
                       }
                     },
                     "virtualMachine_ScriptFileName": {
                       "type": "string",
                       "metadata": {
-                        "description": "Name of the file to be ran while the Virtual Machine is being created\r\nExample: WinServ2022_ConfigScript_General.ps1"
+                        "description": "Name of the file to be ran while the Virtual Machine is being created\nExample: WinServ2022_ConfigScript_General.ps1"
                       }
                     },
                     "commandToExecute": {
                       "type": "string",
                       "metadata": {
-                        "description": "'Command to execute while the Virtual Machine is being created.\r\nExample:\r\n'powershell.exe -ExecutionPolicy Unrestricted -File <file name.ps1>'\r\n"
+                        "description": "'Command to execute while the Virtual Machine is being created.\nExample:\n'powershell.exe -ExecutionPolicy Unrestricted -File <file name.ps1>'\n"
                       }
                     },
                     "addPublicIPAddress": {
@@ -5640,8 +5640,8 @@
                           "metadata": {
                             "_generator": {
                               "name": "bicep",
-                              "version": "0.29.47.4906",
-                              "templateHash": "5767829995467476688"
+                              "version": "0.31.34.60546",
+                              "templateHash": "752507168095095404"
                             }
                           },
                           "parameters": {
@@ -5884,8 +5884,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.29.47.4906",
-              "templateHash": "13331725584789095663"
+              "version": "0.31.34.60546",
+              "templateHash": "546517785603801671"
             }
           },
           "parameters": {
