@@ -11,6 +11,7 @@ if ($projectNames.contains($ProjectName)) {
 
     # Removes the Directory whose name matches the Project Name provided
     Remove-Item -Path ".\${ProjectName}" -Recurse
+    Remove-Item -Path ".\${ProjectName}" -Recurse # Testing running it twice to see if that removes the last two folders
     
     # Removes the Project Name from the BicepProjectList
     .\Tools\Update-BicepProjectList.ps1 -ProjectName $ProjectName -Operation "Remove"

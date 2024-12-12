@@ -18,6 +18,10 @@ sed -i 's/bgpd=no/bgpd=yes/' /etc/frr/daemons
 
 sudo systemctl restart frr
 
+sed -i 's/#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/' /etc/sysctl.conf
+
+sudo sysctl -p
+
 
 # configure terminal 
 # router bgp 65000

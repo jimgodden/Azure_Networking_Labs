@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.31.34.60546",
-      "templateHash": "16282221739398848995"
+      "templateHash": "9698817274920451333"
     }
   },
   "parameters": {
@@ -546,7 +546,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.31.34.60546",
-              "templateHash": "13473802571546086669"
+              "templateHash": "11682738413052606674"
             }
           },
           "parameters": {
@@ -790,7 +790,7 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.31.34.60546",
-                      "templateHash": "752507168095095404"
+                      "templateHash": "13059194259010041159"
                     }
                   },
                   "parameters": {
@@ -871,7 +871,7 @@
                           }
                         ],
                         "enableAcceleratedNetworking": "[parameters('acceleratedNetworking')]",
-                        "enableIPForwarding": false,
+                        "enableIPForwarding": true,
                         "disableTcpStateTracking": false,
                         "nicType": "Standard"
                       },

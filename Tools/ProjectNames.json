@@ -3,16 +3,10 @@
     "Name": "Azure_VirtualWAN_Sandbox"
   },
   {
-    "Name": "Scenario-Bastion"
-  },
-  {
     "Name": "Sandbox-PE_to_SQL"
   },
   {
     "Name": "Scenario-LinuxAutoPacketCapture"
-  },
-  {
-    "Name": "Scenario-DnsZone"
   },
   {
     "Name": "Sandbox-ApplicationGateway_v2"
@@ -45,10 +39,10 @@
     "Name": "Scenario-ELBRepro"
   },
   {
-    "Name": "Training-FRR_BGP_Lab"
+    "Name": "Scenario-ManyVMsRepro"
   },
   {
-    "Name": "Scenario-ManyVMsRepro"
+    "Name": "Scenario-Bastion"
   },
   {
     "Name": "Scenario-ConnMonTest"
@@ -72,9 +66,6 @@
     "Name": "Training-VPN_Lab"
   },
   {
-    "Name": "Scenario-AzureFrontDoor"
-  },
-  {
     "Name": "Scenario-BastionDeveloperSKU"
   },
   {
@@ -90,6 +81,9 @@
     "Name": "Sandbox-PrivateLink"
   },
   {
-    "Name": "Scenario-LotsofPEs"
+    "Name": "Training-FRR_BGP_Lab"
+  },
+  {
+    "Name": "Training-FRR_BGP_Lab_alt"
   }
 ]

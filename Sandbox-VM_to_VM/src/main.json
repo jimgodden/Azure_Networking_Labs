@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.31.34.60546",
-      "templateHash": "2715853223032283318"
+      "templateHash": "11495314229933538517"
     }
   },
   "parameters": {
@@ -1935,7 +1935,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.31.34.60546",
-              "templateHash": "9107602116624813428"
+              "templateHash": "13304526460507877092"
             }
           },
           "parameters": {
@@ -2191,7 +2191,7 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.31.34.60546",
-                      "templateHash": "752507168095095404"
+                      "templateHash": "13059194259010041159"
                     }
                   },
                   "parameters": {
@@ -2272,7 +2272,7 @@
                           }
                         ],
                         "enableAcceleratedNetworking": "[parameters('acceleratedNetworking')]",
-                        "enableIPForwarding": false,
+                        "enableIPForwarding": true,
                         "disableTcpStateTracking": false,
                         "nicType": "Standard"
                       },
@@ -2457,7 +2457,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.31.34.60546",
-              "templateHash": "9107602116624813428"
+              "templateHash": "13304526460507877092"
             }
           },
           "parameters": {
@@ -2713,7 +2713,7 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.31.34.60546",
-                      "templateHash": "752507168095095404"
+                      "templateHash": "13059194259010041159"
                     }
                   },
                   "parameters": {
@@ -2794,7 +2794,7 @@
                           }
                         ],
                         "enableAcceleratedNetworking": "[parameters('acceleratedNetworking')]",
-                        "enableIPForwarding": false,
+                        "enableIPForwarding": true,
                         "disableTcpStateTracking": false,
                         "nicType": "Standard"
                       },
@@ -2979,7 +2979,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.31.34.60546",
-              "templateHash": "13473802571546086669"
+              "templateHash": "11682738413052606674"
             }
           },
           "parameters": {
@@ -3223,7 +3223,7 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.31.34.60546",
-                      "templateHash": "752507168095095404"
+                      "templateHash": "13059194259010041159"
                     }
                   },
                   "parameters": {
@@ -3304,7 +3304,7 @@
                           }
                         ],
                         "enableAcceleratedNetworking": "[parameters('acceleratedNetworking')]",
-                        "enableIPForwarding": false,
+                        "enableIPForwarding": true,
                         "disableTcpStateTracking": false,
                         "nicType": "Standard"
                       },
@@ -3485,7 +3485,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.31.34.60546",
-              "templateHash": "13473802571546086669"
+              "templateHash": "11682738413052606674"
             }
           },
           "parameters": {
@@ -3729,7 +3729,7 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.31.34.60546",
-                      "templateHash": "752507168095095404"
+                      "templateHash": "13059194259010041159"
                     }
                   },
                   "parameters": {
@@ -3810,7 +3810,7 @@
                           }
                         ],
                         "enableAcceleratedNetworking": "[parameters('acceleratedNetworking')]",
-                        "enableIPForwarding": false,
+                        "enableIPForwarding": true,
                         "disableTcpStateTracking": false,
                         "nicType": "Standard"
                       },

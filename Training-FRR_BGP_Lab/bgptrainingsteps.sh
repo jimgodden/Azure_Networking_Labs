@@ -1,5 +1,8 @@
-# 2. Configure BGP
+######################################################################################################################################################################
+# Lab 01
+######################################################################################################################################################################
 
+# 2. Configure BGP
 
 sudo su
 vtysh
@@ -134,3 +137,75 @@ network 10.100.3.0/24
 exit-address-family
 exit
 exit
+
+
+
+######################################################################################################################################################################
+# Lab 02
+######################################################################################################################################################################
+
+configure
+set protocols static route 10.100.4.40/32 next-hop 10.100.2.1
+set protocols bgp 200 neighbor 10.100.4.40 remote-as 200
+set protocols bgp 200 neighbor 10.100.4.40 address-family ipv4-unicast soft-reconfiguration inbound
+set protocols bgp 200 neighbor 10.100.4.40 disable-connected-check
+commit && save && exit
+
+configure
+set protocols static route 10.100.2.20/32 next-hop 10.100.4.1
+set protocols bgp 200 neighbor 10.100.2.20 remote-as 200
+set protocols bgp 200 neighbor 10.100.2.20 address-family ipv4-unicast soft-reconfiguration inbound
+set protocols bgp 200 neighbor 10.100.2.20 disable-connected-check
+set system host-name VM04
+commit && save && exit
+
+
+########################################################
+# VM2 Private IP: 10.100.2.20
+# FRR CONFIG
+
+sudo su
+vtysh
+configure terminal
+router bgp 200
+neighbor 10.100.4.40 remote-as 200
+neighbor 10.100.4.40 disable-connected-check
+neighbor 10.100.4.40 solo
+neighbor 10.100.4.40 description VM2
+address-family ipv4 unicast
+neighbor 10.100.4.40 soft-reconfiguration inbound
+neighbor 10.100.4.40 activate
+exit-address-family
+exit
+exit
+
+
+########################################################
+# VM4 Private IP: 10.100.4.40
+# FRR CONFIG
+
+sudo su
+vtysh
+configure terminal
+router bgp 200
+bgp router-id 10.100.4.40
+no bgp ebgp-requires-policy
+neighbor 10.100.2.20 remote-as 200
+neighbor 10.100.2.20 disable-connected-check
+neighbor 10.100.2.20 solo
+neighbor 10.100.2.20 description VM2
+address-family ipv4 unicast
+neighbor 10.100.2.20 soft-reconfiguration inbound
+neighbor 10.100.2.20 activate
+exit-address-family
+exit
+exit
+
+
+########################################################
+# VM2 Private IP: 10.100.2.20
+# FRR CONFIG
+configure terminal
+router bgp 200
+address-family ipv4 unicast
+neighbor 10.100.4.40 next-hop-self

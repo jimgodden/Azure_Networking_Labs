@@ -44,7 +44,7 @@ resource networkInterfaceWithoutPubIP 'Microsoft.Network/networkInterfaces@2022-
       }
     ]
     enableAcceleratedNetworking: acceleratedNetworking
-    enableIPForwarding: false
+    enableIPForwarding: true
     disableTcpStateTracking: false
     nicType: 'Standard'
   }

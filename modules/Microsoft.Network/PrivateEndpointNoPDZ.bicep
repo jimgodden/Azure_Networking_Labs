@@ -15,8 +15,8 @@ param privateEndpoint_SubnetID string
 @description('The ID of a group obtained from the remote resource that this private endpoint should connect to.')
 param groupID string
 
-@description('Resource Id of the Private DNS Zone')
-param privateDNSZone_Id string
+// @description('Resource Id of the Private DNS Zone')
+// param privateDNSZone_Id string
 
 param tagValues object = {}
 
@@ -51,20 +51,20 @@ resource privateEndpoint 'Microsoft.Network/privateEndpoints@2023-05-01' = {
 //   tags: tagValues
 // }
 
-resource privateDNSZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2023-04-01' = {
-  parent: privateEndpoint
-  name: '${groupID}ZoneGroup'
-  properties: {
-    privateDnsZoneConfigs: [
-      {
-        name: 'default'
-        properties: {
-           privateDnsZoneId: privateDNSZone_Id
-        }
-      }
-    ]
-  }
-}
+// resource privateDNSZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2023-04-01' = {
+//   parent: privateEndpoint
+//   name: '${groupID}ZoneGroup'
+//   properties: {
+//     privateDnsZoneConfigs: [
+//       {
+//         name: 'default'
+//         properties: {
+//            privateDnsZoneId: privateDNSZone_Id
+//         }
+//       }
+//     ]
+//   }
+// }
 
 // resource virtualNetworkLink_File 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2018-09-01' = [ for virtualNetwork_ID in virtualNetwork_IDs: {
 //   parent: privateDNSZone
