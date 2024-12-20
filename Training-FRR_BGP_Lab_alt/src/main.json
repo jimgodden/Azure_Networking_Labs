@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.31.34.60546",
-      "templateHash": "14370350565058471303"
+      "templateHash": "6289691642742095202"
     }
   },
   "parameters": {
@@ -195,7 +195,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.31.34.60546",
-              "templateHash": "7628759269076364522"
+              "templateHash": "14153897378808723292"
             }
           },
           "parameters": {
@@ -224,7 +224,11 @@
               "properties": {
                 "remoteVirtualNetwork": {
                   "id": "[parameters('virtualNetwork2_Id')]"
-                }
+                },
+                "allowVirtualNetworkAccess": true,
+                "allowForwardedTraffic": true,
+                "useRemoteGateways": false,
+                "allowGatewayTransit": false
               }
             },
             {
@@ -234,7 +238,11 @@
               "properties": {
                 "remoteVirtualNetwork": {
                   "id": "[parameters('virtualNetwork1_Id')]"
-                }
+                },
+                "allowVirtualNetworkAccess": true,
+                "allowForwardedTraffic": true,
+                "useRemoteGateways": false,
+                "allowGatewayTransit": false
               }
             }
           ]
@@ -269,7 +277,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.31.34.60546",
-              "templateHash": "7628759269076364522"
+              "templateHash": "14153897378808723292"
             }
           },
           "parameters": {
@@ -298,7 +306,11 @@
               "properties": {
                 "remoteVirtualNetwork": {
                   "id": "[parameters('virtualNetwork2_Id')]"
-                }
+                },
+                "allowVirtualNetworkAccess": true,
+                "allowForwardedTraffic": true,
+                "useRemoteGateways": false,
+                "allowGatewayTransit": false
               }
             },
             {
@@ -308,7 +320,11 @@
               "properties": {
                 "remoteVirtualNetwork": {
                   "id": "[parameters('virtualNetwork1_Id')]"
-                }
+                },
+                "allowVirtualNetworkAccess": true,
+                "allowForwardedTraffic": true,
+                "useRemoteGateways": false,
+                "allowGatewayTransit": false
               }
             }
           ]
@@ -852,7 +868,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.31.34.60546",
-              "templateHash": "7628759269076364522"
+              "templateHash": "14153897378808723292"
             }
           },
           "parameters": {
@@ -881,7 +897,11 @@
               "properties": {
                 "remoteVirtualNetwork": {
                   "id": "[parameters('virtualNetwork2_Id')]"
-                }
+                },
+                "allowVirtualNetworkAccess": true,
+                "allowForwardedTraffic": true,
+                "useRemoteGateways": false,
+                "allowGatewayTransit": false
               }
             },
             {
@@ -891,7 +911,11 @@
               "properties": {
                 "remoteVirtualNetwork": {
                   "id": "[parameters('virtualNetwork1_Id')]"
-                }
+                },
+                "allowVirtualNetworkAccess": true,
+                "allowForwardedTraffic": true,
+                "useRemoteGateways": false,
+                "allowGatewayTransit": false
               }
             }
           ]
@@ -1571,7 +1595,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.31.34.60546",
-              "templateHash": "16195207335685520134"
+              "templateHash": "8999070045458505860"
             }
           },
           "parameters": {
@@ -1611,7 +1635,7 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.31.34.60546",
-                      "templateHash": "7628759269076364522"
+                      "templateHash": "14153897378808723292"
                     }
                   },
                   "parameters": {
@@ -1640,7 +1664,11 @@
                       "properties": {
                         "remoteVirtualNetwork": {
                           "id": "[parameters('virtualNetwork2_Id')]"
-                        }
+                        },
+                        "allowVirtualNetworkAccess": true,
+                        "allowForwardedTraffic": true,
+                        "useRemoteGateways": false,
+                        "allowGatewayTransit": false
                       }
                     },
                     {
@@ -1650,7 +1678,11 @@
                       "properties": {
                         "remoteVirtualNetwork": {
                           "id": "[parameters('virtualNetwork1_Id')]"
-                        }
+                        },
+                        "allowVirtualNetworkAccess": true,
+                        "allowForwardedTraffic": true,
+                        "useRemoteGateways": false,
+                        "allowGatewayTransit": false
                       }
                     }
                   ]
@@ -1692,7 +1724,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.31.34.60546",
-              "templateHash": "16195207335685520134"
+              "templateHash": "8999070045458505860"
             }
           },
           "parameters": {
@@ -1732,7 +1764,7 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.31.34.60546",
-                      "templateHash": "7628759269076364522"
+                      "templateHash": "14153897378808723292"
                     }
                   },
                   "parameters": {
@@ -1761,7 +1793,11 @@
                       "properties": {
                         "remoteVirtualNetwork": {
                           "id": "[parameters('virtualNetwork2_Id')]"
-                        }
+                        },
+                        "allowVirtualNetworkAccess": true,
+                        "allowForwardedTraffic": true,
+                        "useRemoteGateways": false,
+                        "allowGatewayTransit": false
                       }
                     },
                     {
@@ -1771,7 +1807,11 @@
                       "properties": {
                         "remoteVirtualNetwork": {
                           "id": "[parameters('virtualNetwork1_Id')]"
-                        }
+                        },
+                        "allowVirtualNetworkAccess": true,
+                        "allowForwardedTraffic": true,
+                        "useRemoteGateways": false,
+                        "allowGatewayTransit": false
                       }
                     }
                   ]

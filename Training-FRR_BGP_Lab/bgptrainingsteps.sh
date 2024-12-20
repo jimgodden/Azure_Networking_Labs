@@ -1,3 +1,5 @@
+ip route 10.100.2.20/32 10.100.1.1
+
 ######################################################################################################################################################################
 # Lab 01
 ######################################################################################################################################################################
@@ -16,6 +18,7 @@ configure terminal
 sudo su
 vtysh
 configure terminal
+ip route 10.100.2.20/32 10.100.1.1
 router bgp 100
 bgp router-id 10.100.1.10
 no bgp ebgp-requires-policy
@@ -38,6 +41,8 @@ exit
 sudo su
 vtysh
 configure terminal
+ip route 10.100.1.10/32 10.100.2.1
+ip route 10.100.3.30/32 10.100.2.1
 router bgp 200
 bgp router-id 10.100.2.20
 no bgp ebgp-requires-policy
@@ -65,6 +70,7 @@ exit
 sudo su
 vtysh
 configure terminal
+ip route 10.100.2.20/32 10.100.3.1
 router bgp 300
 bgp router-id 10.100.3.30
 no bgp ebgp-requires-policy
@@ -144,21 +150,6 @@ exit
 # Lab 02
 ######################################################################################################################################################################
 
-configure
-set protocols static route 10.100.4.40/32 next-hop 10.100.2.1
-set protocols bgp 200 neighbor 10.100.4.40 remote-as 200
-set protocols bgp 200 neighbor 10.100.4.40 address-family ipv4-unicast soft-reconfiguration inbound
-set protocols bgp 200 neighbor 10.100.4.40 disable-connected-check
-commit && save && exit
-
-configure
-set protocols static route 10.100.2.20/32 next-hop 10.100.4.1
-set protocols bgp 200 neighbor 10.100.2.20 remote-as 200
-set protocols bgp 200 neighbor 10.100.2.20 address-family ipv4-unicast soft-reconfiguration inbound
-set protocols bgp 200 neighbor 10.100.2.20 disable-connected-check
-set system host-name VM04
-commit && save && exit
-
 
 ########################################################
 # VM2 Private IP: 10.100.2.20
@@ -167,11 +158,12 @@ commit && save && exit
 sudo su
 vtysh
 configure terminal
+ip route 10.100.4.40/32 10.100.2.1
 router bgp 200
 neighbor 10.100.4.40 remote-as 200
 neighbor 10.100.4.40 disable-connected-check
 neighbor 10.100.4.40 solo
-neighbor 10.100.4.40 description VM2
+neighbor 10.100.4.40 description VM4
 address-family ipv4 unicast
 neighbor 10.100.4.40 soft-reconfiguration inbound
 neighbor 10.100.4.40 activate
@@ -187,6 +179,7 @@ exit
 sudo su
 vtysh
 configure terminal
+ip route 10.100.2.20/32 10.100.4.1
 router bgp 200
 bgp router-id 10.100.4.40
 no bgp ebgp-requires-policy
@@ -209,3 +202,6 @@ configure terminal
 router bgp 200
 address-family ipv4 unicast
 neighbor 10.100.4.40 next-hop-self
+exit-address-family
+exit
+exit

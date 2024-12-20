@@ -19,6 +19,10 @@ resource virtualNetworkPeering_Source_to_Destination 'Microsoft.Network/virtualN
     remoteVirtualNetwork: {
       id: virtualNetwork_Destination.id
     }
+    allowVirtualNetworkAccess: true
+    allowForwardedTraffic: true
+    useRemoteGateways: false
+    allowGatewayTransit: false
   }
 }
 
@@ -29,5 +33,9 @@ resource virtualNetworkPeering_Destination_to_Source 'Microsoft.Network/virtualN
     remoteVirtualNetwork: {
       id: virtualNetwork_Source.id
     }
+    allowVirtualNetworkAccess: true
+    allowForwardedTraffic: true
+    useRemoteGateways: false
+    allowGatewayTransit: false
   }
 }

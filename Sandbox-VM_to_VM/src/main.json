@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.31.34.60546",
-      "templateHash": "11495314229933538517"
+      "templateHash": "9591014369163576535"
     }
   },
   "parameters": {
@@ -169,7 +169,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.31.34.60546",
-              "templateHash": "10263754388870337008"
+              "templateHash": "997188392080528454"
             }
           },
           "parameters": {
@@ -205,6 +205,10 @@
               "metadata": {
                 "description": "Name of the General Route Table"
               }
+            },
+            "routeTable_disableBgpRoutePropagation": {
+              "type": "bool",
+              "defaultValue": false
             },
             "virtualNetwork_AddressPrefix": {
               "type": "string"
@@ -412,7 +416,7 @@
               "name": "[parameters('routeTable_Name')]",
               "location": "[parameters('location')]",
               "properties": {
-                "disableBgpRoutePropagation": false
+                "disableBgpRoutePropagation": "[parameters('routeTable_disableBgpRoutePropagation')]"
               },
               "tags": "[parameters('tagValues')]"
             },
@@ -623,7 +627,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.31.34.60546",
-              "templateHash": "10263754388870337008"
+              "templateHash": "997188392080528454"
             }
           },
           "parameters": {
@@ -659,6 +663,10 @@
               "metadata": {
                 "description": "Name of the General Route Table"
               }
+            },
+            "routeTable_disableBgpRoutePropagation": {
+              "type": "bool",
+              "defaultValue": false
             },
             "virtualNetwork_AddressPrefix": {
               "type": "string"
@@ -866,7 +874,7 @@
               "name": "[parameters('routeTable_Name')]",
               "location": "[parameters('location')]",
               "properties": {
-                "disableBgpRoutePropagation": false
+                "disableBgpRoutePropagation": "[parameters('routeTable_disableBgpRoutePropagation')]"
               },
               "tags": "[parameters('tagValues')]"
             },
@@ -1833,7 +1841,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.31.34.60546",
-              "templateHash": "17077167883482034850"
+              "templateHash": "6499362084805900680"
             }
           },
           "parameters": {
@@ -1858,7 +1866,11 @@
               "properties": {
                 "remoteVirtualNetwork": {
                   "id": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Destination_Name'))]"
-                }
+                },
+                "allowVirtualNetworkAccess": true,
+                "allowForwardedTraffic": true,
+                "useRemoteGateways": false,
+                "allowGatewayTransit": false
               }
             },
             {
@@ -1868,7 +1880,11 @@
               "properties": {
                 "remoteVirtualNetwork": {
                   "id": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Source_Name'))]"
-                }
+                },
+                "allowVirtualNetworkAccess": true,
+                "allowForwardedTraffic": true,
+                "useRemoteGateways": false,
+                "allowGatewayTransit": false
               }
             }
           ]
@@ -4427,7 +4443,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.31.34.60546",
-              "templateHash": "10263754388870337008"
+              "templateHash": "997188392080528454"
             }
           },
           "parameters": {
@@ -4463,6 +4479,10 @@
               "metadata": {
                 "description": "Name of the General Route Table"
               }
+            },
+            "routeTable_disableBgpRoutePropagation": {
+              "type": "bool",
+              "defaultValue": false
             },
             "virtualNetwork_AddressPrefix": {
               "type": "string"
@@ -4670,7 +4690,7 @@
               "name": "[parameters('routeTable_Name')]",
               "location": "[parameters('location')]",
               "properties": {
-                "disableBgpRoutePropagation": false
+                "disableBgpRoutePropagation": "[parameters('routeTable_disableBgpRoutePropagation')]"
               },
               "tags": "[parameters('tagValues')]"
             },
@@ -5002,7 +5022,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.31.34.60546",
-              "templateHash": "17077167883482034850"
+              "templateHash": "6499362084805900680"
             }
           },
           "parameters": {
@@ -5027,7 +5047,11 @@
               "properties": {
                 "remoteVirtualNetwork": {
                   "id": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Destination_Name'))]"
-                }
+                },
+                "allowVirtualNetworkAccess": true,
+                "allowForwardedTraffic": true,
+                "useRemoteGateways": false,
+                "allowGatewayTransit": false
               }
             },
             {
@@ -5037,7 +5061,11 @@
               "properties": {
                 "remoteVirtualNetwork": {
                   "id": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Source_Name'))]"
-                }
+                },
+                "allowVirtualNetworkAccess": true,
+                "allowForwardedTraffic": true,
+                "useRemoteGateways": false,
+                "allowGatewayTransit": false
               }
             }
           ]

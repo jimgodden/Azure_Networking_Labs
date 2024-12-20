@@ -22,6 +22,8 @@ sed -i 's/#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/' /etc/sysctl.conf
 
 sudo sysctl -p
 
+iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+
 
 # configure terminal 
 # router bgp 65000

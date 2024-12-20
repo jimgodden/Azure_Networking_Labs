@@ -17,6 +17,8 @@ I'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net.
 ''')
 param acceleratedNetworking bool = false
 
+param numberOfVMsInBackendPool int = 3
+
 var virtualMachine_ScriptFileLocation = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
 
 module virtualNetwork '../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
@@ -44,46 +46,30 @@ module virtualMachine_Windows '../../modules/Microsoft.Compute/WindowsServer2022
   }
 }
 
-module webVM '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
-  name: 'webVM'
+module webVMs '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = [ for i in range(0, numberOfVMsInBackendPool): {
+  name: 'webVM${i}'
   params: {
     acceleratedNetworking: acceleratedNetworking
     location: location
     subnet_ID: virtualNetwork.outputs.general_SubnetID
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
-    virtualMachine_Name: 'webVM'
+    virtualMachine_Name: 'webVM${i}'
     virtualMachine_Size: virtualMachine_Size
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
     virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_WebServer.ps1'
     commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_WebServer.ps1 -Username ${virtualMachine_AdminUsername}'
   }
-}
-
-module dnsVM '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
-  name: 'dnsVM'
-  params: {
-    acceleratedNetworking: acceleratedNetworking
-    location: location
-    subnet_ID: virtualNetwork.outputs.general_SubnetID
-    virtualMachine_AdminPassword: virtualMachine_AdminPassword
-    virtualMachine_AdminUsername: virtualMachine_AdminUsername
-    virtualMachine_Name: 'dnsVM'
-    virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_DNS.ps1'
-    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username ${virtualMachine_AdminUsername}'
-  }
-}
+} ]
 
 module ilb '../../modules/Microsoft.Network/InternalLoadBalancer.bicep' = {
   name: 'ilb'
   params: {
     location: location
     internalLoadBalancer_SubnetID: virtualNetwork.outputs.general_SubnetID
-    networkInterface_IPConfig_Name: [webVM.outputs.networkInterface_IPConfig0_Name]
-    networkInterface_Name: [webVM.outputs.networkInterface_Name]
-    networkInterface_SubnetID: [virtualNetwork.outputs.general_SubnetID]
+    networkInterface_IPConfig_Name: [ for i in range(0, numberOfVMsInBackendPool): webVMs[i].outputs.networkInterface_IPConfig0_Name]
+    networkInterface_Name: [ for i in range(0, numberOfVMsInBackendPool): webVMs[i].outputs.networkInterface_Name]
+    networkInterface_SubnetID: [ for i in range(0, numberOfVMsInBackendPool): virtualNetwork.outputs.general_SubnetID]
     tcpPort: 443 // port that should not work intentionally used
   }
 }

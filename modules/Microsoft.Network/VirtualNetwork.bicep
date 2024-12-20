@@ -16,6 +16,8 @@ param networkSecurityGroup_Default_Name string = '${virtualNetwork_Name}_NSG_Gen
 @description('Name of the General Route Table')
 param routeTable_Name string = '${virtualNetwork_Name}_RT_General'
 
+param routeTable_disableBgpRoutePropagation bool = false
+
 param virtualNetwork_AddressPrefix string
 
 param tagValues object = {}
@@ -203,7 +205,7 @@ resource routeTable 'Microsoft.Network/routeTables@2023-02-01' = {
   name: routeTable_Name
   location: location
   properties: {
-    disableBgpRoutePropagation: false
+    disableBgpRoutePropagation: routeTable_disableBgpRoutePropagation
   }
   tags: tagValues
 }

@@ -19,6 +19,10 @@ resource virtualNetworkPeering_1_to_2 'Microsoft.Network/virtualNetworks/virtual
     remoteVirtualNetwork: {
       id: virtualNetwork2.id
     }
+    allowVirtualNetworkAccess: true
+    allowForwardedTraffic: true
+    useRemoteGateways: false
+    allowGatewayTransit: false
   }
 }
 

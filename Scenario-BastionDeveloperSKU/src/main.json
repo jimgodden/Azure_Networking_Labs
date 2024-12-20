@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.31.34.60546",
-      "templateHash": "15042901002519238713"
+      "templateHash": "13654564018976239892"
     }
   },
   "parameters": {
@@ -64,7 +64,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.31.34.60546",
-              "templateHash": "10263754388870337008"
+              "templateHash": "997188392080528454"
             }
           },
           "parameters": {
@@ -100,6 +100,10 @@
               "metadata": {
                 "description": "Name of the General Route Table"
               }
+            },
+            "routeTable_disableBgpRoutePropagation": {
+              "type": "bool",
+              "defaultValue": false
             },
             "virtualNetwork_AddressPrefix": {
               "type": "string"
@@ -307,7 +311,7 @@
               "name": "[parameters('routeTable_Name')]",
               "location": "[parameters('location')]",
               "properties": {
-                "disableBgpRoutePropagation": false
+                "disableBgpRoutePropagation": "[parameters('routeTable_disableBgpRoutePropagation')]"
               },
               "tags": "[parameters('tagValues')]"
             },
