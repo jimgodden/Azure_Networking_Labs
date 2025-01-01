@@ -14,15 +14,15 @@ echo deb '[signed-by=/usr/share/keyrings/frrouting.gpg]' https://deb.frrouting.o
 sudo apt update
 sudo apt install frr -y
 
-sed -i 's/bgpd=no/bgpd=yes/' /etc/frr/daemons
+sudo sed -i 's/bgpd=no/bgpd=yes/' /etc/frr/daemons
 
 sudo systemctl restart frr
 
-sed -i 's/#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/' /etc/sysctl.conf
+sudo sed -i 's/#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/' /etc/sysctl.conf
 
 sudo sysctl -p
 
-iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 
 
 # configure terminal 

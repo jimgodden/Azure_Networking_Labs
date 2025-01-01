@@ -74,10 +74,10 @@ module hub_To_SpokeA_Peering '../../modules/Microsoft.Network/VirtualNetworkPeer
     virtualNetwork_Hub_Name: virtualNetwork_Hub.outputs.virtualNetwork_Name
     virtualNetwork_Spoke_Name: virtualNetwork_SpokeA.outputs.virtualNetwork_Name
   }
-  dependsOn: [
-    Hub_to_OnPrem_conn
-    OnPrem_to_Hub_conn
-  ]
+  // dependsOn: [
+  //   Hub_to_OnPrem_conn
+  //   OnPrem_to_Hub_conn
+  // ]
 }
 
 module hub_To_SpokeB_Peering '../../modules/Microsoft.Network/VirtualNetworkPeeringHub2Spoke.bicep' = {
@@ -86,10 +86,10 @@ module hub_To_SpokeB_Peering '../../modules/Microsoft.Network/VirtualNetworkPeer
     virtualNetwork_Hub_Name: virtualNetwork_Hub.outputs.virtualNetwork_Name
     virtualNetwork_Spoke_Name: virtualNetwork_SpokeB.outputs.virtualNetwork_Name
   }
-  dependsOn: [
-    Hub_to_OnPrem_conn
-    OnPrem_to_Hub_conn
-  ]
+  // dependsOn: [
+  //   Hub_to_OnPrem_conn
+  //   OnPrem_to_Hub_conn
+  // ]
 }
 
 module hub_DnsVMs '../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = [ for i in range(1, 1) : {
@@ -339,15 +339,48 @@ module OnPremVM_WinDNS '../../modules/Microsoft.Compute/WindowsServer2022/Virtua
   }
 } ]
 
-module virtualNetworkGateway_OnPrem '../../modules/Microsoft.Network/VirtualNetworkGateway.bicep' = {
-  name: 'OnPremVirtualNetworkGateway'
+module OnPrem_NVA '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.bicep' = {
+  name: 'OnPrem_NVA'
   params: {
+    acceleratedNetworking: acceleratedNetworking
     location: location
-    virtualNetworkGateway_ASN: 65000
-    virtualNetworkGateway_Name: 'OnPrem_VNG'
-    virtualNetworkGateway_Subnet_ResourceID: virtualNetwork_OnPremHub.outputs.gateway_SubnetID
+    subnet_ID: virtualNetwork_OnPremHub.outputs.general_SubnetID
+    virtualMachine_AdminPassword: virtualMachine_AdminPassword
+    virtualMachine_AdminUsername: virtualMachine_AdminUsername
+    virtualMachine_Name: 'OnPrem-NVA'
+    virtualMachine_Size: virtualMachine_Size
+    privateIPAllocationMethod: 'Static'
+    privateIPAddress: '10.100.0.254'
+    virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
+    virtualMachine_ScriptFileName: 'frrconfig.sh'
+    commandToExecute: './frrconfig.sh'
   }
 }
+
+module vpn_vm '../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.bicep' = {
+  name: 'VPN_VM'
+  params: {
+    location: location
+    acceleratedNetworking: acceleratedNetworking
+    subnet_ID: virtualNetwork_OnPremHub.outputs.general_SubnetID
+    virtualMachine_AdminPassword: virtualMachine_AdminPassword
+    virtualMachine_AdminUsername: virtualMachine_AdminUsername
+    virtualMachine_Name: 'vpn-vm'
+    virtualMachine_ScriptFileName: 'Ubuntu20_DNS_Config.sh'
+    commandToExecute: './Ubuntu20_DNS_Config.sh'
+    virtualMachine_Size: virtualMachine_Size
+  }
+}
+
+// module virtualNetworkGateway_OnPrem '../../modules/Microsoft.Network/VirtualNetworkGateway.bicep' = {
+//   name: 'OnPremVirtualNetworkGateway'
+//   params: {
+//     location: location
+//     virtualNetworkGateway_ASN: 65000
+//     virtualNetworkGateway_Name: 'OnPrem_VNG'
+//     virtualNetworkGateway_Subnet_ResourceID: virtualNetwork_OnPremHub.outputs.gateway_SubnetID
+//   }
+// }
 
 module virtualNetworkGateway_Hub '../../modules/Microsoft.Network/VirtualNetworkGateway.bicep' = {
   name: 'HubVirtualNetworkGateway'
@@ -359,28 +392,28 @@ module virtualNetworkGateway_Hub '../../modules/Microsoft.Network/VirtualNetwork
   }
 }
 
-module OnPrem_to_Hub_conn '../../modules/Microsoft.Network/Connection_and_LocalNetworkGateway.bicep' = {
-  name: 'OnPrem_to_Hub_conn'
-  params: {
-    location: location
-    virtualNetworkGateway_ID: virtualNetworkGateway_OnPrem.outputs.virtualNetworkGateway_ResourceID
-    vpn_Destination_ASN: virtualNetworkGateway_Hub.outputs.virtualNetworkGateway_ASN
-    vpn_Destination_BGPIPAddress: virtualNetworkGateway_Hub.outputs.virtualNetworkGateway_BGPAddress
-    vpn_Destination_Name: virtualNetworkGateway_Hub.outputs.virtualNetworkGateway_Name
-    vpn_Destination_PublicIPAddress: virtualNetworkGateway_Hub.outputs.virtualNetworkGateway_PublicIPAddress
-    vpn_SharedKey: vpn_SharedKey
-  }
-}
+// module OnPrem_to_Hub_conn '../../modules/Microsoft.Network/Connection_and_LocalNetworkGateway.bicep' = {
+//   name: 'OnPrem_to_Hub_conn'
+//   params: {
+//     location: location
+//     virtualNetworkGateway_ID: virtualNetworkGateway_OnPrem.outputs.virtualNetworkGateway_ResourceID
+//     vpn_Destination_ASN: virtualNetworkGateway_Hub.outputs.virtualNetworkGateway_ASN
+//     vpn_Destination_BGPIPAddress: virtualNetworkGateway_Hub.outputs.virtualNetworkGateway_BGPAddress
+//     vpn_Destination_Name: virtualNetworkGateway_Hub.outputs.virtualNetworkGateway_Name
+//     vpn_Destination_PublicIPAddress: virtualNetworkGateway_Hub.outputs.virtualNetworkGateway_PublicIPAddress
+//     vpn_SharedKey: vpn_SharedKey
+//   }
+// }
 
-module Hub_to_OnPrem_conn '../../modules/Microsoft.Network/Connection_and_LocalNetworkGateway.bicep' = {
-  name: 'Hub_to_OnPrem_conn'
-  params: {
-    location: location
-    virtualNetworkGateway_ID: virtualNetworkGateway_Hub.outputs.virtualNetworkGateway_ResourceID
-    vpn_Destination_ASN: virtualNetworkGateway_OnPrem.outputs.virtualNetworkGateway_ASN
-    vpn_Destination_BGPIPAddress: virtualNetworkGateway_OnPrem.outputs.virtualNetworkGateway_BGPAddress
-    vpn_Destination_Name: virtualNetworkGateway_OnPrem.outputs.virtualNetworkGateway_Name
-    vpn_Destination_PublicIPAddress: virtualNetworkGateway_OnPrem.outputs.virtualNetworkGateway_PublicIPAddress
-    vpn_SharedKey: vpn_SharedKey
-  }
-}
+// module Hub_to_OnPrem_conn '../../modules/Microsoft.Network/Connection_and_LocalNetworkGateway.bicep' = {
+//   name: 'Hub_to_OnPrem_conn'
+//   params: {
+//     location: location
+//     virtualNetworkGateway_ID: virtualNetworkGateway_Hub.outputs.virtualNetworkGateway_ResourceID
+//     vpn_Destination_ASN: virtualNetworkGateway_OnPrem.outputs.virtualNetworkGateway_ASN
+//     vpn_Destination_BGPIPAddress: virtualNetworkGateway_OnPrem.outputs.virtualNetworkGateway_BGPAddress
+//     vpn_Destination_Name: virtualNetworkGateway_OnPrem.outputs.virtualNetworkGateway_Name
+//     vpn_Destination_PublicIPAddress: virtualNetworkGateway_OnPrem.outputs.virtualNetworkGateway_PublicIPAddress
+//     vpn_SharedKey: vpn_SharedKey
+//   }
+// }
