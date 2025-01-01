@@ -70,11 +70,11 @@ resource virtualMachine_CustomScriptExtension 'Microsoft.Compute/virtualMachines
     autoUpgradeMinorVersion: true
     settings: {
       fileUris: [
-        'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2022_ConfigScript_DNS.ps1'
+        'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2025_ConfigScript_DNS.ps1'
       ]
     }
     protectedSettings: {
-      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username ${virtualMachine_AdminUsername} -SampleDNSZoneName ${sampleDNSZoneName} -SampleARecord ${sampleARecord} -PrivateDNSZone ${conditionallyForwardedFQDN} -ConditionalForwarderIPAddress ${conditionalForwarderIPAddress}'
+      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript_DNS.ps1 -Username ${virtualMachine_AdminUsername} -SampleDNSZoneName ${sampleDNSZoneName} -SampleARecord ${sampleARecord} -PrivateDNSZone ${conditionallyForwardedFQDN} -ConditionalForwarderIPAddress ${conditionalForwarderIPAddress}'
     }
   }
   tags: tagValues
@@ -211,7 +211,7 @@ resource nic 'Microsoft.Network/networkInterfaces@2024-01-01' = {
         properties: {
           privateIPAddress: privateIPAddress
           privateIPAllocationMethod: privateIPAllocationMethod
-          publicIPAddress: addPublicIPAddress ? { id: publicIPAddress.id } : {}
+          publicIPAddress: addPublicIPAddress ? { id: publicIPAddress.id } : null
           subnet: {
             id: subnet_ID
           }

@@ -1,5 +1,9 @@
 param (
-    [string]$Username
+    [string]$Username,
+    [string]$SampleDNSZoneName,
+    [string]$SampleARecord,
+    [string]$PrivateDNSZone,
+    [string]$ConditionalForwarderIPAddress
 )
 
 $progressPreference = 'silentlyContinue'
@@ -70,3 +74,20 @@ Unregister-ScheduledTask -TaskName "Init" -Confirm:$false
 }
 
 Set-Content -Path "C:\WinServ2025_InstallTools.ps1" -Value $scriptBlock.ToString()
+
+
+
+# Start of the DNS Server configuration
+
+Install-WindowsFeature -Name DNS -IncludeManagementTools
+Set-DnsServerForwarder -IPAddress "168.63.129.16"
+
+Import-Module DnsServer
+
+if ($null -ne $SampleDNSZoneName -and $null -ne $SampleARecord) {
+    Add-DnsServerPrimaryZone -Name $SampleDNSZoneName -ZoneFile "${SampleDNSZoneName}dns" -IPv4Address $SampleARecord -PassThru 
+}
+
+if ($null -eq $PrivateDNSZone -and $null -eq $ConditionalForwarderIPAddress) {
+    Add-DnsServerConditionalForwarderZone -Name $PrivateDNSZone -MasterServers $ConditionalForwarderIPAddress
+}

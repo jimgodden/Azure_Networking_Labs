@@ -1,7 +1,7 @@
 param location string = resourceGroup().location
 
-@description('Principal ID of the user to assign the Virtual Machine Administrator Login role to')
-param principalId string
+// @description('Principal ID of the user to assign the Virtual Machine Administrator Login role to')
+// param principalId string
 
 @description('Username for the admin account of the Virtual Machines')
 param virtualMachine_AdminUsername string
@@ -97,7 +97,7 @@ module jumpboxVM '../../modules/Microsoft.Compute/VirtualMachine/Windows/Server2
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'jumpboxVM'
     vmSize: vmSize
-    entraConnect: true
+    entraConnect: false
     addPublicIPAddress: true
     tagValues: tagValues
   }
@@ -114,27 +114,29 @@ module clientVM '../../modules/Microsoft.Compute/VirtualMachine/Windows/Server20
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'clientVM'
     vmSize: vmSize
-    entraConnect: true
+    entraConnect: false
     addPublicIPAddress: false
     tagValues: tagValues
   }
 }
 
-resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(principalId, RoleDefinitionId_VmAdminLogin, resourceGroup().id)
-  properties: {
-    roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', RoleDefinitionId_VmAdminLogin)
-    principalId: principalId
-  }
-}
+// assigns the Virtual Machine Administrator Login role to the user specified by the principalId parameter 
+// (principalId is the Object ID from Entra of the user)
+// resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+//   name: guid(principalId, RoleDefinitionId_VmAdminLogin, resourceGroup().id)
+//   properties: {
+//     roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', RoleDefinitionId_VmAdminLogin)
+//     principalId: principalId
+//   }
+// }
 
-module bastion '../../modules/Microsoft.Network/Bastion.bicep' = {
-  name: 'bastion'
-  params: {
-    location: location
-    bastion_SubnetID: vnet.properties.subnets[1].id
-    bastion_name: 'bastion'
-    bastion_SKU: 'Standard'
-    enableKerberos: true
-  }
-}
+// module bastion '../../modules/Microsoft.Network/Bastion.bicep' = {
+//   name: 'bastion'
+//   params: {
+//     location: location
+//     bastion_SubnetID: vnet.properties.subnets[1].id
+//     bastion_name: 'bastion'
+//     bastion_SKU: 'Standard'
+//     enableKerberos: true
+//   }
+// }
