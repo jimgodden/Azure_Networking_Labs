@@ -21,7 +21,9 @@ $packages = @(
     "vscode",
     "pstools",
     "Microsoft.PowerShell",
-    "notepadplusplus"
+    "notepadplusplus",
+    "putty",
+    "winscp"
 )
 
 foreach ($package in $packages) {

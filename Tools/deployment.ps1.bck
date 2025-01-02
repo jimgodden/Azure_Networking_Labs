@@ -10,9 +10,6 @@ param(
     [Parameter(Mandatory)]
     [string]$DeploymentName,
 
-    # [Parameter(Mandatory)]
-    # [string]$DeploymentType,
-
     [Parameter(Mandatory)]
     [string]$Location,
     
@@ -29,11 +26,7 @@ if (!($context = Get-AzContext)) {
 Write-Host "AzContext is set to the following:"
 Write-Host "Subscription: $($context.Subscription.Name) ($($context.Subscription.Id)) | Tenant: $($context.Tenant.Id)`n"
 
-$DeploymentName_Split = $DeploymentName.Split("-")
-$D_Type = $DeploymentName_Split[0]
-$D_Name = $DeploymentName_Split[1]
-
-$deploymentFilePath = ".\Deployment_${D_Type}\${D_Name}"
+$deploymentFilePath = ".\${DeploymentName}"
 $mainBicepFile = "${deploymentFilePath}\src\main.bicep"
 $mainParameterFile = "${deploymentFilePath}\src\main.bicepparam"
 $iterationFile = "${deploymentFilePath}\iteration.txt"

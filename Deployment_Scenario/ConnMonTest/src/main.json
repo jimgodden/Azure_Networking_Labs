@@ -1,0 +1,86 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.32.4.45862",
+      "templateHash": "5454822202316159973"
+    }
+  },
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "eastus2",
+      "metadata": {
+        "description": "Location of the connection monitor.  Should be created in the same region as the Virtual Machine."
+      }
+    },
+    "srcEndpointVmResource_Id": {
+      "type": "string",
+      "metadata": {
+        "description": "Resource Id of a Virtual Machine to use as a source Endpoint.  Must have the Network Watcher extension installed."
+      }
+    },
+    "uniqueIdentifier": {
+      "type": "string",
+      "defaultValue": "test",
+      "metadata": {
+        "description": "Unique Identifier that can be used if running this test multiple times.  This is optional."
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/networkWatchers/connectionMonitors",
+      "apiVersion": "2023-11-01",
+      "name": "[format('NetworkWatcher_eastus2/{0}connmon', parameters('uniqueIdentifier'))]",
+      "properties": {
+        "endpoints": [
+          {
+            "name": "[format('{0}({1})', last(split(parameters('srcEndpointVmResource_Id'), '/')), split(parameters('srcEndpointVmResource_Id'), '/')[3])]",
+            "type": "AzureVM",
+            "resourceId": "[parameters('srcEndpointVmResource_Id')]"
+          },
+          {
+            "name": "8.8.8.8",
+            "type": "ExternalAddress",
+            "address": "8.8.8.8"
+          }
+        ],
+        "testConfigurations": [
+          {
+            "name": "[format('{0}testconfig', parameters('uniqueIdentifier'))]",
+            "testFrequencySec": 60,
+            "protocol": "Tcp",
+            "tcpConfiguration": {
+              "port": 3389,
+              "disableTraceRoute": false
+            }
+          }
+        ],
+        "testGroups": [
+          {
+            "name": "[format('{0}testgroup', parameters('uniqueIdentifier'))]",
+            "disable": false,
+            "testConfigurations": [
+              "[format('{0}testconfig', parameters('uniqueIdentifier'))]"
+            ],
+            "sources": [
+              "[format('{0}({1})', last(split(parameters('srcEndpointVmResource_Id'), '/')), split(parameters('srcEndpointVmResource_Id'), '/')[3])]"
+            ],
+            "destinations": [
+              "8.8.8.8"
+            ]
+          }
+        ],
+        "outputs": [
+          {
+            "type": "Workspace"
+          }
+        ]
+      },
+      "location": "[parameters('location')]"
+    }
+  ]
+}

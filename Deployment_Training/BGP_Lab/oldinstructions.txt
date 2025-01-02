@@ -1,0 +1,56 @@
+[[_TOC_]]
+
+# Overview
+
+This module outlines how to deploy lab required for this training.
+
+> NOTE: This lab is **ONLY** available for users in the FDPO tenant.
+
+> NOTE: You must use your Microsoft Azure Internal Consumption (AIRS) subscription, and your @microsoft.com user, else the lab deployment will fail due to not having access to the custom image gallery.
+
+# Obtain permissions to get access to the NVA image
+
+* Email jamesgodden@microsoft.com with a request for access to the NVA image for the BGP training.
+* Setup an SSH client. Recommendations are either Windows 10 built-in SSH client, or PuTTY.
+
+   > TIP: Please ensure your SSH client has "SSH Keepalives" enabled, else the SSH session can expire and you'll have to reconnect. Details: [PuTTY Documentation](https:/main/documentation.help/PuTTY/config-keepalive.html)
+
+# Install Terraform 
+
+1. Download the [64-bit Terraform binary for Windows](https:/main/www.terraform.io/downloads.html) and unzip it to a dedicated folder
+1. Download the AnpBgpLab.tf Terraform configuration file from: <https:/main/ryanborpublic.blob.core.windows.net/public/AnpBgpLab.tf>, and place it in the same directory from Step 1. 
+
+# Deploy Baseline Lab via Terraform
+
+Baseline lab diagram is simply 4 VyOS NVAs in a Vnet, each in their own subnet. This is the baseline configuration that we will leverage for each module:
+
+![List of VMs with IPs](/.attachments/image-0ba21348-50bd-429c-bc1e-d534328b774e.png =x400)
+
+1. Open a Command Prompt window, and `cd` to change to the directory in which you previously downloaded Terraform.exe and AnpBgpLab.tf. Example, if my folder called "bgpLab" is in my Downloads folder: `cd %userprofile%\Downloads\bgpLab`
+1. Run `terraform init --upgrade` to install the azurerm terraform module (ref: [Command: init (Terraform Docs)](https:/main/www.terraform.io/docs/cli/commands/init.html)). This will also upgrade your existing Terraform modules to be compatible, if necessary
+
+   > NOTE: If running commands via PowerShell, you must prepend `.\` - for example: `.\terraform init --upgrade`
+
+1. Run `terraform apply` to execute the actions proposed in the Terraform config file. Terraform will ask you for your home internet IP so it can create NSGs. It will also present a list of things it will create and ask for your confirmation before beginning its deployment. 
+
+   > NOTE: If running commands via PowerShell, you must prepend `.\` - for example: `.\terraform apply`
+
+   This command pushes changes to Azure and creates resources in your Azure subscription. To specify your deployment to a specific Azure Region (default is East US 2), append `-var="location=West Europe"` (replace with your preferred region, of course). (ref: [Command: apply (Terraform Docs)](https:/main/www.terraform.io/docs/cli/commands/apply.html))
+
+   The output should show you the Azure Public IP for each NVA instance deployed. You'll use these IPs to SSH into the VMs in the next section of the lab:
+
+   ``` cmd
+   VM_PIPs = [
+     "VM01-IP: 23.96.205.156",
+     "VM02-IP: 23.96.206.133",
+     "VM03-IP: 23.96.195.251",
+     "VM04-IP: 157.55.172.15",
+   ]
+   ```
+   > NOTE: These IPs are Microsoft-Owned IPs used as example and are not PII. 
+
+You now have three VyOS NVAs deployed to Azure – one hub and two spokes! Move on to the next section to setup and configure BGP.
+
+---
+
+[![Return to Training button](/.attachments/image-a056dbd7-1a6d-4b6c-95ee-f97c1969007c.png =300x)](https:/main/supportability.visualstudio.com/AzureNetworking/_wiki/wikis/Wiki/279470/BGP-Learning-Path?anchor=general-bgp-topic-overview-(3-hours))

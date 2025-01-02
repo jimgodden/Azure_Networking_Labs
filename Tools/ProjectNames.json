@@ -1,6 +1,6 @@
 [
   {
-    "Name": "Azure_VirtualWAN_Sandbox"
+    "Name": "Sandbox-VirtualWAN"
   },
   {
     "Name": "Training-FRR_BGP_Lab_alt"
@@ -36,7 +36,7 @@
     "Name": "Sandbox-TrafficManager"
   },
   {
-    "Name": "Training-VNET-4_1"
+    "Name": "Training-VNET_4_1"
   },
   {
     "Name": "Scenario-ELBRepro"

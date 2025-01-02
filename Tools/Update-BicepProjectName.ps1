@@ -1,16 +1,18 @@
-param (
-    [Parameter(Mandatory)]
-    [string]$OldProjectName,
+Write-Host "This script has not been updated to use the latest directory structure."
 
-    [Parameter(Mandatory)]
-    [string]$NewProjectName
-)
+# param (
+#     [Parameter(Mandatory)]
+#     [string]$OldProjectName,
 
-Rename-Item -Path ".\${OldProjectName}" -NewName $NewProjectName
-Remove-Item -Path ".\${NewProjectName}\${OldProjectName}-deployment.ps1"
-New-Item -ItemType File -Path ".\${NewProjectName}\${NewProjectName}-deployment.ps1"
-Set-Content -Path ".\${NewProjectName}\${NewProjectName}-deployment.ps1" -Value ".\Tools\deployment.ps1 -DeploymentName `"${NewProjectName}`" -Location `"eastus2`""
+#     [Parameter(Mandatory)]
+#     [string]$NewProjectName
+# )
+
+# Rename-Item -Path ".\${OldProjectName}" -NewName $NewProjectName
+# Remove-Item -Path ".\${NewProjectName}\${OldProjectName}-deployment.ps1"
+# New-Item -ItemType File -Path ".\${NewProjectName}\${NewProjectName}-deployment.ps1"
+# Set-Content -Path ".\${NewProjectName}\${NewProjectName}-deployment.ps1" -Value ".\Tools\deployment.ps1 -DeploymentName `"${NewProjectName}`" -Location `"eastus2`""
 
 
-.\Tools\Update-BicepProjectList.ps1 -ProjectName $OldProjectName -Operation "Remove"
-.\Tools\Update-BicepProjectList.ps1 -ProjectName $NewProjectName -Operation "Add"
+# .\Tools\Update-BicepProjectList.ps1 -ProjectName $OldProjectName -Operation "Remove"
+# .\Tools\Update-BicepProjectList.ps1 -ProjectName $NewProjectName -Operation "Add"
