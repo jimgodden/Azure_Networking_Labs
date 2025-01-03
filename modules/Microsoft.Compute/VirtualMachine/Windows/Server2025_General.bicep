@@ -29,23 +29,6 @@ param subnet_ID string
 @description('Enables the Virtual Machine to be joined to an Entra Domain')
 param entraConnect bool = false
 
-// @description('''Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /
-// Example: https://example.com/scripts/''')
-// param virtualMachine_ScriptFileLocation string
-
-// @description('''Name of the file to be ran while the Virtual Machine is being created
-// Example: WinServ2022_ConfigScript_General.ps1''')
-// param virtualMachine_ScriptFileName string
-
-// @description('Joins the file path and the file name together')
-// var virtualMachine_ScriptFileUri = '${virtualMachine_ScriptFileLocation}${virtualMachine_ScriptFileName}'
-
-// @description(''''Command to execute while the Virtual Machine is being created.
-// Example:
-// 'powershell.exe -ExecutionPolicy Unrestricted -File <file name.ps1>'
-// ''')
-// param commandToExecute string
-
 @description('Adds a Public IP to the Network Interface of the Virtual Machine')
 param addPublicIPAddress bool = false
 
@@ -74,11 +57,11 @@ resource virtualMachine_CustomScriptExtension 'Microsoft.Compute/virtualMachines
     autoUpgradeMinorVersion: true
     settings: {
       fileUris: [
-        'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2025_ConfigScript_General.ps1'
+        'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2025_ConfigScript.ps1'
       ]
     }
     protectedSettings: {
-      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript_General.ps1 -Username ${virtualMachine_AdminUsername}'
+      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username ${virtualMachine_AdminUsername} -Type General'
     }
   }
   tags: tagValues

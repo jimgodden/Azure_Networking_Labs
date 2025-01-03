@@ -77,11 +77,11 @@ resource virtualMachine_CustomScriptExtension 'Microsoft.Compute/virtualMachines
     autoUpgradeMinorVersion: true
     settings: {
       fileUris: [
-        'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2025_ConfigScript_WebServer.ps1'
+        'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2025_ConfigScript.ps1'
       ]
     }
     protectedSettings: {
-      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript_WebServer.ps1 -Username ${virtualMachine_AdminUsername} -location ${location} -FQDN ${customFQDN}'
+      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username ${virtualMachine_AdminUsername} -Type WebServer -location ${location} -FQDN ${customFQDN}'
     }
   }
   tags: tagValues
