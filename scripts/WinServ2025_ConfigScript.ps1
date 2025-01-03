@@ -24,21 +24,12 @@ Install-Module -Name Microsoft.WinGet.Client -Force -Repository PSGallery -scope
 Write-Host "Using Repair-WinGetPackageManager cmdlet to bootstrap WinGet..."
 Repair-WinGetPackageManager
 
-# npcap for using Wireshark for taking packet captures
-Invoke-WebRequest -Uri "https://npcap.com/dist/npcap-1.80.exe" -OutFile "c:\npcap-1.80.exe"
-
-
-# Creates a task that installs the tools when the user logs in
-$initTaskName = "Init"
-$initTaskAction = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-NoProfile -ExecutionPolicy Bypass -File `"C:\WinServ2025_InstallTools.ps1`""
-$initTaskTrigger = New-ScheduledTaskTrigger -AtLogon
-Register-ScheduledTask -TaskName $initTaskName -Action $initTaskAction -Trigger $initTaskTrigger -User $Username -Force
-
-$scriptBlock = {function Install-WinGetPackage {
+function Install-WinGetPackage {
     param (
         [string]$PackageName
     )
-    winget install --accept-source-agreements --scope machine $PackageName
+    $output = winget install --accept-source-agreements --scope machine $PackageName
+    $output | Out-File -FilePath "C:\winget_install_output.txt" -Append
 }
 
 $packages = @(
@@ -55,8 +46,18 @@ $packages = @(
 foreach ($package in $packages) {
     Install-WinGetPackage -PackageName $package
 }
-    
-    $DesktopFilePath = "C:\Users\$ENV:USERNAME\Desktop"
+
+# npcap for using Wireshark for taking packet captures
+Invoke-WebRequest -Uri "https://npcap.com/dist/npcap-1.80.exe" -OutFile "c:\npcap-1.80.exe"
+
+
+# Creates a task that installs the tools when the user logs in
+$initTaskName = "Init"
+$initTaskAction = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-NoProfile -ExecutionPolicy Bypass -File `"C:\WinServ2025_InstallTools.ps1`""
+$initTaskTrigger = New-ScheduledTaskTrigger -AtLogon
+Register-ScheduledTask -TaskName $initTaskName -Action $initTaskAction -Trigger $initTaskTrigger -User $Username -Force
+
+$scriptBlock = {$DesktopFilePath = "C:\Users\$ENV:USERNAME\Desktop"
 
 function Set-Shortcut {
     param (
