@@ -24,10 +24,16 @@ Install-Module -Name Microsoft.WinGet.Client -Force -Repository PSGallery -scope
 Write-Host "Using Repair-WinGetPackageManager cmdlet to bootstrap WinGet..."
 Repair-WinGetPackageManager
 
+Start-Sleep -Seconds 10
+
+$output = winget
+$output | Out-File -FilePath "C:\winget_install_output.txt" -Append
+
 function Install-WinGetPackage {
     param (
         [string]$PackageName
     )
+    Write-Host "Installing $PackageName..." | Out-File -FilePath "C:\winget_install_output.txt" -Append
     $output = winget install --accept-source-agreements --scope machine $PackageName
     $output | Out-File -FilePath "C:\winget_install_output.txt" -Append
 }
