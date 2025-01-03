@@ -220,6 +220,7 @@ module udrToAzFW_Hub '../../../modules/Microsoft.Network/RouteTable.bicep' = if 
     nextHopIpAddress: azureFirewall.outputs.azureFirewall_PrivateIPAddress
   }
   dependsOn: [
+    #disable-next-line no-unnecessary-dependson
     azureFirewall
   ]
 }
@@ -238,6 +239,7 @@ module udrToAzFW_SpokeA '../../../modules/Microsoft.Network/RouteTable.bicep' = 
     nextHopIpAddress: azureFirewall.outputs.azureFirewall_PrivateIPAddress
   }
   dependsOn: [
+    #disable-next-line no-unnecessary-dependson
     azureFirewall
   ]
 }
@@ -256,6 +258,7 @@ module udrToAzFW_SpokeB '../../../modules/Microsoft.Network/RouteTable.bicep' = 
     nextHopIpAddress: azureFirewall.outputs.azureFirewall_PrivateIPAddress
   }
   dependsOn: [
+    #disable-next-line no-unnecessary-dependson
     azureFirewall
   ]
 }

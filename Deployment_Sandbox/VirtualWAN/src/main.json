@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.31.34.60546",
-      "templateHash": "1729745456394888540"
+      "version": "0.32.4.45862",
+      "templateHash": "438582742835750191"
     }
   },
   "parameters": {
@@ -66,8 +66,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.31.34.60546",
-              "templateHash": "4376531118780394039"
+              "version": "0.32.4.45862",
+              "templateHash": "11869916475456508949"
             }
           },
           "parameters": {
@@ -158,8 +158,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.31.34.60546",
-              "templateHash": "2569434113854427028"
+              "version": "0.32.4.45862",
+              "templateHash": "17717650997187640644"
             }
           },
           "parameters": {
@@ -230,8 +230,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.31.34.60546",
-                      "templateHash": "2218181201673264173"
+                      "version": "0.32.4.45862",
+                      "templateHash": "4408762652190752828"
                     }
                   },
                   "parameters": {
@@ -466,8 +466,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.31.34.60546",
-                      "templateHash": "997188392080528454"
+                      "version": "0.32.4.45862",
+                      "templateHash": "13797875414295410429"
                     }
                   },
                   "parameters": {
@@ -928,8 +928,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.31.34.60546",
-                      "templateHash": "8464979538020394213"
+                      "version": "0.32.4.45862",
+                      "templateHash": "16982177181072278683"
                     }
                   },
                   "parameters": {
@@ -1053,8 +1053,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.31.34.60546",
-                      "templateHash": "13304526460507877092"
+                      "version": "0.32.4.45862",
+                      "templateHash": "427334920654472171"
                     }
                   },
                   "parameters": {
@@ -1309,8 +1309,8 @@
                           "metadata": {
                             "_generator": {
                               "name": "bicep",
-                              "version": "0.31.34.60546",
-                              "templateHash": "13059194259010041159"
+                              "version": "0.32.4.45862",
+                              "templateHash": "11358289721704706086"
                             }
                           },
                           "parameters": {
@@ -1609,8 +1609,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.31.34.60546",
-              "templateHash": "8338229029362298547"
+              "version": "0.32.4.45862",
+              "templateHash": "2965071902059896032"
             }
           },
           "parameters": {
@@ -1819,8 +1819,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.31.34.60546",
-              "templateHash": "3171682610581102002"
+              "version": "0.32.4.45862",
+              "templateHash": "17977246023814411552"
             }
           },
           "parameters": {
@@ -1894,8 +1894,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.31.34.60546",
-                      "templateHash": "997188392080528454"
+                      "version": "0.32.4.45862",
+                      "templateHash": "13797875414295410429"
                     }
                   },
                   "parameters": {
@@ -2359,8 +2359,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.31.34.60546",
-                      "templateHash": "4380001811983798787"
+                      "version": "0.32.4.45862",
+                      "templateHash": "3831283260328725977"
                     }
                   },
                   "parameters": {
@@ -2585,8 +2585,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.31.34.60546",
-                      "templateHash": "13609541206309054438"
+                      "version": "0.32.4.45862",
+                      "templateHash": "15330167770294849167"
                     }
                   },
                   "parameters": {
@@ -2797,8 +2797,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.31.34.60546",
-                      "templateHash": "11534259321289650232"
+                      "version": "0.32.4.45862",
+                      "templateHash": "8940753681302617038"
                     }
                   },
                   "parameters": {
@@ -2820,12 +2820,41 @@
                         "description": "Resource ID of the subnet the Azure Bastion will be placed in.  The name of the subnet must be \"AzureBastionSubnet\""
                       }
                     },
+                    "enableTunneling": {
+                      "type": "bool",
+                      "defaultValue": false
+                    },
+                    "enableIpConnect": {
+                      "type": "bool",
+                      "defaultValue": false
+                    },
+                    "disableCopyPaste": {
+                      "type": "bool",
+                      "defaultValue": false
+                    },
+                    "enableShareableLink": {
+                      "type": "bool",
+                      "defaultValue": false
+                    },
+                    "enableFileCopy": {
+                      "type": "bool",
+                      "defaultValue": false
+                    },
+                    "enableKerberos": {
+                      "type": "bool",
+                      "defaultValue": false
+                    },
+                    "enablePrivateOnlyBastion": {
+                      "type": "bool",
+                      "defaultValue": false
+                    },
                     "bastion_SKU": {
                       "type": "string",
                       "defaultValue": "Basic",
                       "allowedValues": [
                         "Basic",
-                        "Standard"
+                        "Standard",
+                        "Premium"
                       ],
                       "metadata": {
                         "description": "SKU of the Azure Bastion"
@@ -2839,7 +2868,7 @@
                   "resources": [
                     {
                       "type": "Microsoft.Network/bastionHosts",
-                      "apiVersion": "2022-09-01",
+                      "apiVersion": "2024-05-01",
                       "name": "[parameters('bastion_name')]",
                       "location": "[parameters('location')]",
                       "sku": {
@@ -2847,10 +2876,13 @@
                       },
                       "properties": {
                         "scaleUnits": 2,
-                        "enableTunneling": false,
-                        "enableIpConnect": false,
-                        "disableCopyPaste": false,
-                        "enableShareableLink": false,
+                        "enableTunneling": "[parameters('enableTunneling')]",
+                        "enableIpConnect": "[parameters('enableIpConnect')]",
+                        "disableCopyPaste": "[parameters('disableCopyPaste')]",
+                        "enableShareableLink": "[parameters('enableShareableLink')]",
+                        "enableFileCopy": "[parameters('enableFileCopy')]",
+                        "enableKerberos": "[parameters('enableKerberos')]",
+                        "enablePrivateOnlyBastion": "[parameters('enablePrivateOnlyBastion')]",
                         "ipConfigurations": [
                           {
                             "name": "IpConf",
@@ -2942,8 +2974,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.31.34.60546",
-                      "templateHash": "13304526460507877092"
+                      "version": "0.32.4.45862",
+                      "templateHash": "427334920654472171"
                     }
                   },
                   "parameters": {
@@ -3198,8 +3230,8 @@
                           "metadata": {
                             "_generator": {
                               "name": "bicep",
-                              "version": "0.31.34.60546",
-                              "templateHash": "13059194259010041159"
+                              "version": "0.32.4.45862",
+                              "templateHash": "11358289721704706086"
                             }
                           },
                           "parameters": {
@@ -3473,8 +3505,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.31.34.60546",
-              "templateHash": "6639829061621120644"
+              "version": "0.32.4.45862",
+              "templateHash": "5751977917526795501"
             }
           },
           "parameters": {

@@ -6,3 +6,4 @@ ComputeGallery.bicep
 /Tools/OrganizeParamFiles.ps1
 /Training-BGP_Lab/oldinstructions.txt
 ARM_to_Bicep_conversions
+freebsdfrr.sh

@@ -85,7 +85,7 @@ $certName = "MySelfSignedCert"
 # Create a self-signed certificate
 $cert = New-SelfSignedCertificate -DnsName "localhost" -CertStoreLocation "cert:\LocalMachine\My" -FriendlyName $certName
 
-if ($null -eq $FQDN) {
+if (($null -eq $FQDN) -and ($FQDN -ne "ignore")) {
     $hostHeader = "example.contoso.com"
 }
 else {

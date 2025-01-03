@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.31.34.60546",
-      "templateHash": "11000740713649435230"
+      "version": "0.32.4.45862",
+      "templateHash": "16004862157459952337"
     }
   },
   "parameters": {
@@ -149,8 +149,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.31.34.60546",
-              "templateHash": "997188392080528454"
+              "version": "0.32.4.45862",
+              "templateHash": "13797875414295410429"
             }
           },
           "parameters": {
@@ -610,8 +610,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.31.34.60546",
-              "templateHash": "13059194259010041159"
+              "version": "0.32.4.45862",
+              "templateHash": "11358289721704706086"
             }
           },
           "parameters": {
@@ -809,8 +809,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.31.34.60546",
-              "templateHash": "11534259321289650232"
+              "version": "0.32.4.45862",
+              "templateHash": "8940753681302617038"
             }
           },
           "parameters": {
@@ -832,12 +832,41 @@
                 "description": "Resource ID of the subnet the Azure Bastion will be placed in.  The name of the subnet must be \"AzureBastionSubnet\""
               }
             },
+            "enableTunneling": {
+              "type": "bool",
+              "defaultValue": false
+            },
+            "enableIpConnect": {
+              "type": "bool",
+              "defaultValue": false
+            },
+            "disableCopyPaste": {
+              "type": "bool",
+              "defaultValue": false
+            },
+            "enableShareableLink": {
+              "type": "bool",
+              "defaultValue": false
+            },
+            "enableFileCopy": {
+              "type": "bool",
+              "defaultValue": false
+            },
+            "enableKerberos": {
+              "type": "bool",
+              "defaultValue": false
+            },
+            "enablePrivateOnlyBastion": {
+              "type": "bool",
+              "defaultValue": false
+            },
             "bastion_SKU": {
               "type": "string",
               "defaultValue": "Basic",
               "allowedValues": [
                 "Basic",
-                "Standard"
+                "Standard",
+                "Premium"
               ],
               "metadata": {
                 "description": "SKU of the Azure Bastion"
@@ -851,7 +880,7 @@
           "resources": [
             {
               "type": "Microsoft.Network/bastionHosts",
-              "apiVersion": "2022-09-01",
+              "apiVersion": "2024-05-01",
               "name": "[parameters('bastion_name')]",
               "location": "[parameters('location')]",
               "sku": {
@@ -859,10 +888,13 @@
               },
               "properties": {
                 "scaleUnits": 2,
-                "enableTunneling": false,
-                "enableIpConnect": false,
-                "disableCopyPaste": false,
-                "enableShareableLink": false,
+                "enableTunneling": "[parameters('enableTunneling')]",
+                "enableIpConnect": "[parameters('enableIpConnect')]",
+                "disableCopyPaste": "[parameters('disableCopyPaste')]",
+                "enableShareableLink": "[parameters('enableShareableLink')]",
+                "enableFileCopy": "[parameters('enableFileCopy')]",
+                "enableKerberos": "[parameters('enableKerberos')]",
+                "enablePrivateOnlyBastion": "[parameters('enablePrivateOnlyBastion')]",
                 "ipConfigurations": [
                   {
                     "name": "IpConf",

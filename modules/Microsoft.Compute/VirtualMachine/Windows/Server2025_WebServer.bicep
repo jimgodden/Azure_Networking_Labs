@@ -30,7 +30,7 @@ param subnet_ID string
 param entraConnect bool = false
 
 @description('Domain Name that the IIS Server will be listening on for HTTP and HTTPS requests')
-param customFQDN string = ''
+param customFQDN string = 'ignore'
 
 // @description('''Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /
 // Example: https://example.com/scripts/''')

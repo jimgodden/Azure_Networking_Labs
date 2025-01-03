@@ -46,16 +46,16 @@ param privateIPAddress string = ''
 param enableIPForwarding bool = true
 
 @description('Domain name to be hosted on the DNS Server')
-param sampleDNSZoneName string = ''
+param sampleDNSZoneName string = 'ignore'
 
 @description('A Record to be created on the DNS Zone provided in "sampleDNSZoneName"')
-param sampleARecord string = ''
+param sampleARecord string = 'ignore'
 
 @description('FQDN that will be conditionally forwarded to a DNS Server whose IP Address is provided in "conditionalForwarderIPAddress"')
-param conditionallyForwardedFQDN string = ''
+param conditionallyForwardedFQDN string = 'ignore'
 
 @description('IP Address of the DNS Server that will be conditionally forwarded to')
-param conditionalForwarderIPAddress string = ''
+param conditionalForwarderIPAddress string = 'ignore'
 
 param tagValues object = {}
 

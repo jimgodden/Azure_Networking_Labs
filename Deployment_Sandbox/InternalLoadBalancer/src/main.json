@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.32.4.45862",
-      "templateHash": "3829114538263226550"
+      "templateHash": "13440644199125576143"
     }
   },
   "parameters": {
@@ -44,7 +44,8 @@
     },
     "numberOfVMsInBackendPool": {
       "type": "int",
-      "defaultValue": 3
+      "defaultValue": 3,
+      "maxValue": 100
     }
   },
   "variables": {
