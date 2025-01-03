@@ -24,7 +24,17 @@ Install-Module -Name Microsoft.WinGet.Client -Force -Repository PSGallery -scope
 Write-Host "Using Repair-WinGetPackageManager cmdlet to bootstrap WinGet..."
 Repair-WinGetPackageManager
 
-function Install-WinGetPackage {
+# npcap for using Wireshark for taking packet captures
+Invoke-WebRequest -Uri "https://npcap.com/dist/npcap-1.80.exe" -OutFile "c:\npcap-1.80.exe"
+
+
+# Creates a task that installs the tools when the user logs in
+$initTaskName = "Init"
+$initTaskAction = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-NoProfile -ExecutionPolicy Bypass -File `"C:\WinServ2025_InstallTools.ps1`""
+$initTaskTrigger = New-ScheduledTaskTrigger -AtLogon
+Register-ScheduledTask -TaskName $initTaskName -Action $initTaskAction -Trigger $initTaskTrigger -User $Username -Force
+
+$scriptBlock = {function Install-WinGetPackage {
     param (
         [string]$PackageName
     )
@@ -36,7 +46,7 @@ $packages = @(
     "vscode",
     "pstools",
     "Microsoft.PowerShell",
-    "notepadplusplus",
+    "Notepad++.Notepad++",
     "putty",
     "winscp",
     "iperf3"
@@ -45,18 +55,8 @@ $packages = @(
 foreach ($package in $packages) {
     Install-WinGetPackage -PackageName $package
 }
-
-# npcap for using Wireshark for taking packet captures
-Invoke-WebRequest -Uri "https://npcap.com/dist/npcap-1.80.exe" -OutFile "c:\npcap-1.80.exe"
-
-
-# Creates a task that installs the tools when the user logs in
-$initTaskName = "Init"
-$initTaskAction = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-NoProfile -ExecutionPolicy Bypass -File `"C:\WinServ2025_InstallTools.ps1`""
-$initTaskTrigger = New-ScheduledTaskTrigger -AtLogon
-Register-ScheduledTask -TaskName $initTaskName -Action $initTaskAction -Trigger $initTaskTrigger -User $Username -Force
-
-$scriptBlock = {$DesktopFilePath = "C:\Users\$ENV:USERNAME\Desktop"
+    
+    $DesktopFilePath = "C:\Users\$ENV:USERNAME\Desktop"
 
 function Set-Shortcut {
     param (

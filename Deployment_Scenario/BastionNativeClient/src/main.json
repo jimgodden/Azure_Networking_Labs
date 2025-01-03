@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.32.4.45862",
-      "templateHash": "9422403747728098967"
+      "templateHash": "15214652089167074442"
     }
   },
   "parameters": {
@@ -178,7 +178,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.32.4.45862",
-              "templateHash": "3078429722909833408"
+              "templateHash": "9001263156636817774"
             }
           },
           "parameters": {
@@ -283,11 +283,11 @@
                 "autoUpgradeMinorVersion": true,
                 "settings": {
                   "fileUris": [
-                    "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2025_ConfigScript_General.ps1"
+                    "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2025_ConfigScript.ps1"
                   ]
                 },
                 "protectedSettings": {
-                  "commandToExecute": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript_General.ps1 -Username {0}', parameters('virtualMachine_AdminUsername'))]"
+                  "commandToExecute": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username {0} -Type General', parameters('virtualMachine_AdminUsername'))]"
                 }
               },
               "tags": "[parameters('tagValues')]",
@@ -547,7 +547,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.32.4.45862",
-              "templateHash": "3078429722909833408"
+              "templateHash": "9001263156636817774"
             }
           },
           "parameters": {
@@ -652,11 +652,11 @@
                 "autoUpgradeMinorVersion": true,
                 "settings": {
                   "fileUris": [
-                    "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2025_ConfigScript_General.ps1"
+                    "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2025_ConfigScript.ps1"
                   ]
                 },
                 "protectedSettings": {
-                  "commandToExecute": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript_General.ps1 -Username {0}', parameters('virtualMachine_AdminUsername'))]"
+                  "commandToExecute": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username {0} -Type General', parameters('virtualMachine_AdminUsername'))]"
                 }
               },
               "tags": "[parameters('tagValues')]",

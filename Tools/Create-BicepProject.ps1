@@ -12,7 +12,7 @@ param(
 $BranchName = git rev-parse --abbrev-ref HEAD
 
 # Creates a Directory for the project
-New-Item -ItemType Directory -Name $ProjectName -Path ".\${ProjectType}"
+New-Item -ItemType Directory -Name $ProjectName -Path ".\Deployment_${ProjectType}"
 
 $ProjectDirectory = ".\Deployment_${ProjectType}\${ProjectName}"
 
