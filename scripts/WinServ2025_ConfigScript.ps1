@@ -1,5 +1,3 @@
-Start-Transcript -Path "C:\CustomScriptExtension.log"
-
 param (
     [Parameter(Mandatory)]
     [string]$Username,
@@ -19,6 +17,8 @@ param (
     [string]$ConditionalForwarderIPAddress
 )
 
+Start-Transcript -Path "C:\CustomScriptExtension.log"
+
 $progressPreference = 'silentlyContinue'
 Write-Host "Installing WinGet PowerShell module from PSGallery..."
 Install-PackageProvider -Name NuGet -Force | Out-Null
@@ -27,17 +27,11 @@ Write-Host "Using Repair-WinGetPackageManager cmdlet to bootstrap WinGet..."
 Repair-WinGetPackageManager
 
 Start-Sleep -Seconds 10
-
-$output = winget
-$output | Out-File -FilePath "C:\winget_install_output.txt" -Append
-
 function Install-WinGetPackage {
     param (
         [string]$PackageName
     )
-    Write-Host "Installing $PackageName..." | Out-File -FilePath "C:\winget_install_output.txt" -Append
-    $output = winget install --accept-source-agreements --scope machine $PackageName
-    $output | Out-File -FilePath "C:\winget_install_output.txt" -Append
+    winget.exe install --accept-source-agreements --scope machine $PackageName
 }
 
 $packages = @(
