@@ -3,93 +3,96 @@
     "Name": "Sandbox-VirtualWAN"
   },
   {
-    "Name": "Training-FRR_BGP_Lab"
-  },
-  {
-    "Name": "Sandbox-PrivateLink"
-  },
-  {
-    "Name": "Sandbox-ExternalLoadBalancer"
-  },
-  {
-    "Name": "Sandbox-InternalLoadBalancer"
-  },
-  {
-    "Name": "Scenario-AVNMPeeringDeleteTest"
-  },
-  {
-    "Name": "Scenario-BastionDeveloperSKU"
-  },
-  {
-    "Name": "Training-VPN_Lab"
-  },
-  {
-    "Name": "Training-Azure_DNS"
-  },
-  {
-    "Name": "Training-BGP_Lab"
-  },
-  {
-    "Name": "Training-VPN_L300"
-  },
-  {
-    "Name": "Sandbox-VirtualNetworkManager"
-  },
-  {
-    "Name": "Sandbox-NetworkWatcher"
-  },
-  {
-    "Name": "Scenario-ConnMonTest"
-  },
-  {
-    "Name": "Scenario-BastionNativeClient"
-  },
-  {
-    "Name": "Scenario-ManyVMsRepro"
-  },
-  {
-    "Name": "Scenario-ELBRepro"
-  },
-  {
-    "Name": "Training-VNET_4_1"
-  },
-  {
-    "Name": "Sandbox-TrafficManager"
-  },
-  {
-    "Name": "Sandbox-VM_Linux"
-  },
-  {
-    "Name": "Sandbox-VM_to_VM"
-  },
-  {
-    "Name": "Sandbox-VM_Windows"
-  },
-  {
-    "Name": "Sandbox-PrivateResolver"
-  },
-  {
-    "Name": "Scenario-NSGFlowLogs"
-  },
-  {
-    "Name": "Sandbox-DNS"
-  },
-  {
-    "Name": "Sandbox-ApplicationGateway_v2"
-  },
-  {
-    "Name": "Scenario-LinuxAutoPacketCapture"
-  },
-  {
-    "Name": "Sandbox-PE_to_SQL"
+    "Name": "Training-AzFWBasic"
   },
   {
     "Name": "Training-FRR_BGP_Lab_alt"
   },
   {
-    "Name": "Training-AzFWBasic"
+    "Name": "Sandbox-PE_to_SQL"
+  },
+  {
+    "Name": "Scenario-LinuxAutoPacketCapture"
+  },
+  {
+    "Name": "Sandbox-ApplicationGateway_v2"
+  },
+  {
+    "Name": "Sandbox-DNS"
+  },
+  {
+    "Name": "Scenario-NSGFlowLogs"
+  },
+  {
+    "Name": "Sandbox-PrivateResolver"
+  },
+  {
+    "Name": "Sandbox-VM_Windows"
+  },
+  {
+    "Name": "Sandbox-VM_to_VM"
+  },
+  {
+    "Name": "Sandbox-VM_Linux"
+  },
+  {
+    "Name": "Sandbox-TrafficManager"
+  },
+  {
+    "Name": "Training-VNET_4_1"
+  },
+  {
+    "Name": "Scenario-ELBRepro"
+  },
+  {
+    "Name": "Scenario-ManyVMsRepro"
+  },
+  {
+    "Name": "Scenario-BastionNativeClient"
+  },
+  {
+    "Name": "Scenario-ConnMonTest"
+  },
+  {
+    "Name": "Sandbox-NetworkWatcher"
+  },
+  {
+    "Name": "Sandbox-VirtualNetworkManager"
+  },
+  {
+    "Name": "Training-VPN_L300"
+  },
+  {
+    "Name": "Training-BGP_Lab"
+  },
+  {
+    "Name": "Training-Azure_DNS"
+  },
+  {
+    "Name": "Training-VPN_Lab"
+  },
+  {
+    "Name": "Scenario-BastionDeveloperSKU"
+  },
+  {
+    "Name": "Scenario-AVNMPeeringDeleteTest"
+  },
+  {
+    "Name": "Sandbox-InternalLoadBalancer"
+  },
+  {
+    "Name": "Sandbox-ExternalLoadBalancer"
+  },
+  {
+    "Name": "Sandbox-PrivateLink"
+  },
+  {
+    "Name": "Training-FRR_BGP_Lab"
   },
   {
     "Name": "Sandbox-Basic_Lab"
+  },
+  {
+    "Name": "Scenario-Test"
   }
 ]

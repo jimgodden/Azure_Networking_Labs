@@ -1,3 +1,5 @@
+Start-Transcript -Path "C:\CustomScriptExtension.log"
+
 param (
     [Parameter(Mandatory)]
     [string]$Username,
@@ -164,3 +166,5 @@ elseif ($Type -eq "DNS") {
     # End of the DNS Server configuration
     
 }
+
+Stop-Transcript
