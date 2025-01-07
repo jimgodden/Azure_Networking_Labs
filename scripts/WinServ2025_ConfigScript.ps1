@@ -36,6 +36,7 @@ function Install-WinGetPackage {
 
 $packages = @(
     "wireshark",
+    "netmon", # time this
     "vscode",
     "pstools",
     "Microsoft.PowerShell",
@@ -51,7 +52,6 @@ foreach ($package in $packages) {
 
 # npcap for using Wireshark for taking packet captures
 Invoke-WebRequest -Uri "https://npcap.com/dist/npcap-1.80.exe" -OutFile "c:\npcap-1.80.exe"
-
 
 # Creates a task that installs the tools when the user logs in
 $initTaskName = "Init"

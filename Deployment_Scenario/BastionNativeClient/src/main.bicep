@@ -132,6 +132,7 @@ module bastion '../../../modules/Microsoft.Network/Bastion.bicep' = {
     bastion_SubnetID: vnet.properties.subnets[1].id
     bastion_name: 'bastion'
     bastion_SKU: 'Standard'
+    enableTunneling: true
     enableKerberos: true
   }
 }

@@ -17,31 +17,12 @@ I'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net.
 ''')
 param acceleratedNetworking bool = true
 
-param clientIPAddressForRDP string
-
 module virtualNetwork_Hub '../../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
   name: 'vnet-hub'
   params: {
     location: location
     virtualNetwork_AddressPrefix: '10.0.0.0/16'
     virtualNetwork_Name: 'vnet-hub'
-  }
-}
-
-module networkSecurityGroupRule_addToExisting '../../../modules/Microsoft.Network/NetworkSecurityGroupRule_addToExisting.bicep' = {
-  name: 'nsg-rule-allowRDP'
-  params: {
-    NetworkSecurityGroup_Name: virtualNetwork_Hub.outputs.networkSecurityGroup_Name
-    NetworkSecurityGroupRule_Name: 'allowRDPNSGRule'
-    NetworkSecurityGroupRule_Priority: 100
-    NetworkSecurityGroupRule_Description: 'Allow RDP'
-    NetworkSecurityGroupRule_Direction: 'Inbound'
-    NetworkSecurityGroupRule_Access: 'Allow'
-    NetworkSecurityGroupRule_Protocol: 'Tcp'
-    NetworkSecurityGroupRule_SourceAddressPrefix: clientIPAddressForRDP
-    NetworkSecurityGroupRule_SourcePortRange: '*'
-    NetworkSecurityGroupRule_DestinationAddressPrefix: '*'
-    NetworkSecurityGroupRule_DestinationPortRange: '3389'
   }
 }
 
@@ -55,8 +36,14 @@ module virtualMachine_Client '../../../modules/Microsoft.Compute/VirtualMachine/
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'vm-client'
     vmSize: virtualMachine_Size
-    addPublicIPAddress: true
   }
 }
 
-output virtualMachine_Client_IPAddress string = virtualMachine_Client.outputs.networkInterface_PublicIPAddress
+module bastion '../../../modules/Microsoft.Network/Bastion.bicep' = {
+  name: 'bastion'
+  params: {
+    location: location
+    bastion_SubnetID: virtualNetwork_Hub.outputs.bastion_SubnetID
+    bastion_name: 'bastion'
+  }
+}
