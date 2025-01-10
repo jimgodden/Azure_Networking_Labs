@@ -19,6 +19,12 @@ var acceleratedNetworking = false
 
 param tagValues object = { Training: 'BGPLab' }
 
+// Use the following if the VMs need to skip the auto shutdown policy
+// param tagValues object = { 
+//   Training: 'BGPLab' 
+//   CostControl: 'Ignore'
+// }
+
 var virtualNetwork_AddressPrefix = '10.100.0.0/16'
 
 var subnet_AddressRangeCIDRs = [for i in range(0, 255): cidrSubnet(virtualNetwork_AddressPrefix, 24, i) ]
@@ -179,5 +185,6 @@ module bastion '../../../modules/Microsoft.Network/Bastion.bicep' = {
     bastion_SubnetID: virtualNetwork.properties.subnets[0].id
     location: location
     bastion_SKU: 'Standard'
+    enableShareableLink: true
   }
 }

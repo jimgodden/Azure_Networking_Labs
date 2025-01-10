@@ -31,7 +31,7 @@ function Install-WinGetPackage {
     param (
         [string]$PackageName
     )
-    winget.exe install --accept-source-agreements --scope machine $PackageName
+    Start-Process "C:\Users\$Username\AppData\Local\Microsoft\WindowsApps\winget.exe install --accept-source-agreements --scope machine $PackageName"
 }
 
 $packages = @(

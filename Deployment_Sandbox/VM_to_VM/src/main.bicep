@@ -18,7 +18,7 @@ param virtualMachine_Size string = 'Standard_D2as_v4' // 'Standard_B2ms' // 'Sta
 Not all VM sizes support Accel Net (i.e. Standard_B2ms).  
 I'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net.
 ''')
-param acceleratedNetworking bool = false
+param acceleratedNetworking bool = true
 
 @description('SKU of the Virtual Network Gateway')
 param virtualNetworkGateway_SKU string = 'VpnGw1'
