@@ -41,7 +41,6 @@ gmake
 gmake check
 sudo gmake install
 
-
 mkdir /usr/local/etc/frr
 touch /usr/local/etc/frr/frr.conf
 

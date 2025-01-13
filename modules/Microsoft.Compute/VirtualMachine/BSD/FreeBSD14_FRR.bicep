@@ -58,6 +58,11 @@ module networkInterface '../../../Microsoft.Network/NetworkInterface.bicep' = {
 resource virtualMachine_Linux 'Microsoft.Compute/virtualMachines@2023-03-01' = {
   name: virtualMachine_Name
   location: location
+  plan: {
+    name: '14_1-release-amd64-gen2-zfs'
+    publisher: 'thefreebsdfoundation'
+    product: 'freebsd-14_1'
+  }
   properties: {
     hardwareProfile: {
       vmSize: virtualMachine_Size

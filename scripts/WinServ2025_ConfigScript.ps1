@@ -32,7 +32,7 @@ function Install-WinGetPackage {
         [string]$PackageName,
         [string]$Username
     )
-    Start-Process "C:\Users\${Username}\AppData\Local\Microsoft\WindowsApps\winget.exe install --accept-source-agreements --scope machine $PackageName"
+    & "C:\Users\${Username}\AppData\Local\Microsoft\WindowsApps\winget.exe" install --accept-source-agreements --scope machine $PackageName
 }
 
 $packages = @(
