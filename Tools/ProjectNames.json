@@ -3,10 +3,7 @@
     "Name": "Sandbox-VirtualWAN"
   },
   {
-    "Name": "Training-AzFWBasic"
-  },
-  {
-    "Name": "Training-FRR_BGP_Lab_alt"
+    "Name": "Scenario-Test"
   },
   {
     "Name": "Sandbox-PE_to_SQL"
@@ -45,13 +42,13 @@
     "Name": "Scenario-ELBRepro"
   },
   {
-    "Name": "Scenario-ManyVMsRepro"
-  },
-  {
     "Name": "Scenario-BastionNativeClient"
   },
   {
     "Name": "Scenario-ConnMonTest"
+  },
+  {
+    "Name": "Training-AzFWBasic"
   },
   {
     "Name": "Sandbox-NetworkWatcher"
@@ -93,6 +90,9 @@
     "Name": "Sandbox-Basic_Lab"
   },
   {
-    "Name": "Scenario-Test"
+    "Name": "Scenario-ManyVMsRepro"
+  },
+  {
+    "Name": "Training-FRR_BGP_FreeBSD_Lab"
   }
 ]

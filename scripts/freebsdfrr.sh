@@ -69,3 +69,5 @@ echo "net.inet.ip.forwarding=1" | sudo tee -a /etc/sysctl.conf
 echo "net.inet6.ip6.forwarding=1" | sudo tee -a /etc/sysctl.conf
 sysctl net.inet.ip.forwarding=1
 sysctl net.inet6.ip6.forwarding=1
+
+reboot
