@@ -32,7 +32,15 @@ function Install-WinGetPackage {
         [string]$PackageName,
         [string]$Username
     )
-    & "C:\Users\${Username}\AppData\Local\Microsoft\WindowsApps\winget.exe" install --accept-source-agreements --scope machine $PackageName
+
+    $ResolveWingetPath = Resolve-Path "C:\Program Files\WindowsApps\Microsoft.DesktopAppInstaller_*_x64__8wekyb3d8bbwe"
+    if ($ResolveWingetPath) {
+        $WingetPath = $ResolveWingetPath[-1].Path
+    }
+
+    Set-Location $WingetPath
+
+    & ".\winget.exe" install --accept-source-agreements --scope machine $PackageName
 }
 
 $packages = @(
@@ -80,8 +88,13 @@ Write-Host "This script is installing the following:"
 Write-Host "Npcap - So that Wireshark can take packet captures"
 Write-Host "`nAdditionally, the script will create shortcuts on the desktop for several applications."
 
+$ResolveWindowsTerminalPath = Resolve-Path "C:\Program Files\WindowsApps\Microsoft.WindowsTerminal_*_x64__8wekyb3d8bbwe"
+if ($ResolveWindowsTerminalPath) {
+    $WindowsTerminalPath = $ResolveWindowsTerminalPath[-1].Path
+}
+
 Set-Shortcut -ApplicationFilePath "C:\Program Files\Wireshark\Wireshark.exe"  -DestinationFilePath "${DesktopFilePath}/Wireshark.lnk"
-Set-Shortcut -ApplicationFilePath "C:\Program Files\WindowsApps\Microsoft.WindowsTerminal_1.18.10301.0_x64__8wekyb3d8bbwe\WindowsTerminal.exe" -DestinationFilePath "${DesktopFilePath}/Windows Terminal.lnk"
+Set-Shortcut -ApplicationFilePath "${WindowsTerminalPath}\WindowsTerminal.exe" -DestinationFilePath "${DesktopFilePath}/Windows Terminal.lnk"
 Set-Shortcut -ApplicationFilePath "C:\Program Files\Notepad++\notepad++.exe" -DestinationFilePath "${DesktopFilePath}/Notepad++.lnk"
 Set-Shortcut -ApplicationFilePath "C:\Program Files\Microsoft VS Code\Code.exe" -DestinationFilePath "${DesktopFilePath}/Visual Studio Code.lnk"
 
