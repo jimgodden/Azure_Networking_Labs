@@ -1,6 +1,7 @@
 **/iteration.txt
-**/*.bicepparam
+*.bicepparam
 build.ps1
 /Tools/OrganizeParamFiles.ps1
 ARM_to_Bicep_conversions
 freebsdfrr.sh
+main.bicepparam.sample

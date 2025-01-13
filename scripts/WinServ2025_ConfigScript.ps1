@@ -29,7 +29,8 @@ Repair-WinGetPackageManager
 Start-Sleep -Seconds 10
 function Install-WinGetPackage {
     param (
-        [string]$PackageName
+        [string]$PackageName,
+        [string]$Username
     )
     Start-Process "C:\Users\$Username\AppData\Local\Microsoft\WindowsApps\winget.exe install --accept-source-agreements --scope machine $PackageName"
 }
@@ -47,7 +48,7 @@ $packages = @(
 )
 
 foreach ($package in $packages) {
-    Install-WinGetPackage -PackageName $package
+    Install-WinGetPackage -PackageName $package -Username $Username
 }
 
 # npcap for using Wireshark for taking packet captures

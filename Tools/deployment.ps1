@@ -48,9 +48,10 @@ if (Test-Path $iterationFile) {
     $rgName = "${DeploymentName}_RG_${iteration}"
 }
 else {
-    $iteration = 0
+    $iteration = 1
     New-Item -ItemType File -Path $iterationFile
     Set-Content -Path $iterationFile -Value "${iteration}"
+    $rgName = "${DeploymentName}_RG_${iteration}"
 }
 
 if (Get-AzResourceGroup -Name $rgName -ErrorAction SilentlyContinue) {
