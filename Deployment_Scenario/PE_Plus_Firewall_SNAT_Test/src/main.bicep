@@ -35,9 +35,6 @@ Storage account name restrictions:
 @maxLength(24)
 param storageAccount_Name string = 'storagepl${uniqueString(resourceGroup().id)}'
 
-@description('Set this to true if you want to use an Azure Firewall in the Hub Virtual Network.')
-param usingAzureFirewall bool = true
-
 @description('VPN Shared Key used for authenticating VPN connections')
 @secure()
 param vpn_SharedKey string
@@ -190,7 +187,7 @@ module hub_StorageAccount_Blob_PrivateEndpoint '../../../modules/Microsoft.Netwo
   }
 }
 
-module azureFirewall '../../../modules/Microsoft.Network/AzureFirewall.bicep' = if (usingAzureFirewall) {
+module azureFirewall '../../../modules/Microsoft.Network/AzureFirewall.bicep' = {
   name: 'hubAzureFirewall'
   params: {
     azureFirewall_ManagementSubnet_ID: virtualNetwork_Hub.outputs.azureFirewallManagement_SubnetID
@@ -206,7 +203,7 @@ module azureFirewall '../../../modules/Microsoft.Network/AzureFirewall.bicep' = 
   ]
 }
 
-module udrToAzFW_Hub '../../../modules/Microsoft.Network/RouteTable.bicep' = if (usingAzureFirewall) {
+module udrToAzFW_Hub '../../../modules/Microsoft.Network/RouteTable.bicep' = {
   name: 'udrToAzFW_Hub'
   params: {
     addressPrefixs: [
@@ -225,7 +222,7 @@ module udrToAzFW_Hub '../../../modules/Microsoft.Network/RouteTable.bicep' = if 
   ]
 }
 
-module udrToAzFW_SpokeA '../../../modules/Microsoft.Network/RouteTable.bicep' = if (usingAzureFirewall) {
+module udrToAzFW_SpokeA '../../../modules/Microsoft.Network/RouteTable.bicep' = {
   name: 'udrToAzFW_SpokeA'
   params: {
     addressPrefixs: [
@@ -244,7 +241,7 @@ module udrToAzFW_SpokeA '../../../modules/Microsoft.Network/RouteTable.bicep' = 
   ]
 }
 
-module udrToAzFW_SpokeB '../../../modules/Microsoft.Network/RouteTable.bicep' = if (usingAzureFirewall) {
+module udrToAzFW_SpokeB '../../../modules/Microsoft.Network/RouteTable.bicep' = {
   name: 'udrToAzFW_SpokeB'
   params: {
     addressPrefixs: [
@@ -269,17 +266,6 @@ module hubBastion '../../../modules/Microsoft.Network/Bastion.bicep' = {
     bastion_SubnetID: virtualNetwork_Hub.outputs.bastion_SubnetID
     location: locationA
     bastion_name: 'hub_bastion'
-  }
-}
-
-module dnsPrivateResolver '../../../modules/Microsoft.Network/DNSPrivateResolver.bicep' = {
-  name: 'dnsPrivateResolver'
-  params: {
-    dnsPrivateResolver_Name: 'hub_DNSPrivateResolver'
-    dnsPrivateResolver_Inbound_SubnetID: virtualNetwork_Hub.outputs.privateResolver_Inbound_SubnetID
-    dnsPrivateResolver_Outbound_SubnetID: virtualNetwork_Hub.outputs.privateResolver_Outbound_SubnetID
-    location: locationA
-    virtualNetwork_ID: virtualNetwork_Hub.outputs.virtualNetwork_ID
   }
 }
 

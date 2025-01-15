@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.32.4.45862",
-      "templateHash": "17395450168859999656"
+      "templateHash": "15159941065434693479"
     }
   },
   "parameters": {
@@ -41,9 +41,6 @@
       "metadata": {
         "description": "True enables Accelerated Networking and False disabled it.  \nNot all VM sizes support Accel Net (i.e. Standard_B2ms).  \nI'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net.\n"
       }
-    },
-    "clientIPAddressForRDP": {
-      "type": "string"
     }
   },
   "resources": [
@@ -505,131 +502,6 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2022-09-01",
-      "name": "nsg-rule-allowRDP",
-      "properties": {
-        "expressionEvaluationOptions": {
-          "scope": "inner"
-        },
-        "mode": "Incremental",
-        "parameters": {
-          "NetworkSecurityGroup_Name": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'vnet-hub'), '2022-09-01').outputs.networkSecurityGroup_Name.value]"
-          },
-          "NetworkSecurityGroupRule_Name": {
-            "value": "allowRDPNSGRule"
-          },
-          "NetworkSecurityGroupRule_Priority": {
-            "value": 100
-          },
-          "NetworkSecurityGroupRule_Description": {
-            "value": "Allow RDP"
-          },
-          "NetworkSecurityGroupRule_Direction": {
-            "value": "Inbound"
-          },
-          "NetworkSecurityGroupRule_Access": {
-            "value": "Allow"
-          },
-          "NetworkSecurityGroupRule_Protocol": {
-            "value": "Tcp"
-          },
-          "NetworkSecurityGroupRule_SourceAddressPrefix": {
-            "value": "[parameters('clientIPAddressForRDP')]"
-          },
-          "NetworkSecurityGroupRule_SourcePortRange": {
-            "value": "*"
-          },
-          "NetworkSecurityGroupRule_DestinationAddressPrefix": {
-            "value": "*"
-          },
-          "NetworkSecurityGroupRule_DestinationPortRange": {
-            "value": "3389"
-          }
-        },
-        "template": {
-          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0.0",
-          "metadata": {
-            "_generator": {
-              "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "3808827254806256516"
-            }
-          },
-          "parameters": {
-            "NetworkSecurityGroup_Name": {
-              "type": "string"
-            },
-            "NetworkSecurityGroupRule_Name": {
-              "type": "string"
-            },
-            "NetworkSecurityGroupRule_Priority": {
-              "type": "int"
-            },
-            "NetworkSecurityGroupRule_Description": {
-              "type": "string",
-              "defaultValue": "Created via Bicep"
-            },
-            "NetworkSecurityGroupRule_Direction": {
-              "type": "string"
-            },
-            "NetworkSecurityGroupRule_Access": {
-              "type": "string",
-              "allowedValues": [
-                "Allow",
-                "Deny"
-              ]
-            },
-            "NetworkSecurityGroupRule_Protocol": {
-              "type": "string",
-              "allowedValues": [
-                "*",
-                "Tcp",
-                "Udp",
-                "Icmp",
-                "Esp"
-              ]
-            },
-            "NetworkSecurityGroupRule_SourceAddressPrefix": {
-              "type": "string"
-            },
-            "NetworkSecurityGroupRule_SourcePortRange": {
-              "type": "string"
-            },
-            "NetworkSecurityGroupRule_DestinationAddressPrefix": {
-              "type": "string"
-            },
-            "NetworkSecurityGroupRule_DestinationPortRange": {
-              "type": "string"
-            }
-          },
-          "resources": [
-            {
-              "type": "Microsoft.Network/networkSecurityGroups/securityRules",
-              "apiVersion": "2024-05-01",
-              "name": "[format('{0}/{1}', parameters('NetworkSecurityGroup_Name'), parameters('NetworkSecurityGroupRule_Name'))]",
-              "properties": {
-                "access": "[parameters('NetworkSecurityGroupRule_Access')]",
-                "description": "[parameters('NetworkSecurityGroupRule_Description')]",
-                "destinationAddressPrefix": "[parameters('NetworkSecurityGroupRule_DestinationAddressPrefix')]",
-                "destinationPortRange": "[parameters('NetworkSecurityGroupRule_DestinationPortRange')]",
-                "direction": "[parameters('NetworkSecurityGroupRule_Direction')]",
-                "priority": "[parameters('NetworkSecurityGroupRule_Priority')]",
-                "protocol": "[parameters('NetworkSecurityGroupRule_Protocol')]",
-                "sourceAddressPrefix": "[parameters('NetworkSecurityGroupRule_SourceAddressPrefix')]",
-                "sourcePortRange": "[parameters('NetworkSecurityGroupRule_SourcePortRange')]"
-              }
-            }
-          ]
-        }
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Resources/deployments', 'vnet-hub')]"
-      ]
-    },
-    {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
       "name": "vm-client",
       "properties": {
         "expressionEvaluationOptions": {
@@ -657,9 +529,6 @@
           },
           "vmSize": {
             "value": "[parameters('virtualMachine_Size')]"
-          },
-          "addPublicIPAddress": {
-            "value": true
           }
         },
         "template": {
@@ -989,12 +858,162 @@
       "dependsOn": [
         "[resourceId('Microsoft.Resources/deployments', 'vnet-hub')]"
       ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "bastion",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "bastion_SubnetID": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'vnet-hub'), '2022-09-01').outputs.bastion_SubnetID.value]"
+          },
+          "bastion_name": {
+            "value": "bastion"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.32.4.45862",
+              "templateHash": "8940753681302617038"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string",
+              "metadata": {
+                "description": "Azure Datacenter location that the main resouces will be deployed to."
+              }
+            },
+            "bastion_name": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the Azure Bastion"
+              }
+            },
+            "bastion_SubnetID": {
+              "type": "string",
+              "metadata": {
+                "description": "Resource ID of the subnet the Azure Bastion will be placed in.  The name of the subnet must be \"AzureBastionSubnet\""
+              }
+            },
+            "enableTunneling": {
+              "type": "bool",
+              "defaultValue": false
+            },
+            "enableIpConnect": {
+              "type": "bool",
+              "defaultValue": false
+            },
+            "disableCopyPaste": {
+              "type": "bool",
+              "defaultValue": false
+            },
+            "enableShareableLink": {
+              "type": "bool",
+              "defaultValue": false
+            },
+            "enableFileCopy": {
+              "type": "bool",
+              "defaultValue": false
+            },
+            "enableKerberos": {
+              "type": "bool",
+              "defaultValue": false
+            },
+            "enablePrivateOnlyBastion": {
+              "type": "bool",
+              "defaultValue": false
+            },
+            "bastion_SKU": {
+              "type": "string",
+              "defaultValue": "Basic",
+              "allowedValues": [
+                "Basic",
+                "Standard",
+                "Premium"
+              ],
+              "metadata": {
+                "description": "SKU of the Azure Bastion"
+              }
+            },
+            "tagValues": {
+              "type": "object",
+              "defaultValue": {}
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Network/bastionHosts",
+              "apiVersion": "2024-05-01",
+              "name": "[parameters('bastion_name')]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "[parameters('bastion_SKU')]"
+              },
+              "properties": {
+                "scaleUnits": 2,
+                "enableTunneling": "[parameters('enableTunneling')]",
+                "enableIpConnect": "[parameters('enableIpConnect')]",
+                "disableCopyPaste": "[parameters('disableCopyPaste')]",
+                "enableShareableLink": "[parameters('enableShareableLink')]",
+                "enableFileCopy": "[parameters('enableFileCopy')]",
+                "enableKerberos": "[parameters('enableKerberos')]",
+                "enablePrivateOnlyBastion": "[parameters('enablePrivateOnlyBastion')]",
+                "ipConfigurations": [
+                  {
+                    "name": "IpConf",
+                    "properties": {
+                      "privateIPAllocationMethod": "Dynamic",
+                      "publicIPAddress": {
+                        "id": "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_VIP', parameters('bastion_name')))]"
+                      },
+                      "subnet": {
+                        "id": "[parameters('bastion_SubnetID')]"
+                      }
+                    }
+                  }
+                ]
+              },
+              "tags": "[parameters('tagValues')]",
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_VIP', parameters('bastion_name')))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Network/publicIPAddresses",
+              "apiVersion": "2022-09-01",
+              "name": "[format('{0}_VIP', parameters('bastion_name'))]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Standard",
+                "tier": "Regional"
+              },
+              "properties": {
+                "publicIPAddressVersion": "IPv4",
+                "publicIPAllocationMethod": "Static",
+                "idleTimeoutInMinutes": 4,
+                "ipTags": []
+              },
+              "tags": "[parameters('tagValues')]"
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'vnet-hub')]"
+      ]
     }
-  ],
-  "outputs": {
-    "virtualMachine_Client_IPAddress": {
-      "type": "string",
-      "value": "[reference(resourceId('Microsoft.Resources/deployments', 'vm-client'), '2022-09-01').outputs.networkInterface_PublicIPAddress.value]"
-    }
-  }
+  ]
 }

@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.32.4.45862",
-      "templateHash": "13634346994355496154"
+      "templateHash": "904767887715448820"
     }
   },
   "parameters": {
@@ -556,7 +556,7 @@
               {
                 "name": "value",
                 "count": "[length(range(0, 2))]",
-                "input": "[reference(resourceId('Microsoft.Resources/deployments', format('hub-DnsVM{0}', range(0, 2)[range(0, 2)[copyIndex('value')]])), '2022-09-01').outputs.networkInterface_PrivateIPAddress.value]"
+                "input": "[reference(resourceId('Microsoft.Resources/deployments', format('hub-DnsVM{0}', range(0, 1)[range(0, 2)[copyIndex('value')]])), '2022-09-01').outputs.networkInterface_PrivateIPAddress.value]"
               }
             ]
           },
@@ -1023,7 +1023,7 @@
               {
                 "name": "value",
                 "count": "[length(range(0, 2))]",
-                "input": "[reference(resourceId('Microsoft.Resources/deployments', format('hub-DnsVM{0}', range(0, 2)[range(0, 2)[copyIndex('value')]])), '2022-09-01').outputs.networkInterface_PrivateIPAddress.value]"
+                "input": "[reference(resourceId('Microsoft.Resources/deployments', format('hub-DnsVM{0}', range(0, 1)[range(0, 2)[copyIndex('value')]])), '2022-09-01').outputs.networkInterface_PrivateIPAddress.value]"
               }
             ]
           },
@@ -1635,11 +1635,11 @@
     {
       "copy": {
         "name": "hub_DnsVMs",
-        "count": "[length(range(0, 2))]"
+        "count": "[length(range(0, 1))]"
       },
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2022-09-01",
-      "name": "[format('hub-DnsVM{0}', range(0, 2)[copyIndex()])]",
+      "name": "[format('hub-DnsVM{0}', range(0, 1)[copyIndex()])]",
       "properties": {
         "expressionEvaluationOptions": {
           "scope": "inner"
@@ -1662,7 +1662,7 @@
             "value": "[parameters('virtualMachine_AdminUsername')]"
           },
           "virtualMachine_Name": {
-            "value": "[format('hub-DnsVM{0}', range(0, 2)[copyIndex()])]"
+            "value": "[format('hub-DnsVM{0}', range(0, 1)[copyIndex()])]"
           },
           "virtualMachine_Size": {
             "value": "[parameters('virtualMachine_Size')]"

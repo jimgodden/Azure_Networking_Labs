@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.32.4.45862",
-      "templateHash": "15214652089167074442"
+      "templateHash": "10752556213777084152"
     }
   },
   "parameters": {
@@ -889,6 +889,9 @@
           },
           "bastion_SKU": {
             "value": "Standard"
+          },
+          "enableTunneling": {
+            "value": true
           },
           "enableKerberos": {
             "value": true
