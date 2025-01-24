@@ -2,15 +2,11 @@
 
 sudo apt update
 sudo apt upgrade -y
-sudo apt install python3 -y
-sudo apt install python3-pip -y
+sudo apt install python3-flask -y
 
 sleep 5
 
 sudo ufw allow 5000/tcp
-
-# Install Flask
-pip install flask
 
 # Create the Python file
 cat <<EOL > app.py
@@ -58,4 +54,4 @@ if __name__ == '__main__':
 EOL
 
 # Run the Flask application
-python app.py
+python3 app.py
