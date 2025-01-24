@@ -28,13 +28,10 @@ module virtualNetwork_Source '../../../modules/Microsoft.Network/VirtualNetwork.
     virtualNetwork_AddressPrefix: '10.0.0.0/16'
     location: location
     virtualNetwork_Name: 'srcVNET'
-    dnsServers: [ for i in range(1, numberOfDNSServers): {
-      dnsServer_IPAddress: dnsServers[i - 1].outputs.networkInterface_PrivateIPAddress
-    }]
   }
-  dependsOn: [
-    dnsServers
-  ]
+  // dependsOn: [
+  //   dnsServers
+  // ]
 }
 
 module virtualNetwork_Destination '../../../modules/Microsoft.Network/VirtualNetwork.bicep' = {

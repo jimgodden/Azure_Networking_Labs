@@ -1,1 +1,1 @@
-.\Tools\deployment.ps1 -DeploymentName "Scenario-GeminiTest" -Location "eastus2"
+.\Tools\deployment.ps1 -DeploymentName "Scenario-GeminiTest" -Location "westus2"
