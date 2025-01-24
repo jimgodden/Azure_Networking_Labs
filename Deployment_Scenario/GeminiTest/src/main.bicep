@@ -101,6 +101,8 @@ module linuxLoggingServer '../../../modules/Microsoft.Compute/VirtualMachine/Lin
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'loggingServer'
     virtualMachine_Size: 'Standard_D2ls_v5'
+    privateIPAddress: '10.1.0.250'
+    privateIPAllocationMethod: 'Static'
   }
 }
 
