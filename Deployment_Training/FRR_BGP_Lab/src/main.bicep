@@ -97,7 +97,8 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2022-09-01' = {
   tags: tagValues
 }
 
-module VMs '../../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.bicep' = [ for i in range(1, 4): {
+// module VMs '../../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.bicep' = [ for i in range(1, 4): {
+module VMs '../../../modules/Microsoft.Compute/VirtualMachine/Linux/Ubuntu24_FRR.bicep' = [ for i in range(1, 4): {
   name: 'VM0${i}'
   params: {
     acceleratedNetworking: acceleratedNetworking
@@ -109,9 +110,9 @@ module VMs '../../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.bicep' = 
     virtualMachine_Size: virtualMachine_Size
     privateIPAllocationMethod: 'Static'
     privateIPAddress: '10.100.${i}.${i}0'
-    virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    virtualMachine_ScriptFileName: 'frrconfig.sh'
-    commandToExecute: './frrconfig.sh'
+    // virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
+    // virtualMachine_ScriptFileName: 'frrconfig.sh'
+    // commandToExecute: './frrconfig.sh'
   }
 } ]
 

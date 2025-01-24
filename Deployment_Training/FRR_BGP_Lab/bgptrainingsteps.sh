@@ -195,6 +195,10 @@ exit
 exit
 
 
+show ip bgp neighbors 10.100.2.20 advertised-routes
+show ip bgp neighbors 10.100.2.20 received-routes
+
+
 ########################################################
 # VM2 Private IP: 10.100.2.20
 # FRR CONFIG
