@@ -107,7 +107,7 @@ module bastion '../../../modules/Microsoft.Network/BastionEverything.bicep' = {
   name: 'bastion'
   params: {
     location: location
-    bastion_name: 'bastion'
+    bastion_name: 'bastionHub'
     bastion_SubnetID: virtualNetwork_Destination.outputs.bastion_SubnetID
     virtualNetwork_AddressPrefix: '10.100.0.0/24'
     bastion_SKU: 'Standard'

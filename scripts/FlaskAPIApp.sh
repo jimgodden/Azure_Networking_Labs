@@ -1,8 +1,11 @@
 #!/bin/bash
 
 sudo apt update
-sudo apt install python3
-sudo apt install python3-pip
+sudo apt upgrade -y
+sudo apt install python3 -y
+sudo apt install python3-pip -y
+
+sleep 5
 
 sudo ufw allow 5000/tcp
 
