@@ -202,16 +202,18 @@ module VMs '../../../modules/Microsoft.Compute/VirtualMachine/Linux/Ubuntu24_FRR
 //   tags: tagValues
 // }
 
-// module bastion '../../../modules/Microsoft.Network/Bastion.bicep' = {
-//   name: 'bastion'
-//   params: {
-//     bastion_name: 'Bastion'
-//     bastion_SubnetID: virtualNetwork.properties.subnets[0].id
-//     location: location
-//   }
-// }
+module bastion '../../../modules/Microsoft.Network/Bastion.bicep' = {
+  name: 'bastion'
+  params: {
+    bastion_name: 'Bastion'
+    bastion_SubnetID: virtualNetwork.properties.subnets[0].id
+    location: location
+  }
+}
 
-output VM01_PublicIP string = VMs[0].outputs.networkInterface_PublicIPAddress
-output VM02_PublicIP string = VMs[1].outputs.networkInterface_PublicIPAddress
-output VM03_PublicIP string = VMs[2].outputs.networkInterface_PublicIPAddress
-output VM04_PublicIP string = VMs[3].outputs.networkInterface_PublicIPAddress
+output VM01_PublicIP string = 'ssh -p 2022 ${virtualMachine_AdminUsername}@${VMs[0].outputs.networkInterface_PublicIPAddress}'
+output VM02_PublicIP string = 'ssh -p 2022 ${virtualMachine_AdminUsername}@${VMs[1].outputs.networkInterface_PublicIPAddress}'
+output VM03_PublicIP string = 'ssh -p 2022 ${virtualMachine_AdminUsername}@${VMs[2].outputs.networkInterface_PublicIPAddress}'
+output VM04_PublicIP string = 'ssh -p 2022 ${virtualMachine_AdminUsername}@${VMs[3].outputs.networkInterface_PublicIPAddress}'
+
+//https://ms.portal.azure.com/#@fdpo.onmicrosoft.com/resource${resourceId}/bastionHost

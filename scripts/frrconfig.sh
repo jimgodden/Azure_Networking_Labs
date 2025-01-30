@@ -29,21 +29,16 @@ sudo sed -i '/^Port 22/a Port 2022' /etc/ssh/sshd_config && sudo systemctl resta
 sudo ufw allow 2022/tcp
 sudo ufw reload
 
+# download scripts that will automate the configuration of FRR for each step of the lab
+curl -o /step1.sh https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/step1.sh
+curl -o /step2.sh https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/step2.sh
+curl -o /step3.sh https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/step3.sh
+curl -o /step4.sh https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/step4.sh
+curl -o /step5.sh https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/step5.sh
 
-
-# configure terminal 
-# router bgp 65000
-# bgp router-id
-# neighbor 10.0.0.4 remote-as 65000
-# neighbor 10.0.0.5 remote-as 65000
-
-
-
-# # Configure BGP in FRR
-# sudo vtysh -c "configure terminal"
-# sudo vtysh -c "router bgp 65000"
-# sudo vtysh -c "bgp router-id 10.100.1.4"
-# sudo vtysh -c "neighbor 10.0.0.4 remote-as 65000"
-# sudo vtysh -c "neighbor 10.0.0.5 remote-as 65000"
-# sudo vtysh -c "exit"
-# sudo systemctl restart frr
+# make scripts executable
+sudo chmod +x /step1.sh
+sudo chmod +x /step2.sh
+sudo chmod +x /step3.sh
+sudo chmod +x /step4.sh
+sudo chmod +x /step5.sh
