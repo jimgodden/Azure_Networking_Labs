@@ -2,12 +2,17 @@
 # This is to be used in conjunction with the UDP_Server.ps1 script.
 
 param (
-    [string]$DestinationIP,
-    [int]$DestinationPort,
-    [string]$SentMessage
+    [string]$DestinationIP = "10.1.0.7",
+    [int]$DestinationPort = 65330,
+    [string]$SentMessage = "Hi"
 )
 
-$udpClient = New-Object System.Net.Sockets.UdpClient
+$SourcePort = 65330
+$DestinationIP = "10.1.0.4"
+$DestinationPort = 5000
+$SentMessage = "Hi"
+
+$udpClient = New-Object System.Net.Sockets.UdpClient ($SourcePort)
 $endpoint = New-Object System.Net.IPEndPoint ([System.Net.IPAddress]::Parse($DestinationIP), $DestinationPort)
 while ($true) {
     $bytes = [System.Text.Encoding]::ASCII.GetBytes($SentMessage)

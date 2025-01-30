@@ -26,6 +26,9 @@ sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 
 # configure ssh to listen on both ports 22 and 2022
 sudo sed -i '/^Port 22/a Port 2022' /etc/ssh/sshd_config && sudo systemctl restart ssh
+sudo ufw allow 2022/tcp
+sudo ufw reload
+
 
 
 # configure terminal 

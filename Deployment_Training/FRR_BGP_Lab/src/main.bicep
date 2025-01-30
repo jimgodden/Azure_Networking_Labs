@@ -51,6 +51,9 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2022-09-01' = {
           delegations: []
           privateEndpointNetworkPolicies: 'Disabled'
           privateLinkServiceNetworkPolicies: 'Enabled'
+          networkSecurityGroup: {
+            id: nsgRule2022.id
+          }
         }
       }
       {
@@ -60,6 +63,9 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2022-09-01' = {
           delegations: []
           privateEndpointNetworkPolicies: 'Disabled'
           privateLinkServiceNetworkPolicies: 'Enabled' 
+          networkSecurityGroup: {
+            id: nsgRule2022.id
+          }
         }
       }
       {
@@ -69,6 +75,9 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2022-09-01' = {
           delegations: []
           privateEndpointNetworkPolicies: 'Disabled'
           privateLinkServiceNetworkPolicies: 'Enabled' 
+          networkSecurityGroup: {
+            id: nsgRule2022.id
+          }
         }
       }
       {
@@ -77,6 +86,9 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2022-09-01' = {
           addressPrefix: subnet_AddressRangeCIDRs[4]
           privateEndpointNetworkPolicies: 'Disabled'
           privateLinkServiceNetworkPolicies: 'Enabled'
+          networkSecurityGroup: {
+            id: nsgRule2022.id
+          }
         }
       }
       // {
@@ -97,6 +109,28 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2022-09-01' = {
   tags: tagValues
 }
 
+resource nsgRule2022 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
+  name: 'nsgRule2022'
+  location: location
+  properties: {
+    securityRules: [
+      {
+        name: 'AllowSSH'
+        properties: {
+          access: 'Allow'
+          direction: 'Inbound'
+          priority: 200
+          protocol: 'Tcp'
+          sourceAddressPrefix: '*'
+          sourcePortRange: '*'
+          destinationAddressPrefix: '*'
+          destinationPortRange: '2022'
+        }
+      }
+    ]
+  }
+}
+
 // module VMs '../../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.bicep' = [ for i in range(1, 4): {
 module VMs '../../../modules/Microsoft.Compute/VirtualMachine/Linux/Ubuntu24_FRR.bicep' = [ for i in range(1, 4): {
   name: 'VM0${i}'
@@ -110,6 +144,7 @@ module VMs '../../../modules/Microsoft.Compute/VirtualMachine/Linux/Ubuntu24_FRR
     virtualMachine_Size: virtualMachine_Size
     privateIPAllocationMethod: 'Static'
     privateIPAddress: '10.100.${i}.${i}0'
+    addPublicIPAddress: true
     // virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
     // virtualMachine_ScriptFileName: 'frrconfig.sh'
     // commandToExecute: './frrconfig.sh'
@@ -167,11 +202,16 @@ module VMs '../../../modules/Microsoft.Compute/VirtualMachine/Linux/Ubuntu24_FRR
 //   tags: tagValues
 // }
 
-module bastion '../../../modules/Microsoft.Network/Bastion.bicep' = {
-  name: 'bastion'
-  params: {
-    bastion_name: 'Bastion'
-    bastion_SubnetID: virtualNetwork.properties.subnets[0].id
-    location: location
-  }
-}
+// module bastion '../../../modules/Microsoft.Network/Bastion.bicep' = {
+//   name: 'bastion'
+//   params: {
+//     bastion_name: 'Bastion'
+//     bastion_SubnetID: virtualNetwork.properties.subnets[0].id
+//     location: location
+//   }
+// }
+
+output VM01_PublicIP string = VMs[0].outputs.networkInterface_PublicIPAddress
+output VM02_PublicIP string = VMs[1].outputs.networkInterface_PublicIPAddress
+output VM03_PublicIP string = VMs[2].outputs.networkInterface_PublicIPAddress
+output VM04_PublicIP string = VMs[3].outputs.networkInterface_PublicIPAddress

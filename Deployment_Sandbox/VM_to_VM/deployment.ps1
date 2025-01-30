@@ -1,1 +1,1 @@
-.\Tools\deployment.ps1 -DeploymentName "Sandbox-VM_to_VM" -Location "centralus"
+.\Tools\deployment.ps1 -DeploymentName "Sandbox-VM_to_VM" -Location "eastus2"

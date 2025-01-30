@@ -6,6 +6,9 @@ param (
     [string]$ResponseMessage
 )
 
+$UDPPort = 5000
+$ResponseMessage = "Hello"
+
 New-NetFirewallRule -DisplayName "Allow inbound UDP port ${UDPPort}" -Direction Inbound -LocalPort $UDPPort -Protocol UDP -Action Allow
 $udpClient = New-Object System.Net.Sockets.UdpClient $UDPPort
 $endpoint = New-Object System.Net.IPEndPoint ([System.Net.IPAddress]::Any, $UDPPort)

@@ -57,7 +57,7 @@ module virtualNetworkPeering_Source_to_Destination '../../../modules/Microsoft.N
 
 
 module clientVMSS '../../../modules/Microsoft.Compute/VirtualMachineScaleSets/WinServ2025.bicep' = {
-  name: 'dstVMSS'
+  name: 'clientVMSS'
   params: {
     location: location
     acceleratedNetworking: acceleratedNetworking
@@ -68,12 +68,12 @@ module clientVMSS '../../../modules/Microsoft.Compute/VirtualMachineScaleSets/Wi
     virtualMachineScaleSet_Size: 'Standard_D2as_v5' // 'Standard_D2as_v5' // 'Standard_D48as_v5'
     capacity: 4
     virtualMachineScaleSet_ScriptFileName: 'VMSSClientest.ps1'
-    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File '
+    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File VMSSClientest.ps1'
   }
 }
 
 module dnsServers '../../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = [ for i in range(1, numberOfDNSServers): {
-  name: 'srcVMWindows${i}'
+  name: 'dnsServers${i}'
   params: {
     acceleratedNetworking: acceleratedNetworking
     location: location
@@ -107,7 +107,7 @@ module bastion '../../../modules/Microsoft.Network/BastionEverything.bicep' = {
   name: 'bastion'
   params: {
     location: location
-    bastion_name: 'bastionHub'
+    bastion_name: 'bastionhub3'
     bastion_SubnetID: virtualNetwork_Destination.outputs.bastion_SubnetID
     virtualNetwork_AddressPrefix: '10.100.0.0/24'
     bastion_SKU: 'Standard'
