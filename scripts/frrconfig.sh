@@ -12,7 +12,7 @@ echo deb '[signed-by=/usr/share/keyrings/frrouting.gpg]' https://deb.frrouting.o
 
 # update and install FRR
 sudo apt update
-sudo apt install frr -y
+sudo apt install frr=10.2.1 -y
 
 sudo sed -i 's/bgpd=no/bgpd=yes/' /etc/frr/daemons
 
@@ -29,16 +29,11 @@ sudo sed -i '/^Port 22/a Port 2022' /etc/ssh/sshd_config && sudo systemctl resta
 sudo ufw allow 2022/tcp
 sudo ufw reload
 
-# download scripts that will automate the configuration of FRR for each step of the lab
-curl -o /step1.sh https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/step1.sh
-curl -o /step2.sh https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/step2.sh
-curl -o /step3.sh https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/step3.sh
-curl -o /step4.sh https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/step4.sh
-curl -o /step5.sh https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/step5.sh
+# download scripts that will automate the baseline configuration of FRR for each step of the lab
+curl -o /noConfigs.sh https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/noConfigs.sh
+curl -o /baseConfigs.sh https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/baseConfigs.sh
+
 
 # make scripts executable
-sudo chmod +x /step1.sh
-sudo chmod +x /step2.sh
-sudo chmod +x /step3.sh
-sudo chmod +x /step4.sh
-sudo chmod +x /step5.sh
+sudo chmod +x /noConfigs.sh
+sudo chmod +x /baseConfigs.sh

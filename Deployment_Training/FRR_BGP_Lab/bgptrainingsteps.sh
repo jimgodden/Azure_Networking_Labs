@@ -198,4 +198,3 @@ exit
 
 show ip bgp neighbors 10.100.2.20 advertised-routes
 show ip bgp neighbors 10.100.2.20 received-routes
-

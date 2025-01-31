@@ -37,7 +37,6 @@ service integrated-vtysh-config
 !
 ip route 10.100.1.10/32 10.100.2.1
 ip route 10.100.3.30/32 10.100.2.1
-ip route 10.100.4.40/32 10.100.2.1
 !
 router bgp 200
  bgp router-id 10.100.2.20
@@ -115,5 +114,3 @@ esac
 
 # Restart FRR to apply the new configuration
 sudo systemctl restart frr
-
-cat /etc/frr/frr.conf

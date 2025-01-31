@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.32.4.45862",
-      "templateHash": "3207099698229280324"
+      "templateHash": "15548014657401265094"
     }
   },
   "parameters": {
@@ -73,7 +73,10 @@
               "addressPrefix": "[variables('subnet_AddressRangeCIDRs')[1]]",
               "delegations": [],
               "privateEndpointNetworkPolicies": "Disabled",
-              "privateLinkServiceNetworkPolicies": "Enabled"
+              "privateLinkServiceNetworkPolicies": "Enabled",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'nsgRule2022')]"
+              }
             }
           },
           {
@@ -82,7 +85,10 @@
               "addressPrefix": "[variables('subnet_AddressRangeCIDRs')[2]]",
               "delegations": [],
               "privateEndpointNetworkPolicies": "Disabled",
-              "privateLinkServiceNetworkPolicies": "Enabled"
+              "privateLinkServiceNetworkPolicies": "Enabled",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'nsgRule2022')]"
+              }
             }
           },
           {
@@ -91,7 +97,10 @@
               "addressPrefix": "[variables('subnet_AddressRangeCIDRs')[3]]",
               "delegations": [],
               "privateEndpointNetworkPolicies": "Disabled",
-              "privateLinkServiceNetworkPolicies": "Enabled"
+              "privateLinkServiceNetworkPolicies": "Enabled",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'nsgRule2022')]"
+              }
             }
           },
           {
@@ -99,13 +108,42 @@
             "properties": {
               "addressPrefix": "[variables('subnet_AddressRangeCIDRs')[4]]",
               "privateEndpointNetworkPolicies": "Disabled",
-              "privateLinkServiceNetworkPolicies": "Enabled"
+              "privateLinkServiceNetworkPolicies": "Enabled",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'nsgRule2022')]"
+              }
             }
           }
         ],
         "enableDdosProtection": false
       },
-      "tags": "[variables('tagValues')]"
+      "tags": "[variables('tagValues')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkSecurityGroups', 'nsgRule2022')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2024-05-01",
+      "name": "nsgRule2022",
+      "location": "[parameters('location')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "AllowSSH",
+            "properties": {
+              "access": "Allow",
+              "direction": "Inbound",
+              "priority": 200,
+              "protocol": "Tcp",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "2022"
+            }
+          }
+        ]
+      }
     },
     {
       "copy": {
@@ -148,14 +186,8 @@
           "privateIPAddress": {
             "value": "[format('10.100.{0}.{1}0', range(1, 4)[copyIndex()], range(1, 4)[copyIndex()])]"
           },
-          "virtualMachine_ScriptFileLocation": {
-            "value": "[variables('virtualMachine_ScriptFileLocation')]"
-          },
-          "virtualMachine_ScriptFileName": {
-            "value": "frrconfig.sh"
-          },
-          "commandToExecute": {
-            "value": "./frrconfig.sh"
+          "addPublicIPAddress": {
+            "value": true
           }
         },
         "template": {
@@ -165,7 +197,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.32.4.45862",
-              "templateHash": "14470086615027683818"
+              "templateHash": "15425598390782625899"
             }
           },
           "parameters": {
@@ -241,29 +273,10 @@
                 "description": "Adds a Public IP to the Network Interface of the Virtual Machine"
               }
             },
-            "virtualMachine_ScriptFileLocation": {
-              "type": "string",
-              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/",
-              "metadata": {
-                "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\nExample: https://example.com/scripts/"
-              }
-            },
-            "virtualMachine_ScriptFileName": {
-              "type": "string",
-              "metadata": {
-                "description": "Name of the file to be ran while the Virtual Machine is being created\nExample: Ubuntu20_DNS_Config.sh"
-              }
-            },
-            "commandToExecute": {
-              "type": "string"
-            },
             "tagValues": {
               "type": "object",
               "defaultValue": {}
             }
-          },
-          "variables": {
-            "virtualMachine_ScriptFileUri": "[format('{0}{1}', parameters('virtualMachine_ScriptFileLocation'), parameters('virtualMachine_ScriptFileName'))]"
           },
           "resources": [
             {
@@ -278,8 +291,8 @@
                 "storageProfile": {
                   "imageReference": {
                     "publisher": "canonical",
-                    "offer": "0001-com-ubuntu-server-focal",
-                    "sku": "20_04-lts-gen2",
+                    "offer": "ubuntu-24_04-lts",
+                    "sku": "server",
                     "version": "latest"
                   },
                   "osDisk": {
@@ -355,11 +368,11 @@
                 "autoUpgradeMinorVersion": true,
                 "settings": {
                   "fileUris": [
-                    "[variables('virtualMachine_ScriptFileUri')]"
+                    "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/frrconfig.sh"
                   ]
                 },
                 "protectedSettings": {
-                  "commandToExecute": "[parameters('commandToExecute')]"
+                  "commandToExecute": "./frrconfig.sh"
                 }
               },
               "tags": "[parameters('tagValues')]",
@@ -771,5 +784,23 @@
         "[resourceId('Microsoft.Network/virtualNetworks', 'virtualNetwork')]"
       ]
     }
-  ]
+  ],
+  "outputs": {
+    "VM01_PublicIP": {
+      "type": "string",
+      "value": "[format('ssh -p 2022 {0}@{1}', parameters('virtualMachine_AdminUsername'), reference(resourceId('Microsoft.Resources/deployments', format('VM0{0}', range(1, 4)[0])), '2022-09-01').outputs.networkInterface_PublicIPAddress.value)]"
+    },
+    "VM02_PublicIP": {
+      "type": "string",
+      "value": "[format('ssh -p 2022 {0}@{1}', parameters('virtualMachine_AdminUsername'), reference(resourceId('Microsoft.Resources/deployments', format('VM0{0}', range(1, 4)[1])), '2022-09-01').outputs.networkInterface_PublicIPAddress.value)]"
+    },
+    "VM03_PublicIP": {
+      "type": "string",
+      "value": "[format('ssh -p 2022 {0}@{1}', parameters('virtualMachine_AdminUsername'), reference(resourceId('Microsoft.Resources/deployments', format('VM0{0}', range(1, 4)[2])), '2022-09-01').outputs.networkInterface_PublicIPAddress.value)]"
+    },
+    "VM04_PublicIP": {
+      "type": "string",
+      "value": "[format('ssh -p 2022 {0}@{1}', parameters('virtualMachine_AdminUsername'), reference(resourceId('Microsoft.Resources/deployments', format('VM0{0}', range(1, 4)[3])), '2022-09-01').outputs.networkInterface_PublicIPAddress.value)]"
+    }
+  }
 }
