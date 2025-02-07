@@ -9,7 +9,7 @@ param virtualMachine_AdminUsername string
 param virtualMachine_AdminPassword string
 
 @description('Size of the Virtual Machines')
-param virtualMachine_Size string = 'Standard_D2as_v4' // 'Standard_B2ms' // 'Standard_D2s_v3' // 'Standard_D16lds_v5'
+param vmSize string = 'Standard_D2as_v4' // 'Standard_B2ms' // 'Standard_D2s_v3' // 'Standard_D16lds_v5'
 
 @description('''True enables Accelerated Networking and False disabled it.  
 Not all VM sizes support Accel Net (i.e. Standard_B2ms).  
@@ -23,6 +23,7 @@ param acceleratedNetworking bool = true
 // @description('SKU for the Azure Firewall')
 // param azureFirewall_SKU string = 'Premium'
 
+@minLength(6)
 @description('VPN Shared Key used for authenticating VPN connections')
 @secure()
 param vpn_SharedKey string
@@ -36,11 +37,15 @@ Storage account name restrictions:
 @maxLength(24)
 param storageAccount_Name string
 
-var virtualMachine_ScriptFileLocation = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
+var virtualMachine_ScriptFile = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2025_ConfigScripttest.ps1'
+
+param tagValues object = {
+  Training: 'AzureFirewall'
+}
 
 
 module virtualNetwork_Hub '../../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
-  name: 'virtualNetwork_Hub'
+  name: 'hub_VNet'
   params: {
     virtualNetwork_AddressPrefix: '10.0.0.0/16'
     location: location
@@ -49,7 +54,7 @@ module virtualNetwork_Hub '../../../modules/Microsoft.Network/VirtualNetwork.bic
 }
 
 module virtualNetwork_SpokeA '../../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
-  name: 'virtualNetwork_SpokeA'
+  name: 'spokeA_VNet'
   params: {
     virtualNetwork_AddressPrefix: '10.1.0.0/16'
     routeTable_disableBgpRoutePropagation: true
@@ -59,7 +64,7 @@ module virtualNetwork_SpokeA '../../../modules/Microsoft.Network/VirtualNetwork.
 }
 
 module virtualNetwork_SpokeB '../../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
-  name: 'virtualNetwork_SpokeB'
+  name: 'spokeB_VNet'
   params: {
     virtualNetwork_AddressPrefix: '10.2.0.0/16'
     routeTable_disableBgpRoutePropagation: true
@@ -74,10 +79,10 @@ module hub_To_SpokeA_Peering '../../../modules/Microsoft.Network/VirtualNetworkP
     virtualNetwork_Hub_Name: virtualNetwork_Hub.outputs.virtualNetwork_Name
     virtualNetwork_Spoke_Name: virtualNetwork_SpokeA.outputs.virtualNetwork_Name
   }
-  // dependsOn: [
-  //   Hub_to_OnPrem_conn
-  //   OnPrem_to_Hub_conn
-  // ]
+  dependsOn: [
+    Hub_to_OnPrem_conn
+    OnPrem_to_Hub_conn
+  ]
 }
 
 module hub_To_SpokeB_Peering '../../../modules/Microsoft.Network/VirtualNetworkPeeringHub2Spoke.bicep' = {
@@ -86,80 +91,451 @@ module hub_To_SpokeB_Peering '../../../modules/Microsoft.Network/VirtualNetworkP
     virtualNetwork_Hub_Name: virtualNetwork_Hub.outputs.virtualNetwork_Name
     virtualNetwork_Spoke_Name: virtualNetwork_SpokeB.outputs.virtualNetwork_Name
   }
-  // dependsOn: [
-  //   Hub_to_OnPrem_conn
-  //   OnPrem_to_Hub_conn
-  // ]
+  dependsOn: [
+    Hub_to_OnPrem_conn
+    OnPrem_to_Hub_conn
+  ]
 }
 
-module hub_DnsVMs '../../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = [ for i in range(1, 1) : {
-  name: 'hub-DnsVM${i}'
-  params: {
-    acceleratedNetworking: acceleratedNetworking
-    location: location
-    subnet_ID: virtualNetwork_Hub.outputs.general_SubnetID
-    virtualMachine_AdminPassword: virtualMachine_AdminPassword
-    virtualMachine_AdminUsername: virtualMachine_AdminUsername
-    virtualMachine_Name: 'hub-DnsVM${i}'
-    virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_DNS.ps1'
-    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username ${virtualMachine_AdminUsername}'
+// Start of hub-DnsVM
+var virtualMachine_Hub_Dns_Name = 'hub-DnsVM'
+resource virtualMachine_Hub_Dns 'Microsoft.Compute/virtualMachines@2024-07-01' = {
+  name: virtualMachine_Hub_Dns_Name
+  location: location
+  identity: {
+    type: 'SystemAssigned'
   }
-} ]
+  properties: {
+    hardwareProfile: {
+      vmSize: vmSize
+    }
+    additionalCapabilities: {
+      hibernationEnabled: false
+    }
+    storageProfile: {
+      imageReference: {
+        publisher: 'MicrosoftWindowsServer'
+        offer: 'WindowsServer'
+        sku: '2025-datacenter-azure-edition'
+        version: 'latest'
+      }
+      osDisk: {
+        osType: 'Windows'
+        name: '${virtualMachine_Hub_Dns_Name}_OsDisk_1'
+        createOption: 'FromImage'
+        caching: 'ReadWrite'
+        managedDisk: {
+          storageAccountType: 'Premium_LRS'
+        }
+        deleteOption: 'Delete'
+        diskSizeGB: 127
+      }
+      dataDisks: []
+      diskControllerType: 'SCSI'
+    }
+    osProfile: {
+      computerName: virtualMachine_Hub_Dns_Name
+      adminUsername: virtualMachine_AdminUsername
+      adminPassword: virtualMachine_AdminPassword
+      windowsConfiguration: {
+        provisionVMAgent: true
+        enableAutomaticUpdates: true
+        patchSettings: {
+          patchMode: 'AutomaticByPlatform'
+          automaticByPlatformSettings: {
+            rebootSetting: 'IfRequired'
+          }
+          assessmentMode: 'ImageDefault'
+          enableHotpatching: true
+        }
+      }
+      secrets: []
+      allowExtensionOperations: true
+    }
+    securityProfile: {
+      uefiSettings: {
+        secureBootEnabled: true
+        vTpmEnabled: true
+      }
+      securityType: 'TrustedLaunch'
+    }
+    networkProfile: {
+      networkInterfaces: [
+        {
+          id: virtualMachine_Hub_Dns_NIC.id
+          properties: {
+            deleteOption: 'Delete'
+          }
+        }
+      ]
+    }
+    diagnosticsProfile: {
+      bootDiagnostics: {
+        enabled: true
+      }
+    }
+  }
+  tags: tagValues
+}
+resource virtualMachine_Hub_Dns_NIC 'Microsoft.Network/networkInterfaces@2024-01-01' = {
+  name: '${virtualMachine_Hub_Dns_Name}-nic'
+  location: location
+  properties: {
+    ipConfigurations: [
+      {
+        name: 'ipconfig1'
+        properties: {
+          privateIPAddress: '10.0.0.4'
+          privateIPAllocationMethod: 'Static'
+          subnet: {
+            id: virtualNetwork_Hub.outputs.general_SubnetID
+          }
+          primary: true
+          privateIPAddressVersion: 'IPv4'
+        }
+      }
+    ]
+    enableAcceleratedNetworking: acceleratedNetworking
+  }
+  tags: tagValues
+}
+resource virtualMachine_Hub_Dns_CustomScriptExtension 'Microsoft.Compute/virtualMachines/extensions@2021-11-01' = {
+  parent: virtualMachine_Hub_Dns
+  name: 'installcustomscript'
+  location: location
+  properties: {
+    publisher: 'Microsoft.Compute'
+    type: 'CustomScriptExtension'
+    typeHandlerVersion: '1.9'
+    autoUpgradeMinorVersion: true
+    settings: {
+      fileUris: [
+        virtualMachine_ScriptFile
+      ]
+    }
+    protectedSettings: {
+      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username ${virtualMachine_AdminUsername} -Type DNS'
+    }
+  }
+  tags: tagValues
+}
+// End of hub-DnsVM
 
-module spokeA_WinVM '../../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
-  name: 'spokeA-WinVM'
-  params: {
-    acceleratedNetworking: acceleratedNetworking
-    location: location
-    subnet_ID: virtualNetwork_SpokeA.outputs.general_SubnetID
-    virtualMachine_AdminPassword: virtualMachine_AdminPassword
-    virtualMachine_AdminUsername: virtualMachine_AdminUsername
-    virtualMachine_Name: 'spokeA-ClientVM'
-    virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_General.ps1'
-    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_General.ps1 -Username ${virtualMachine_AdminUsername}'
+
+// Start of spokeA-ClientVM
+var virtualMachine_SpokeA_Client_Name = 'spokeA-ClientVM'
+resource virtualMachine_SpokeA_Client 'Microsoft.Compute/virtualMachines@2024-07-01' = {
+  name: virtualMachine_SpokeA_Client_Name
+  location: location
+  identity: {
+    type: 'SystemAssigned'
   }
+  properties: {
+    hardwareProfile: {
+      vmSize: vmSize
+    }
+    additionalCapabilities: {
+      hibernationEnabled: false
+    }
+    storageProfile: {
+      imageReference: {
+        publisher: 'MicrosoftWindowsServer'
+        offer: 'WindowsServer'
+        sku: '2025-datacenter-azure-edition'
+        version: 'latest'
+      }
+      osDisk: {
+        osType: 'Windows'
+        name: '${virtualMachine_SpokeA_Client_Name}_OsDisk_1'
+        createOption: 'FromImage'
+        caching: 'ReadWrite'
+        managedDisk: {
+          storageAccountType: 'Premium_LRS'
+        }
+        deleteOption: 'Delete'
+        diskSizeGB: 127
+      }
+      dataDisks: []
+      diskControllerType: 'SCSI'
+    }
+    osProfile: {
+      computerName: virtualMachine_SpokeA_Client_Name
+      adminUsername: virtualMachine_AdminUsername
+      adminPassword: virtualMachine_AdminPassword
+      windowsConfiguration: {
+        provisionVMAgent: true
+        enableAutomaticUpdates: true
+        patchSettings: {
+          patchMode: 'AutomaticByPlatform'
+          automaticByPlatformSettings: {
+            rebootSetting: 'IfRequired'
+          }
+          assessmentMode: 'ImageDefault'
+          enableHotpatching: true
+        }
+      }
+      secrets: []
+      allowExtensionOperations: true
+    }
+    securityProfile: {
+      uefiSettings: {
+        secureBootEnabled: true
+        vTpmEnabled: true
+      }
+      securityType: 'TrustedLaunch'
+    }
+    networkProfile: {
+      networkInterfaces: [
+        {
+          id: virtualMachine_SpokeA_Client_NIC.id
+          properties: {
+            deleteOption: 'Delete'
+          }
+        }
+      ]
+    }
+    diagnosticsProfile: {
+      bootDiagnostics: {
+        enabled: true
+      }
+    }
+  }
+  tags: tagValues
+}
+resource virtualMachine_SpokeA_Client_NIC 'Microsoft.Network/networkInterfaces@2024-01-01' = {
+  name: '${virtualMachine_SpokeA_Client_Name}-nic'
+  location: location
+  properties: {
+    ipConfigurations: [
+      {
+        name: 'ipconfig1'
+        properties: {
+          privateIPAddress: '10.1.0.4'
+          privateIPAllocationMethod: 'Static'
+          subnet: {
+            id: virtualNetwork_SpokeA.outputs.general_SubnetID
+          }
+          primary: true
+          privateIPAddressVersion: 'IPv4'
+        }
+      }
+    ]
+    enableAcceleratedNetworking: acceleratedNetworking
+  }
+  tags: tagValues
+}
+resource virtualMachine_SpokeA_Client_CustomScriptExtension 'Microsoft.Compute/virtualMachines/extensions@2021-11-01' = {
+  parent: virtualMachine_SpokeA_Client
+  name: 'installcustomscript'
+  location: location
+  properties: {
+    publisher: 'Microsoft.Compute'
+    type: 'CustomScriptExtension'
+    typeHandlerVersion: '1.9'
+    autoUpgradeMinorVersion: true
+    settings: {
+      fileUris: [
+        virtualMachine_ScriptFile
+      ]
+    }
+    protectedSettings: {
+      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username ${virtualMachine_AdminUsername} -Type General'
+    }
+  }
+  tags: tagValues
+}
+// End of spokeA-ClientVM
+
+// Start of spokeB-IisVM
+var virtualMachine_SpokeB_Iis_Name = 'spokeB-IisVM'
+resource virtualMachine_SpokeB_Iis 'Microsoft.Compute/virtualMachines@2024-07-01' = {
+  name: virtualMachine_SpokeB_Iis_Name
+  location: location
+  identity: {
+    type: 'SystemAssigned'
+  }
+  properties: {
+    hardwareProfile: {
+      vmSize: vmSize
+    }
+    additionalCapabilities: {
+      hibernationEnabled: false
+    }
+    storageProfile: {
+      imageReference: {
+        publisher: 'MicrosoftWindowsServer'
+        offer: 'WindowsServer'
+        sku: '2025-datacenter-azure-edition'
+        version: 'latest'
+      }
+      osDisk: {
+        osType: 'Windows'
+        name: '${virtualMachine_SpokeB_Iis_Name}_OsDisk_1'
+        createOption: 'FromImage'
+        caching: 'ReadWrite'
+        managedDisk: {
+          storageAccountType: 'Premium_LRS'
+        }
+        deleteOption: 'Delete'
+        diskSizeGB: 127
+      }
+      dataDisks: []
+      diskControllerType: 'SCSI'
+    }
+    osProfile: {
+      computerName: virtualMachine_SpokeB_Iis_Name
+      adminUsername: virtualMachine_AdminUsername
+      adminPassword: virtualMachine_AdminPassword
+      windowsConfiguration: {
+        provisionVMAgent: true
+        enableAutomaticUpdates: true
+        patchSettings: {
+          patchMode: 'AutomaticByPlatform'
+          automaticByPlatformSettings: {
+            rebootSetting: 'IfRequired'
+          }
+          assessmentMode: 'ImageDefault'
+          enableHotpatching: true
+        }
+      }
+      secrets: []
+      allowExtensionOperations: true
+    }
+    securityProfile: {
+      uefiSettings: {
+        secureBootEnabled: true
+        vTpmEnabled: true
+      }
+      securityType: 'TrustedLaunch'
+    }
+    networkProfile: {
+      networkInterfaces: [
+        {
+          id: virtualMachine_SpokeB_Iis_NIC.id
+          properties: {
+            deleteOption: 'Delete'
+          }
+        }
+      ]
+    }
+    diagnosticsProfile: {
+      bootDiagnostics: {
+        enabled: true
+      }
+    }
+  }
+  tags: tagValues
+}
+resource virtualMachine_SpokeB_Iis_NIC 'Microsoft.Network/networkInterfaces@2024-01-01' = {
+  name: '${virtualMachine_SpokeB_Iis_Name}-nic'
+  location: location
+  properties: {
+    ipConfigurations: [
+      {
+        name: 'ipconfig1'
+        properties: {
+          privateIPAddress: '10.2.0.4'
+          privateIPAllocationMethod: 'Static'
+          subnet: {
+            id: virtualNetwork_SpokeB.outputs.general_SubnetID
+          }
+          primary: true
+          privateIPAddressVersion: 'IPv4'
+        }
+      }
+    ]
+    enableAcceleratedNetworking: acceleratedNetworking
+  }
+  tags: tagValues
+}
+resource virtualMachine_SpokeB_Iis_CustomScriptExtension 'Microsoft.Compute/virtualMachines/extensions@2021-11-01' = {
+  parent: virtualMachine_SpokeB_Iis
+  name: 'installcustomscript'
+  location: location
+  properties: {
+    publisher: 'Microsoft.Compute'
+    type: 'CustomScriptExtension'
+    typeHandlerVersion: '1.9'
+    autoUpgradeMinorVersion: true
+    settings: {
+      fileUris: [
+        virtualMachine_ScriptFile
+      ]
+    }
+    protectedSettings: {
+      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username ${virtualMachine_AdminUsername} -Type WebServer'
+    }
+  }
+  tags: tagValues
+}
+// End of spokeB-IisVM
+
+resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
+  name: storageAccount_Name
+  location: location
+  sku: {
+    name: 'Standard_LRS'
+  }
+  kind: 'StorageV2'
+  properties: {
+    dnsEndpointType: 'Standard'
+    defaultToOAuthAuthentication: false
+    publicNetworkAccess: 'Enabled'
+    allowCrossTenantReplication: true
+    minimumTlsVersion: 'TLS1_2'
+    allowBlobPublicAccess: true
+    allowSharedKeyAccess: true
+    networkAcls: {
+      bypass: 'AzureServices'
+      virtualNetworkRules: []
+      ipRules: []
+      defaultAction: 'Deny'
+    }
+    supportsHttpsTrafficOnly: true
+    encryption: {
+      requireInfrastructureEncryption: false
+      services: {
+        file: {
+          keyType: 'Account'
+          enabled: true
+        }
+        blob: {
+          keyType: 'Account'
+          enabled: true
+        }
+      }
+      keySource: 'Microsoft.Storage'
+    }
+    accessTier: 'Hot'
+  }
+  tags: tagValues
 }
 
-module spokeB_WinVM '../../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
-  name: 'spokeB-WinVM'
-  params: {
-    acceleratedNetworking: acceleratedNetworking
-    location: location
-    subnet_ID: virtualNetwork_SpokeB.outputs.general_SubnetID
-    virtualMachine_AdminPassword: virtualMachine_AdminPassword
-    virtualMachine_AdminUsername: virtualMachine_AdminUsername
-    virtualMachine_Name: 'spokeB-IISVM'
-    virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_WebServer.ps1'
-    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_WebServer.ps1 -Username ${virtualMachine_AdminUsername}'
+resource storageAccount_BlobServices 'Microsoft.Storage/storageAccounts/blobServices@2023-01-01' = {
+  parent: storageAccount
+  name: 'default'
+  properties: {
+    changeFeed: {
+      enabled: false
+    }
+    restorePolicy: {
+      enabled: false
+    }
+    containerDeleteRetentionPolicy: {
+      enabled: true
+      days: 7
+    }
+    cors: {
+      corsRules: []
+    }
+    deleteRetentionPolicy: {
+      allowPermanentDelete: false
+      enabled: true
+      days: 7
+    }
+    isVersioningEnabled: false
   }
 }
-
-module storageAccount '../../../modules/Microsoft.Storage/StorageAccount.bicep' = {
-  name: 'storageAccount'
-  params: {
-    location: location
-    storageAccount_Name: storageAccount_Name
-  }
-}
-
-// module hub_StorageAccount_Blob_PrivateEndpoint '../../../modules/Microsoft.Network/PrivateEndpoint.bicep' = {
-//   name: 'hub_StorageAccount_Blob_PrivateEndpoint'
-//   params: {
-//     groupID: 'blob'
-//     location: location
-//     privateDNSZone_Name: 'privatelink.blob.${environment().suffixes.storage}'
-//     privateEndpoint_Name: 'hub_${storageAccount_Name}_blob_pe'
-//     privateEndpoint_SubnetID: virtualNetwork_Hub.outputs.privateEndpoint_SubnetID
-//     privateLinkServiceId: storageAccount.outputs.storageAccount_ID
-//     virtualNetwork_IDs: [virtualNetwork_Hub.outputs.virtualNetwork_ID]
-//   }
-// }
 
 resource azureFirewall_PIP 'Microsoft.Network/publicIPAddresses@2022-11-01' = {
   name: 'AzFW_PIP'
@@ -174,7 +550,7 @@ resource azureFirewall_PIP 'Microsoft.Network/publicIPAddresses@2022-11-01' = {
     idleTimeoutInMinutes: 4
     ipTags: []
   }
-  // tags: tagValues
+  tags: tagValues
 }
 
 resource azureFirewall_Management_PIP 'Microsoft.Network/publicIPAddresses@2022-11-01' = {
@@ -190,7 +566,7 @@ resource azureFirewall_Management_PIP 'Microsoft.Network/publicIPAddresses@2022-
     idleTimeoutInMinutes: 4
     ipTags: []
   }
-  // tags: tagValues
+  tags: tagValues
 }
 
 // module azureFirewall '../../../modules/Microsoft.Network/AzureFirewall.bicep' = if (usingAzureFirewall) {
@@ -248,54 +624,19 @@ module udrToAzFW_SpokeB '../../../modules/Microsoft.Network/RouteTable.bicep' = 
   }
 }
 
-resource Bastion_VNet 'Microsoft.Network/virtualNetworks@2022-09-01' = {
-  name: 'Bastion_VNet'
-  location: location
-  properties: {
-    addressSpace: {
-      addressPrefixes: [
-        '10.200.0.0/24'
-      ]
-    }
-    subnets: [
-      {
-        name: 'AzureBastionSubnet'
-        properties: {
-          addressPrefix: '10.200.0.0/24'
-          delegations: []
-          privateEndpointNetworkPolicies: 'Disabled'
-          privateLinkServiceNetworkPolicies: 'Enabled'
-        }
-      }
-    ]
-    enableDdosProtection: false
-  }
-}
-
-module bastion '../../../modules/Microsoft.Network/Bastion.bicep' = {
-  name: 'bastion'
+module Bastion '../../../modules/Microsoft.Network/BastionEverything.bicep' = {
+  name: 'Bastion'
   params: {
-    bastion_name: 'Bastion'
-    bastion_SubnetID: Bastion_VNet.properties.subnets[0].id
     location: location
-  }
-}
-
-module bastionPeeringToAllVNets '../../../modules/Microsoft.Network/BastionVirtualNetworkHubPeerings.bicep' = {
-  name: 'bastionPeeringToAllVNets'
-  params: {
-    bastion_VirtualNetwork_Id: Bastion_VNet.id
-    other_VirtualNetwork_Ids: [ 
+    peered_VirtualNetwork_Ids: [ 
       virtualNetwork_Hub.outputs.virtualNetwork_ID
       virtualNetwork_SpokeA.outputs.virtualNetwork_ID
       virtualNetwork_SpokeB.outputs.virtualNetwork_ID
       virtualNetwork_OnPremHub.outputs.virtualNetwork_ID
-    ]
+    ] 
+    bastion_name: 'Hub_Bastion'
+    virtualNetwork_AddressPrefix: '10.200.0.0/24'
   }
-  dependsOn: [
-    hub_To_SpokeA_Peering
-    hub_To_SpokeB_Peering
-  ]
 }
 
 module virtualNetwork_OnPremHub '../../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
@@ -307,113 +648,331 @@ module virtualNetwork_OnPremHub '../../../modules/Microsoft.Network/VirtualNetwo
   }
 }
 
-module OnPremVM_Client '../../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
-  name: 'OnPremWinClient'
-  params: {
-    acceleratedNetworking: acceleratedNetworking
-    location: location
-    subnet_ID: virtualNetwork_OnPremHub.outputs.general_SubnetID
-    virtualMachine_AdminPassword: virtualMachine_AdminPassword
-    virtualMachine_AdminUsername: virtualMachine_AdminUsername
-    virtualMachine_Name: 'OnPrem-Client'
-    virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_General.ps1'
-    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_General.ps1 -Username ${virtualMachine_AdminUsername}'
+
+// Start of onprem_dnsVM
+var virtualMachine_Onprem_Dns_Name = 'onprem-dnsVM'
+resource virtualMachine_Onprem_Dns 'Microsoft.Compute/virtualMachines@2024-07-01' = {
+  name: virtualMachine_Onprem_Dns_Name
+  location: location
+  identity: {
+    type: 'SystemAssigned'
   }
+  properties: {
+    hardwareProfile: {
+      vmSize: vmSize
+    }
+    additionalCapabilities: {
+      hibernationEnabled: false
+    }
+    storageProfile: {
+      imageReference: {
+        publisher: 'MicrosoftWindowsServer'
+        offer: 'WindowsServer'
+        sku: '2025-datacenter-azure-edition'
+        version: 'latest'
+      }
+      osDisk: {
+        osType: 'Windows'
+        name: '${virtualMachine_Onprem_Dns_Name}_OsDisk_1'
+        createOption: 'FromImage'
+        caching: 'ReadWrite'
+        managedDisk: {
+          storageAccountType: 'Premium_LRS'
+        }
+        deleteOption: 'Delete'
+        diskSizeGB: 127
+      }
+      dataDisks: []
+      diskControllerType: 'SCSI'
+    }
+    osProfile: {
+      computerName: virtualMachine_Onprem_Dns_Name
+      adminUsername: virtualMachine_AdminUsername
+      adminPassword: virtualMachine_AdminPassword
+      windowsConfiguration: {
+        provisionVMAgent: true
+        enableAutomaticUpdates: true
+        patchSettings: {
+          patchMode: 'AutomaticByPlatform'
+          automaticByPlatformSettings: {
+            rebootSetting: 'IfRequired'
+          }
+          assessmentMode: 'ImageDefault'
+          enableHotpatching: true
+        }
+      }
+      secrets: []
+      allowExtensionOperations: true
+    }
+    securityProfile: {
+      uefiSettings: {
+        secureBootEnabled: true
+        vTpmEnabled: true
+      }
+      securityType: 'TrustedLaunch'
+    }
+    networkProfile: {
+      networkInterfaces: [
+        {
+          id: virtualMachine_Onprem_Dns_NIC.id
+          properties: {
+            deleteOption: 'Delete'
+          }
+        }
+      ]
+    }
+    diagnosticsProfile: {
+      bootDiagnostics: {
+        enabled: true
+      }
+    }
+  }
+  tags: tagValues
 }
-
-module OnPremVM_WinDNS '../../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = [for i in range(0, 1) : {
-  name: 'OnPremWinDNS${i}'
-  params: {
-    acceleratedNetworking: acceleratedNetworking
-    location: location
-    subnet_ID: virtualNetwork_OnPremHub.outputs.general_SubnetID
-    virtualMachine_AdminPassword: virtualMachine_AdminPassword
-    virtualMachine_AdminUsername: virtualMachine_AdminUsername
-    virtualMachine_Name: 'OnPrem-WinDNS${i}'
-    virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_DNS.ps1'
-    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username ${virtualMachine_AdminUsername}'
+resource virtualMachine_Onprem_Dns_NIC 'Microsoft.Network/networkInterfaces@2024-01-01' = {
+  name: '${virtualMachine_Onprem_Dns_Name}-nic'
+  location: location
+  properties: {
+    ipConfigurations: [
+      {
+        name: 'ipconfig1'
+        properties: {
+          privateIPAddress: '10.100.0.4'
+          privateIPAllocationMethod: 'Static'
+          subnet: {
+            id: virtualNetwork_OnPremHub.outputs.general_SubnetID
+          }
+          primary: true
+          privateIPAddressVersion: 'IPv4'
+        }
+      }
+    ]
+    enableAcceleratedNetworking: acceleratedNetworking
   }
-} ]
-
-module OnPrem_NVA '../../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.bicep' = {
-  name: 'OnPrem_NVA'
-  params: {
-    acceleratedNetworking: acceleratedNetworking
-    location: location
-    subnet_ID: virtualNetwork_OnPremHub.outputs.general_SubnetID
-    virtualMachine_AdminPassword: virtualMachine_AdminPassword
-    virtualMachine_AdminUsername: virtualMachine_AdminUsername
-    virtualMachine_Name: 'OnPrem-NVA'
-    virtualMachine_Size: virtualMachine_Size
-    privateIPAllocationMethod: 'Static'
-    privateIPAddress: '10.100.0.254'
-    virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    virtualMachine_ScriptFileName: 'frrconfig.sh'
-    commandToExecute: './frrconfig.sh'
-  }
+  tags: tagValues
 }
-
-module vpn_vm '../../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.bicep' = {
-  name: 'VPN_VM'
-  params: {
-    location: location
-    acceleratedNetworking: acceleratedNetworking
-    subnet_ID: virtualNetwork_OnPremHub.outputs.general_SubnetID
-    virtualMachine_AdminPassword: virtualMachine_AdminPassword
-    virtualMachine_AdminUsername: virtualMachine_AdminUsername
-    virtualMachine_Name: 'vpn-vm'
-    virtualMachine_ScriptFileName: 'Ubuntu20_DNS_Config.sh'
-    commandToExecute: './Ubuntu20_DNS_Config.sh'
-    virtualMachine_Size: virtualMachine_Size
+resource virtualMachine_Onprem_Dns_CustomScriptExtension 'Microsoft.Compute/virtualMachines/extensions@2021-11-01' = {
+  parent: virtualMachine_Onprem_Dns
+  name: 'installcustomscript'
+  location: location
+  properties: {
+    publisher: 'Microsoft.Compute'
+    type: 'CustomScriptExtension'
+    typeHandlerVersion: '1.9'
+    autoUpgradeMinorVersion: true
+    settings: {
+      fileUris: [
+        virtualMachine_ScriptFile
+      ]
+    }
+    protectedSettings: {
+      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username ${virtualMachine_AdminUsername} -Type DNS'
+    }
   }
+  tags: tagValues
 }
+// End of onprem_dnsVM
 
-// module virtualNetworkGateway_OnPrem '../../../modules/Microsoft.Network/VirtualNetworkGateway.bicep' = {
-//   name: 'OnPremVirtualNetworkGateway'
+// Start of onprem_clientVM
+var virtualMachine_Onprem_Client_Name = 'onprem-clientVM'
+resource virtualMachine_Onprem_Client 'Microsoft.Compute/virtualMachines@2024-07-01' = {
+  name: virtualMachine_Onprem_Client_Name
+  location: location
+  identity: {
+    type: 'SystemAssigned'
+  }
+  properties: {
+    hardwareProfile: {
+      vmSize: vmSize
+    }
+    additionalCapabilities: {
+      hibernationEnabled: false
+    }
+    storageProfile: {
+      imageReference: {
+        publisher: 'MicrosoftWindowsServer'
+        offer: 'WindowsServer'
+        sku: '2025-datacenter-azure-edition'
+        version: 'latest'
+      }
+      osDisk: {
+        osType: 'Windows'
+        name: '${virtualMachine_Onprem_Client_Name}_OsDisk_1'
+        createOption: 'FromImage'
+        caching: 'ReadWrite'
+        managedDisk: {
+          storageAccountType: 'Premium_LRS'
+        }
+        deleteOption: 'Delete'
+        diskSizeGB: 127
+      }
+      dataDisks: []
+      diskControllerType: 'SCSI'
+    }
+    osProfile: {
+      computerName: virtualMachine_Onprem_Client_Name
+      adminUsername: virtualMachine_AdminUsername
+      adminPassword: virtualMachine_AdminPassword
+      windowsConfiguration: {
+        provisionVMAgent: true
+        enableAutomaticUpdates: true
+        patchSettings: {
+          patchMode: 'AutomaticByPlatform'
+          automaticByPlatformSettings: {
+            rebootSetting: 'IfRequired'
+          }
+          assessmentMode: 'ImageDefault'
+          enableHotpatching: true
+        }
+      }
+      secrets: []
+      allowExtensionOperations: true
+    }
+    securityProfile: {
+      uefiSettings: {
+        secureBootEnabled: true
+        vTpmEnabled: true
+      }
+      securityType: 'TrustedLaunch'
+    }
+    networkProfile: {
+      networkInterfaces: [
+        {
+          id: virtualMachine_Onprem_Client_NIC.id
+          properties: {
+            deleteOption: 'Delete'
+          }
+        }
+      ]
+    }
+    diagnosticsProfile: {
+      bootDiagnostics: {
+        enabled: true
+      }
+    }
+  }
+  tags: tagValues
+}
+resource virtualMachine_Onprem_Client_NIC 'Microsoft.Network/networkInterfaces@2024-01-01' = {
+  name: '${virtualMachine_Onprem_Client_Name}-nic'
+  location: location
+  properties: {
+    ipConfigurations: [
+      {
+        name: 'ipconfig1'
+        properties: {
+          privateIPAddress: '10.100.0.5'
+          privateIPAllocationMethod: 'Static'
+          subnet: {
+            id: virtualNetwork_OnPremHub.outputs.general_SubnetID
+          }
+          primary: true
+          privateIPAddressVersion: 'IPv4'
+        }
+      }
+    ]
+    enableAcceleratedNetworking: acceleratedNetworking
+  }
+  tags: tagValues
+}
+resource virtualMachine_Onprem_Client_CustomScriptExtension 'Microsoft.Compute/virtualMachines/extensions@2021-11-01' = {
+  parent: virtualMachine_Onprem_Client
+  name: 'installcustomscript'
+  location: location
+  properties: {
+    publisher: 'Microsoft.Compute'
+    type: 'CustomScriptExtension'
+    typeHandlerVersion: '1.9'
+    autoUpgradeMinorVersion: true
+    settings: {
+      fileUris: [
+        virtualMachine_ScriptFile
+      ]
+    }
+    protectedSettings: {
+      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username ${virtualMachine_AdminUsername} -Type General'
+    }
+  }
+  tags: tagValues
+}
+// End of onprem_clientVM
+
+// module OnPrem_NVA '../../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.bicep' = {
+//   name: 'OnPrem_NVA'
 //   params: {
+//     acceleratedNetworking: acceleratedNetworking
 //     location: location
-//     virtualNetworkGateway_ASN: 65000
-//     virtualNetworkGateway_Name: 'OnPrem_VNG'
-//     virtualNetworkGateway_Subnet_ResourceID: virtualNetwork_OnPremHub.outputs.gateway_SubnetID
+//     subnet_ID: virtualNetwork_OnPremHub.outputs.general_SubnetID
+//     virtualMachine_AdminPassword: virtualMachine_AdminPassword
+//     virtualMachine_AdminUsername: virtualMachine_AdminUsername
+//     virtualMachine_Name: 'OnPrem-NVA'
+//     virtualMachine_Size: vmSize
+//     privateIPAllocationMethod: 'Static'
+//     privateIPAddress: '10.100.0.254'
+//     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
+//     virtualMachine_ScriptFileName: 'frrconfig.sh'
+//     commandToExecute: './frrconfig.sh'
 //   }
 // }
+
+// TODO - create a VPN NVA to be used in forced tunneling training
+// module vpn_vm '../../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.bicep' = {
+//   name: 'VPN_VM'
+//   params: {
+//     location: location
+//     acceleratedNetworking: acceleratedNetworking
+//     subnet_ID: virtualNetwork_OnPremHub.outputs.general_SubnetID
+//     virtualMachine_AdminPassword: virtualMachine_AdminPassword
+//     virtualMachine_AdminUsername: virtualMachine_AdminUsername
+//     virtualMachine_Name: 'vpn-vm'
+//     virtualMachine_ScriptFileName: 'Ubuntu20_DNS_Config.sh'
+//     commandToExecute: './Ubuntu20_DNS_Config.sh'
+//     virtualMachine_Size: vmSize
+//   }
+// }
+
+module virtualNetworkGateway_OnPrem '../../../modules/Microsoft.Network/VirtualNetworkGateway.bicep' = {
+  name: 'OnPremVirtualNetworkGateway'
+  params: {
+    location: location
+    virtualNetworkGateway_ASN: 65000
+    virtualNetworkGateway_Name: 'onprem_VNG'
+    virtualNetworkGateway_Subnet_ResourceID: virtualNetwork_OnPremHub.outputs.gateway_SubnetID
+  }
+}
 
 module virtualNetworkGateway_Hub '../../../modules/Microsoft.Network/VirtualNetworkGateway.bicep' = {
   name: 'HubVirtualNetworkGateway'
   params: {
     location: location
     virtualNetworkGateway_ASN: 65001
-    virtualNetworkGateway_Name: 'Hub_VNG'
+    virtualNetworkGateway_Name: 'hub_VNG'
     virtualNetworkGateway_Subnet_ResourceID: virtualNetwork_Hub.outputs.gateway_SubnetID
   }
 }
 
-// module OnPrem_to_Hub_conn '../../../modules/Microsoft.Network/Connection_and_LocalNetworkGateway.bicep' = {
-//   name: 'OnPrem_to_Hub_conn'
-//   params: {
-//     location: location
-//     virtualNetworkGateway_ID: virtualNetworkGateway_OnPrem.outputs.virtualNetworkGateway_ResourceID
-//     vpn_Destination_ASN: virtualNetworkGateway_Hub.outputs.virtualNetworkGateway_ASN
-//     vpn_Destination_BGPIPAddress: virtualNetworkGateway_Hub.outputs.virtualNetworkGateway_BGPAddress
-//     vpn_Destination_Name: virtualNetworkGateway_Hub.outputs.virtualNetworkGateway_Name
-//     vpn_Destination_PublicIPAddress: virtualNetworkGateway_Hub.outputs.virtualNetworkGateway_PublicIPAddress
-//     vpn_SharedKey: vpn_SharedKey
-//   }
-// }
+module OnPrem_to_Hub_conn '../../../modules/Microsoft.Network/Connection_and_LocalNetworkGateway.bicep' = {
+  name: 'OnPrem_to_Hub_conn'
+  params: {
+    location: location
+    virtualNetworkGateway_ID: virtualNetworkGateway_OnPrem.outputs.virtualNetworkGateway_ResourceID
+    vpn_Destination_ASN: virtualNetworkGateway_Hub.outputs.virtualNetworkGateway_ASN
+    vpn_Destination_BGPIPAddress: virtualNetworkGateway_Hub.outputs.virtualNetworkGateway_BGPAddress
+    vpn_Destination_Name: virtualNetworkGateway_Hub.outputs.virtualNetworkGateway_Name
+    vpn_Destination_PublicIPAddress: virtualNetworkGateway_Hub.outputs.virtualNetworkGateway_PublicIPAddress
+    vpn_SharedKey: vpn_SharedKey
+  }
+}
 
-// module Hub_to_OnPrem_conn '../../../modules/Microsoft.Network/Connection_and_LocalNetworkGateway.bicep' = {
-//   name: 'Hub_to_OnPrem_conn'
-//   params: {
-//     location: location
-//     virtualNetworkGateway_ID: virtualNetworkGateway_Hub.outputs.virtualNetworkGateway_ResourceID
-//     vpn_Destination_ASN: virtualNetworkGateway_OnPrem.outputs.virtualNetworkGateway_ASN
-//     vpn_Destination_BGPIPAddress: virtualNetworkGateway_OnPrem.outputs.virtualNetworkGateway_BGPAddress
-//     vpn_Destination_Name: virtualNetworkGateway_OnPrem.outputs.virtualNetworkGateway_Name
-//     vpn_Destination_PublicIPAddress: virtualNetworkGateway_OnPrem.outputs.virtualNetworkGateway_PublicIPAddress
-//     vpn_SharedKey: vpn_SharedKey
-//   }
-// }
+module Hub_to_OnPrem_conn '../../../modules/Microsoft.Network/Connection_and_LocalNetworkGateway.bicep' = {
+  name: 'Hub_to_OnPrem_conn'
+  params: {
+    location: location
+    virtualNetworkGateway_ID: virtualNetworkGateway_Hub.outputs.virtualNetworkGateway_ResourceID
+    vpn_Destination_ASN: virtualNetworkGateway_OnPrem.outputs.virtualNetworkGateway_ASN
+    vpn_Destination_BGPIPAddress: virtualNetworkGateway_OnPrem.outputs.virtualNetworkGateway_BGPAddress
+    vpn_Destination_Name: virtualNetworkGateway_OnPrem.outputs.virtualNetworkGateway_Name
+    vpn_Destination_PublicIPAddress: virtualNetworkGateway_OnPrem.outputs.virtualNetworkGateway_PublicIPAddress
+    vpn_SharedKey: vpn_SharedKey
+  }
+}

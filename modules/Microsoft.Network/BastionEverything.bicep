@@ -4,12 +4,9 @@ param location string
 @description('Name of the Azure Bastion')
 param bastion_name string
 
-@description('Resource ID of the subnet the Azure Bastion will be placed in.  The name of the subnet must be "AzureBastionSubnet"')
-param bastion_SubnetID string
-
 param bastion_SKU string = 'Standard'
 
-param other_VirtualNetwork_Ids array
+param peered_VirtualNetwork_Ids array
 
 param virtualNetwork_AddressPrefix string
 
@@ -41,7 +38,7 @@ module bastion 'Bastion.bicep' = {
   name: bastion_name
   params: {
     location: location
-    bastion_SubnetID: bastion_SubnetID
+    bastion_SubnetID: bastionVNET.properties.subnets[0].id
     bastion_name: bastion_name
     bastion_SKU: bastion_SKU
   }
@@ -51,6 +48,6 @@ module bastionVNETPeering 'BastionVirtualNetworkHubPeerings.bicep' = {
   name: 'bastionVNETPeering'
   params: {
     bastion_VirtualNetwork_Id: bastionVNET.id
-    other_VirtualNetwork_Ids: other_VirtualNetwork_Ids
+    other_VirtualNetwork_Ids: peered_VirtualNetwork_Ids
   }
 }

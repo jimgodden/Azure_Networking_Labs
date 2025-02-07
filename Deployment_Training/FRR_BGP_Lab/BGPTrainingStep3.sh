@@ -112,3 +112,111 @@ no neighbor 10.100.3.30 route-map asPath out
 
 
 # 4. Local Preference Attribute
+
+
+
+########################################################
+# VM 1 Private IP: 10.100.1.10
+# FRR CONFIG
+
+configure
+route-map setLocalPref permit 10
+set local-preference 300
+exit
+router bgp 100
+neighbor 10.100.2.20 remote-as 200
+address-family ipv4 unicast
+neighbor 10.100.2.20 route-map setLocalPref in
+exit
+exit
+exit
+
+
+
+########################################################
+# VM 3 Private IP: 10.100.3.30
+# FRR CONFIG
+
+configure
+route-map setLocalPref permit 10
+set local-preference 300
+exit
+router bgp 300
+neighbor 10.100.2.20 remote-as 200
+address-family ipv4 unicast
+neighbor 10.100.2.20 route-map setLocalPref in
+exit
+exit
+exit
+
+
+
+# Undo the LocalPref
+
+########################################################
+# VM 1 Private IP: 10.100.1.10
+# FRR CONFIG
+
+configure
+no route-map setLocalPref permit 10
+router bgp 100
+neighbor 10.100.2.20 remote-as 200
+address-family ipv4 unicast
+no neighbor 10.100.2.20 route-map setLocalPref in
+exit
+exit
+exit
+
+
+
+########################################################
+# VM 3 Private IP: 10.100.3.30
+# FRR CONFIG
+
+configure
+no route-map setLocalPref permit 10
+router bgp 300
+neighbor 10.100.2.20 remote-as 200
+address-family ipv4 unicast
+no neighbor 10.100.2.20 route-map setLocalPref in
+exit
+exit
+exit
+
+
+
+
+# 5. Route Weight Attribute
+
+
+########################################################
+# VM 1 Private IP: 10.100.1.10
+# FRR CONFIG
+
+configure
+route-map setWeight permit 10
+set weight 100
+exit
+router bgp 100
+address-family ipv4 unicast
+neighbor 10.100.2.20 route-map setWeight in
+exit
+exit
+exit
+
+
+
+########################################################
+# VM 3 Private IP: 10.100.3.30
+# FRR CONFIG
+
+configure
+route-map setWeight permit 10
+set weight 100
+exit
+router bgp 300
+address-family ipv4 unicast
+neighbor 10.100.2.20 route-map setWeight in
+exit
+exit
+exit
