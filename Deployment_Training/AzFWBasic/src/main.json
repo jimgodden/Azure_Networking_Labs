@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.32.4.45862",
-      "templateHash": "4008834483626891898"
+      "templateHash": "10582632253084180088"
     }
   },
   "parameters": {
@@ -24,8 +24,9 @@
     },
     "virtualMachine_AdminPassword": {
       "type": "securestring",
+      "minLength": 8,
       "metadata": {
-        "description": "Password for the admin account of the Virtual Machines"
+        "description": "Password for the admin account of the Virtual Machines.\nEnsure the password meets typical Azure VM password requirements.\n"
       }
     },
     "vmSize": {
@@ -199,7 +200,7 @@
           ]
         },
         "protectedSettings": {
-          "commandToExecute": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username {0} -Type DNS', parameters('virtualMachine_AdminUsername'))]"
+          "commandToExecute": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScripttest.ps1 -Username {0} -Type DNS', parameters('virtualMachine_AdminUsername'))]"
         }
       },
       "tags": "[parameters('tagValues')]",
@@ -333,7 +334,7 @@
           ]
         },
         "protectedSettings": {
-          "commandToExecute": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username {0} -Type General', parameters('virtualMachine_AdminUsername'))]"
+          "commandToExecute": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScripttest.ps1 -Username {0} -Type General', parameters('virtualMachine_AdminUsername'))]"
         }
       },
       "tags": "[parameters('tagValues')]",
@@ -467,7 +468,7 @@
           ]
         },
         "protectedSettings": {
-          "commandToExecute": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username {0} -Type WebServer', parameters('virtualMachine_AdminUsername'))]"
+          "commandToExecute": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScripttest.ps1 -Username {0} -Type WebServer', parameters('virtualMachine_AdminUsername'))]"
         }
       },
       "tags": "[parameters('tagValues')]",
@@ -706,7 +707,7 @@
           ]
         },
         "protectedSettings": {
-          "commandToExecute": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username {0} -Type DNS', parameters('virtualMachine_AdminUsername'))]"
+          "commandToExecute": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScripttest.ps1 -Username {0} -Type DNS', parameters('virtualMachine_AdminUsername'))]"
         }
       },
       "tags": "[parameters('tagValues')]",
@@ -840,7 +841,7 @@
           ]
         },
         "protectedSettings": {
-          "commandToExecute": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username {0} -Type General', parameters('virtualMachine_AdminUsername'))]"
+          "commandToExecute": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScripttest.ps1 -Username {0} -Type General', parameters('virtualMachine_AdminUsername'))]"
         }
       },
       "tags": "[parameters('tagValues')]",

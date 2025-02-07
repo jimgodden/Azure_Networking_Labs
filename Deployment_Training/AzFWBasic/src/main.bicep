@@ -4,7 +4,10 @@ param location string = resourceGroup().location
 @description('Username for the admin account of the Virtual Machines')
 param virtualMachine_AdminUsername string
 
-@description('Password for the admin account of the Virtual Machines')
+@minLength(8)
+@description('''Password for the admin account of the Virtual Machines.
+Ensure the password meets typical Azure VM password requirements.
+''')
 @secure()
 param virtualMachine_AdminPassword string
 
@@ -214,7 +217,7 @@ resource virtualMachine_Hub_Dns_CustomScriptExtension 'Microsoft.Compute/virtual
       ]
     }
     protectedSettings: {
-      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username ${virtualMachine_AdminUsername} -Type DNS'
+      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScripttest.ps1 -Username ${virtualMachine_AdminUsername} -Type DNS'
     }
   }
   tags: tagValues
@@ -339,7 +342,7 @@ resource virtualMachine_SpokeA_Client_CustomScriptExtension 'Microsoft.Compute/v
       ]
     }
     protectedSettings: {
-      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username ${virtualMachine_AdminUsername} -Type General'
+      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScripttest.ps1 -Username ${virtualMachine_AdminUsername} -Type General'
     }
   }
   tags: tagValues
@@ -463,7 +466,7 @@ resource virtualMachine_SpokeB_Iis_CustomScriptExtension 'Microsoft.Compute/virt
       ]
     }
     protectedSettings: {
-      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username ${virtualMachine_AdminUsername} -Type WebServer'
+      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScripttest.ps1 -Username ${virtualMachine_AdminUsername} -Type WebServer'
     }
   }
   tags: tagValues
@@ -766,7 +769,7 @@ resource virtualMachine_Onprem_Dns_CustomScriptExtension 'Microsoft.Compute/virt
       ]
     }
     protectedSettings: {
-      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username ${virtualMachine_AdminUsername} -Type DNS'
+      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScripttest.ps1 -Username ${virtualMachine_AdminUsername} -Type DNS'
     }
   }
   tags: tagValues
@@ -890,7 +893,7 @@ resource virtualMachine_Onprem_Client_CustomScriptExtension 'Microsoft.Compute/v
       ]
     }
     protectedSettings: {
-      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username ${virtualMachine_AdminUsername} -Type General'
+      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScripttest.ps1 -Username ${virtualMachine_AdminUsername} -Type General'
     }
   }
   tags: tagValues

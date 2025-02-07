@@ -130,7 +130,7 @@ $toolDownloadingScriptFile = {
     $form.StartPosition = "CenterScreen"
     
     # Button click function
-    function Execute-Script {
+    function Invoke-Script {
         param ($scriptName)
         $scriptPath = "C:\ToolDownloadScripts\$scriptName"
         if (Test-Path $scriptPath) {
@@ -147,7 +147,7 @@ $toolDownloadingScriptFile = {
         $button.Text = $fileName
         $button.Size = New-Object System.Drawing.Size(120, 30)
         $button.Location = New-Object System.Drawing.Point(0, (30 * $i))
-        $button.Add_Click({ Execute-Script $fileName })
+        $button.Add_Click({ Invoke-Script $fileName })
         $form.Controls.Add($button)
         $i++
     }
