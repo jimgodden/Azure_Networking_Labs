@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.32.4.45862",
-      "templateHash": "10582632253084180088"
+      "templateHash": "13654499840871616399"
     }
   },
   "parameters": {
@@ -66,9 +66,9 @@
     }
   },
   "variables": {
-    "virtualMachine_ScriptFile": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2025_ConfigScripttest.ps1",
+    "virtualMachine_ScriptFile": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2025_ConfigScript.ps1",
     "virtualMachine_Hub_Dns_Name": "hub-DnsVM",
-    "virtualMachine_SpokeA_Client_Name": "spokeA-ClientVM",
+    "virtualMachine_SpokeA_Client_Name": "spokeA-clientVM",
     "virtualMachine_SpokeB_Iis_Name": "spokeB-IisVM",
     "virtualMachine_Onprem_Dns_Name": "onprem-dnsVM",
     "virtualMachine_Onprem_Client_Name": "onprem-clientVM"
@@ -200,7 +200,7 @@
           ]
         },
         "protectedSettings": {
-          "commandToExecute": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScripttest.ps1 -Username {0} -Type DNS', parameters('virtualMachine_AdminUsername'))]"
+          "commandToExecute": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username {0} -Type DNS', parameters('virtualMachine_AdminUsername'))]"
         }
       },
       "tags": "[parameters('tagValues')]",
@@ -334,7 +334,7 @@
           ]
         },
         "protectedSettings": {
-          "commandToExecute": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScripttest.ps1 -Username {0} -Type General', parameters('virtualMachine_AdminUsername'))]"
+          "commandToExecute": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username {0} -Type General', parameters('virtualMachine_AdminUsername'))]"
         }
       },
       "tags": "[parameters('tagValues')]",
@@ -468,7 +468,7 @@
           ]
         },
         "protectedSettings": {
-          "commandToExecute": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScripttest.ps1 -Username {0} -Type WebServer', parameters('virtualMachine_AdminUsername'))]"
+          "commandToExecute": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username {0} -Type WebServer', parameters('virtualMachine_AdminUsername'))]"
         }
       },
       "tags": "[parameters('tagValues')]",
@@ -707,7 +707,7 @@
           ]
         },
         "protectedSettings": {
-          "commandToExecute": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScripttest.ps1 -Username {0} -Type DNS', parameters('virtualMachine_AdminUsername'))]"
+          "commandToExecute": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username {0} -Type DNS', parameters('virtualMachine_AdminUsername'))]"
         }
       },
       "tags": "[parameters('tagValues')]",
@@ -841,7 +841,7 @@
           ]
         },
         "protectedSettings": {
-          "commandToExecute": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScripttest.ps1 -Username {0} -Type General', parameters('virtualMachine_AdminUsername'))]"
+          "commandToExecute": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username {0} -Type General', parameters('virtualMachine_AdminUsername'))]"
         }
       },
       "tags": "[parameters('tagValues')]",

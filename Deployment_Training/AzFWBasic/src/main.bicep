@@ -40,7 +40,7 @@ Storage account name restrictions:
 @maxLength(24)
 param storageAccount_Name string
 
-var virtualMachine_ScriptFile = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2025_ConfigScripttest.ps1'
+var virtualMachine_ScriptFile = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2025_ConfigScript.ps1'
 
 param tagValues object = {
   Training: 'AzureFirewall'
@@ -217,7 +217,7 @@ resource virtualMachine_Hub_Dns_CustomScriptExtension 'Microsoft.Compute/virtual
       ]
     }
     protectedSettings: {
-      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScripttest.ps1 -Username ${virtualMachine_AdminUsername} -Type DNS'
+      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username ${virtualMachine_AdminUsername} -Type DNS'
     }
   }
   tags: tagValues
@@ -226,7 +226,7 @@ resource virtualMachine_Hub_Dns_CustomScriptExtension 'Microsoft.Compute/virtual
 
 
 // Start of spokeA-ClientVM
-var virtualMachine_SpokeA_Client_Name = 'spokeA-ClientVM'
+var virtualMachine_SpokeA_Client_Name = 'spokeA-clientVM'
 resource virtualMachine_SpokeA_Client 'Microsoft.Compute/virtualMachines@2024-07-01' = {
   name: virtualMachine_SpokeA_Client_Name
   location: location
@@ -342,7 +342,7 @@ resource virtualMachine_SpokeA_Client_CustomScriptExtension 'Microsoft.Compute/v
       ]
     }
     protectedSettings: {
-      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScripttest.ps1 -Username ${virtualMachine_AdminUsername} -Type General'
+      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username ${virtualMachine_AdminUsername} -Type General'
     }
   }
   tags: tagValues
@@ -466,7 +466,7 @@ resource virtualMachine_SpokeB_Iis_CustomScriptExtension 'Microsoft.Compute/virt
       ]
     }
     protectedSettings: {
-      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScripttest.ps1 -Username ${virtualMachine_AdminUsername} -Type WebServer'
+      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username ${virtualMachine_AdminUsername} -Type WebServer'
     }
   }
   tags: tagValues
@@ -769,7 +769,7 @@ resource virtualMachine_Onprem_Dns_CustomScriptExtension 'Microsoft.Compute/virt
       ]
     }
     protectedSettings: {
-      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScripttest.ps1 -Username ${virtualMachine_AdminUsername} -Type DNS'
+      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username ${virtualMachine_AdminUsername} -Type DNS'
     }
   }
   tags: tagValues
@@ -893,7 +893,7 @@ resource virtualMachine_Onprem_Client_CustomScriptExtension 'Microsoft.Compute/v
       ]
     }
     protectedSettings: {
-      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScripttest.ps1 -Username ${virtualMachine_AdminUsername} -Type General'
+      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username ${virtualMachine_AdminUsername} -Type General'
     }
   }
   tags: tagValues

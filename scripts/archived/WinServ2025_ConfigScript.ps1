@@ -26,30 +26,26 @@ Install-Module -Name Microsoft.WinGet.Client -Force -Repository PSGallery -scope
 Write-Host "Using Repair-WinGetPackageManager cmdlet to bootstrap WinGet..."
 Repair-WinGetPackageManager
 
-New-Item -Type Directory -Path "C:\ToolDownloadScripts" -Force
+Start-Sleep -Seconds 10
 function Install-WinGetPackage {
     param (
-        [string]$PackageName
+        [string]$PackageName,
+        [string]$Username
     )
 
-
-    $toolDownloadScript = {
-        Invoke-Expression "winget.exe install --accept-source-agreements --scope machine $PackageName"
+    $ResolveWingetPath = Resolve-Path "C:\Program Files\WindowsApps\Microsoft.DesktopAppInstaller_*_x64__8wekyb3d8bbwe"
+    if ($ResolveWingetPath) {
+        $WingetPath = $ResolveWingetPath[-1].Path
     }
 
-    New-Item -Path "C:\ToolDownloadScripts" -ItemType Directory -Force
-    Set-Content -Path "C:\ToolDownloadScripts\$PackageName.ps1" -Value $toolDownloadScript.toString()
+    Set-Location $WingetPath
 
-    $WScriptObj = New-Object -ComObject ("WScript.Shell")
-    $shortcut = $WscriptObj.CreateShortcut($DestinationFilePath)
-    $shortcut.TargetPath = $ApplicationFilePath
-    $shortcut.Save()
-    
+    & ".\winget.exe" install --accept-source-agreements --scope machine $PackageName
 }
 
 $packages = @(
     "wireshark",
-    "netmon",
+    "netmon", # time this
     "vscode",
     "pstools",
     "Microsoft.PowerShell",
@@ -70,42 +66,37 @@ Invoke-WebRequest -Uri "https://npcap.com/dist/npcap-1.80.exe" -OutFile "c:\npca
 $initTaskName = "Init"
 $initTaskAction = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-NoProfile -ExecutionPolicy Bypass -File `"C:\WinServ2025_InstallTools.ps1`""
 $initTaskTrigger = New-ScheduledTaskTrigger -AtLogon
-Register-ScheduledTask -TaskName $initTaskName -Action $initTaskAction -Trigger $initTaskTrigger -Force
+Register-ScheduledTask -TaskName $initTaskName -Action $initTaskAction -Trigger $initTaskTrigger -User $Username -Force
 
 $scriptBlock = {$DesktopFilePath = "C:\Users\$ENV:USERNAME\Desktop"
-# function Set-Shortcut {
-#     param (
-#         [Parameter(Mandatory)]
-#         [string]$ApplicationFilePath,
-#         [Parameter(Mandatory)]
-#         [string]$DestinationFilePath
-#     )
-#     $WScriptObj = New-Object -ComObject ("WScript.Shell")
-#     $shortcut = $WscriptObj.CreateShortcut($DestinationFilePath)
-#     $shortcut.TargetPath = $ApplicationFilePath
-#     $shortcut.Save()
-# }
+
+function Set-Shortcut {
+    param (
+        [Parameter(Mandatory)]
+        [string]$ApplicationFilePath,
+        [Parameter(Mandatory)]
+        [string]$DestinationFilePath
+    )
+    $WScriptObj = New-Object -ComObject ("WScript.Shell")
+    $shortcut = $WscriptObj.CreateShortcut($DestinationFilePath)
+    $shortcut.TargetPath = $ApplicationFilePath
+    $shortcut.Save()
+}
 
 # ensures that Windows PowerShell is used
-Write-Host "This script is installing Npcap for capturing packets via Wireshark"
-Write-Host "Additionally, it is calling a script (located on the desktop) that provides a GUI to easily install various tools"
+Write-Host "This script is installing the following:"
+Write-Host "Npcap - So that Wireshark can take packet captures"
+Write-Host "`nAdditionally, the script will create shortcuts on the desktop for several applications."
 
+$ResolveWindowsTerminalPath = Resolve-Path "C:\Program Files\WindowsApps\Microsoft.WindowsTerminal_*_x64__8wekyb3d8bbwe"
+if ($ResolveWindowsTerminalPath) {
+    $WindowsTerminalPath = $ResolveWindowsTerminalPath[-1].Path
+}
 
-# Write-Host "`nAdditionally, the script will create shortcuts on the desktop for several applications."
-
-# $ResolveWindowsTerminalPath = Resolve-Path "C:\Program Files\WindowsApps\Microsoft.WindowsTerminal_*_x64__8wekyb3d8bbwe"
-# if ($ResolveWindowsTerminalPath) {
-#     $WindowsTerminalPath = $ResolveWindowsTerminalPath[-1].Path
-# }
-
-# Set-Shortcut -ApplicationFilePath "C:\Program Files\Wireshark\Wireshark.exe"  -DestinationFilePath "${DesktopFilePath}/Wireshark.lnk"
-# Set-Shortcut -ApplicationFilePath "${WindowsTerminalPath}\WindowsTerminal.exe" -DestinationFilePath "${DesktopFilePath}/Windows Terminal.lnk"
-# Set-Shortcut -ApplicationFilePath "C:\Program Files\Notepad++\notepad++.exe" -DestinationFilePath "${DesktopFilePath}/Notepad++.lnk"
-# Set-Shortcut -ApplicationFilePath "C:\Program Files\Microsoft VS Code\Code.exe" -DestinationFilePath "${DesktopFilePath}/Visual Studio Code.lnk"
-
-Copy-Item -Path "C:\GUI_Tool_Installer.ps1" -Destination "${DesktopFilePath}/GUI_Tool_Installer.ps1"
-
-pwsh -Command "Start-Process -FilePath ${DesktopFilePath}/GUI_Tool_Installer.ps1"
+Set-Shortcut -ApplicationFilePath "C:\Program Files\Wireshark\Wireshark.exe"  -DestinationFilePath "${DesktopFilePath}/Wireshark.lnk"
+Set-Shortcut -ApplicationFilePath "${WindowsTerminalPath}\WindowsTerminal.exe" -DestinationFilePath "${DesktopFilePath}/Windows Terminal.lnk"
+Set-Shortcut -ApplicationFilePath "C:\Program Files\Notepad++\notepad++.exe" -DestinationFilePath "${DesktopFilePath}/Notepad++.lnk"
+Set-Shortcut -ApplicationFilePath "C:\Program Files\Microsoft VS Code\Code.exe" -DestinationFilePath "${DesktopFilePath}/Visual Studio Code.lnk"
 
 # npcap for using Wireshark for taking packet captures
 c:\npcap-1.80.exe
@@ -114,51 +105,6 @@ Unregister-ScheduledTask -TaskName "Init" -Confirm:$false
 }
 
 Set-Content -Path "C:\WinServ2025_InstallTools.ps1" -Value $scriptBlock.ToString()
-
-$toolDownloadingScriptFile = {
-    Add-Type -AssemblyName System.Windows.Forms
-    
-    $fileNames = (Get-ChildItem -Path "C:\ToolDownloadScripts").Name
-    
-    $screenWidth = 300
-    $screenHight = ($fileNames.Count * 30) + 200
-    
-    # Create Form
-    $form = New-Object System.Windows.Forms.Form
-    $form.Text = "Software Installer"
-    $form.Size = New-Object System.Drawing.Size($screenWidth, $screenHight)
-    $form.StartPosition = "CenterScreen"
-    
-    # Button click function
-    function Invoke-Script {
-        param ($scriptName)
-        $scriptPath = "C:\ToolDownloadScripts\$scriptName"
-        if (Test-Path $scriptPath) {
-            Start-Process powershell -ArgumentList "-ExecutionPolicy Bypass -NoProfile -File `"$scriptPath`"" # -WindowStyle Hidden
-        } else {
-            [System.Windows.Forms.MessageBox]::Show("Script $scriptName not found!", "Error", "OK", "Error")
-        }
-    }
-    
-    $i = 0
-    # Create buttons
-    foreach ($fileName in $fileNames) {
-        $button = New-Object System.Windows.Forms.Button
-        $button.Text = $fileName
-        $button.Size = New-Object System.Drawing.Size(120, 30)
-        $button.Location = New-Object System.Drawing.Point(0, (30 * $i))
-        $button.Add_Click({ Invoke-Script $fileName })
-        $form.Controls.Add($button)
-        $i++
-    }
-    
-    # Show Form
-    $form.ShowDialog()
-    
-}
-
-Set-Content -Path "C:\GUI_Tool_Installer.ps1" -Value $toolDownloadingScriptFile.ToString()
-    
 
 # Start of the IIS configuration script
 
