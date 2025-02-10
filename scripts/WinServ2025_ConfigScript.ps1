@@ -93,7 +93,7 @@ Copy-Item -Path "C:\CommonToolInstaller.ps1" -Destination "${DesktopFilePath}/Co
 # Testing calling the script automatically as the user
 # powershell -File "C:\CommonToolInstaller.ps1"
 
-Unregister-ScheduledTask -TaskName "Init" -Confirm:$false
+# Unregister-ScheduledTask -TaskName "Init" -Confirm:$false
 }
 
 Set-Content -Path "C:\WinServ2025_InstallTools.ps1" -Value $scriptBlock.ToString()
