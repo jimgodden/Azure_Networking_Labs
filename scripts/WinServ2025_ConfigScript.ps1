@@ -50,7 +50,7 @@ Invoke-WebRequest -Uri "https://npcap.com/dist/npcap-1.80.exe" -OutFile "c:\npca
 $initTaskName = "Init"
 $initTaskAction = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-NoProfile -ExecutionPolicy Bypass -File `"C:\WinServ2025_InstallTools.ps1`""
 $initTaskTrigger = New-ScheduledTaskTrigger -AtLogon
-Register-ScheduledTask -TaskName $initTaskName -Action $initTaskAction  -User $Username -Trigger $initTaskTrigger -Force
+Register-ScheduledTask -TaskName $initTaskName -Action $initTaskAction  -User "${env:computername}\${Username}" -Trigger $initTaskTrigger -Force
 
 $scriptBlock = {$DesktopFilePath = "C:\Users\$ENV:USERNAME\Desktop"
 function Set-Shortcut {
@@ -90,10 +90,9 @@ foreach ($package in $packages) {
 
 Copy-Item -Path "C:\CommonToolInstaller.ps1" -Destination "${DesktopFilePath}/CommonToolInstaller.ps1"
 
-# Testing calling the script automatically as the user
-# powershell -File "C:\CommonToolInstaller.ps1"
+powershell -File "C:\CommonToolInstaller.ps1"
 
-# Unregister-ScheduledTask -TaskName "Init" -Confirm:$false
+Unregister-ScheduledTask -TaskName "Init" -Confirm:$false
 }
 
 Set-Content -Path "C:\WinServ2025_InstallTools.ps1" -Value $scriptBlock.ToString()
