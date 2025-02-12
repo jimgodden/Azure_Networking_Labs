@@ -52,7 +52,33 @@ $initTaskAction = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-
 $initTaskTrigger = New-ScheduledTaskTrigger -AtLogon
 Register-ScheduledTask -TaskName $initTaskName -Action $initTaskAction  -User "${env:computername}\${Username}" -Trigger $initTaskTrigger -Force
 
-$scriptBlock = {$DesktopFilePath = "C:\Users\$ENV:USERNAME\Desktop"
+$scriptBlock = {# ensures that Windows PowerShell is used
+
+$packages = @(
+    "wireshark",
+    "pstools",
+    "vscode",
+    "Microsoft.PowerShell",
+    "Notepad++.Notepad++",
+    "winscp",
+    "iperf3",
+    "netmon"
+)
+
+Write-Host "This script runs during the first logon of the user and installs the following tools:"
+Write-Host "Additionally, it is calling a script (located on the desktop) that provides a GUI to easily install various tools"
+
+# npcap for using Wireshark for taking packet captures
+c:\npcap-1.80.exe
+
+
+
+foreach ($package in $packages) {
+    winget install --accept-source-agreements --scope machine $package
+} 
+
+$DesktopFilePath = "C:\Users\$ENV:USERNAME\Desktop"
+
 function Set-Shortcut {
     param (
         [Parameter(Mandatory)]
@@ -66,31 +92,10 @@ function Set-Shortcut {
     $shortcut.Save()
 }
 
-# ensures that Windows PowerShell is used
-Write-Host "This script is installing Npcap for capturing packets via Wireshark"
-Write-Host "Additionally, it is calling a script (located on the desktop) that provides a GUI to easily install various tools"
-
-# npcap for using Wireshark for taking packet captures
-c:\npcap-1.80.exe
-
-$packages = @(
-    "wireshark",
-    "pstools",
-    "vscode",
-    "Microsoft.PowerShell",
-    "Notepad++.Notepad++",
-    "winscp",
-    "iperf3",
-    "netmon"
-)
-
-foreach ($package in $packages) {
-    winget install --accept-source-agreements --scope machine $package
-} 
-
-Copy-Item -Path "C:\CommonToolInstaller.ps1" -Destination "${DesktopFilePath}/CommonToolInstaller.ps1"
-
-powershell -File "C:\CommonToolInstaller.ps1"
+Set-Shortcut -ApplicationFilePath "C:\Program Files\Wireshark\Wireshark.exe"  -DestinationFilePath "${DesktopFilePath}/Wireshark.lnk"
+Set-Shortcut -ApplicationFilePath "C:\Program Files\WindowsApps\Microsoft.WindowsTerminal_1.18.10301.0_x64__8wekyb3d8bbwe\WindowsTerminal.exe" -DestinationFilePath "${DesktopFilePath}/Windows Terminal.lnk"
+Set-Shortcut -ApplicationFilePath "C:\Program Files\Notepad++\notepad++.exe" -DestinationFilePath "${DesktopFilePath}/Notepad++.lnk"
+Set-Shortcut -ApplicationFilePath "C:\Program Files\Microsoft VS Code\Code.exe" -DestinationFilePath "${DesktopFilePath}/Visual Studio Code.lnk"
 
 Unregister-ScheduledTask -TaskName "Init" -Confirm:$false
 }

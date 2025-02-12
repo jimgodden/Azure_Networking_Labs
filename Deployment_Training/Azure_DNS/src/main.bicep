@@ -9,7 +9,7 @@ param virtualMachine_AdminUsername string
 param virtualMachine_AdminPassword string
 
 @description('Size of the Virtual Machines')
-param virtualMachine_Size string = 'Standard_D2as_v4' // 'Standard_B2ms' // 'Standard_D2s_v3' // 'Standard_D16lds_v5'
+param vmSize string = 'Standard_D2as_v4' // 'Standard_B2ms' // 'Standard_D2s_v3' // 'Standard_D16lds_v5'
 
 @description('''True enables Accelerated Networking and False disabled it.  
 Not all VM sizes support Accel Net (i.e. Standard_B2ms).  
@@ -37,7 +37,7 @@ param tagValues object = {
 @description('SKU of the Virtual Network Gateway')
 var virtualNetworkGateway_SKU = 'VpnGw1'
 
-var virtualMachine_ScriptFileLocation = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
+var virtualMachine_ScriptFile = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2025_ConfigScript.ps1'
 
 module Hub_VirtualNetwork '../../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
   name: 'Hub_VirtualNetwork'
@@ -71,53 +71,327 @@ module Hub_To_Spoke_Peering '../../../modules/Microsoft.Network/VirtualNetworkPe
 }
 
 
-module Hub_WinClientVM '../../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
-  name: 'Hub-WinClientVM'
-  params: {
-    acceleratedNetworking: acceleratedNetworking
-    location: location
-    subnet_ID: Hub_VirtualNetwork.outputs.general_SubnetID
-    virtualMachine_AdminPassword: virtualMachine_AdminPassword
-    virtualMachine_AdminUsername: virtualMachine_AdminUsername
-    virtualMachine_Name: 'Hub-WinClient'
-    virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_General.ps1'
-    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_General.ps1 -Username ${virtualMachine_AdminUsername}'
-    privateIPAddress: cidrHost( Hub_VirtualNetwork.outputs.general_Subnet_AddressPrefix, 3 )
-    privateIPAllocationMethod: 'Static'
-    tagValues: tagValues
+// Start of Hub-ClientVM
+var Hub_VirtualMachine_Client_Name = 'Hub-clientVM'
+resource Hub_VirtualMachine_Client 'Microsoft.Compute/virtualMachines@2024-07-01' = {
+  name: Hub_VirtualMachine_Client_Name
+  location: location
+  identity: {
+    type: 'SystemAssigned'
   }
+  properties: {
+    hardwareProfile: {
+      vmSize: vmSize
+    }
+    additionalCapabilities: {
+      hibernationEnabled: false
+    }
+    storageProfile: {
+      imageReference: {
+        publisher: 'MicrosoftWindowsServer'
+        offer: 'WindowsServer'
+        sku: '2025-datacenter-azure-edition'
+        version: 'latest'
+      }
+      osDisk: {
+        osType: 'Windows'
+        name: '${Hub_VirtualMachine_Client_Name}_OsDisk_1'
+        createOption: 'FromImage'
+        caching: 'ReadWrite'
+        managedDisk: {
+          storageAccountType: 'Premium_LRS'
+        }
+        deleteOption: 'Delete'
+        diskSizeGB: 127
+      }
+      dataDisks: []
+      diskControllerType: 'SCSI'
+    }
+    osProfile: {
+      computerName: Hub_VirtualMachine_Client_Name
+      adminUsername: virtualMachine_AdminUsername
+      adminPassword: virtualMachine_AdminPassword
+      windowsConfiguration: {
+        provisionVMAgent: true
+        enableAutomaticUpdates: true
+        patchSettings: {
+          patchMode: 'AutomaticByPlatform'
+          automaticByPlatformSettings: {
+            rebootSetting: 'IfRequired'
+          }
+          assessmentMode: 'ImageDefault'
+          enableHotpatching: true
+        }
+      }
+      secrets: []
+      allowExtensionOperations: true
+    }
+    securityProfile: {
+      uefiSettings: {
+        secureBootEnabled: true
+        vTpmEnabled: true
+      }
+      securityType: 'TrustedLaunch'
+    }
+    networkProfile: {
+      networkInterfaces: [
+        {
+          id: Hub_VirtualMachine_Client_NIC.id
+          properties: {
+            deleteOption: 'Delete'
+          }
+        }
+      ]
+    }
+    diagnosticsProfile: {
+      bootDiagnostics: {
+        enabled: true
+      }
+    }
+  }
+  tags: tagValues
 }
+resource Hub_VirtualMachine_Client_NIC 'Microsoft.Network/networkInterfaces@2024-01-01' = {
+  name: '${Hub_VirtualMachine_Client_Name}-nic'
+  location: location
+  properties: {
+    ipConfigurations: [
+      {
+        name: 'ipconfig1'
+        properties: {
+          privateIPAddress: cidrHost( Hub_VirtualNetwork.outputs.general_Subnet_AddressPrefix, 3 )
+          privateIPAllocationMethod: 'Static'
+          subnet: {
+            id: Hub_VirtualNetwork.outputs.general_SubnetID
+          }
+          primary: true
+          privateIPAddressVersion: 'IPv4'
+        }
+      }
+    ]
+    enableAcceleratedNetworking: acceleratedNetworking
+  }
+  tags: tagValues
+}
+resource Hub_VirtualMachine_Client_CustomScriptExtension 'Microsoft.Compute/virtualMachines/extensions@2021-11-01' = {
+  parent: Hub_VirtualMachine_Client
+  name: 'installcustomscript'
+  location: location
+  properties: {
+    publisher: 'Microsoft.Compute'
+    type: 'CustomScriptExtension'
+    typeHandlerVersion: '1.9'
+    autoUpgradeMinorVersion: true
+    settings: {
+      fileUris: [
+        virtualMachine_ScriptFile
+      ]
+    }
+    protectedSettings: {
+      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username ${virtualMachine_AdminUsername} -Type General'
+    }
+  }
+  tags: tagValues
+}
+// End of Hub-ClientVM
 
-module Spoke_WinClientVM '../../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
-  name: 'spoke-WinClientVM'
-  params: {
-    acceleratedNetworking: acceleratedNetworking
-    location: location
-    subnet_ID: Spoke_VirtualNetwork.outputs.general_SubnetID
-    virtualMachine_AdminPassword: virtualMachine_AdminPassword
-    virtualMachine_AdminUsername: virtualMachine_AdminUsername
-    virtualMachine_Name: 'Spoke-WinClient'
-    virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_General.ps1'
-    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_General.ps1 -Username ${virtualMachine_AdminUsername}'
-    privateIPAddress: cidrHost( Spoke_VirtualNetwork.outputs.general_Subnet_AddressPrefix, 3 )
-    privateIPAllocationMethod: 'Static'
-    tagValues: tagValues
+
+
+
+// Start of Spoke-ClientVM
+var Spoke_VirtualMachine_Client_Name = 'Spoke-ClientVM'
+resource Spoke_VirtualMachine_Client 'Microsoft.Compute/virtualMachines@2024-07-01' = {
+  name: Spoke_VirtualMachine_Client_Name
+  location: location
+  identity: {
+    type: 'SystemAssigned'
+  }
+  properties: {
+    hardwareProfile: {
+      vmSize: vmSize
+    }
+    additionalCapabilities: {
+      hibernationEnabled: false
+    }
+    storageProfile: {
+      imageReference: {
+        publisher: 'MicrosoftWindowsServer'
+        offer: 'WindowsServer'
+        sku: '2025-datacenter-azure-edition'
+        version: 'latest'
+      }
+      osDisk: {
+        osType: 'Windows'
+        name: '${Spoke_VirtualMachine_Client_Name}_OsDisk_1'
+        createOption: 'FromImage'
+        caching: 'ReadWrite'
+        managedDisk: {
+          storageAccountType: 'Premium_LRS'
+        }
+        deleteOption: 'Delete'
+        diskSizeGB: 127
+      }
+      dataDisks: []
+      diskControllerType: 'SCSI'
+    }
+    osProfile: {
+      computerName: Spoke_VirtualMachine_Client_Name
+      adminUsername: virtualMachine_AdminUsername
+      adminPassword: virtualMachine_AdminPassword
+      windowsConfiguration: {
+        provisionVMAgent: true
+        enableAutomaticUpdates: true
+        patchSettings: {
+          patchMode: 'AutomaticByPlatform'
+          automaticByPlatformSettings: {
+            rebootSetting: 'IfRequired'
+          }
+          assessmentMode: 'ImageDefault'
+          enableHotpatching: true
+        }
+      }
+      secrets: []
+      allowExtensionOperations: true
+    }
+    securityProfile: {
+      uefiSettings: {
+        secureBootEnabled: true
+        vTpmEnabled: true
+      }
+      securityType: 'TrustedLaunch'
+    }
+    networkProfile: {
+      networkInterfaces: [
+        {
+          id: Spoke_VirtualMachine_Client_NIC.id
+          properties: {
+            deleteOption: 'Delete'
+          }
+        }
+      ]
+    }
+    diagnosticsProfile: {
+      bootDiagnostics: {
+        enabled: true
+      }
+    }
+  }
+  tags: tagValues
+}
+resource Spoke_VirtualMachine_Client_NIC 'Microsoft.Network/networkInterfaces@2024-01-01' = {
+  name: '${Spoke_VirtualMachine_Client_Name}-nic'
+  location: location
+  properties: {
+    ipConfigurations: [
+      {
+        name: 'ipconfig1'
+        properties: {
+          privateIPAddress: cidrHost( Spoke_VirtualNetwork.outputs.general_Subnet_AddressPrefix, 3 )
+          privateIPAllocationMethod: 'Static'
+          subnet: {
+            id: Spoke_VirtualNetwork.outputs.general_SubnetID
+          }
+          primary: true
+          privateIPAddressVersion: 'IPv4'
+        }
+      }
+    ]
+    enableAcceleratedNetworking: acceleratedNetworking
   }
   dependsOn: [
     Hub_To_Spoke_Peering
   ]
+  tags: tagValues
+}
+resource Spoke_VirtualMachine_Client_CustomScriptExtension 'Microsoft.Compute/virtualMachines/extensions@2021-11-01' = {
+  parent: Spoke_VirtualMachine_Client
+  name: 'installcustomscript'
+  location: location
+  properties: {
+    publisher: 'Microsoft.Compute'
+    type: 'CustomScriptExtension'
+    typeHandlerVersion: '1.9'
+    autoUpgradeMinorVersion: true
+    settings: {
+      fileUris: [
+        virtualMachine_ScriptFile
+      ]
+    }
+    protectedSettings: {
+      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username ${virtualMachine_AdminUsername} -Type General'
+    }
+  }
+  tags: tagValues
+}
+// End of Spoke-ClientVM
+
+
+
+
+resource StorageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
+  name: storageAccount_Name
+  location: location
+  sku: {
+    name: 'Standard_LRS'
+  }
+  kind: 'StorageV2'
+  properties: {
+    dnsEndpointType: 'Standard'
+    defaultToOAuthAuthentication: false
+    publicNetworkAccess: 'Enabled'
+    allowCrossTenantReplication: true
+    minimumTlsVersion: 'TLS1_2'
+    allowBlobPublicAccess: true
+    allowSharedKeyAccess: true
+    networkAcls: {
+      bypass: 'AzureServices'
+      virtualNetworkRules: []
+      ipRules: []
+      defaultAction: 'Deny'
+    }
+    supportsHttpsTrafficOnly: true
+    encryption: {
+      requireInfrastructureEncryption: false
+      services: {
+        file: {
+          keyType: 'Account'
+          enabled: true
+        }
+        blob: {
+          keyType: 'Account'
+          enabled: true
+        }
+      }
+      keySource: 'Microsoft.Storage'
+    }
+    accessTier: 'Hot'
+  }
+  tags: tagValues
 }
 
-module StorageAccount '../../../modules/Microsoft.Storage/StorageAccount.bicep' = {
-  name: 'storageAccount'
-  params: {
-    location: location
-    storageAccount_Name: storageAccount_Name
-    tagValues: tagValues
+resource StorageAccount_BlobServices 'Microsoft.Storage/storageAccounts/blobServices@2023-01-01' = {
+  parent: StorageAccount
+  name: 'default'
+  properties: {
+    changeFeed: {
+      enabled: false
+    }
+    restorePolicy: {
+      enabled: false
+    }
+    containerDeleteRetentionPolicy: {
+      enabled: true
+      days: 7
+    }
+    cors: {
+      corsRules: []
+    }
+    deleteRetentionPolicy: {
+      allowPermanentDelete: false
+      enabled: true
+      days: 7
+    }
+    isVersioningEnabled: false
   }
 }
 
@@ -129,7 +403,7 @@ resource StorageAccount_PrivateEndpoint 'Microsoft.Network/privateEndpoints@2023
       {
         name: 'PrivateEndpoint_to_StorageAccount'
         properties: {
-          privateLinkServiceId: StorageAccount.outputs.storageAccount_ID
+          privateLinkServiceId: StorageAccount.id
           groupIds: [
             'blob'
           ]
@@ -143,24 +417,17 @@ resource StorageAccount_PrivateEndpoint 'Microsoft.Network/privateEndpoints@2023
   tags: tagValues
 }
 
-module Hub_Bastion '../../../modules/Microsoft.Network/Bastion.bicep' = {
-  name: 'Hub_Bastion'
+module Bastion '../../../modules/Microsoft.Network/BastionEverything.bicep' = {
+  name: 'Bastion'
   params: {
-    bastion_SubnetID: Hub_VirtualNetwork.outputs.bastion_SubnetID
     location: location
-    bastion_name: 'Hub_Bastion'
-    tagValues: tagValues
-  }
-  
-}
-
-module OnPrem_Bastion '../../../modules/Microsoft.Network/Bastion.bicep' = {
-  name: 'OnPrem_Bastion'
-  params: {
-    bastion_SubnetID: OnPrem_VirtualNetwork.outputs.bastion_SubnetID
-    location: location
-    bastion_name: 'OnPrem_Bastion'
-    tagValues: tagValues
+    bastion_name: 'Bastion'
+    peered_VirtualNetwork_Ids: [
+      Hub_VirtualNetwork.outputs.virtualNetwork_ID
+      Spoke_VirtualNetwork.outputs.virtualNetwork_ID
+      OnPrem_VirtualNetwork.outputs.virtualNetwork_ID
+    ]
+    virtualNetwork_AddressPrefix: '10.240.0.0/24'
   }
 }
 
@@ -175,45 +442,254 @@ module OnPrem_VirtualNetwork '../../../modules/Microsoft.Network/VirtualNetwork.
 }
 
 
-
-module OnPrem_WinDnsVm '../../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
-  name: 'OnPremWinDNS'
-  params: {
-    acceleratedNetworking: acceleratedNetworking
-    location: location
-    subnet_ID: OnPrem_VirtualNetwork.outputs.general_SubnetID
-    virtualMachine_AdminPassword: virtualMachine_AdminPassword
-    virtualMachine_AdminUsername: virtualMachine_AdminUsername
-    virtualMachine_Name: 'OnPrem-WinDns'
-    virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_General.ps1'
-    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_General.ps1 -Username ${virtualMachine_AdminUsername}'
-    privateIPAddress: cidrHost( OnPrem_VirtualNetwork.outputs.general_Subnet_AddressPrefix, 3 )
-    privateIPAllocationMethod: 'Static'
-    tagValues: tagValues
+// Start of OnPrem_dnsVM
+var OnPrem_VirtualMachine_Dns_Name = 'OnPrem-dnsVM'
+resource OnPrem_VirtualMachine_Dns 'Microsoft.Compute/virtualMachines@2024-07-01' = {
+  name: OnPrem_VirtualMachine_Dns_Name
+  location: location
+  identity: {
+    type: 'SystemAssigned'
   }
-}
-
-module OnPrem_WinClientVM '../../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
-  name: 'OnPrem-WinClientVM'
-  params: {
-    acceleratedNetworking: acceleratedNetworking
-    location: location
-    subnet_ID: OnPrem_VirtualNetwork.outputs.general_SubnetID
-    virtualMachine_AdminPassword: virtualMachine_AdminPassword
-    virtualMachine_AdminUsername: virtualMachine_AdminUsername
-    virtualMachine_Name: 'OnPrem-WinClien'
-    virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_General.ps1'
-    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_General.ps1 -Username ${virtualMachine_AdminUsername}'
-    privateIPAddress: cidrHost( OnPrem_VirtualNetwork.outputs.general_Subnet_AddressPrefix, 4 )
-    privateIPAllocationMethod: 'Static'
-    tagValues: tagValues
+  properties: {
+    hardwareProfile: {
+      vmSize: vmSize
+    }
+    additionalCapabilities: {
+      hibernationEnabled: false
+    }
+    storageProfile: {
+      imageReference: {
+        publisher: 'MicrosoftWindowsServer'
+        offer: 'WindowsServer'
+        sku: '2025-datacenter-azure-edition'
+        version: 'latest'
+      }
+      osDisk: {
+        osType: 'Windows'
+        name: '${OnPrem_VirtualMachine_Dns_Name}_OsDisk_1'
+        createOption: 'FromImage'
+        caching: 'ReadWrite'
+        managedDisk: {
+          storageAccountType: 'Premium_LRS'
+        }
+        deleteOption: 'Delete'
+        diskSizeGB: 127
+      }
+      dataDisks: []
+      diskControllerType: 'SCSI'
+    }
+    osProfile: {
+      computerName: OnPrem_VirtualMachine_Dns_Name
+      adminUsername: virtualMachine_AdminUsername
+      adminPassword: virtualMachine_AdminPassword
+      windowsConfiguration: {
+        provisionVMAgent: true
+        enableAutomaticUpdates: true
+        patchSettings: {
+          patchMode: 'AutomaticByPlatform'
+          automaticByPlatformSettings: {
+            rebootSetting: 'IfRequired'
+          }
+          assessmentMode: 'ImageDefault'
+          enableHotpatching: true
+        }
+      }
+      secrets: []
+      allowExtensionOperations: true
+    }
+    securityProfile: {
+      uefiSettings: {
+        secureBootEnabled: true
+        vTpmEnabled: true
+      }
+      securityType: 'TrustedLaunch'
+    }
+    networkProfile: {
+      networkInterfaces: [
+        {
+          id: OnPrem_VirtualMachine_Dns_NIC.id
+          properties: {
+            deleteOption: 'Delete'
+          }
+        }
+      ]
+    }
+    diagnosticsProfile: {
+      bootDiagnostics: {
+        enabled: true
+      }
+    }
   }
+  tags: tagValues
 }
+resource OnPrem_VirtualMachine_Dns_NIC 'Microsoft.Network/networkInterfaces@2024-01-01' = {
+  name: '${OnPrem_VirtualMachine_Dns_Name}-nic'
+  location: location
+  properties: {
+    ipConfigurations: [
+      {
+        name: 'ipconfig1'
+        properties: {
+          privateIPAddress: cidrHost( OnPrem_VirtualNetwork.outputs.general_Subnet_AddressPrefix, 3 )
+          privateIPAllocationMethod: 'Static'
+          subnet: {
+            id: OnPrem_VirtualNetwork.outputs.general_SubnetID
+          }
+          primary: true
+          privateIPAddressVersion: 'IPv4'
+        }
+      }
+    ]
+    enableAcceleratedNetworking: acceleratedNetworking
+  }
+  tags: tagValues
+}
+resource OnPrem_VirtualMachine_Dns_CustomScriptExtension 'Microsoft.Compute/virtualMachines/extensions@2021-11-01' = {
+  parent: OnPrem_VirtualMachine_Dns
+  name: 'installcustomscript'
+  location: location
+  properties: {
+    publisher: 'Microsoft.Compute'
+    type: 'CustomScriptExtension'
+    typeHandlerVersion: '1.9'
+    autoUpgradeMinorVersion: true
+    settings: {
+      fileUris: [
+        virtualMachine_ScriptFile
+      ]
+    }
+    protectedSettings: {
+      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username ${virtualMachine_AdminUsername} -Type General'
+    }
+  }
+  tags: tagValues
+}
+// End of OnPrem_dnsVM
 
+
+// Start of OnPrem_clientVM
+var OnPrem_VirtualMachine_Client_Name = 'OnPrem-clientVM'
+resource OnPrem_VirtualMachine_Client 'Microsoft.Compute/virtualMachines@2024-07-01' = {
+  name: OnPrem_VirtualMachine_Client_Name
+  location: location
+  identity: {
+    type: 'SystemAssigned'
+  }
+  properties: {
+    hardwareProfile: {
+      vmSize: vmSize
+    }
+    additionalCapabilities: {
+      hibernationEnabled: false
+    }
+    storageProfile: {
+      imageReference: {
+        publisher: 'MicrosoftWindowsServer'
+        offer: 'WindowsServer'
+        sku: '2025-datacenter-azure-edition'
+        version: 'latest'
+      }
+      osDisk: {
+        osType: 'Windows'
+        name: '${OnPrem_VirtualMachine_Client_Name}_OsDisk_1'
+        createOption: 'FromImage'
+        caching: 'ReadWrite'
+        managedDisk: {
+          storageAccountType: 'Premium_LRS'
+        }
+        deleteOption: 'Delete'
+        diskSizeGB: 127
+      }
+      dataDisks: []
+      diskControllerType: 'SCSI'
+    }
+    osProfile: {
+      computerName: OnPrem_VirtualMachine_Client_Name
+      adminUsername: virtualMachine_AdminUsername
+      adminPassword: virtualMachine_AdminPassword
+      windowsConfiguration: {
+        provisionVMAgent: true
+        enableAutomaticUpdates: true
+        patchSettings: {
+          patchMode: 'AutomaticByPlatform'
+          automaticByPlatformSettings: {
+            rebootSetting: 'IfRequired'
+          }
+          assessmentMode: 'ImageDefault'
+          enableHotpatching: true
+        }
+      }
+      secrets: []
+      allowExtensionOperations: true
+    }
+    securityProfile: {
+      uefiSettings: {
+        secureBootEnabled: true
+        vTpmEnabled: true
+      }
+      securityType: 'TrustedLaunch'
+    }
+    networkProfile: {
+      networkInterfaces: [
+        {
+          id: OnPrem_VirtualMachine_Client_NIC.id
+          properties: {
+            deleteOption: 'Delete'
+          }
+        }
+      ]
+    }
+    diagnosticsProfile: {
+      bootDiagnostics: {
+        enabled: true
+      }
+    }
+  }
+  tags: tagValues
+}
+resource OnPrem_VirtualMachine_Client_NIC 'Microsoft.Network/networkInterfaces@2024-01-01' = {
+  name: '${OnPrem_VirtualMachine_Client_Name}-nic'
+  location: location
+  properties: {
+    ipConfigurations: [
+      {
+        name: 'ipconfig1'
+        properties: {
+          privateIPAddress: cidrHost( OnPrem_VirtualNetwork.outputs.general_Subnet_AddressPrefix, 4 )
+          privateIPAllocationMethod: 'Static'
+          subnet: {
+            id: OnPrem_VirtualNetwork.outputs.general_SubnetID
+          }
+          primary: true
+          privateIPAddressVersion: 'IPv4'
+        }
+      }
+    ]
+    enableAcceleratedNetworking: acceleratedNetworking
+  }
+  tags: tagValues
+}
+resource OnPrem_VirtualMachine_Client_CustomScriptExtension 'Microsoft.Compute/virtualMachines/extensions@2021-11-01' = {
+  parent: OnPrem_VirtualMachine_Client
+  name: 'installcustomscript'
+  location: location
+  properties: {
+    publisher: 'Microsoft.Compute'
+    type: 'CustomScriptExtension'
+    typeHandlerVersion: '1.9'
+    autoUpgradeMinorVersion: true
+    settings: {
+      fileUris: [
+        virtualMachine_ScriptFile
+      ]
+    }
+    protectedSettings: {
+      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username ${virtualMachine_AdminUsername} -Type General'
+    }
+  }
+  tags: tagValues
+}
+// End of OnPrem_clientVM
 
 module OnPrem_VirtualNetworkGateway '../../../modules/Microsoft.Network/VirtualNetworkGateway.bicep' = {
   name: 'OnPrem_VNG'
