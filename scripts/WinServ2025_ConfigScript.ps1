@@ -55,18 +55,23 @@ Register-ScheduledTask -TaskName $initTaskName -Action $initTaskAction  -User "$
 $scriptBlock = {# ensures that Windows PowerShell is used
 
 $packages = @(
+    "netmon",
     "wireshark",
     "pstools",
     "vscode",
     "Microsoft.PowerShell",
     "Notepad++.Notepad++",
     "winscp",
-    "iperf3",
-    "netmon"
+    "iperf3"
 )
 
+
+
 Write-Host "This script runs during the first logon of the user and installs the following tools:"
-Write-Host "Additionally, it is calling a script (located on the desktop) that provides a GUI to easily install various tools"
+foreach ($package in $packages) {
+    Write-Host $package
+}
+Write-Host "Additionally, you will see a pop up momentarily to install npcap.  Please click 'Next' and 'Install' to complete the installation.  This is necessary for Wireshark to capture packets."
 
 # npcap for using Wireshark for taking packet captures
 c:\npcap-1.80.exe
