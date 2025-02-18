@@ -505,29 +505,46 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
   tags: tagValues
 }
 
-resource storageAccount_BlobServices 'Microsoft.Storage/storageAccounts/blobServices@2023-01-01' = {
-  parent: storageAccount
-  name: 'default'
-  properties: {
-    changeFeed: {
-      enabled: false
-    }
-    restorePolicy: {
-      enabled: false
-    }
-    containerDeleteRetentionPolicy: {
-      enabled: true
-      days: 7
-    }
-    cors: {
-      corsRules: []
-    }
-    deleteRetentionPolicy: {
-      allowPermanentDelete: false
-      enabled: true
-      days: 7
-    }
-    isVersioningEnabled: false
+// resource storageAccount_BlobServices 'Microsoft.Storage/storageAccounts/blobServices@2023-01-01' = {
+//   parent: storageAccount
+//   name: 'default'
+//   properties: {
+//     changeFeed: {
+//       enabled: false
+//     }
+//     restorePolicy: {
+//       enabled: false
+//     }
+//     containerDeleteRetentionPolicy: {
+//       enabled: true
+//       days: 7
+//     }
+//     cors: {
+//       corsRules: []
+//     }
+//     deleteRetentionPolicy: {
+//       allowPermanentDelete: false
+//       enabled: true
+//       days: 7
+//     }
+//     isVersioningEnabled: false
+//   }
+// }
+
+module storageAccount_Blob_PrivateEndpoint '../../../modules/Microsoft.Network/PrivateEndpoint.bicep' = {
+  name: 'storageAccount_Blob_PrivateEndpoint'
+  params: {
+    location: location
+    groupID: 'blob'
+    privateDNSZone_Name: 'privatelink.blob.${environment().suffixes.storage}'
+    privateEndpoint_Name: 'spokeB_${storageAccount_Name}_blob_PrivateEndpoint'
+    privateEndpoint_SubnetID: virtualNetwork_SpokeB.outputs.privateEndpoint_SubnetID
+    privateLinkServiceId: storageAccount.id
+    virtualNetwork_IDs: [
+      virtualNetwork_Hub.outputs.virtualNetwork_ID
+      virtualNetwork_SpokeA.outputs.virtualNetwork_ID
+      virtualNetwork_SpokeB.outputs.virtualNetwork_ID
+    ]
   }
 }
 
