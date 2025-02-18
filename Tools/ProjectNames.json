@@ -3,6 +3,9 @@
     "Name": "Sandbox-VirtualWAN"
   },
   {
+    "Name": "Training-AzFWBasic"
+  },
+  {
     "Name": "Scenario-ConnMonTest"
   },
   {
@@ -39,22 +42,13 @@
     "Name": "Sandbox-TrafficManager"
   },
   {
-    "Name": "Training-VNET_4_1"
+    "Name": "Scenario-BastionNativeClient"
   },
   {
     "Name": "Scenario-ELBRepro"
   },
   {
-    "Name": "Scenario-BastionNativeClient"
-  },
-  {
-    "Name": "Training-AzFWBasic"
-  },
-  {
-    "Name": "Training-FRR_BGP_FreeBSD_Lab"
-  },
-  {
-    "Name": "Scenario-ManyVMsRepro"
+    "Name": "Sandbox-NetworkWatcher"
   },
   {
     "Name": "Sandbox-Basic_Lab"
@@ -72,12 +66,6 @@
     "Name": "Sandbox-InternalLoadBalancer"
   },
   {
-    "Name": "Scenario-PE_Plus_Firewall_SNAT_Test"
-  },
-  {
-    "Name": "Scenario-AVNMPeeringDeleteTest"
-  },
-  {
     "Name": "Training-VPN_Lab"
   },
   {
@@ -93,12 +81,9 @@
     "Name": "Sandbox-VirtualNetworkManager"
   },
   {
-    "Name": "Sandbox-NetworkWatcher"
-  },
-  {
     "Name": "Scenario-BastionDeveloperSKU"
   },
   {
-    "Name": "Scenario-GeminiTest"
+    "Name": "Training-AzFWBasic_Complete"
   }
 ]

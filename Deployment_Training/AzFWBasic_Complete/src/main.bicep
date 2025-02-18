@@ -20,11 +20,8 @@ I'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net.
 ''')
 param acceleratedNetworking bool = true
 
-// @description('Set this to true if you want to use an Azure Firewall in the Hub Virtual Network.')
-// param usingAzureFirewall bool = true
-
-// @description('SKU for the Azure Firewall')
-// param azureFirewall_SKU string = 'Premium'
+@description('SKU for the Azure Firewall')
+param azureFirewall_SKU string = 'Premium'
 
 @minLength(6)
 @description('VPN Shared Key used for authenticating VPN connections')
@@ -212,7 +209,7 @@ resource virtualMachine_Hub_Dns_CustomScriptExtension 'Microsoft.Compute/virtual
     typeHandlerVersion: '1.9'
     autoUpgradeMinorVersion: true
     settings: {
-      fileUris: [ virtualMachine_ScriptFile ]
+      fileUris: [ virtualMachine_ScriptFile]
     }
     protectedSettings: {
       commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username ${virtualMachine_AdminUsername} -Type DNS'
@@ -566,21 +563,21 @@ resource azureFirewall_Management_PIP 'Microsoft.Network/publicIPAddresses@2022-
   tags: tagValues
 }
 
-// module azureFirewall '../../../modules/Microsoft.Network/AzureFirewall.bicep' = if (usingAzureFirewall) {
-//   name: 'hubAzureFirewall'
-//   params: {
-//     azureFirewall_ManagementSubnet_ID: virtualNetwork_Hub.outputs.azureFirewallManagement_SubnetID
-//     azureFirewall_Name: 'hub_AzFW'
-//     azureFirewall_SKU: azureFirewall_SKU
-//     azureFirewall_Subnet_ID: virtualNetwork_Hub.outputs.azureFirewall_SubnetID
-//     azureFirewallPolicy_Name: 'hub_AzFWPolicy'
-//     location: location
-//   }
-//   dependsOn: [
-//     Hub_to_OnPrem_conn
-//     OnPrem_to_Hub_conn
-//   ]
-// }
+module azureFirewall '../../../modules/Microsoft.Network/AzureFirewall.bicep' = {
+  name: 'hubAzureFirewall'
+  params: {
+    azureFirewall_ManagementSubnet_ID: virtualNetwork_Hub.outputs.azureFirewallManagement_SubnetID
+    azureFirewall_Name: 'hub_AzFW'
+    azureFirewall_SKU: azureFirewall_SKU
+    azureFirewall_Subnet_ID: virtualNetwork_Hub.outputs.azureFirewall_SubnetID
+    azureFirewallPolicy_Name: 'hub_AzFWPolicy'
+    location: location
+  }
+  dependsOn: [
+    Hub_to_OnPrem_conn
+    OnPrem_to_Hub_conn
+  ]
+}
 
 module udrToAzFW_Hub '../../../modules/Microsoft.Network/RouteTable.bicep' = {
   name: 'udrToAzFW_Hub'
@@ -888,41 +885,6 @@ resource virtualMachine_Onprem_Client_CustomScriptExtension 'Microsoft.Compute/v
   }
   tags: tagValues
 }
-// End of onprem_clientVM
-
-// module OnPrem_NVA '../../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.bicep' = {
-//   name: 'OnPrem_NVA'
-//   params: {
-//     acceleratedNetworking: acceleratedNetworking
-//     location: location
-//     subnet_ID: virtualNetwork_OnPremHub.outputs.general_SubnetID
-//     virtualMachine_AdminPassword: virtualMachine_AdminPassword
-//     virtualMachine_AdminUsername: virtualMachine_AdminUsername
-//     virtualMachine_Name: 'OnPrem-NVA'
-//     virtualMachine_Size: vmSize
-//     privateIPAllocationMethod: 'Static'
-//     privateIPAddress: '10.100.0.254'
-//     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-//     virtualMachine_ScriptFileName: 'frrconfig.sh'
-//     commandToExecute: './frrconfig.sh'
-//   }
-// }
-
-// TODO - create a VPN NVA to be used in forced tunneling training
-// module vpn_vm '../../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.bicep' = {
-//   name: 'VPN_VM'
-//   params: {
-//     location: location
-//     acceleratedNetworking: acceleratedNetworking
-//     subnet_ID: virtualNetwork_OnPremHub.outputs.general_SubnetID
-//     virtualMachine_AdminPassword: virtualMachine_AdminPassword
-//     virtualMachine_AdminUsername: virtualMachine_AdminUsername
-//     virtualMachine_Name: 'vpn-vm'
-//     virtualMachine_ScriptFileName: 'Ubuntu20_DNS_Config.sh'
-//     commandToExecute: './Ubuntu20_DNS_Config.sh'
-//     virtualMachine_Size: vmSize
-//   }
-// }
 
 module virtualNetworkGateway_OnPrem '../../../modules/Microsoft.Network/VirtualNetworkGateway.bicep' = {
   name: 'OnPremVirtualNetworkGateway'

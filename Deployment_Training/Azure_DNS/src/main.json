@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.32.4.45862",
-      "templateHash": "18223305003238640505"
+      "templateHash": "18214022576044070350"
     }
   },
   "parameters": {
@@ -39,7 +39,7 @@
       "type": "bool",
       "defaultValue": false,
       "metadata": {
-        "description": "True enables Accelerated Networking and False disabled it.  \nNot all VM sizes support Accel Net (i.e. Standard_B2ms).  \nI'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net.\n"
+        "description": "True enables Accelerated Networking and False disabled it.  \nNot all VM sizes support Accel Net (i.e. Standard_B2ms).  \nI'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net. \n"
       }
     },
     "storageAccount_Name": {
@@ -353,12 +353,12 @@
       "kind": "StorageV2",
       "properties": {
         "dnsEndpointType": "Standard",
-        "defaultToOAuthAuthentication": false,
+        "defaultToOAuthAuthentication": true,
         "publicNetworkAccess": "Enabled",
         "allowCrossTenantReplication": true,
         "minimumTlsVersion": "TLS1_2",
-        "allowBlobPublicAccess": true,
-        "allowSharedKeyAccess": true,
+        "allowBlobPublicAccess": false,
+        "allowSharedKeyAccess": false,
         "networkAcls": {
           "bypass": "AzureServices",
           "virtualNetworkRules": [],
@@ -1706,7 +1706,7 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2022-09-01",
-      "name": "Bastion",
+      "name": "AllBastionResources",
       "properties": {
         "expressionEvaluationOptions": {
           "scope": "inner"

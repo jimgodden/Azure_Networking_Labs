@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.32.4.45862",
-      "templateHash": "15548014657401265094"
+      "templateHash": "422739556637396009"
     }
   },
   "parameters": {
@@ -42,7 +42,6 @@
     "tagValues": {
       "Training": "BGPLab"
     },
-    "virtualMachine_ScriptFileLocation": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/",
     "virtualNetwork_AddressPrefix": "10.100.0.0/16"
   },
   "resources": [

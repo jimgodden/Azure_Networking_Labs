@@ -13,7 +13,7 @@ param vmSize string = 'Standard_D2as_v4' // 'Standard_B2ms' // 'Standard_D2s_v3'
 
 @description('''True enables Accelerated Networking and False disabled it.  
 Not all VM sizes support Accel Net (i.e. Standard_B2ms).  
-I'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net.
+I'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net. 
 ''')
 param acceleratedNetworking bool = false
 
@@ -337,12 +337,12 @@ resource StorageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
   kind: 'StorageV2'
   properties: {
     dnsEndpointType: 'Standard'
-    defaultToOAuthAuthentication: false
+    defaultToOAuthAuthentication: true
     publicNetworkAccess: 'Enabled'
     allowCrossTenantReplication: true
     minimumTlsVersion: 'TLS1_2'
-    allowBlobPublicAccess: true
-    allowSharedKeyAccess: true
+    allowBlobPublicAccess: false
+    allowSharedKeyAccess: false
     networkAcls: {
       bypass: 'AzureServices'
       virtualNetworkRules: []
@@ -418,7 +418,7 @@ resource StorageAccount_PrivateEndpoint 'Microsoft.Network/privateEndpoints@2023
 }
 
 module Bastion '../../../modules/Microsoft.Network/BastionEverything.bicep' = {
-  name: 'Bastion'
+  name: 'AllBastionResources'
   params: {
     location: location
     bastion_name: 'Bastion'

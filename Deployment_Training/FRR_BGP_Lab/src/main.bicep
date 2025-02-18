@@ -19,7 +19,7 @@ var acceleratedNetworking = false
 
 var tagValues = { Training: 'BGPLab' }
 
-var virtualMachine_ScriptFileLocation = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
+// var virtualMachine_ScriptFileLocation = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
 
 var virtualNetwork_AddressPrefix = '10.100.0.0/16'
 
