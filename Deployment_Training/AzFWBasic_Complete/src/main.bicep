@@ -78,9 +78,6 @@ resource virtualNetwork_Hub 'Microsoft.Network/virtualNetworks@2021-02-01' = {
           routeTable: {
             id: routeTable_Hub.id
           }
-          networkSecurityGroup: {
-            id: networkSecurityGroup_Generic.id
-          }
         }
       }
       {
@@ -704,9 +701,6 @@ resource virtualNetwork_OnPrem 'Microsoft.Network/virtualNetworks@2021-02-01' = 
         name: 'GatewaySubnet'
         properties: {
           addressPrefix: '10.100.1.0/24'
-          networkSecurityGroup: {
-            id: networkSecurityGroup_Generic.id
-          }
         }
       }
     ]

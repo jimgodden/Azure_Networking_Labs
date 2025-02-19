@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.32.4.45862",
-      "templateHash": "17619340072290988515"
+      "templateHash": "1367062820931873511"
     }
   },
   "parameters": {
@@ -111,9 +111,6 @@
               "addressPrefix": "10.0.1.0/24",
               "routeTable": {
                 "id": "[resourceId('Microsoft.Network/routeTables', 'hub_RouteTable')]"
-              },
-              "networkSecurityGroup": {
-                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'genericNSG')]"
               }
             }
           },
@@ -735,10 +732,7 @@
           {
             "name": "GatewaySubnet",
             "properties": {
-              "addressPrefix": "10.100.1.0/24",
-              "networkSecurityGroup": {
-                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'genericNSG')]"
-              }
+              "addressPrefix": "10.100.1.0/24"
             }
           }
         ]
