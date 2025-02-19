@@ -36,7 +36,27 @@ $packages = @(
 )
 
 foreach ($package in $packages) {
-    winget install --accept-source-agreements --scope user $package
+    $attempt = 0
+    $maxAttempts = 3
+    $success = $false
+
+    while (-not $success -and $attempt -lt $maxAttempts) {
+        try {
+            winget install --accept-source-agreements --scope machine $package -ErrorAction Stop
+            Write-Host "Successfully installed $package"
+            $success = $true
+        } catch {
+            $attempt++
+            Write-Host "Failed to install $package. Attempt $attempt of $maxAttempts. Error: $_"
+            if ($attempt -lt $maxAttempts) {
+                Start-Sleep -Seconds 5
+            }
+        }
+    }
+
+    if (-not $success) {
+        Write-Host "Failed to install $package after $maxAttempts attempts."
+    }
 } }
 
 # Adds the script block to a file that will be run on the first logon of the user
