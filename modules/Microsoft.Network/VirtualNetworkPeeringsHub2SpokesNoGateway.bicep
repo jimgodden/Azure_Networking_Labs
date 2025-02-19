@@ -25,8 +25,7 @@ resource virtualNetworkPeering_Spokes_to_Hub 'Microsoft.Network/virtualNetworks/
     }
     allowVirtualNetworkAccess: true
     allowForwardedTraffic: true
-    useRemoteGateways: true
+    useRemoteGateways: false
     allowGatewayTransit: false
-    doNotVerifyRemoteGateways: true
   }
 } ]

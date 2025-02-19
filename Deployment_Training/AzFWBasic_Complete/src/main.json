@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.32.4.45862",
-      "templateHash": "7234717299549960252"
+      "templateHash": "5673788744201777370"
     }
   },
   "parameters": {
@@ -1006,7 +1006,7 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2022-09-01",
-      "name": "peerings_Hub_to_Spokes",
+      "name": "peerings_Hub_to_Spokes_NoGateway",
       "properties": {
         "expressionEvaluationOptions": {
           "scope": "inner"
@@ -1030,7 +1030,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.32.4.45862",
-              "templateHash": "6501883046579527015"
+              "templateHash": "9093547247946164556"
             }
           },
           "parameters": {
@@ -1054,7 +1054,7 @@
                 "count": "[length(parameters('virtualNetwork_Spoke_Ids'))]"
               },
               "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
-              "apiVersion": "2022-09-01",
+              "apiVersion": "2024-05-01",
               "name": "[format('{0}/to{1}', split(parameters('virtualNetwork_Hub_Id'), '/')[8], split(parameters('virtualNetwork_Spoke_Ids')[copyIndex()], '/')[8])]",
               "properties": {
                 "remoteVirtualNetwork": {
@@ -1072,7 +1072,7 @@
                 "count": "[length(parameters('virtualNetwork_Spoke_Ids'))]"
               },
               "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
-              "apiVersion": "2022-09-01",
+              "apiVersion": "2024-05-01",
               "name": "[format('{0}/to{1}', split(parameters('virtualNetwork_Spoke_Ids')[copyIndex()], '/')[8], split(parameters('virtualNetwork_Hub_Id'), '/')[8])]",
               "properties": {
                 "remoteVirtualNetwork": {
@@ -1080,9 +1080,8 @@
                 },
                 "allowVirtualNetworkAccess": true,
                 "allowForwardedTraffic": true,
-                "useRemoteGateways": true,
-                "allowGatewayTransit": false,
-                "doNotVerifyRemoteGateways": true
+                "useRemoteGateways": false,
+                "allowGatewayTransit": false
               }
             }
           ]
@@ -2719,6 +2718,98 @@
         "[resourceId('Microsoft.Resources/deployments', 'hubAzureFirewall')]",
         "[resourceId('Microsoft.Network/virtualNetworks', 'hub_VNet')]",
         "[resourceId('Microsoft.Network/virtualNetworks', 'onprem_VNet')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "peerings_Hub_to_Spokes",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "virtualNetwork_Hub_Id": {
+            "value": "[resourceId('Microsoft.Network/virtualNetworks', 'hub_VNet')]"
+          },
+          "virtualNetwork_Spoke_Ids": {
+            "value": [
+              "[resourceId('Microsoft.Network/virtualNetworks', 'spokeA_VNet')]",
+              "[resourceId('Microsoft.Network/virtualNetworks', 'spokeB_VNet')]"
+            ]
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.32.4.45862",
+              "templateHash": "9506160143020222285"
+            }
+          },
+          "parameters": {
+            "virtualNetwork_Hub_Id": {
+              "type": "string",
+              "metadata": {
+                "description": "Resource Id of the Hub Virtual Network"
+              }
+            },
+            "virtualNetwork_Spoke_Ids": {
+              "type": "array",
+              "metadata": {
+                "description": "Array of Resource Ids of the Spoke Virtual Networks"
+              }
+            }
+          },
+          "resources": [
+            {
+              "copy": {
+                "name": "virtualNetworkPeering_Hub_to_Spoke",
+                "count": "[length(parameters('virtualNetwork_Spoke_Ids'))]"
+              },
+              "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+              "apiVersion": "2024-05-01",
+              "name": "[format('{0}/to{1}', split(parameters('virtualNetwork_Hub_Id'), '/')[8], split(parameters('virtualNetwork_Spoke_Ids')[copyIndex()], '/')[8])]",
+              "properties": {
+                "remoteVirtualNetwork": {
+                  "id": "[parameters('virtualNetwork_Spoke_Ids')[copyIndex()]]"
+                },
+                "allowVirtualNetworkAccess": true,
+                "allowForwardedTraffic": true,
+                "useRemoteGateways": false,
+                "allowGatewayTransit": true
+              }
+            },
+            {
+              "copy": {
+                "name": "virtualNetworkPeering_Spokes_to_Hub",
+                "count": "[length(parameters('virtualNetwork_Spoke_Ids'))]"
+              },
+              "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+              "apiVersion": "2024-05-01",
+              "name": "[format('{0}/to{1}', split(parameters('virtualNetwork_Spoke_Ids')[copyIndex()], '/')[8], split(parameters('virtualNetwork_Hub_Id'), '/')[8])]",
+              "properties": {
+                "remoteVirtualNetwork": {
+                  "id": "[parameters('virtualNetwork_Hub_Id')]"
+                },
+                "allowVirtualNetworkAccess": true,
+                "allowForwardedTraffic": true,
+                "useRemoteGateways": true,
+                "allowGatewayTransit": false,
+                "doNotVerifyRemoteGateways": true
+              }
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'onprem_to_Hub_VirtualNetworkGateways_and_Connections')]",
+        "[resourceId('Microsoft.Network/virtualNetworks', 'hub_VNet')]",
+        "[resourceId('Microsoft.Network/virtualNetworks', 'spokeA_VNet')]",
+        "[resourceId('Microsoft.Network/virtualNetworks', 'spokeB_VNet')]"
       ]
     }
   ]

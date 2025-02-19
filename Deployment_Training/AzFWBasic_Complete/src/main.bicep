@@ -210,8 +210,8 @@ resource routeTable_Spokes 'Microsoft.Network/routeTables@2024-05-01' = {
   }
 }
 
-module peerings_Hub_to_Spokes '../../../modules/Microsoft.Network/VirtualNetworkPeeringsHub2Spokes.bicep' = {
-  name: 'peerings_Hub_to_Spokes'
+module peerings_Hub_to_Spokes_NoGateway '../../../modules/Microsoft.Network/VirtualNetworkPeeringsHub2SpokesNoGateway.bicep' = {
+  name: 'peerings_Hub_to_Spokes_NoGateway'
   params: {
     virtualNetwork_Hub_Id: virtualNetwork_Hub.id
     virtualNetwork_Spoke_Ids: [
@@ -959,5 +959,19 @@ module onprem_to_Hub_VirtualNetworkGateways_and_Connections '../../../modules/Mi
   }
   dependsOn: [
     azureFirewall
+  ]
+}
+
+module peerings_Hub_to_Spokes '../../../modules/Microsoft.Network/VirtualNetworkPeeringsHub2Spokes.bicep' = {
+  name: 'peerings_Hub_to_Spokes'
+  params: {
+    virtualNetwork_Hub_Id: virtualNetwork_Hub.id
+    virtualNetwork_Spoke_Ids: [
+      virtualNetwork_SpokeA.id
+      virtualNetwork_SpokeB.id
+    ]
+  }
+  dependsOn: [
+    onprem_to_Hub_VirtualNetworkGateways_and_Connections
   ]
 }
