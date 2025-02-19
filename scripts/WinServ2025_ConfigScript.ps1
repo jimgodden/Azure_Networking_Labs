@@ -42,7 +42,7 @@ foreach ($package in $packages) {
 
     while (-not $success -and $attempt -lt $maxAttempts) {
         try {
-            winget install --accept-source-agreements --scope machine $package -ErrorAction Stop
+            winget install --accept-source-agreements --scope machine $package
             Write-Host "Successfully installed $package"
             $success = $true
         } catch {
