@@ -138,11 +138,45 @@ resource virtualNetwork_SpokeA 'Microsoft.Network/virtualNetworks@2021-02-01' = 
         properties: {
           addressPrefix: '10.1.0.0/24'
           routeTable: {
-            id: routeTable_Spokes.id
+            id: routeTable_SpokeA.id
           }
           networkSecurityGroup: {
             id: networkSecurityGroup_Generic.id
           }
+        }
+      }
+    ]
+  }
+}
+
+resource routeTable_SpokeA 'Microsoft.Network/routeTables@2024-05-01' = {
+  name: 'spokeA_RouteTable'
+  location: location
+  properties: {
+    disableBgpRoutePropagation: false
+    routes: [
+      {
+        name: 'toHub'
+        properties: {
+          addressPrefix: '10.0.0.0/16'
+          nextHopType: 'VirtualAppliance'
+          nextHopIpAddress: '10.0.2.4'
+        }
+      }
+      {
+        name: 'toSpokeB'
+        properties: {
+          addressPrefix: '10.2.0.0/16'
+          nextHopType: 'VirtualAppliance'
+          nextHopIpAddress: '10.0.2.4'
+        }
+      }
+      {
+        name: 'toOnPrem'
+        properties: {
+          addressPrefix: '10.100.0.0/16'
+          nextHopType: 'VirtualAppliance'
+          nextHopIpAddress: '10.0.2.4'
         }
       }
     ]
@@ -164,7 +198,7 @@ resource virtualNetwork_SpokeB 'Microsoft.Network/virtualNetworks@2021-02-01' = 
         properties: {
           addressPrefix: '10.2.0.0/24'
           routeTable: {
-            id: routeTable_Spokes.id
+            id: routeTable_SpokeB.id
           }
           networkSecurityGroup: {
             id: networkSecurityGroup_Generic.id
@@ -184,8 +218,8 @@ resource virtualNetwork_SpokeB 'Microsoft.Network/virtualNetworks@2021-02-01' = 
   }
 }
 
-resource routeTable_Spokes 'Microsoft.Network/routeTables@2024-05-01' = {
-  name: 'spoke_RouteTable'
+resource routeTable_SpokeB 'Microsoft.Network/routeTables@2024-05-01' = {
+  name: 'spokeB_RouteTable'
   location: location
   properties: {
     disableBgpRoutePropagation: false
@@ -193,15 +227,23 @@ resource routeTable_Spokes 'Microsoft.Network/routeTables@2024-05-01' = {
       {
         name: 'toHub'
         properties: {
+          addressPrefix: '10.0.0.0/16'
+          nextHopType: 'VirtualAppliance'
+          nextHopIpAddress: '10.0.2.4'
+        }
+      }
+      {
+        name: 'toSpokeA'
+        properties: {
           addressPrefix: '10.1.0.0/16'
           nextHopType: 'VirtualAppliance'
           nextHopIpAddress: '10.0.2.4'
         }
       }
       {
-        name: 'toTenSlashEight'
+        name: 'toOnPrem'
         properties: {
-          addressPrefix: '10.0.0.0/8'
+          addressPrefix: '10.100.0.0/16'
           nextHopType: 'VirtualAppliance'
           nextHopIpAddress: '10.0.2.4'
         }

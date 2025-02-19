@@ -17,8 +17,6 @@ param (
     [string]$ConditionalForwarderIPAddress
 )
 
-Start-Transcript -Path "C:\CustomScriptExtension.log"
-
 $progressPreference = 'silentlyContinue'
 Write-Host "Installing WinGet PowerShell module from PSGallery..."
 Install-PackageProvider -Name NuGet -Force | Out-Null
@@ -26,24 +24,22 @@ Install-Module -Name Microsoft.WinGet.Client -Force -Repository PSGallery -scope
 Write-Host "Using Repair-WinGetPackageManager cmdlet to bootstrap WinGet..."
 Repair-WinGetPackageManager
 
+# Creates a script that will install commonly used networking tools using winget.  It will be called from another script after a user logs in
 $CommonToolInstallerScript = {
-
-    
 $packages = @(
     "wireshark",
     "pstools",
     "vscode",
-    "Microsoft.PowerShell",
     "Notepad++.Notepad++",
-    "winscp",
-    "iperf3",
-    "netmon"
+    "Microsoft.PowerShell",
+    "iperf3"
 )
 
 foreach ($package in $packages) {
-    winget install --accept-source-agreements --scope machine $package
+    winget install --accept-source-agreements --scope user $package
 } }
 
+# Adds the script block to a file that will be run on the first logon of the user
 Set-Content -Path "C:\CommonToolInstaller.ps1" -Value $CommonToolInstallerScript.ToString()
 
 # npcap for using Wireshark for taking packet captures
@@ -55,22 +51,16 @@ $initTaskAction = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-
 $initTaskTrigger = New-ScheduledTaskTrigger -AtLogon
 Register-ScheduledTask -TaskName $initTaskName -Action $initTaskAction  -User "${env:computername}\${Username}" -Trigger $initTaskTrigger -Force
 
-$scriptBlock = {# ensures that Windows PowerShell is used
-
-Read-Host "Press any key and enter to install the tools.  This will take a few minutes."
-
+# Creates a script that will be run on the first logon of the user to install the tools and create shortcuts
+$scriptBlock = {
 $packages = @(
-    "netmon",
     "wireshark",
     "pstools",
     "vscode",
-    "Microsoft.PowerShell",
     "Notepad++.Notepad++",
-    "winscp",
+    "Microsoft.PowerShell",
     "iperf3"
 )
-
-
 
 Write-Host "This script runs during the first logon of the user and installs the following tools:"
 foreach ($package in $packages) {
@@ -78,19 +68,14 @@ foreach ($package in $packages) {
 }
 Write-Host "Additionally, you will see a pop up momentarily to install npcap.  Please click 'Next' and 'Install' to complete the installation.  This is necessary for Wireshark to capture packets."
 
-Read-Host "`n`nPress any key and enter to begin installing the tools.  This will take a few minutes."
-
-# npcap for using Wireshark for taking packet captures
+# Installs npcap for using Wireshark for taking packet captures
 c:\npcap-1.80.exe
 
-
-
-foreach ($package in $packages) {
-    winget install --accept-source-agreements --scope machine $package
-} 
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\CommonToolInstaller.ps1"
 
 $DesktopFilePath = "C:\Users\$ENV:USERNAME\Desktop"
 
+# Creates shortcuts for commonly used tools on the desktop
 function Set-Shortcut {
     param (
         [Parameter(Mandatory)]
@@ -103,23 +88,22 @@ function Set-Shortcut {
     $shortcut.TargetPath = $ApplicationFilePath
     $shortcut.Save()
 }
-
 Set-Shortcut -ApplicationFilePath "C:\Program Files\Wireshark\Wireshark.exe"  -DestinationFilePath "${DesktopFilePath}/Wireshark.lnk"
 Set-Shortcut -ApplicationFilePath "C:\Program Files\WindowsApps\Microsoft.WindowsTerminal_1.18.10301.0_x64__8wekyb3d8bbwe\WindowsTerminal.exe" -DestinationFilePath "${DesktopFilePath}/Windows Terminal.lnk"
 Set-Shortcut -ApplicationFilePath "C:\Program Files\Notepad++\notepad++.exe" -DestinationFilePath "${DesktopFilePath}/Notepad++.lnk"
 Set-Shortcut -ApplicationFilePath "C:\Program Files\Microsoft VS Code\Code.exe" -DestinationFilePath "${DesktopFilePath}/Visual Studio Code.lnk"
 
-Unregister-ScheduledTask -TaskName "Init" -Confirm:$false
+Read-Host -Prompt "Press Enter to exit the script"
 
-Write-Host "Installation of tools is complete.  Run C:\WinServ2025_InstallTools.ps1 manually with PowerShell if there were any failures."
-Read-Host "Press any key and enter to close this window."
+# Removes the scheduled task so that it doesn't run again on the next logon
+Unregister-ScheduledTask -TaskName "Init" -Confirm:$false
 }
 
+# Adds the script block to a file that will be run on the first logon of the user
 Set-Content -Path "C:\WinServ2025_InstallTools.ps1" -Value $scriptBlock.ToString()
     
 
-# Start of the IIS configuration script
-
+# Configures the Virtual Machine as a Web server if the type is WebServer
 if ($Type -eq "WebServer") {
     # Define variables for the IIS website and certificate
     $portHTTP = 80
@@ -167,9 +151,8 @@ if ($Type -eq "WebServer") {
     # End of the IIS configuration script
 
 }
+# Configures the Virtual Machine as a DNS server if the type is DNS
 elseif ($Type -eq "DNS") {
-    # Start of the DNS Server configuration
-
     Install-WindowsFeature -Name DNS -IncludeManagementTools
     Set-DnsServerForwarder -IPAddress "168.63.129.16"
     
@@ -181,10 +164,5 @@ elseif ($Type -eq "DNS") {
     
     if (($null -eq $PrivateDNSZone -and $PrivateDNSZone -ne "ignore") -and ($null -eq $ConditionalForwarderIPAddress -and $ConditionalForwarderIPAddress -ne "ignore")) {
         Add-DnsServerConditionalForwarderZone -Name $PrivateDNSZone -MasterServers $ConditionalForwarderIPAddress
-    }
-
-    # End of the DNS Server configuration
-    
+    }    
 }
-
-Stop-Transcript

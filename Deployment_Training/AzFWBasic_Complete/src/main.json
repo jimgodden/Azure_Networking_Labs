@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.32.4.45862",
-      "templateHash": "5673788744201777370"
+      "templateHash": "6178496144471772880"
     }
   },
   "parameters": {
@@ -177,7 +177,7 @@
             "properties": {
               "addressPrefix": "10.1.0.0/24",
               "routeTable": {
-                "id": "[resourceId('Microsoft.Network/routeTables', 'spoke_RouteTable')]"
+                "id": "[resourceId('Microsoft.Network/routeTables', 'spokeA_RouteTable')]"
               },
               "networkSecurityGroup": {
                 "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'genericNSG')]"
@@ -188,8 +188,43 @@
       },
       "dependsOn": [
         "[resourceId('Microsoft.Network/networkSecurityGroups', 'genericNSG')]",
-        "[resourceId('Microsoft.Network/routeTables', 'spoke_RouteTable')]"
+        "[resourceId('Microsoft.Network/routeTables', 'spokeA_RouteTable')]"
       ]
+    },
+    {
+      "type": "Microsoft.Network/routeTables",
+      "apiVersion": "2024-05-01",
+      "name": "spokeA_RouteTable",
+      "location": "[variables('location')]",
+      "properties": {
+        "disableBgpRoutePropagation": false,
+        "routes": [
+          {
+            "name": "toHub",
+            "properties": {
+              "addressPrefix": "10.0.0.0/16",
+              "nextHopType": "VirtualAppliance",
+              "nextHopIpAddress": "10.0.2.4"
+            }
+          },
+          {
+            "name": "toSpokeB",
+            "properties": {
+              "addressPrefix": "10.2.0.0/16",
+              "nextHopType": "VirtualAppliance",
+              "nextHopIpAddress": "10.0.2.4"
+            }
+          },
+          {
+            "name": "toOnPrem",
+            "properties": {
+              "addressPrefix": "10.100.0.0/16",
+              "nextHopType": "VirtualAppliance",
+              "nextHopIpAddress": "10.0.2.4"
+            }
+          }
+        ]
+      }
     },
     {
       "type": "Microsoft.Network/virtualNetworks",
@@ -208,7 +243,7 @@
             "properties": {
               "addressPrefix": "10.2.0.0/24",
               "routeTable": {
-                "id": "[resourceId('Microsoft.Network/routeTables', 'spoke_RouteTable')]"
+                "id": "[resourceId('Microsoft.Network/routeTables', 'spokeB_RouteTable')]"
               },
               "networkSecurityGroup": {
                 "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'genericNSG')]"
@@ -228,13 +263,13 @@
       },
       "dependsOn": [
         "[resourceId('Microsoft.Network/networkSecurityGroups', 'genericNSG')]",
-        "[resourceId('Microsoft.Network/routeTables', 'spoke_RouteTable')]"
+        "[resourceId('Microsoft.Network/routeTables', 'spokeB_RouteTable')]"
       ]
     },
     {
       "type": "Microsoft.Network/routeTables",
       "apiVersion": "2024-05-01",
-      "name": "spoke_RouteTable",
+      "name": "spokeB_RouteTable",
       "location": "[variables('location')]",
       "properties": {
         "disableBgpRoutePropagation": false,
@@ -242,15 +277,23 @@
           {
             "name": "toHub",
             "properties": {
+              "addressPrefix": "10.0.0.0/16",
+              "nextHopType": "VirtualAppliance",
+              "nextHopIpAddress": "10.0.2.4"
+            }
+          },
+          {
+            "name": "toSpokeA",
+            "properties": {
               "addressPrefix": "10.1.0.0/16",
               "nextHopType": "VirtualAppliance",
               "nextHopIpAddress": "10.0.2.4"
             }
           },
           {
-            "name": "toTenSlashEight",
+            "name": "toOnPrem",
             "properties": {
-              "addressPrefix": "10.0.0.0/8",
+              "addressPrefix": "10.100.0.0/16",
               "nextHopType": "VirtualAppliance",
               "nextHopIpAddress": "10.0.2.4"
             }

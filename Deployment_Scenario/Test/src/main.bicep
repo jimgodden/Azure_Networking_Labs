@@ -1,179 +1,49 @@
-@description('Azure Datacenter location for the Hub and Spoke A resources')
-var location = resourceGroup().location
+@description('Azure Datacenter location for the source resources')
+param location string = resourceGroup().location
 
-resource networkSecurityGroup_Generic 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
-  name: 'genericNSG'
-  location: location
-}
+@description('Username for the admin account of the Virtual Machines')
+param virtualMachine_AdminUsername string
 
-resource virtualNetwork_Hub 'Microsoft.Network/virtualNetworks@2021-02-01' = {
-  name: 'hub_VNet'
-  location: location
-  properties: {
-    addressSpace: {
-      addressPrefixes: [
-        '10.0.0.0/16'
-      ]
-    }
-    subnets: [
-      {
-        name: 'General'
-        properties: {
-          addressPrefix: '10.0.0.0/24'
-          routeTable: {
-            id: routeTable_Hub.id
-          }
-          networkSecurityGroup: {
-            id: networkSecurityGroup_Generic.id
-          }
-        }
-      }
-      {
-        name: 'GatewaySubnet'
-        properties: {
-          addressPrefix: '10.0.1.0/24'
-          routeTable: {
-            id: routeTable_Hub.id
-          }
-        }
-      }
-      {
-        name: 'AzureFirewallSubnet'
-        properties: {
-          addressPrefix: '10.0.2.0/24'
-        }
-      }
-      {
-        name: 'AzureFirewallManagementSubnet'
-        properties: {
-          addressPrefix: '10.0.3.0/24'
-        }
-      }
-    ]
-  }
-}
+@description('Password for the admin account of the Virtual Machines')
+@secure()
+param virtualMachine_AdminPassword string
 
-resource routeTable_Hub 'Microsoft.Network/routeTables@2024-05-01' = {
-  name: 'hub_RouteTable'
-  location: location
-  properties: {
-    disableBgpRoutePropagation: false
-    routes: [
-      {
-        name: 'toSpokeA'
-        properties: {
-          addressPrefix: '10.1.0.0/16'
-          nextHopType: 'VirtualAppliance'
-          nextHopIpAddress: '10.0.2.4'
-        }
-      }
-      {
-        name: 'toSpokeB'
-        properties: {
-          addressPrefix: '10.2.0.0/16'
-          nextHopType: 'VirtualAppliance'
-          nextHopIpAddress: '10.0.2.4'
-        }
-      }
-    ]
-  }
-}
+@description('Size of the Virtual Machines')
+param virtualMachine_Size string = 'Standard_D2as_v4' // 'Standard_B2ms' // 'Standard_D2s_v3' // 'Standard_D16lds_v5'
 
+@description('''True enables Accelerated Networking and False disabled it.  
+Not all VM sizes support Accel Net (i.e. Standard_B2ms).  
+I'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net.
+''')
+param acceleratedNetworking bool = true
 
-resource virtualNetwork_SpokeA 'Microsoft.Network/virtualNetworks@2021-02-01' = {
-  name: 'spokeA_VNet'
-  location: location
-  properties: {
-    addressSpace: {
-      addressPrefixes: [
-        '10.1.0.0/16'
-      ]
-    }
-    subnets: [
-      {
-        name: 'General'
-        properties: {
-          addressPrefix: '10.1.0.0/24'
-          routeTable: {
-            id: routeTable_Spokes.id
-          }
-          networkSecurityGroup: {
-            id: networkSecurityGroup_Generic.id
-          }
-        }
-      }
-    ]
-  }
-}
-
-resource virtualNetwork_SpokeB 'Microsoft.Network/virtualNetworks@2021-02-01' = {
-  name: 'spokeB_VNet'
-  location: location
-  properties: {
-    addressSpace: {
-      addressPrefixes: [
-        '10.2.0.0/16'
-      ]
-    }
-    subnets: [
-      {
-        name: 'General'
-        properties: {
-          addressPrefix: '10.2.0.0/24'
-          routeTable: {
-            id: routeTable_Spokes.id
-          }
-          networkSecurityGroup: {
-            id: networkSecurityGroup_Generic.id
-          }
-        }
-      }
-      {
-        name: 'PrivateEndpoint'
-        properties: {
-          addressPrefix: '10.2.1.0/24'
-          networkSecurityGroup: {
-            id: networkSecurityGroup_Generic.id
-          }
-        }
-      }
-    ]
-  }
-}
-
-resource routeTable_Spokes 'Microsoft.Network/routeTables@2024-05-01' = {
-  name: 'spoke_RouteTable'
-  location: location
-  properties: {
-    disableBgpRoutePropagation: false
-    routes: [
-      {
-        name: 'toHub'
-        properties: {
-          addressPrefix: '10.1.0.0/16'
-          nextHopType: 'VirtualAppliance'
-          nextHopIpAddress: '10.0.2.4'
-        }
-      }
-      {
-        name: 'toTenSlashEight'
-        properties: {
-          addressPrefix: '10.0.0.0/8'
-          nextHopType: 'VirtualAppliance'
-          nextHopIpAddress: '10.0.2.4'
-        }
-      }
-    ]
-  }
-}
-
-module peerings_Hub_to_Spokes '../../../modules/Microsoft.Network/VirtualNetworkPeeringsHub2Spokes.bicep' = {
-  name: 'peerings_Hub_to_Spokes'
+module virtualNetwork_Hub '../../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
+  name: 'vnet-hub'
   params: {
-    virtualNetwork_Hub_Id: virtualNetwork_Hub.id
-    virtualNetwork_Spoke_Ids: [
-      virtualNetwork_SpokeA.id
-      virtualNetwork_SpokeB.id
-    ]
+    location: location
+    virtualNetwork_AddressPrefix: '10.0.0.0/16'
+    virtualNetwork_Name: 'vnet-hub'
+  }
+}
+
+module virtualMachine_Client '../../../modules/Microsoft.Compute/VirtualMachine/Windows/Server2025_General.bicep' = {
+  name: 'vm-client'
+  params: {
+    location: location
+    acceleratedNetworking: acceleratedNetworking
+    subnet_ID: virtualNetwork_Hub.outputs.general_SubnetID
+    virtualMachine_AdminPassword: virtualMachine_AdminPassword
+    virtualMachine_AdminUsername: virtualMachine_AdminUsername
+    virtualMachine_Name: 'vm-client'
+    vmSize: virtualMachine_Size
+  }
+}
+
+module bastion '../../../modules/Microsoft.Network/Bastion.bicep' = {
+  name: 'bastion'
+  params: {
+    location: location
+    bastion_SubnetID: virtualNetwork_Hub.outputs.bastion_SubnetID
+    bastion_name: 'bastion'
   }
 }
