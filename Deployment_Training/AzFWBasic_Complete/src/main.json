@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.32.4.45862",
-      "templateHash": "1367062820931873511"
+      "templateHash": "7234717299549960252"
     }
   },
   "parameters": {
@@ -117,19 +117,13 @@
           {
             "name": "AzureFirewallSubnet",
             "properties": {
-              "addressPrefix": "10.0.2.0/24",
-              "networkSecurityGroup": {
-                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'genericNSG')]"
-              }
+              "addressPrefix": "10.0.2.0/24"
             }
           },
           {
             "name": "AzureFirewallManagementSubnet",
             "properties": {
-              "addressPrefix": "10.0.3.0/24",
-              "networkSecurityGroup": {
-                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'genericNSG')]"
-              }
+              "addressPrefix": "10.0.3.0/24"
             }
           }
         ]

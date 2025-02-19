@@ -84,18 +84,12 @@ resource virtualNetwork_Hub 'Microsoft.Network/virtualNetworks@2021-02-01' = {
         name: 'AzureFirewallSubnet'
         properties: {
           addressPrefix: '10.0.2.0/24'
-          networkSecurityGroup: {
-            id: networkSecurityGroup_Generic.id
-          }
         }
       }
       {
         name: 'AzureFirewallManagementSubnet'
         properties: {
           addressPrefix: '10.0.3.0/24'
-          networkSecurityGroup: {
-            id: networkSecurityGroup_Generic.id
-          }
         }
       }
     ]
