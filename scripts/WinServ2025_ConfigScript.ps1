@@ -17,6 +17,15 @@ param (
     [string]$ConditionalForwarderIPAddress
 )
 
+# First test to see if it disabled the initial bootup request to allow telemetry
+New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows" -Name "OOBE" -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\OOBE" -Name "DisablePrivacyExperience" -Value 1 -Type DWord
+
+# Second test to see if it disabled the initial bootup request to allow telemetry
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "AllowTelemetry" -Value 1 -Type DWord
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "DisableEnterpriseAuthProxy" -Value 1 -Type DWord
+
+
 $progressPreference = 'silentlyContinue'
 Write-Host "Installing WinGet PowerShell module from PSGallery..."
 Install-PackageProvider -Name NuGet -Force | Out-Null
@@ -88,6 +97,10 @@ foreach ($package in $packages) {
 }
 Write-Host "Additionally, you will see a pop up momentarily to install npcap.  Please click 'Next' and 'Install' to complete the installation.  This is necessary for Wireshark to capture packets."
 
+Start-Sleep -Seconds 10
+
+Read-Host "Press Enter to begin installing the tools"
+
 # Installs npcap for using Wireshark for taking packet captures
 c:\npcap-1.80.exe
 
@@ -113,10 +126,10 @@ Set-Shortcut -ApplicationFilePath "C:\Program Files\WindowsApps\Microsoft.Window
 Set-Shortcut -ApplicationFilePath "C:\Program Files\Notepad++\notepad++.exe" -DestinationFilePath "${DesktopFilePath}/Notepad++.lnk"
 Set-Shortcut -ApplicationFilePath "C:\Program Files\Microsoft VS Code\Code.exe" -DestinationFilePath "${DesktopFilePath}/Visual Studio Code.lnk"
 
-Read-Host -Prompt "Press Enter to exit the script"
-
 # Removes the scheduled task so that it doesn't run again on the next logon
 Unregister-ScheduledTask -TaskName "Init" -Confirm:$false
+
+Read-Host -Prompt "Press Enter to exit the script"
 }
 
 # Adds the script block to a file that will be run on the first logon of the user
