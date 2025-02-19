@@ -43,58 +43,191 @@ param tagValues object = {
   Training: 'AzureFirewall'
 }
 
+resource networkSecurityGroup_Generic 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
+  name: 'genericNSG'
+  location: location
+}
 
-module virtualNetwork_Hub '../../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
+
+resource virtualNetwork_Hub 'Microsoft.Network/virtualNetworks@2021-02-01' = {
   name: 'hub_VNet'
-  params: {
-    virtualNetwork_AddressPrefix: '10.0.0.0/16'
-    location: location
-    virtualNetwork_Name: 'hub_VNet'
+  location: location
+  properties: {
+    addressSpace: {
+      addressPrefixes: [
+        '10.0.0.0/16'
+      ]
+    }
+    subnets: [
+      {
+        name: 'General'
+        properties: {
+          addressPrefix: '10.0.0.0/24'
+          routeTable: {
+            id: routeTable_Hub.id
+          }
+          networkSecurityGroup: {
+            id: networkSecurityGroup_Generic.id
+          }
+        }
+      }
+      {
+        name: 'GatewaySubnet'
+        properties: {
+          addressPrefix: '10.0.1.0/24'
+          routeTable: {
+            id: routeTable_Hub.id
+          }
+          networkSecurityGroup: {
+            id: networkSecurityGroup_Generic.id
+          }
+        }
+      }
+      {
+        name: 'AzureFirewallSubnet'
+        properties: {
+          addressPrefix: '10.0.2.0/24'
+          networkSecurityGroup: {
+            id: networkSecurityGroup_Generic.id
+          }
+        }
+      }
+      {
+        name: 'AzureFirewallManagementSubnet'
+        properties: {
+          addressPrefix: '10.0.3.0/24'
+          networkSecurityGroup: {
+            id: networkSecurityGroup_Generic.id
+          }
+        }
+      }
+    ]
   }
 }
 
-module virtualNetwork_SpokeA '../../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
+resource routeTable_Hub 'Microsoft.Network/routeTables@2024-05-01' = {
+  name: 'hub_RouteTable'
+  location: location
+  properties: {
+    disableBgpRoutePropagation: false
+    routes: [
+      {
+        name: 'toSpokeA'
+        properties: {
+          addressPrefix: '10.1.0.0/16'
+          nextHopType: 'VirtualAppliance'
+          nextHopIpAddress: '10.0.2.4'
+        }
+      }
+      {
+        name: 'toSpokeB'
+        properties: {
+          addressPrefix: '10.2.0.0/16'
+          nextHopType: 'VirtualAppliance'
+          nextHopIpAddress: '10.0.2.4'
+        }
+      }
+    ]
+  }
+}
+
+
+resource virtualNetwork_SpokeA 'Microsoft.Network/virtualNetworks@2021-02-01' = {
   name: 'spokeA_VNet'
-  params: {
-    virtualNetwork_AddressPrefix: '10.1.0.0/16'
-    routeTable_disableBgpRoutePropagation: true
-    location: location
-    virtualNetwork_Name: 'spokeA_VNet'
+  location: location
+  properties: {
+    addressSpace: {
+      addressPrefixes: [
+        '10.1.0.0/16'
+      ]
+    }
+    subnets: [
+      {
+        name: 'General'
+        properties: {
+          addressPrefix: '10.1.0.0/24'
+          routeTable: {
+            id: routeTable_Spokes.id
+          }
+          networkSecurityGroup: {
+            id: networkSecurityGroup_Generic.id
+          }
+        }
+      }
+    ]
   }
 }
 
-module virtualNetwork_SpokeB '../../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
+resource virtualNetwork_SpokeB 'Microsoft.Network/virtualNetworks@2021-02-01' = {
   name: 'spokeB_VNet'
-  params: {
-    virtualNetwork_AddressPrefix: '10.2.0.0/16'
-    routeTable_disableBgpRoutePropagation: true
-    location: location
-    virtualNetwork_Name: 'spokeB_VNet'
+  location: location
+  properties: {
+    addressSpace: {
+      addressPrefixes: [
+        '10.2.0.0/16'
+      ]
+    }
+    subnets: [
+      {
+        name: 'General'
+        properties: {
+          addressPrefix: '10.2.0.0/24'
+          routeTable: {
+            id: routeTable_Spokes.id
+          }
+          networkSecurityGroup: {
+            id: networkSecurityGroup_Generic.id
+          }
+        }
+      }
+      {
+        name: 'PrivateEndpoint'
+        properties: {
+          addressPrefix: '10.2.1.0/24'
+          networkSecurityGroup: {
+            id: networkSecurityGroup_Generic.id
+          }
+        }
+      }
+    ]
   }
 }
 
-module hub_To_SpokeA_Peering '../../../modules/Microsoft.Network/VirtualNetworkPeeringHub2Spoke.bicep' = {
-  name: 'hubToSpokeAPeering'
-  params: {
-    virtualNetwork_Hub_Name: virtualNetwork_Hub.outputs.virtualNetwork_Name
-    virtualNetwork_Spoke_Name: virtualNetwork_SpokeA.outputs.virtualNetwork_Name
+resource routeTable_Spokes 'Microsoft.Network/routeTables@2024-05-01' = {
+  name: 'spoke_RouteTable'
+  location: location
+  properties: {
+    disableBgpRoutePropagation: false
+    routes: [
+      {
+        name: 'toHub'
+        properties: {
+          addressPrefix: '10.1.0.0/16'
+          nextHopType: 'VirtualAppliance'
+          nextHopIpAddress: '10.0.2.4'
+        }
+      }
+      {
+        name: 'toTenSlashEight'
+        properties: {
+          addressPrefix: '10.0.0.0/8'
+          nextHopType: 'VirtualAppliance'
+          nextHopIpAddress: '10.0.2.4'
+        }
+      }
+    ]
   }
-  dependsOn: [
-    Hub_to_OnPrem_conn
-    OnPrem_to_Hub_conn
-  ]
 }
 
-module hub_To_SpokeB_Peering '../../../modules/Microsoft.Network/VirtualNetworkPeeringHub2Spoke.bicep' = {
-  name: 'hubToSpokeBPeering'
+module peerings_Hub_to_Spokes '../../../modules/Microsoft.Network/VirtualNetworkPeeringsHub2Spokes.bicep' = {
+  name: 'peerings_Hub_to_Spokes'
   params: {
-    virtualNetwork_Hub_Name: virtualNetwork_Hub.outputs.virtualNetwork_Name
-    virtualNetwork_Spoke_Name: virtualNetwork_SpokeB.outputs.virtualNetwork_Name
+    virtualNetwork_Hub_Id: virtualNetwork_Hub.id
+    virtualNetwork_Spoke_Ids: [
+      virtualNetwork_SpokeA.id
+      virtualNetwork_SpokeB.id
+    ]
   }
-  dependsOn: [
-    Hub_to_OnPrem_conn
-    OnPrem_to_Hub_conn
-  ]
 }
 
 // Start of hub-DnsVM
@@ -188,7 +321,7 @@ resource virtualMachine_Hub_Dns_NIC 'Microsoft.Network/networkInterfaces@2024-01
           privateIPAddress: '10.0.0.4'
           privateIPAllocationMethod: 'Static'
           subnet: {
-            id: virtualNetwork_Hub.outputs.general_SubnetID
+            id: virtualNetwork_Hub.properties.subnets[0].id
           }
           primary: true
           privateIPAddressVersion: 'IPv4'
@@ -311,7 +444,7 @@ resource virtualMachine_SpokeA_Client_NIC 'Microsoft.Network/networkInterfaces@2
           privateIPAddress: '10.1.0.4'
           privateIPAllocationMethod: 'Static'
           subnet: {
-            id: virtualNetwork_SpokeA.outputs.general_SubnetID
+            id: virtualNetwork_SpokeA.properties.subnets[0].id
           }
           primary: true
           privateIPAddressVersion: 'IPv4'
@@ -433,7 +566,7 @@ resource virtualMachine_SpokeB_Iis_NIC 'Microsoft.Network/networkInterfaces@2024
           privateIPAddress: '10.2.0.4'
           privateIPAllocationMethod: 'Static'
           subnet: {
-            id: virtualNetwork_SpokeB.outputs.general_SubnetID
+            id: virtualNetwork_SpokeB.properties.subnets[0].id
           }
           primary: true
           privateIPAddressVersion: 'IPv4'
@@ -504,33 +637,6 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
   }
   tags: tagValues
 }
-
-// resource storageAccount_BlobServices 'Microsoft.Storage/storageAccounts/blobServices@2023-01-01' = {
-//   parent: storageAccount
-//   name: 'default'
-//   properties: {
-//     changeFeed: {
-//       enabled: false
-//     }
-//     restorePolicy: {
-//       enabled: false
-//     }
-//     containerDeleteRetentionPolicy: {
-//       enabled: true
-//       days: 7
-//     }
-//     cors: {
-//       corsRules: []
-//     }
-//     deleteRetentionPolicy: {
-//       allowPermanentDelete: false
-//       enabled: true
-//       days: 7
-//     }
-//     isVersioningEnabled: false
-//   }
-// }
-
 module storageAccount_Blob_PrivateEndpoint '../../../modules/Microsoft.Network/PrivateEndpoint.bicep' = {
   name: 'storageAccount_Blob_PrivateEndpoint'
   params: {
@@ -538,127 +644,74 @@ module storageAccount_Blob_PrivateEndpoint '../../../modules/Microsoft.Network/P
     groupID: 'blob'
     privateDNSZone_Name: 'privatelink.blob.${environment().suffixes.storage}'
     privateEndpoint_Name: 'spokeB_${storageAccount_Name}_blob_PrivateEndpoint'
-    privateEndpoint_SubnetID: virtualNetwork_SpokeB.outputs.privateEndpoint_SubnetID
+    privateEndpoint_SubnetID: virtualNetwork_SpokeB.properties.subnets[1].id
     privateLinkServiceId: storageAccount.id
     virtualNetwork_IDs: [
-      virtualNetwork_Hub.outputs.virtualNetwork_ID
-      virtualNetwork_SpokeA.outputs.virtualNetwork_ID
-      virtualNetwork_SpokeB.outputs.virtualNetwork_ID
+      virtualNetwork_Hub.id
+      virtualNetwork_SpokeA.id
+      virtualNetwork_SpokeB.id
     ]
   }
-}
-
-resource azureFirewall_PIP 'Microsoft.Network/publicIPAddresses@2022-11-01' = {
-  name: 'AzFW_PIP'
-  location: location
-  sku: {
-    name: 'Standard'
-    tier: 'Regional'
-  }
-  properties: {
-    publicIPAddressVersion: 'IPv4'
-    publicIPAllocationMethod: 'Static'
-    idleTimeoutInMinutes: 4
-    ipTags: []
-  }
-  tags: tagValues
-}
-
-resource azureFirewall_Management_PIP 'Microsoft.Network/publicIPAddresses@2022-11-01' = {
-  name: 'AzFW_Management_PIP'
-  location: location
-  sku: {
-    name: 'Standard'
-    tier: 'Regional'
-  }
-  properties: {
-    publicIPAddressVersion: 'IPv4'
-    publicIPAllocationMethod: 'Static'
-    idleTimeoutInMinutes: 4
-    ipTags: []
-  }
-  tags: tagValues
 }
 
 module azureFirewall '../../../modules/Microsoft.Network/AzureFirewall.bicep' = {
   name: 'hubAzureFirewall'
   params: {
-    azureFirewall_ManagementSubnet_ID: virtualNetwork_Hub.outputs.azureFirewallManagement_SubnetID
+    azureFirewall_ManagementSubnet_ID: virtualNetwork_Hub.properties.subnets[3].id
     azureFirewall_Name: 'hub_AzFW'
     azureFirewall_SKU: azureFirewall_SKU
-    azureFirewall_Subnet_ID: virtualNetwork_Hub.outputs.azureFirewall_SubnetID
+    azureFirewall_Subnet_ID: virtualNetwork_Hub.properties.subnets[2].id
     azureFirewallPolicy_Name: 'hub_AzFWPolicy'
     location: location
   }
-  dependsOn: [
-    Hub_to_OnPrem_conn
-    OnPrem_to_Hub_conn
-  ]
 }
 
-module udrToAzFW_Hub '../../../modules/Microsoft.Network/RouteTable.bicep' = {
-  name: 'udrToAzFW_Hub'
-  params: {
-    addressPrefixs: [
-      '10.0.0.0/8'
-    ]
-    nextHopType: 'VirtualAppliance'
-    routeTable_Name: virtualNetwork_Hub.outputs.routeTable_Name
-    routeTableRoute_Name: 'toAzFW'
-    nextHopIpAddress: '10.0.6.4' // hardcode IP Address
-  }
-}
-
-module udrToAzFW_SpokeA '../../../modules/Microsoft.Network/RouteTable.bicep' = {
-  name: 'udrToAzFW_SpokeA'
-  params: {
-    addressPrefixs: [
-      '10.0.0.0/8'
-    ]
-    nextHopType: 'VirtualAppliance'
-    routeTable_Name: virtualNetwork_SpokeA.outputs.routeTable_Name
-    routeTableRoute_Name: 'toAzFW'
-    nextHopIpAddress: '10.0.6.4'
-  }
-}
-
-module udrToAzFW_SpokeB '../../../modules/Microsoft.Network/RouteTable.bicep' = {
-  name: 'udrToAzFW_SpokeB'
-  params: {
-    addressPrefixs: [
-      '10.0.0.0/8'
-    ]
-    nextHopType: 'VirtualAppliance'
-    routeTable_Name: virtualNetwork_SpokeB.outputs.routeTable_Name
-    routeTableRoute_Name: 'toAzFW'
-    nextHopIpAddress: '10.0.6.4'
-  }
-}
-
-module Bastion '../../../modules/Microsoft.Network/BastionEverything.bicep' = {
+module bastion '../../../modules/Microsoft.Network/BastionEverything.bicep' = {
   name: 'AllBastionResources'
   params: {
     location: location
     peered_VirtualNetwork_Ids: [ 
-      virtualNetwork_Hub.outputs.virtualNetwork_ID
-      virtualNetwork_SpokeA.outputs.virtualNetwork_ID
-      virtualNetwork_SpokeB.outputs.virtualNetwork_ID
-      virtualNetwork_OnPremHub.outputs.virtualNetwork_ID
+      virtualNetwork_Hub.id
+      virtualNetwork_SpokeA.id
+      virtualNetwork_SpokeB.id
+      virtualNetwork_OnPrem.id
     ] 
     bastion_name: 'Bastion'
     virtualNetwork_AddressPrefix: '10.200.0.0/24'
   }
 }
 
-module virtualNetwork_OnPremHub '../../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
+resource virtualNetwork_OnPrem 'Microsoft.Network/virtualNetworks@2021-02-01' = {
   name: 'onprem_VNet'
-  params: {
-    virtualNetwork_AddressPrefix: '10.100.0.0/16'
-    location: location
-    virtualNetwork_Name: 'onprem_VNet'
+  location: location
+  properties: {
+    addressSpace: {
+      addressPrefixes: [
+        '10.100.0.0/16'
+      ]
+    }
+    subnets: [
+      {
+        name: 'General'
+        properties: {
+          addressPrefix: '10.100.0.0/24'
+          networkSecurityGroup: {
+            id: networkSecurityGroup_Generic.id
+          }
+        }
+      }
+      {
+        name: 'GatewaySubnet'
+        properties: {
+          addressPrefix: '10.100.1.0/24'
+          networkSecurityGroup: {
+            id: networkSecurityGroup_Generic.id
+          }
+        }
+      }
+    ]
   }
 }
-
 
 // Start of onprem_dnsVM
 var virtualMachine_Onprem_Dns_Name = 'onprem-dnsVM'
@@ -751,7 +804,7 @@ resource virtualMachine_Onprem_Dns_NIC 'Microsoft.Network/networkInterfaces@2024
           privateIPAddress: '10.100.0.4'
           privateIPAllocationMethod: 'Static'
           subnet: {
-            id: virtualNetwork_OnPremHub.outputs.general_SubnetID
+            id: virtualNetwork_OnPrem.properties.subnets[0].id
           }
           primary: true
           privateIPAddressVersion: 'IPv4'
@@ -873,7 +926,7 @@ resource virtualMachine_Onprem_Client_NIC 'Microsoft.Network/networkInterfaces@2
           privateIPAddress: '10.100.0.5'
           privateIPAllocationMethod: 'Static'
           subnet: {
-            id: virtualNetwork_OnPremHub.outputs.general_SubnetID
+            id: virtualNetwork_OnPrem.properties.subnets[0].id
           }
           primary: true
           privateIPAddressVersion: 'IPv4'
@@ -903,48 +956,20 @@ resource virtualMachine_Onprem_Client_CustomScriptExtension 'Microsoft.Compute/v
   tags: tagValues
 }
 
-module virtualNetworkGateway_OnPrem '../../../modules/Microsoft.Network/VirtualNetworkGateway.bicep' = {
-  name: 'OnPremVirtualNetworkGateway'
+module onprem_to_Hub_VirtualNetworkGateways_and_Connections '../../../modules/Microsoft.Network/VirtualNetworkGatewaysAndConnections.bicep' = {
+  name: 'onprem_to_Hub_VirtualNetworkGateways_and_Connections'
   params: {
-    location: location
-    virtualNetworkGateway_ASN: 65000
-    virtualNetworkGateway_Name: 'onprem_VNG'
-    virtualNetworkGateway_Subnet_ResourceID: virtualNetwork_OnPremHub.outputs.gateway_SubnetID
-  }
-}
-
-module virtualNetworkGateway_Hub '../../../modules/Microsoft.Network/VirtualNetworkGateway.bicep' = {
-  name: 'HubVirtualNetworkGateway'
-  params: {
-    location: location
-    virtualNetworkGateway_ASN: 65001
-    virtualNetworkGateway_Name: 'hub_VNG'
-    virtualNetworkGateway_Subnet_ResourceID: virtualNetwork_Hub.outputs.gateway_SubnetID
-  }
-}
-
-module OnPrem_to_Hub_conn '../../../modules/Microsoft.Network/Connection_and_LocalNetworkGateway.bicep' = {
-  name: 'OnPrem_to_Hub_conn'
-  params: {
-    location: location
-    virtualNetworkGateway_ID: virtualNetworkGateway_OnPrem.outputs.virtualNetworkGateway_ResourceID
-    vpn_Destination_ASN: virtualNetworkGateway_Hub.outputs.virtualNetworkGateway_ASN
-    vpn_Destination_BGPIPAddress: virtualNetworkGateway_Hub.outputs.virtualNetworkGateway_BGPAddress
-    vpn_Destination_Name: virtualNetworkGateway_Hub.outputs.virtualNetworkGateway_Name
-    vpn_Destination_PublicIPAddress: virtualNetworkGateway_Hub.outputs.virtualNetworkGateway_PublicIPAddress
+    location_VirtualNetworkGateway1: location
+    asn_VirtualNetworkGateway1: 65000
+    name_VirtualNetworkGateway1: 'onprem_VNG'
+    subnetId_VirtualNetworkGateway1: virtualNetwork_OnPrem.properties.subnets[1].id
+    location_VirtualNetworkGateway2: location
+    asn_VirtualNetworkGateway2: 65001
+    name_VirtualNetworkGateway2: 'hub_VNG'
+    subnetId_VirtualNetworkGateway2: virtualNetwork_Hub.properties.subnets[1].id
     vpn_SharedKey: vpn_SharedKey
   }
-}
-
-module Hub_to_OnPrem_conn '../../../modules/Microsoft.Network/Connection_and_LocalNetworkGateway.bicep' = {
-  name: 'Hub_to_OnPrem_conn'
-  params: {
-    location: location
-    virtualNetworkGateway_ID: virtualNetworkGateway_Hub.outputs.virtualNetworkGateway_ResourceID
-    vpn_Destination_ASN: virtualNetworkGateway_OnPrem.outputs.virtualNetworkGateway_ASN
-    vpn_Destination_BGPIPAddress: virtualNetworkGateway_OnPrem.outputs.virtualNetworkGateway_BGPAddress
-    vpn_Destination_Name: virtualNetworkGateway_OnPrem.outputs.virtualNetworkGateway_Name
-    vpn_Destination_PublicIPAddress: virtualNetworkGateway_OnPrem.outputs.virtualNetworkGateway_PublicIPAddress
-    vpn_SharedKey: vpn_SharedKey
-  }
+  dependsOn: [
+    azureFirewall
+  ]
 }

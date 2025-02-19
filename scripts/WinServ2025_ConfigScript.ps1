@@ -26,7 +26,10 @@ Install-Module -Name Microsoft.WinGet.Client -Force -Repository PSGallery -scope
 Write-Host "Using Repair-WinGetPackageManager cmdlet to bootstrap WinGet..."
 Repair-WinGetPackageManager
 
-$CommonToolInstallerScript = {$packages = @(
+$CommonToolInstallerScript = {
+
+    
+$packages = @(
     "wireshark",
     "pstools",
     "vscode",
@@ -54,6 +57,8 @@ Register-ScheduledTask -TaskName $initTaskName -Action $initTaskAction  -User "$
 
 $scriptBlock = {# ensures that Windows PowerShell is used
 
+Read-Host "Press any key and enter to install the tools.  This will take a few minutes."
+
 $packages = @(
     "netmon",
     "wireshark",
@@ -72,6 +77,8 @@ foreach ($package in $packages) {
     Write-Host $package
 }
 Write-Host "Additionally, you will see a pop up momentarily to install npcap.  Please click 'Next' and 'Install' to complete the installation.  This is necessary for Wireshark to capture packets."
+
+Read-Host "`n`nPress any key and enter to begin installing the tools.  This will take a few minutes."
 
 # npcap for using Wireshark for taking packet captures
 c:\npcap-1.80.exe
@@ -103,6 +110,9 @@ Set-Shortcut -ApplicationFilePath "C:\Program Files\Notepad++\notepad++.exe" -De
 Set-Shortcut -ApplicationFilePath "C:\Program Files\Microsoft VS Code\Code.exe" -DestinationFilePath "${DesktopFilePath}/Visual Studio Code.lnk"
 
 Unregister-ScheduledTask -TaskName "Init" -Confirm:$false
+
+Write-Host "Installation of tools is complete.  Run C:\WinServ2025_InstallTools.ps1 manually with PowerShell if there were any failures."
+Read-Host "Press any key and enter to close this window."
 }
 
 Set-Content -Path "C:\WinServ2025_InstallTools.ps1" -Value $scriptBlock.ToString()
