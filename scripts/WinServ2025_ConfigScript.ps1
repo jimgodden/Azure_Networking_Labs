@@ -17,13 +17,13 @@ param (
     [string]$ConditionalForwarderIPAddress
 )
 
-# First test to see if it disabled the initial bootup request to allow telemetry
-# New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows" -Name "OOBE" -Force
-# Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\OOBE" -Name "DisablePrivacyExperience" -Value 1 -Type DWord
+# Disables the initial bootup request to allow telemetry
+New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows" -Name "OOBE" -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\OOBE" -Name "DisablePrivacyExperience" -Value 1 -Type DWord
 
-# Second test to see if it disabled the initial bootup request to allow telemetry
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "AllowTelemetry" -Value 1 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "DisableEnterpriseAuthProxy" -Value 1 -Type DWord
+# Skipping the Allow Telemetry popup with the following registry change is bugged right now.  Leaving this commented in case it gets fixed.
+# Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "AllowTelemetry" -Value 1 -Type DWord
+# Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "DisableEnterpriseAuthProxy" -Value 1 -Type DWord
 
 
 $progressPreference = 'silentlyContinue'
@@ -32,44 +32,6 @@ Install-PackageProvider -Name NuGet -Force | Out-Null
 Install-Module -Name Microsoft.WinGet.Client -Force -Repository PSGallery -scope AllUsers | Out-Null
 Write-Host "Using Repair-WinGetPackageManager cmdlet to bootstrap WinGet..."
 Repair-WinGetPackageManager
-
-# Creates a script that will install commonly used networking tools using winget.  It will be called from another script after a user logs in
-$CommonToolInstallerScript = {
-$packages = @(
-    "wireshark",
-    "pstools",
-    "vscode",
-    "Notepad++.Notepad++",
-    "Microsoft.PowerShell",
-    "iperf3"
-)
-
-foreach ($package in $packages) {
-    $attempt = 0
-    $maxAttempts = 3
-    $success = $false
-
-    while (-not $success -and $attempt -lt $maxAttempts) {
-        try {
-            winget install --accept-source-agreements --scope machine $package
-            Write-Host "Successfully installed $package"
-            $success = $true
-        } catch {
-            $attempt++
-            Write-Host "Failed to install $package. Attempt $attempt of $maxAttempts. Error: $_"
-            if ($attempt -lt $maxAttempts) {
-                Start-Sleep -Seconds 5
-            }
-        }
-    }
-
-    if (-not $success) {
-        Write-Host "Failed to install $package after $maxAttempts attempts."
-    }
-} }
-
-# Adds the script block to a file that will be run on the first logon of the user
-Set-Content -Path "C:\CommonToolInstaller.ps1" -Value $CommonToolInstallerScript.ToString()
 
 # npcap for using Wireshark for taking packet captures
 Invoke-WebRequest -Uri "https://npcap.com/dist/npcap-1.80.exe" -OutFile "c:\npcap-1.80.exe"
@@ -95,26 +57,16 @@ Write-Host "This script runs during the first logon of the user and installs the
 foreach ($package in $packages) {
     Write-Host $package
 }
-Write-Host "Additionally, you will see a pop up momentarily to install npcap.  Please click 'Next' and 'Install' to complete the installation.  This is necessary for Wireshark to capture packets."
+Write-Host "Additionally, you will see a pop up momentarily to install npcap.  Please click 'Next' and 'Install' to complete the installation.  This is necessary for Wireshark to capture packets.`n`n`n"
 
-# Start-Sleep -Seconds 10
+Start-Sleep -Seconds 10
 
 # Read-Host "Press Enter to begin installing the tools"
 
 # Installs npcap for using Wireshark for taking packet captures
 c:\npcap-1.80.exe
 
-
-
-$packages = @(
-    "wireshark",
-    "pstools",
-    "vscode",
-    "Notepad++.Notepad++",
-    "Microsoft.PowerShell",
-    "iperf3"
-)
-
+# Installs the tools defined in $packages via winget.
 foreach ($package in $packages) {
     $attempt = 0
     $maxAttempts = 3
@@ -127,7 +79,8 @@ foreach ($package in $packages) {
             $success = $true
         } catch {
             $attempt++
-            Write-Host "Failed to install $package. Attempt $attempt of $maxAttempts. Error: $_"
+            Write-Host -ForegroundColor Red "`nFailed to install $package. Attempt $attempt of $maxAttempts."
+            Write-Host "Error: $_`n"
             if ($attempt -lt $maxAttempts) {
                 Start-Sleep -Seconds 5
             }
@@ -135,7 +88,7 @@ foreach ($package in $packages) {
     }
 
     if (-not $success) {
-        Write-Host "Failed to install $package after $maxAttempts attempts."
+        Write-Host -ForegroundColor Red "Failed to install $package after $maxAttempts attempts."
     }
 }
 
