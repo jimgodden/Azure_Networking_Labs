@@ -18,8 +18,8 @@ param (
 )
 
 # First test to see if it disabled the initial bootup request to allow telemetry
-New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows" -Name "OOBE" -Force
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\OOBE" -Name "DisablePrivacyExperience" -Value 1 -Type DWord
+# New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows" -Name "OOBE" -Force
+# Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\OOBE" -Name "DisablePrivacyExperience" -Value 1 -Type DWord
 
 # Second test to see if it disabled the initial bootup request to allow telemetry
 Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "AllowTelemetry" -Value 1 -Type DWord
@@ -97,14 +97,51 @@ foreach ($package in $packages) {
 }
 Write-Host "Additionally, you will see a pop up momentarily to install npcap.  Please click 'Next' and 'Install' to complete the installation.  This is necessary for Wireshark to capture packets."
 
-Start-Sleep -Seconds 10
+# Start-Sleep -Seconds 10
 
-Read-Host "Press Enter to begin installing the tools"
+# Read-Host "Press Enter to begin installing the tools"
 
 # Installs npcap for using Wireshark for taking packet captures
 c:\npcap-1.80.exe
 
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\CommonToolInstaller.ps1"
+
+
+$packages = @(
+    "wireshark",
+    "pstools",
+    "vscode",
+    "Notepad++.Notepad++",
+    "Microsoft.PowerShell",
+    "iperf3"
+)
+
+foreach ($package in $packages) {
+    $attempt = 0
+    $maxAttempts = 3
+    $success = $false
+
+    while (-not $success -and $attempt -lt $maxAttempts) {
+        try {
+            winget install --accept-source-agreements --scope machine $package
+            Write-Host "Successfully installed $package"
+            $success = $true
+        } catch {
+            $attempt++
+            Write-Host "Failed to install $package. Attempt $attempt of $maxAttempts. Error: $_"
+            if ($attempt -lt $maxAttempts) {
+                Start-Sleep -Seconds 5
+            }
+        }
+    }
+
+    if (-not $success) {
+        Write-Host "Failed to install $package after $maxAttempts attempts."
+    }
+}
+
+
+
+# powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\CommonToolInstaller.ps1"
 
 $DesktopFilePath = "C:\Users\$ENV:USERNAME\Desktop"
 
