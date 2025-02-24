@@ -19,26 +19,20 @@ var acceleratedNetworking = false
 
 var tagValues = { Training: 'BGPLab' }
 
-// var virtualMachine_ScriptFileLocation = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
-
-var virtualNetwork_AddressPrefix = '10.100.0.0/16'
-
-var subnet_AddressRangeCIDRs = [for i in range(0, 255): cidrSubnet(virtualNetwork_AddressPrefix, 24, i) ]
-
 resource virtualNetwork 'Microsoft.Network/virtualNetworks@2022-09-01' = {
   name: 'virtualNetwork'
   location: location
   properties: {
     addressSpace: {
       addressPrefixes: [
-        virtualNetwork_AddressPrefix
+        '10.100.0.0/16'
       ]
     }
     subnets: [
       {
         name: 'AzureBastionSubnet'
         properties: {
-          addressPrefix: subnet_AddressRangeCIDRs[0]
+          addressPrefix: '10.100.0.0/24'
           delegations: []
           privateEndpointNetworkPolicies: 'Disabled'
           privateLinkServiceNetworkPolicies: 'Enabled'
@@ -47,160 +41,167 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2022-09-01' = {
       {
         name: 'Subnet01'
         properties: {
-          addressPrefix: subnet_AddressRangeCIDRs[1]
+          addressPrefix: '10.100.1.0/24'
           delegations: []
           privateEndpointNetworkPolicies: 'Disabled'
           privateLinkServiceNetworkPolicies: 'Enabled'
           networkSecurityGroup: {
-            id: nsgRule2022.id
+            id: genericNSG.id
           }
         }
       }
       {
         name: 'Subnet02'
         properties: {
-          addressPrefix: subnet_AddressRangeCIDRs[2]
+          addressPrefix: '10.100.2.0/24'
           delegations: []
           privateEndpointNetworkPolicies: 'Disabled'
           privateLinkServiceNetworkPolicies: 'Enabled' 
           networkSecurityGroup: {
-            id: nsgRule2022.id
+            id: genericNSG.id
           }
         }
       }
       {
         name: 'Subnet03'
         properties: {
-          addressPrefix: subnet_AddressRangeCIDRs[3]
+          addressPrefix: '10.100.3.0/24'
           delegations: []
           privateEndpointNetworkPolicies: 'Disabled'
           privateLinkServiceNetworkPolicies: 'Enabled' 
           networkSecurityGroup: {
-            id: nsgRule2022.id
+            id: genericNSG.id
           }
         }
       }
       {
         name: 'Subnet04'
         properties: {
-          addressPrefix: subnet_AddressRangeCIDRs[4]
+          addressPrefix: '10.100.4.0/24'
           privateEndpointNetworkPolicies: 'Disabled'
           privateLinkServiceNetworkPolicies: 'Enabled'
           networkSecurityGroup: {
-            id: nsgRule2022.id
+            id: genericNSG.id
           }
         }
       }
-      // {
-      //   name: 'ClientSubnet'
-      //   properties: {
-      //     addressPrefix: subnet_AddressRangeCIDRs[5]
-      //     delegations: []
-      //     routeTable: {
-      //       id: routeTable.id
-      //     }
-      //     privateEndpointNetworkPolicies: 'Disabled'
-      //     privateLinkServiceNetworkPolicies: 'Enabled'
-      //   }
-      // }
     ]
     enableDdosProtection: false
   }
   tags: tagValues
 }
 
-resource nsgRule2022 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
-  name: 'nsgRule2022'
+resource genericNSG 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
+  name: 'genericNSG'
   location: location
-  properties: {
-    securityRules: [
-      {
-        name: 'AllowSSH'
-        properties: {
-          access: 'Allow'
-          direction: 'Inbound'
-          priority: 200
-          protocol: 'Tcp'
-          sourceAddressPrefix: '*'
-          sourcePortRange: '*'
-          destinationAddressPrefix: '*'
-          destinationPortRange: '2022'
-        }
-      }
-    ]
-  }
 }
 
-// module VMs '../../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.bicep' = [ for i in range(1, 4): {
-module VMs '../../../modules/Microsoft.Compute/VirtualMachine/Linux/Ubuntu24_FRR.bicep' = [ for i in range(1, 4): {
-  name: 'VM0${i}'
+module networkInterface '../../../modules/Microsoft.Network/NetworkInterface.bicep' = [ for i in range(1, 4):  {
+  name: 'VM0${i}_networkInterface'
   params: {
     acceleratedNetworking: acceleratedNetworking
     location: location
+    networkInterface_Name: 'VM0${i}_networkInterface'
     subnet_ID: virtualNetwork.properties.subnets[i].id
-    virtualMachine_AdminPassword: virtualMachine_AdminPassword
-    virtualMachine_AdminUsername: virtualMachine_AdminUsername
-    virtualMachine_Name: 'VM0${i}'
-    virtualMachine_Size: virtualMachine_Size
-    privateIPAllocationMethod: 'Static'
     privateIPAddress: '10.100.${i}.${i}0'
-    addPublicIPAddress: true
-    // virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    // virtualMachine_ScriptFileName: 'frrconfig.sh'
-    // commandToExecute: './frrconfig.sh'
+    privateIPAllocationMethod: 'Static'
+    tagValues: tagValues
   }
 } ]
 
-// module Client_VM '../../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
-//   name: 'Client_VM'
+resource virtualMachine_Linux 'Microsoft.Compute/virtualMachines@2023-03-01' = [ for i in range(1, 4):  {
+  name: 'VM0${i}'
+  location: location
+  properties: {
+    hardwareProfile: {
+      vmSize: virtualMachine_Size
+    }
+    storageProfile: {
+      imageReference: {
+        publisher: 'canonical'
+        offer: 'ubuntu-24_04-lts'
+        sku: 'server'
+        version: 'latest'
+      }
+      osDisk: {
+        osType: 'Linux'
+        name: 'VM0${i}_OsDisk_1'
+        createOption: 'FromImage'
+        caching: 'ReadWrite'
+        deleteOption: 'Delete'
+      }
+      dataDisks: []
+    }
+    osProfile: {
+      computerName: 'VM0${i}'
+      adminUsername: virtualMachine_AdminUsername
+      adminPassword: virtualMachine_AdminPassword
+      linuxConfiguration: {
+        disablePasswordAuthentication: false
+        provisionVMAgent: true
+        patchSettings: {
+          patchMode: 'ImageDefault'
+          assessmentMode: 'ImageDefault'
+        }
+      }
+      secrets: []
+      allowExtensionOperations: true
+    }
+    networkProfile: {
+      networkInterfaces: [
+        {
+          id: networkInterface[i - 1].outputs.networkInterface_ID
+          properties: {
+            deleteOption: 'Delete'
+          }
+        }
+      ]
+    }
+    diagnosticsProfile: {
+      bootDiagnostics: {
+        enabled: true
+      }
+    }
+  }
+  tags: tagValues
+} ]
+
+resource vm_CustomScriptExtension 'Microsoft.Compute/virtualMachines/extensions@2021-11-01' = [ for i in range(1, 4):  {
+  parent: virtualMachine_Linux[i - 1]
+  name: 'installcustomscript'
+  location: location
+  properties: {
+    publisher: 'Microsoft.Azure.Extensions'
+    type: 'CustomScript'
+    typeHandlerVersion: '2.1'
+    autoUpgradeMinorVersion: true
+    settings: {
+      fileUris: [
+        'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/FRR_BGP_Training_Configuration.sh'
+      ]
+    }
+    protectedSettings: {
+      commandToExecute: './FRR_BGP_Training_Configuration.sh'
+    }
+  }
+  tags: tagValues
+} ]
+
+// module VMs '../../../modules/Microsoft.Compute/VirtualMachine/Linux/Ubuntu24_FRR.bicep' = [ for i in range(1, 4): {
+//   name: 'VM0${i}'
 //   params: {
 //     acceleratedNetworking: acceleratedNetworking
 //     location: location
-//     subnet_ID: virtualNetwork.properties.subnets[5].id
+//     subnet_ID: virtualNetwork.properties.subnets[i].id
 //     virtualMachine_AdminPassword: virtualMachine_AdminPassword
 //     virtualMachine_AdminUsername: virtualMachine_AdminUsername
-//     virtualMachine_Name: 'Client-VM'
+//     virtualMachine_Name: 'VM0${i}'
 //     virtualMachine_Size: virtualMachine_Size
-//     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-//     virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_WebServer.ps1'
-//     commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_WebServer.ps1 -Username ${virtualMachine_AdminUsername}'
+//     privateIPAllocationMethod: 'Static'
+//     privateIPAddress: '10.100.${i}.${i}0'
+//     addPublicIPAddress: true
 //   }
-// }
-
-// resource routeTable 'Microsoft.Network/routeTables@2022-09-01' = {
-//   name: 'Client_RouteTable'
-//   location: location
-//   properties: {
-//     disableBgpRoutePropagation: false
-//     routes: [
-//       {
-//         name: 'RouteToOne'
-//         properties: {
-//           addressPrefix: '10.100.1.0/24'
-//           nextHopType: 'VirtualAppliance'
-//           nextHopIpAddress: '10.100.4.40'
-//         }
-//       }
-//       {
-//         name: 'RouteToTwo'
-//         properties: {
-//           addressPrefix: '10.100.2.0/24'
-//           nextHopType: 'VirtualAppliance'
-//           nextHopIpAddress: '10.100.4.40'
-//         }
-//       }
-//       {
-//         name: 'RouteToThree'
-//         properties: {
-//           addressPrefix: '10.100.3.0/24'
-//           nextHopType: 'VirtualAppliance'
-//           nextHopIpAddress: '10.100.4.40'
-//         }
-//       }
-//     ]
-//   }
-//   tags: tagValues
-// }
+// } ]
 
 module bastion '../../../modules/Microsoft.Network/Bastion.bicep' = {
   name: 'bastion'
@@ -208,12 +209,11 @@ module bastion '../../../modules/Microsoft.Network/Bastion.bicep' = {
     bastion_name: 'Bastion'
     bastion_SubnetID: virtualNetwork.properties.subnets[0].id
     location: location
+    bastion_SKU: 'Basic'
   }
 }
 
-output VM01_PublicIP string = 'ssh -p 2022 ${virtualMachine_AdminUsername}@${VMs[0].outputs.networkInterface_PublicIPAddress}'
-output VM02_PublicIP string = 'ssh -p 2022 ${virtualMachine_AdminUsername}@${VMs[1].outputs.networkInterface_PublicIPAddress}'
-output VM03_PublicIP string = 'ssh -p 2022 ${virtualMachine_AdminUsername}@${VMs[2].outputs.networkInterface_PublicIPAddress}'
-output VM04_PublicIP string = 'ssh -p 2022 ${virtualMachine_AdminUsername}@${VMs[3].outputs.networkInterface_PublicIPAddress}'
-
-//https://ms.portal.azure.com/#@fdpo.onmicrosoft.com/resource${resourceId}/bastionHost
+// output VM01_PublicIP string = 'ssh -p 2022 ${virtualMachine_AdminUsername}@${VMs[0].outputs.networkInterface_PublicIPAddress}'
+// output VM02_PublicIP string = 'ssh -p 2022 ${virtualMachine_AdminUsername}@${VMs[1].outputs.networkInterface_PublicIPAddress}'
+// output VM03_PublicIP string = 'ssh -p 2022 ${virtualMachine_AdminUsername}@${VMs[2].outputs.networkInterface_PublicIPAddress}'
+// output VM04_PublicIP string = 'ssh -p 2022 ${virtualMachine_AdminUsername}@${VMs[3].outputs.networkInterface_PublicIPAddress}'

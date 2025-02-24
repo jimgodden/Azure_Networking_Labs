@@ -3,87 +3,90 @@
     "Name": "Sandbox-VirtualWAN"
   },
   {
-    "Name": "Training-AzFWBasic"
-  },
-  {
-    "Name": "Scenario-ConnMonTest"
-  },
-  {
-    "Name": "Scenario-Test"
-  },
-  {
-    "Name": "Sandbox-PE_to_SQL"
-  },
-  {
-    "Name": "Scenario-LinuxAutoPacketCapture"
-  },
-  {
-    "Name": "Sandbox-ApplicationGateway_v2"
-  },
-  {
-    "Name": "Sandbox-DNS"
-  },
-  {
-    "Name": "Scenario-NSGFlowLogs"
-  },
-  {
-    "Name": "Sandbox-PrivateResolver"
-  },
-  {
-    "Name": "Sandbox-VM_Windows"
-  },
-  {
-    "Name": "Sandbox-VM_to_VM"
-  },
-  {
-    "Name": "Sandbox-VM_Linux"
-  },
-  {
-    "Name": "Sandbox-TrafficManager"
-  },
-  {
-    "Name": "Scenario-BastionNativeClient"
-  },
-  {
-    "Name": "Scenario-ELBRepro"
-  },
-  {
-    "Name": "Sandbox-NetworkWatcher"
-  },
-  {
-    "Name": "Sandbox-Basic_Lab"
-  },
-  {
-    "Name": "Training-FRR_BGP_Lab"
-  },
-  {
-    "Name": "Sandbox-PrivateLink"
-  },
-  {
-    "Name": "Sandbox-ExternalLoadBalancer"
-  },
-  {
-    "Name": "Sandbox-InternalLoadBalancer"
-  },
-  {
-    "Name": "Training-VPN_Lab"
-  },
-  {
-    "Name": "Training-Azure_DNS"
-  },
-  {
-    "Name": "Training-BGP_Lab"
-  },
-  {
-    "Name": "Training-VPN_L300"
+    "Name": "Scenario-BastionDeveloperSKU"
   },
   {
     "Name": "Sandbox-VirtualNetworkManager"
   },
   {
-    "Name": "Scenario-BastionDeveloperSKU"
+    "Name": "Training-VPN_L300"
+  },
+  {
+    "Name": "Training-BGP_Lab"
+  },
+  {
+    "Name": "Training-Azure_DNS"
+  },
+  {
+    "Name": "Training-VPN_Lab"
+  },
+  {
+    "Name": "Sandbox-InternalLoadBalancer"
+  },
+  {
+    "Name": "Sandbox-ExternalLoadBalancer"
+  },
+  {
+    "Name": "Sandbox-PrivateLink"
+  },
+  {
+    "Name": "Training-FRR_BGP_Lab"
+  },
+  {
+    "Name": "Sandbox-Basic_Lab"
+  },
+  {
+    "Name": "Sandbox-NetworkWatcher"
+  },
+  {
+    "Name": "Scenario-ELBRepro"
+  },
+  {
+    "Name": "Scenario-BastionNativeClient"
+  },
+  {
+    "Name": "Sandbox-TrafficManager"
+  },
+  {
+    "Name": "Sandbox-VM_Linux"
+  },
+  {
+    "Name": "Sandbox-VM_to_VM"
+  },
+  {
+    "Name": "Sandbox-VM_Windows"
+  },
+  {
+    "Name": "Sandbox-PrivateResolver"
+  },
+  {
+    "Name": "Scenario-NSGFlowLogs"
+  },
+  {
+    "Name": "Sandbox-DNS"
+  },
+  {
+    "Name": "Sandbox-ApplicationGateway_v2"
+  },
+  {
+    "Name": "Scenario-LinuxAutoPacketCapture"
+  },
+  {
+    "Name": "Sandbox-PE_to_SQL"
+  },
+  {
+    "Name": "Scenario-Test"
+  },
+  {
+    "Name": "Scenario-ConnMonTest"
+  },
+  {
+    "Name": "Training-AzFWBasic"
   },
   {
     "Name": "Training-AzFWBasic_Complete"
+  },
+  {
+    "Name": "Sandbox-PrivateResolver_Simple"
   }
 ]

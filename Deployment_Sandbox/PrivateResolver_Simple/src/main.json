@@ -1,0 +1,1153 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.32.4.45862",
+      "templateHash": "12916528857286299522"
+    }
+  },
+  "parameters": {
+    "virtualMachine_AdminUsername": {
+      "type": "string",
+      "metadata": {
+        "description": "Username for the admin account of the Virtual Machines"
+      }
+    },
+    "virtualMachine_AdminPassword": {
+      "type": "securestring",
+      "minLength": 8,
+      "metadata": {
+        "description": "Password for the admin account of the Virtual Machines.\nEnsure the password meets typical Azure VM password requirements.\n"
+      }
+    },
+    "vmSize": {
+      "type": "string",
+      "defaultValue": "Standard_D2as_v4",
+      "metadata": {
+        "description": "Size of the Virtual Machines"
+      }
+    },
+    "acceleratedNetworking": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "True enables Accelerated Networking and False disabled it.  \nNot all VM sizes support Accel Net (i.e. Standard_B2ms).  \nI'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net.\n"
+      }
+    },
+    "tagValues": {
+      "type": "object",
+      "defaultValue": {
+        "Training": "PrivateResolver"
+      }
+    }
+  },
+  "variables": {
+    "location": "[resourceGroup().location]",
+    "virtualMachine_ScriptFile": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2025_ConfigScript.ps1",
+    "virtualMachine_Hub_Dns_Name": "hub-dnsVM",
+    "virtualMachine_SpokeA_Client_Name": "spokeA-clientVM"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2024-05-01",
+      "name": "genericNSG",
+      "location": "[variables('location')]"
+    },
+    {
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2021-02-01",
+      "name": "hub_VNet",
+      "location": "[variables('location')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "10.0.0.0/16"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "General",
+            "properties": {
+              "addressPrefix": "10.0.0.0/24",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'genericNSG')]"
+              }
+            }
+          },
+          {
+            "name": "GatewaySubnet",
+            "properties": {
+              "addressPrefix": "10.0.1.0/24"
+            }
+          },
+          {
+            "name": "PRInboundEndpointSubnet",
+            "properties": {
+              "addressPrefix": "10.0.2.0/24"
+            }
+          },
+          {
+            "name": "PROutboundEndpointSubnet",
+            "properties": {
+              "addressPrefix": "10.0.3.0/24"
+            }
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkSecurityGroups', 'genericNSG')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2021-02-01",
+      "name": "spokeA_VNet",
+      "location": "[variables('location')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "10.1.0.0/16"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "General",
+            "properties": {
+              "addressPrefix": "10.1.0.0/24",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'genericNSG')]"
+              }
+            }
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkSecurityGroups', 'genericNSG')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2024-07-01",
+      "name": "[variables('virtualMachine_Hub_Dns_Name')]",
+      "location": "[variables('location')]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('vmSize')]"
+        },
+        "additionalCapabilities": {
+          "hibernationEnabled": false
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "MicrosoftWindowsServer",
+            "offer": "WindowsServer",
+            "sku": "2025-datacenter-azure-edition",
+            "version": "latest"
+          },
+          "osDisk": {
+            "osType": "Windows",
+            "name": "[format('{0}_OsDisk_1', variables('virtualMachine_Hub_Dns_Name'))]",
+            "createOption": "FromImage",
+            "caching": "ReadWrite",
+            "managedDisk": {
+              "storageAccountType": "Premium_LRS"
+            },
+            "deleteOption": "Delete",
+            "diskSizeGB": 127
+          },
+          "dataDisks": [],
+          "diskControllerType": "SCSI"
+        },
+        "osProfile": {
+          "computerName": "[variables('virtualMachine_Hub_Dns_Name')]",
+          "adminUsername": "[parameters('virtualMachine_AdminUsername')]",
+          "adminPassword": "[parameters('virtualMachine_AdminPassword')]",
+          "windowsConfiguration": {
+            "provisionVMAgent": true,
+            "enableAutomaticUpdates": true,
+            "patchSettings": {
+              "patchMode": "AutomaticByPlatform",
+              "automaticByPlatformSettings": {
+                "rebootSetting": "IfRequired"
+              },
+              "assessmentMode": "ImageDefault",
+              "enableHotpatching": true
+            }
+          },
+          "secrets": [],
+          "allowExtensionOperations": true
+        },
+        "securityProfile": {
+          "uefiSettings": {
+            "secureBootEnabled": true,
+            "vTpmEnabled": true
+          },
+          "securityType": "TrustedLaunch"
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', format('{0}-nic', variables('virtualMachine_Hub_Dns_Name')))]",
+              "properties": {
+                "deleteOption": "Delete"
+              }
+            }
+          ]
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": true
+          }
+        }
+      },
+      "tags": "[parameters('tagValues')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkInterfaces', format('{0}-nic', variables('virtualMachine_Hub_Dns_Name')))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2024-01-01",
+      "name": "[format('{0}-nic', variables('virtualMachine_Hub_Dns_Name'))]",
+      "location": "[variables('location')]",
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAddress": "10.0.0.4",
+              "privateIPAllocationMethod": "Static",
+              "subnet": {
+                "id": "[reference(resourceId('Microsoft.Network/virtualNetworks', 'hub_VNet'), '2021-02-01').subnets[0].id]"
+              },
+              "primary": true,
+              "privateIPAddressVersion": "IPv4"
+            }
+          }
+        ],
+        "enableAcceleratedNetworking": "[parameters('acceleratedNetworking')]"
+      },
+      "tags": "[parameters('tagValues')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', 'hub_VNet')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "apiVersion": "2021-11-01",
+      "name": "[format('{0}/{1}', variables('virtualMachine_Hub_Dns_Name'), 'installcustomscript')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "publisher": "Microsoft.Compute",
+        "type": "CustomScriptExtension",
+        "typeHandlerVersion": "1.9",
+        "autoUpgradeMinorVersion": true,
+        "settings": {
+          "fileUris": [
+            "[variables('virtualMachine_ScriptFile')]"
+          ]
+        },
+        "protectedSettings": {
+          "commandToExecute": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username {0} -Type DNS', parameters('virtualMachine_AdminUsername'))]"
+        }
+      },
+      "tags": "[parameters('tagValues')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Compute/virtualMachines', variables('virtualMachine_Hub_Dns_Name'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2024-07-01",
+      "name": "[variables('virtualMachine_SpokeA_Client_Name')]",
+      "location": "[variables('location')]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('vmSize')]"
+        },
+        "additionalCapabilities": {
+          "hibernationEnabled": false
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "MicrosoftWindowsServer",
+            "offer": "WindowsServer",
+            "sku": "2025-datacenter-azure-edition",
+            "version": "latest"
+          },
+          "osDisk": {
+            "osType": "Windows",
+            "name": "[format('{0}_OsDisk_1', variables('virtualMachine_SpokeA_Client_Name'))]",
+            "createOption": "FromImage",
+            "caching": "ReadWrite",
+            "managedDisk": {
+              "storageAccountType": "Premium_LRS"
+            },
+            "deleteOption": "Delete",
+            "diskSizeGB": 127
+          },
+          "dataDisks": [],
+          "diskControllerType": "SCSI"
+        },
+        "osProfile": {
+          "computerName": "[variables('virtualMachine_SpokeA_Client_Name')]",
+          "adminUsername": "[parameters('virtualMachine_AdminUsername')]",
+          "adminPassword": "[parameters('virtualMachine_AdminPassword')]",
+          "windowsConfiguration": {
+            "provisionVMAgent": true,
+            "enableAutomaticUpdates": true,
+            "patchSettings": {
+              "patchMode": "AutomaticByPlatform",
+              "automaticByPlatformSettings": {
+                "rebootSetting": "IfRequired"
+              },
+              "assessmentMode": "ImageDefault",
+              "enableHotpatching": true
+            }
+          },
+          "secrets": [],
+          "allowExtensionOperations": true
+        },
+        "securityProfile": {
+          "uefiSettings": {
+            "secureBootEnabled": true,
+            "vTpmEnabled": true
+          },
+          "securityType": "TrustedLaunch"
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', format('{0}-nic', variables('virtualMachine_SpokeA_Client_Name')))]",
+              "properties": {
+                "deleteOption": "Delete"
+              }
+            }
+          ]
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": true
+          }
+        }
+      },
+      "tags": "[parameters('tagValues')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkInterfaces', format('{0}-nic', variables('virtualMachine_SpokeA_Client_Name')))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2024-01-01",
+      "name": "[format('{0}-nic', variables('virtualMachine_SpokeA_Client_Name'))]",
+      "location": "[variables('location')]",
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAddress": "10.1.0.4",
+              "privateIPAllocationMethod": "Static",
+              "subnet": {
+                "id": "[reference(resourceId('Microsoft.Network/virtualNetworks', 'spokeA_VNet'), '2021-02-01').subnets[0].id]"
+              },
+              "primary": true,
+              "privateIPAddressVersion": "IPv4"
+            }
+          }
+        ],
+        "enableAcceleratedNetworking": "[parameters('acceleratedNetworking')]"
+      },
+      "tags": "[parameters('tagValues')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', 'spokeA_VNet')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "apiVersion": "2021-11-01",
+      "name": "[format('{0}/{1}', variables('virtualMachine_SpokeA_Client_Name'), 'installcustomscript')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "publisher": "Microsoft.Compute",
+        "type": "CustomScriptExtension",
+        "typeHandlerVersion": "1.9",
+        "autoUpgradeMinorVersion": true,
+        "settings": {
+          "fileUris": [
+            "[variables('virtualMachine_ScriptFile')]"
+          ]
+        },
+        "protectedSettings": {
+          "commandToExecute": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username {0} -Type General', parameters('virtualMachine_AdminUsername'))]"
+        }
+      },
+      "tags": "[parameters('tagValues')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Compute/virtualMachines', variables('virtualMachine_SpokeA_Client_Name'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "peerings_Hub_to_Spokes_NoGateway",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "virtualNetwork_Hub_Id": {
+            "value": "[resourceId('Microsoft.Network/virtualNetworks', 'hub_VNet')]"
+          },
+          "virtualNetwork_Spoke_Ids": {
+            "value": [
+              "[resourceId('Microsoft.Network/virtualNetworks', 'spokeA_VNet')]"
+            ]
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.32.4.45862",
+              "templateHash": "9093547247946164556"
+            }
+          },
+          "parameters": {
+            "virtualNetwork_Hub_Id": {
+              "type": "string",
+              "metadata": {
+                "description": "Resource Id of the Hub Virtual Network"
+              }
+            },
+            "virtualNetwork_Spoke_Ids": {
+              "type": "array",
+              "metadata": {
+                "description": "Array of Resource Ids of the Spoke Virtual Networks"
+              }
+            }
+          },
+          "resources": [
+            {
+              "copy": {
+                "name": "virtualNetworkPeering_Hub_to_Spoke",
+                "count": "[length(parameters('virtualNetwork_Spoke_Ids'))]"
+              },
+              "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+              "apiVersion": "2024-05-01",
+              "name": "[format('{0}/to{1}', split(parameters('virtualNetwork_Hub_Id'), '/')[8], split(parameters('virtualNetwork_Spoke_Ids')[copyIndex()], '/')[8])]",
+              "properties": {
+                "remoteVirtualNetwork": {
+                  "id": "[parameters('virtualNetwork_Spoke_Ids')[copyIndex()]]"
+                },
+                "allowVirtualNetworkAccess": true,
+                "allowForwardedTraffic": true,
+                "useRemoteGateways": false,
+                "allowGatewayTransit": true
+              }
+            },
+            {
+              "copy": {
+                "name": "virtualNetworkPeering_Spokes_to_Hub",
+                "count": "[length(parameters('virtualNetwork_Spoke_Ids'))]"
+              },
+              "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+              "apiVersion": "2024-05-01",
+              "name": "[format('{0}/to{1}', split(parameters('virtualNetwork_Spoke_Ids')[copyIndex()], '/')[8], split(parameters('virtualNetwork_Hub_Id'), '/')[8])]",
+              "properties": {
+                "remoteVirtualNetwork": {
+                  "id": "[parameters('virtualNetwork_Hub_Id')]"
+                },
+                "allowVirtualNetworkAccess": true,
+                "allowForwardedTraffic": true,
+                "useRemoteGateways": false,
+                "allowGatewayTransit": false
+              }
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', 'hub_VNet')]",
+        "[resourceId('Microsoft.Network/virtualNetworks', 'spokeA_VNet')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "AllBastionResources",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "[variables('location')]"
+          },
+          "peered_VirtualNetwork_Ids": {
+            "value": [
+              "[resourceId('Microsoft.Network/virtualNetworks', 'hub_VNet')]",
+              "[resourceId('Microsoft.Network/virtualNetworks', 'spokeA_VNet')]"
+            ]
+          },
+          "bastion_name": {
+            "value": "Bastion"
+          },
+          "virtualNetwork_AddressPrefix": {
+            "value": "10.200.0.0/24"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.32.4.45862",
+              "templateHash": "14054073123741368988"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string",
+              "metadata": {
+                "description": "Azure Datacenter location that the main resouces will be deployed to."
+              }
+            },
+            "bastion_name": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the Azure Bastion"
+              }
+            },
+            "bastion_SKU": {
+              "type": "string",
+              "defaultValue": "Standard"
+            },
+            "peered_VirtualNetwork_Ids": {
+              "type": "array"
+            },
+            "virtualNetwork_AddressPrefix": {
+              "type": "string"
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Network/virtualNetworks",
+              "apiVersion": "2024-05-01",
+              "name": "[format('{0}_vnet', parameters('bastion_name'))]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "addressSpace": {
+                  "addressPrefixes": [
+                    "[parameters('virtualNetwork_AddressPrefix')]"
+                  ]
+                },
+                "subnets": [
+                  {
+                    "name": "AzureBastionSubnet",
+                    "properties": {
+                      "addressPrefix": "[parameters('virtualNetwork_AddressPrefix')]",
+                      "delegations": [],
+                      "privateEndpointNetworkPolicies": "Disabled",
+                      "privateLinkServiceNetworkPolicies": "Enabled"
+                    }
+                  }
+                ],
+                "enableDdosProtection": false
+              }
+            },
+            {
+              "type": "Microsoft.Resources/deployments",
+              "apiVersion": "2022-09-01",
+              "name": "[parameters('bastion_name')]",
+              "properties": {
+                "expressionEvaluationOptions": {
+                  "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                  "location": {
+                    "value": "[parameters('location')]"
+                  },
+                  "bastion_SubnetID": {
+                    "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', format('{0}_vnet', parameters('bastion_name'))), '2024-05-01').subnets[0].id]"
+                  },
+                  "bastion_name": {
+                    "value": "[parameters('bastion_name')]"
+                  },
+                  "bastion_SKU": {
+                    "value": "[parameters('bastion_SKU')]"
+                  }
+                },
+                "template": {
+                  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "metadata": {
+                    "_generator": {
+                      "name": "bicep",
+                      "version": "0.32.4.45862",
+                      "templateHash": "8940753681302617038"
+                    }
+                  },
+                  "parameters": {
+                    "location": {
+                      "type": "string",
+                      "metadata": {
+                        "description": "Azure Datacenter location that the main resouces will be deployed to."
+                      }
+                    },
+                    "bastion_name": {
+                      "type": "string",
+                      "metadata": {
+                        "description": "Name of the Azure Bastion"
+                      }
+                    },
+                    "bastion_SubnetID": {
+                      "type": "string",
+                      "metadata": {
+                        "description": "Resource ID of the subnet the Azure Bastion will be placed in.  The name of the subnet must be \"AzureBastionSubnet\""
+                      }
+                    },
+                    "enableTunneling": {
+                      "type": "bool",
+                      "defaultValue": false
+                    },
+                    "enableIpConnect": {
+                      "type": "bool",
+                      "defaultValue": false
+                    },
+                    "disableCopyPaste": {
+                      "type": "bool",
+                      "defaultValue": false
+                    },
+                    "enableShareableLink": {
+                      "type": "bool",
+                      "defaultValue": false
+                    },
+                    "enableFileCopy": {
+                      "type": "bool",
+                      "defaultValue": false
+                    },
+                    "enableKerberos": {
+                      "type": "bool",
+                      "defaultValue": false
+                    },
+                    "enablePrivateOnlyBastion": {
+                      "type": "bool",
+                      "defaultValue": false
+                    },
+                    "bastion_SKU": {
+                      "type": "string",
+                      "defaultValue": "Basic",
+                      "allowedValues": [
+                        "Basic",
+                        "Standard",
+                        "Premium"
+                      ],
+                      "metadata": {
+                        "description": "SKU of the Azure Bastion"
+                      }
+                    },
+                    "tagValues": {
+                      "type": "object",
+                      "defaultValue": {}
+                    }
+                  },
+                  "resources": [
+                    {
+                      "type": "Microsoft.Network/bastionHosts",
+                      "apiVersion": "2024-05-01",
+                      "name": "[parameters('bastion_name')]",
+                      "location": "[parameters('location')]",
+                      "sku": {
+                        "name": "[parameters('bastion_SKU')]"
+                      },
+                      "properties": {
+                        "scaleUnits": 2,
+                        "enableTunneling": "[parameters('enableTunneling')]",
+                        "enableIpConnect": "[parameters('enableIpConnect')]",
+                        "disableCopyPaste": "[parameters('disableCopyPaste')]",
+                        "enableShareableLink": "[parameters('enableShareableLink')]",
+                        "enableFileCopy": "[parameters('enableFileCopy')]",
+                        "enableKerberos": "[parameters('enableKerberos')]",
+                        "enablePrivateOnlyBastion": "[parameters('enablePrivateOnlyBastion')]",
+                        "ipConfigurations": [
+                          {
+                            "name": "IpConf",
+                            "properties": {
+                              "privateIPAllocationMethod": "Dynamic",
+                              "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_VIP', parameters('bastion_name')))]"
+                              },
+                              "subnet": {
+                                "id": "[parameters('bastion_SubnetID')]"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "tags": "[parameters('tagValues')]",
+                      "dependsOn": [
+                        "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_VIP', parameters('bastion_name')))]"
+                      ]
+                    },
+                    {
+                      "type": "Microsoft.Network/publicIPAddresses",
+                      "apiVersion": "2022-09-01",
+                      "name": "[format('{0}_VIP', parameters('bastion_name'))]",
+                      "location": "[parameters('location')]",
+                      "sku": {
+                        "name": "Standard",
+                        "tier": "Regional"
+                      },
+                      "properties": {
+                        "publicIPAddressVersion": "IPv4",
+                        "publicIPAllocationMethod": "Static",
+                        "idleTimeoutInMinutes": 4,
+                        "ipTags": []
+                      },
+                      "tags": "[parameters('tagValues')]"
+                    }
+                  ]
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', format('{0}_vnet', parameters('bastion_name')))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Resources/deployments",
+              "apiVersion": "2022-09-01",
+              "name": "bastionVNETPeering",
+              "properties": {
+                "expressionEvaluationOptions": {
+                  "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                  "bastion_VirtualNetwork_Id": {
+                    "value": "[resourceId('Microsoft.Network/virtualNetworks', format('{0}_vnet', parameters('bastion_name')))]"
+                  },
+                  "other_VirtualNetwork_Ids": {
+                    "value": "[parameters('peered_VirtualNetwork_Ids')]"
+                  }
+                },
+                "template": {
+                  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "metadata": {
+                    "_generator": {
+                      "name": "bicep",
+                      "version": "0.32.4.45862",
+                      "templateHash": "17047602974184826442"
+                    }
+                  },
+                  "parameters": {
+                    "bastion_VirtualNetwork_Id": {
+                      "type": "string"
+                    },
+                    "other_VirtualNetwork_Ids": {
+                      "type": "array"
+                    }
+                  },
+                  "resources": [
+                    {
+                      "copy": {
+                        "name": "bastion_to_other_VirtualNetwork_Peerings",
+                        "count": "[length(parameters('other_VirtualNetwork_Ids'))]"
+                      },
+                      "type": "Microsoft.Resources/deployments",
+                      "apiVersion": "2022-09-01",
+                      "name": "[format('bastion_to_{0}', split(parameters('other_VirtualNetwork_Ids')[copyIndex()], '/')[8])]",
+                      "properties": {
+                        "expressionEvaluationOptions": {
+                          "scope": "inner"
+                        },
+                        "mode": "Incremental",
+                        "parameters": {
+                          "virtualNetwork1_Id": {
+                            "value": "[parameters('bastion_VirtualNetwork_Id')]"
+                          },
+                          "virtualNetwork2_Id": {
+                            "value": "[parameters('other_VirtualNetwork_Ids')[copyIndex()]]"
+                          }
+                        },
+                        "template": {
+                          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                          "contentVersion": "1.0.0.0",
+                          "metadata": {
+                            "_generator": {
+                              "name": "bicep",
+                              "version": "0.32.4.45862",
+                              "templateHash": "14118566146782858923"
+                            }
+                          },
+                          "parameters": {
+                            "virtualNetwork1_Id": {
+                              "type": "string",
+                              "metadata": {
+                                "description": "Name of the First Virtual Network"
+                              }
+                            },
+                            "virtualNetwork2_Id": {
+                              "type": "string",
+                              "metadata": {
+                                "description": "Name of the Second Virtual Network"
+                              }
+                            }
+                          },
+                          "variables": {
+                            "virtualNetwork1_Name": "[split(parameters('virtualNetwork1_Id'), '/')[8]]",
+                            "virtualNetwork2_Name": "[split(parameters('virtualNetwork2_Id'), '/')[8]]"
+                          },
+                          "resources": [
+                            {
+                              "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+                              "apiVersion": "2022-09-01",
+                              "name": "[format('{0}/to{1}', variables('virtualNetwork1_Name'), variables('virtualNetwork2_Name'))]",
+                              "properties": {
+                                "remoteVirtualNetwork": {
+                                  "id": "[parameters('virtualNetwork2_Id')]"
+                                },
+                                "allowVirtualNetworkAccess": true,
+                                "allowForwardedTraffic": true,
+                                "useRemoteGateways": false,
+                                "allowGatewayTransit": false
+                              }
+                            },
+                            {
+                              "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+                              "apiVersion": "2022-09-01",
+                              "name": "[format('{0}/to{1}', variables('virtualNetwork2_Name'), variables('virtualNetwork1_Name'))]",
+                              "properties": {
+                                "remoteVirtualNetwork": {
+                                  "id": "[parameters('virtualNetwork1_Id')]"
+                                },
+                                "allowVirtualNetworkAccess": true,
+                                "allowForwardedTraffic": true,
+                                "useRemoteGateways": false,
+                                "allowGatewayTransit": false
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', format('{0}_vnet', parameters('bastion_name')))]"
+              ]
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', 'hub_VNet')]",
+        "[resourceId('Microsoft.Network/virtualNetworks', 'spokeA_VNet')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "PrivateResolver_Hub",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "[variables('location')]"
+          },
+          "dnsPrivateResolver_Inbound_SubnetID": {
+            "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', 'hub_VNet'), '2021-02-01').subnets[2].id]"
+          },
+          "dnsPrivateResolver_Outbound_SubnetID": {
+            "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', 'hub_VNet'), '2021-02-01').subnets[3].id]"
+          },
+          "virtualNetwork_ID": {
+            "value": "[resourceId('Microsoft.Network/virtualNetworks', 'hub_VNet')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.32.4.45862",
+              "templateHash": "14730579850621794979"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string",
+              "metadata": {
+                "description": "the location for resolver VNET and dns private resolver - Azure DNS Private Resolver available in specific region, refer the documenation to select the supported region for this deployment. For more information https://docs.microsoft.com/azure/dns/dns-private-resolver-overview#regional-availability"
+              }
+            },
+            "virtualNetwork_ID": {
+              "type": "string",
+              "metadata": {
+                "description": "Resource ID of the Virtual Network to which the DNS Private resolver will be added."
+              }
+            },
+            "dnsPrivateResolver_Inbound_SubnetID": {
+              "type": "string",
+              "metadata": {
+                "description": "Resource ID of the Subnet to which the DNS Private resolver Inbound Endpoint will be added."
+              }
+            },
+            "dnsPrivateResolver_Outbound_SubnetID": {
+              "type": "string",
+              "metadata": {
+                "description": "Resource ID of the Subnet to which the DNS Private resolver Outbound Endpoint will be added."
+              }
+            },
+            "dnsPrivateResolver_Name": {
+              "type": "string",
+              "defaultValue": "dnsResolver",
+              "metadata": {
+                "description": "name of the dns private resolver"
+              }
+            },
+            "inboundEndpoint_Name": {
+              "type": "string",
+              "defaultValue": "endpoint-inbound",
+              "metadata": {
+                "description": "name that will be used for the private resolver inbound endpoint"
+              }
+            },
+            "outboundEndpoint_Name": {
+              "type": "string",
+              "defaultValue": "endpoint-outbound",
+              "metadata": {
+                "description": "name that will be used for the private resolver outbound endpoint"
+              }
+            },
+            "tagValues": {
+              "type": "object",
+              "defaultValue": {}
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Network/dnsResolvers",
+              "apiVersion": "2022-07-01",
+              "name": "[parameters('dnsPrivateResolver_Name')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "virtualNetwork": {
+                  "id": "[parameters('virtualNetwork_ID')]"
+                }
+              },
+              "tags": "[parameters('tagValues')]"
+            },
+            {
+              "type": "Microsoft.Network/dnsResolvers/inboundEndpoints",
+              "apiVersion": "2022-07-01",
+              "name": "[format('{0}/{1}', parameters('dnsPrivateResolver_Name'), parameters('inboundEndpoint_Name'))]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "ipConfigurations": [
+                  {
+                    "privateIpAllocationMethod": "Dynamic",
+                    "subnet": {
+                      "id": "[parameters('dnsPrivateResolver_Inbound_SubnetID')]"
+                    }
+                  }
+                ]
+              },
+              "tags": "[parameters('tagValues')]",
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/dnsResolvers', parameters('dnsPrivateResolver_Name'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Network/dnsResolvers/outboundEndpoints",
+              "apiVersion": "2022-07-01",
+              "name": "[format('{0}/{1}', parameters('dnsPrivateResolver_Name'), parameters('outboundEndpoint_Name'))]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "subnet": {
+                  "id": "[parameters('dnsPrivateResolver_Outbound_SubnetID')]"
+                }
+              },
+              "tags": "[parameters('tagValues')]",
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/dnsResolvers', parameters('dnsPrivateResolver_Name'))]"
+              ]
+            }
+          ],
+          "outputs": {
+            "dnsPrivateResolver_Outbound_Endpoint_ID": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/dnsResolvers/outboundEndpoints', parameters('dnsPrivateResolver_Name'), parameters('outboundEndpoint_Name'))]"
+            },
+            "privateDNSResolver_Inbound_Endpoint_IPAddress": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Network/dnsResolvers/inboundEndpoints', parameters('dnsPrivateResolver_Name'), parameters('inboundEndpoint_Name')), '2022-07-01').ipConfigurations[0].privateIpAddress]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', 'hub_VNet')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "PrivateResolver_ForwardingRuleset_Hub",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "[variables('location')]"
+          },
+          "virtualNetwork_IDs": {
+            "value": [
+              "[resourceId('Microsoft.Network/virtualNetworks', 'spokeA_VNet')]"
+            ]
+          },
+          "outboundEndpoint_ID": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'PrivateResolver_Hub'), '2022-09-01').outputs.dnsPrivateResolver_Outbound_Endpoint_ID.value]"
+          },
+          "domainName": {
+            "value": "contoso.com."
+          },
+          "targetDNSServers": {
+            "value": [
+              {
+                "ipaddress": "8.8.8.8",
+                "port": 53
+              }
+            ]
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.32.4.45862",
+              "templateHash": "8206034123101316548"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string",
+              "metadata": {
+                "description": "the location for resolver VNET and dns private resolver"
+              }
+            },
+            "virtualNetwork_IDs": {
+              "type": "array",
+              "metadata": {
+                "description": "Resource ID of the Virtual Network to which the DNS Private resolver's ruleset will be linked."
+              }
+            },
+            "outboundEndpoint_ID": {
+              "type": "string",
+              "metadata": {
+                "description": "Resource ID of the Outbound Endpoint to be associated with the forwarding ruleset"
+              }
+            },
+            "dnsForwardingRuleSet_Name": {
+              "type": "string",
+              "defaultValue": "forwardingRule",
+              "metadata": {
+                "description": "Name of the forwarding ruleset."
+              }
+            },
+            "domainName": {
+              "type": "string",
+              "metadata": {
+                "description": "the target domain name for the forwarding ruleset.  Must end with a dot"
+              }
+            },
+            "targetDNSServers": {
+              "type": "array",
+              "metadata": {
+                "description": "the list of target DNS servers ip address and the port number for conditional forwarding\nFormat to be used:\n{\n  ipaddress: '10.0.0.1'\n  port: 53\n}\n{\n  ipaddress: '10.0.0.2'\n  port: 53\n}\n"
+              }
+            },
+            "tagValues": {
+              "type": "object",
+              "defaultValue": {}
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Network/dnsForwardingRulesets",
+              "apiVersion": "2022-07-01",
+              "name": "[parameters('dnsForwardingRuleSet_Name')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "dnsResolverOutboundEndpoints": [
+                  {
+                    "id": "[parameters('outboundEndpoint_ID')]"
+                  }
+                ]
+              },
+              "tags": "[parameters('tagValues')]"
+            },
+            {
+              "copy": {
+                "name": "resolverLink",
+                "count": "[length(parameters('virtualNetwork_IDs'))]"
+              },
+              "type": "Microsoft.Network/dnsForwardingRulesets/virtualNetworkLinks",
+              "apiVersion": "2022-07-01",
+              "name": "[format('{0}/{1}', parameters('dnsForwardingRuleSet_Name'), format('{0}_link', last(split(parameters('virtualNetwork_IDs')[copyIndex()], '/'))))]",
+              "properties": {
+                "virtualNetwork": {
+                  "id": "[parameters('virtualNetwork_IDs')[copyIndex()]]"
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/dnsForwardingRulesets', parameters('dnsForwardingRuleSet_Name'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Network/dnsForwardingRulesets/forwardingRules",
+              "apiVersion": "2022-07-01",
+              "name": "[format('{0}/{1}', parameters('dnsForwardingRuleSet_Name'), format('{0}_ForwardingRule', join(split(parameters('domainName'), '.'), '')))]",
+              "properties": {
+                "domainName": "[parameters('domainName')]",
+                "targetDnsServers": "[parameters('targetDNSServers')]"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/dnsForwardingRulesets', parameters('dnsForwardingRuleSet_Name'))]"
+              ]
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'PrivateResolver_Hub')]",
+        "[resourceId('Microsoft.Network/virtualNetworks', 'spokeA_VNet')]"
+      ]
+    }
+  ]
+}

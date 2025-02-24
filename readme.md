@@ -50,5 +50,3 @@ These templates are created for one specific use.  They are typically created fo
 ### Training
 
 These templates are created to be used in conjunction with directed Trainings.  They are stored here for development purposes only.  These are not the official and final training templates.  Those will be stored in a private location.
-
-
