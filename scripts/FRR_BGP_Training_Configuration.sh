@@ -23,7 +23,7 @@ sudo systemctl restart frr
 # Sets the base configurations file for the VM with hostname VM01
 if [ "$(hostname)" = "VM01" ]; then
 
-sudo tee /noConfigs.sh > /dev/null << 'EOF'
+sudo tee /noConfig.sh > /dev/null << 'EOF'
 NoConfig="frr version 10.2.1
 frr defaults traditional
 hostname VM01
@@ -41,8 +41,8 @@ EOF
 # Make the script executable
 sudo chmod +x /noConfig.sh
 
-# Save the script to /baseConfigs.sh
-sudo tee /baseConfigs.sh > /dev/null << 'EOF'
+# Save the script to /baseConfig.sh
+sudo tee /baseConfig.sh > /dev/null << 'EOF'
 #!/bin/bash
 
 # Define base configurations
@@ -78,20 +78,15 @@ sudo systemctl restart frr
 EOF
 
 # Make the script executable
-sudo chmod +x /root/baseConfig.sh
+sudo chmod +x /baseConfig.sh
 
 fi # End of the base configurations file for the VM with hostname VM01
-
-
-
-
-
 
 
 # Sets the base configurations file for the VM with hostname VM02
 if [ "$(hostname)" = "VM02" ]; then
 
-sudo tee /noConfigs.sh > /dev/null << 'EOF'
+sudo tee /noConfig.sh > /dev/null << 'EOF'
 NoConfig="frr version 10.2.1
 frr defaults traditional
 hostname VM02
@@ -109,8 +104,8 @@ EOF
 # Make the script executable
 sudo chmod +x /noConfig.sh
 
-# Save the script to /baseConfigs.sh
-sudo tee /baseConfigs.sh > /dev/null << 'EOF'
+# Save the script to /baseConfig.sh
+sudo tee /baseConfig.sh > /dev/null << 'EOF'
 #!/bin/bash
 
 # Define base configurations
@@ -152,17 +147,15 @@ sudo systemctl restart frr
 EOF
 
 # Make the script executable
-sudo chmod +x /root/baseConfig.sh
+sudo chmod +x /baseConfig.sh
 
 fi # End of the base configurations file for the VM with hostname VM02
-
-
 
 
 # Sets the base configurations file for the VM with hostname VM03
 if [ "$(hostname)" = "VM03" ]; then
 
-sudo tee /noConfigs.sh > /dev/null << 'EOF'
+sudo tee /noConfig.sh > /dev/null << 'EOF'
 NoConfig="frr version 10.2.1
 frr defaults traditional
 hostname VM03
@@ -180,8 +173,8 @@ EOF
 # Make the script executable
 sudo chmod +x /noConfig.sh
 
-# Save the script to /baseConfigs.sh
-sudo tee /baseConfigs.sh > /dev/null << 'EOF'
+# Save the script to /baseConfig.sh
+sudo tee /baseConfig.sh > /dev/null << 'EOF'
 #!/bin/bash
 
 # Define base configurations
@@ -217,18 +210,15 @@ sudo systemctl restart frr
 EOF
 
 # Make the script executable
-sudo chmod +x /root/baseConfig.sh
+sudo chmod +x /baseConfig.sh
 
 fi # End of the base configurations file for the VM with hostname VM03
-
-
-
 
 
 # Sets the base configurations file for the VM with hostname VM04
 if [ "$(hostname)" = "VM04" ]; then
 
-sudo tee /noConfigs.sh > /dev/null << 'EOF'
+sudo tee /noConfig.sh > /dev/null << 'EOF'
 NoConfig="frr version 10.2.1
 frr defaults traditional
 hostname VM04
@@ -246,8 +236,8 @@ EOF
 # Make the script executable
 sudo chmod +x /noConfig.sh
 
-# Save the script to /baseConfigs.sh
-sudo tee /baseConfigs.sh > /dev/null << 'EOF'
+# Save the script to /baseConfig.sh
+sudo tee /baseConfig.sh > /dev/null << 'EOF'
 #!/bin/bash
 
 # Define base configurations
@@ -266,6 +256,6 @@ sudo systemctl restart frr
 EOF
 
 # Make the script executable
-sudo chmod +x /root/baseConfig.sh
+sudo chmod +x /baseConfig.sh
 
 fi # End of the base configurations file for the VM with hostname VM04
