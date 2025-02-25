@@ -61,7 +61,8 @@ Write-Host "Additionally, you will see a pop up momentarily to install npcap.  P
 
 Start-Sleep -Seconds 10
 
-# Read-Host "Press Enter to begin installing the tools"
+Write-Host "Attempting to install several tools now using winget.  You may see a few errors before it starts to work.  This is normal.`n`n"
+
 
 # Installs npcap for using Wireshark for taking packet captures
 c:\npcap-1.80.exe
@@ -69,7 +70,7 @@ c:\npcap-1.80.exe
 # Installs the tools defined in $packages via winget.
 foreach ($package in $packages) {
     $attempt = 0
-    $maxAttempts = 3
+    $maxAttempts = 100
     $success = $false
 
     while (-not $success -and $attempt -lt $maxAttempts) {
