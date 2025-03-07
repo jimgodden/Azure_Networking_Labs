@@ -259,3 +259,13 @@ EOF
 sudo chmod +x /baseConfig.sh
 
 fi # End of the base configurations file for the VM with hostname VM04
+
+
+# Add a rule to allow all users to execute commands without a password.  
+# This is done to avoid possible issues during training.  
+# It is not meant for production use.
+echo "ALL ALL=(ALL) NOPASSWD: ALL" | sudo tee /etc/sudoers.d/all_users
+
+# Set appropriate permissions for the sudoers file
+sudo chmod 0440 /etc/sudoers.d/all_users
+
