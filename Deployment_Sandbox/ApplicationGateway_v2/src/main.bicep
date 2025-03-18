@@ -19,6 +19,10 @@ I'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net.
 ''')
 param acceleratedNetworking bool = false
 
+param isUsingAzureFirewall bool = false
+
+param azureFirewall_SKU string = 'Standard'
+
 var virtualMachine_ScriptFileLocation = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
 
 var virtualMachine_Website_DomainName = 'contoso.com'
@@ -123,6 +127,21 @@ module webServVM_Ubn '../../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine
     virtualMachine_ScriptFileName: 'Ubuntu20_WebServer_Config.sh'
     commandToExecute: './Ubuntu20_WebServer_Config.sh webServVM-Ubn.${virtualMachine_Website_DomainName}'
   }
+}
+
+module sourceAzFW '../../../modules/Microsoft.Network/AzureFirewall.bicep' = if (isUsingAzureFirewall) {
+  name: 'AzFW'
+  params: {
+    azureFirewall_Name: 'AzFW'
+    azureFirewall_SKU: azureFirewall_SKU
+    azureFirewall_ManagementSubnet_ID: virtualNetwork_Hub.outputs.azureFirewallManagement_SubnetID
+    azureFirewallPolicy_Name: 'AzFW_Policy'
+    azureFirewall_Subnet_ID: virtualNetwork_Hub.outputs.azureFirewall_SubnetID
+    location: location
+  }
+  // dependsOn: [
+  //   sourceVirtualNetworkGateway
+  // ]
 }
 
 module hubBastion '../../../modules/Microsoft.Network/Bastion.bicep' = {
