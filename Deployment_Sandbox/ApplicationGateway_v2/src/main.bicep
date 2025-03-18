@@ -139,9 +139,9 @@ module sourceAzFW '../../../modules/Microsoft.Network/AzureFirewall.bicep' = if 
     azureFirewall_Subnet_ID: virtualNetwork_Hub.outputs.azureFirewall_SubnetID
     location: location
   }
-  // dependsOn: [
-  //   sourceVirtualNetworkGateway
-  // ]
+  dependsOn: [
+    AppGW
+  ]
 }
 
 module hubBastion '../../../modules/Microsoft.Network/Bastion.bicep' = {

@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.32.4.45862",
-      "templateHash": "9260676670445862228"
+      "templateHash": "4805653186098044911"
     }
   },
   "parameters": {
@@ -3045,6 +3045,7 @@
         }
       },
       "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'AppGW')]",
         "[resourceId('Microsoft.Resources/deployments', 'VirtualNetworkHub')]"
       ]
     },
