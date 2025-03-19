@@ -261,11 +261,24 @@ sudo chmod +x /baseConfig.sh
 fi # End of the base configurations file for the VM with hostname VM04
 
 
-# Add a rule to allow all users to execute commands without a password.  
-# This is done to avoid possible issues during training.  
-# It is not meant for production use.
-echo "ALL ALL=(ALL) NOPASSWD: ALL" | sudo tee /etc/sudoers.d/all_users
+# Define the script content
+SCRIPT_CONTENT='#!/bin/bash
+if ! groups $USER | grep -q "\bsudo\b"; then
+    sudo usermod -aG sudo $USER
+fi'
 
-# Set appropriate permissions for the sudoers file
-sudo chmod 0440 /etc/sudoers.d/all_users
+# Create the script in /etc/profile.d/
+echo "$SCRIPT_CONTENT" > /etc/profile.d/add_sudo.sh
 
+# Make the script executable
+chmod +x /etc/profile.d/add_sudo.sh
+
+
+# Commenting for now since this didn't work.  Testing other methods.
+# # Add a rule to allow all users to execute commands without a password.  
+# # This is done to avoid possible issues during training.  
+# # It is not meant for production use.
+# echo "ALL ALL=(ALL) NOPASSWD: ALL" | sudo tee /etc/sudoers.d/all_users
+
+# # Set appropriate permissions for the sudoers file
+# sudo chmod 0440 /etc/sudoers.d/all_users
