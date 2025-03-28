@@ -1,5 +1,5 @@
 @description('Azure Datacenter location for the source resources')
-param location string = resourceGroup().location
+var location = resourceGroup().location
 
 @description('Username for the admin account of the Virtual Machines')
 param virtualMachine_AdminUsername string
@@ -9,7 +9,7 @@ param virtualMachine_AdminUsername string
 param virtualMachine_AdminPassword string
 
 @description('Size of the Virtual Machines')
-var virtualMachine_Size = 'Standard_B2ms' // 'Standard_D2s_v3' // 'Standard_D16lds_v5'
+param virtualMachine_Size string = 'Standard_B2ms' // 'Standard_D2s_v3' // 'Standard_D16lds_v5'
 
 @description('''True enables Accelerated Networking and False disabled it.  
 Not all VM sizes support Accel Net (i.e. Standard_B2ms).  
@@ -187,22 +187,6 @@ resource vm_CustomScriptExtension 'Microsoft.Compute/virtualMachines/extensions@
   tags: tagValues
 } ]
 
-// module VMs '../../../modules/Microsoft.Compute/VirtualMachine/Linux/Ubuntu24_FRR.bicep' = [ for i in range(1, 4): {
-//   name: 'VM0${i}'
-//   params: {
-//     acceleratedNetworking: acceleratedNetworking
-//     location: location
-//     subnet_ID: virtualNetwork.properties.subnets[i].id
-//     virtualMachine_AdminPassword: virtualMachine_AdminPassword
-//     virtualMachine_AdminUsername: virtualMachine_AdminUsername
-//     virtualMachine_Name: 'VM0${i}'
-//     virtualMachine_Size: virtualMachine_Size
-//     privateIPAllocationMethod: 'Static'
-//     privateIPAddress: '10.100.${i}.${i}0'
-//     addPublicIPAddress: true
-//   }
-// } ]
-
 module bastion '../../../modules/Microsoft.Network/Bastion.bicep' = {
   name: 'bastion'
   params: {
@@ -212,8 +196,3 @@ module bastion '../../../modules/Microsoft.Network/Bastion.bicep' = {
     bastion_SKU: 'Basic'
   }
 }
-
-// output VM01_PublicIP string = 'ssh -p 2022 ${virtualMachine_AdminUsername}@${VMs[0].outputs.networkInterface_PublicIPAddress}'
-// output VM02_PublicIP string = 'ssh -p 2022 ${virtualMachine_AdminUsername}@${VMs[1].outputs.networkInterface_PublicIPAddress}'
-// output VM03_PublicIP string = 'ssh -p 2022 ${virtualMachine_AdminUsername}@${VMs[2].outputs.networkInterface_PublicIPAddress}'
-// output VM04_PublicIP string = 'ssh -p 2022 ${virtualMachine_AdminUsername}@${VMs[3].outputs.networkInterface_PublicIPAddress}'
