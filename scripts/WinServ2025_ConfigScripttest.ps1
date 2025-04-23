@@ -41,7 +41,7 @@ Set-ItemProperty -Path $registryPath -Name $registryName -Value $registryValue
 Invoke-WebRequest -Uri "https://npcap.com/dist/npcap-1.80.exe" -OutFile "c:\npcap-1.80.exe"
 
 # Install Chocolatey
-Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
 
 # List of applications to install
 $packages = @(
@@ -62,9 +62,22 @@ foreach ($package in $packages) {
 
 Write-Host "Applications installed successfully." -ForegroundColor Green
 
-$DesktopFilePath = "C:\Users\$Username\Desktop"
+
+
+# Creates a task that installs the tools when the user logs in
+$initTaskName = "Init"
+$initTaskAction = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-NoProfile -ExecutionPolicy Bypass -File `"C:\WinServ2025_InstallTools.ps1`""
+$initTaskTrigger = New-ScheduledTaskTrigger -AtLogon
+Register-ScheduledTask -TaskName $initTaskName -Action $initTaskAction -Trigger $initTaskTrigger -Force
+# Register-ScheduledTask -TaskName $initTaskName -Action $initTaskAction -User "${env:computername}\${Username}" -Trigger $initTaskTrigger -Force
+
+$scriptBlock = {
+$ChocolatelyPackages = Get-Content "C:\ChoclatelyPackages.txt"
+Write-Host "This Virtual Machine has been the following applications pre-installed via chocolately:"
+Write-Host $ChocolatelyPackages
 
 # Creates shortcuts for commonly used tools on the desktop
+$DesktopFilePath = "C:\Users\$env:USERNAME\Desktop"
 function Set-Shortcut {
     param (
         [Parameter(Mandatory)]
@@ -80,31 +93,20 @@ function Set-Shortcut {
 Set-Shortcut -ApplicationFilePath "C:\Program Files\Wireshark\Wireshark.exe"  -DestinationFilePath "${DesktopFilePath}/Wireshark.lnk"
 Set-Shortcut -ApplicationFilePath "C:\Program Files\WindowsApps\Microsoft.WindowsTerminal_1.18.10301.0_x64__8wekyb3d8bbwe\WindowsTerminal.exe" -DestinationFilePath "${DesktopFilePath}/Windows Terminal.lnk"
 Set-Shortcut -ApplicationFilePath "C:\Program Files\Notepad++\notepad++.exe" -DestinationFilePath "${DesktopFilePath}/Notepad++.lnk"
-Set-Shortcut -ApplicationFilePath "C:\Program Files\Microsoft VS Code\Code.exe" -DestinationFilePath "${DesktopFilePath}/Visual Studio Code.lnk"
-
-# Creates a task that installs the tools when the user logs in
-$initTaskName = "Init"
-$initTaskAction = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-NoProfile -ExecutionPolicy Bypass -File `"C:\WinServ2025_InstallTools.ps1`""
-$initTaskTrigger = New-ScheduledTaskTrigger -AtLogon
-Register-ScheduledTask -TaskName $initTaskName -Action $initTaskAction  -User "${env:computername}\${Username}" -Trigger $initTaskTrigger -Force
-
-$scriptBlock = {
-$ChocolatelyPackages = Get-Content "C:\ChoclatelyPackages.txt"
-Write-Host "This Virtual Machine has been the following applications pre-installed via chocolately:"
-Write-Host $ChocolatelyPackages
+# Set-Shortcut -ApplicationFilePath "C:\Program Files\Microsoft VS Code\Code.exe" -DestinationFilePath "${DesktopFilePath}/Visual Studio Code.lnk"
 
 Write-Host "`n`nTo take packet captures with wireshark, npcap needs to be installed."
 Write-Host "A pop up for installing npcap will appear momentarily."
 Write-Host "Follow the instructions as directed to install npcap on this machine."
 # Installs npcap for using Wireshark for taking packet captures
 c:\npcap-1.80.exe
+
+# Removes the scheduled task so that it doesn't run again on the next logon
+Unregister-ScheduledTask -TaskName "Init" -Confirm:$false
 }
 
 # Adds the script block to a file that will be run on the first logon of the user
 Set-Content -Path "C:\WinServ2025_InstallTools.ps1" -Value $scriptBlock.ToString()
-
-# Removes the scheduled task so that it doesn't run again on the next logon
-Unregister-ScheduledTask -TaskName "Init" -Confirm:$false
 
 
 # Configures the Virtual Machine as a Web server if the type is WebServer
