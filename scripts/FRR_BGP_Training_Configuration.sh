@@ -8,18 +8,6 @@ sudo sed -i 's/bgpd=no/bgpd=yes/' /etc/frr/daemons
 
 sudo systemctl restart frr
 
-# # The following commands are used to configure the VMs to forward packets between interfaces.
-# # This is being left here in case we decided to use it in the future.
-# sudo sed -i 's/#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/' /etc/sysctl.conf
-# sudo sysctl -p
-# sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
-
-# # The following commands allow the VM to listen on port 22 and 2022 for additional SSH options.  
-# # configure ssh to listen on both ports 22 and 2022
-# sudo sed -i '/^Port 22/a Port 2022' /etc/ssh/sshd_config && sudo systemctl restart ssh
-# sudo ufw allow 2022/tcp
-# sudo ufw reload
-
 # Sets the base configurations file for the VM with hostname VM01
 if [ "$(hostname)" = "VM01" ]; then
 
@@ -261,24 +249,15 @@ sudo chmod +x /baseConfig.sh
 fi # End of the base configurations file for the VM with hostname VM04
 
 
-# Define the script content
-SCRIPT_CONTENT='#!/bin/bash
-if ! groups $USER | grep -q "\bsudo\b"; then
-    sudo usermod -aG sudo $USER
-fi'
+# # Define the script content
+# SCRIPT_CONTENT='#!/bin/bash
+# if ! groups $USER | grep -q "\bsudo\b"; then
+#     sudo usermod -aG sudo $USER
+# fi'
 
-# Create the script in /etc/profile.d/
-echo "$SCRIPT_CONTENT" > /etc/profile.d/add_sudo.sh
+# # Create the script in /etc/profile.d/
+# echo "$SCRIPT_CONTENT" > /etc/profile.d/add_sudo.sh
 
-# Make the script executable
-chmod +x /etc/profile.d/add_sudo.sh
+# # Make the script executable
+# chmod +x /etc/profile.d/add_sudo.sh
 
-
-# Commenting for now since this didn't work.  Testing other methods.
-# # Add a rule to allow all users to execute commands without a password.  
-# # This is done to avoid possible issues during training.  
-# # It is not meant for production use.
-# echo "ALL ALL=(ALL) NOPASSWD: ALL" | sudo tee /etc/sudoers.d/all_users
-
-# # Set appropriate permissions for the sudoers file
-# sudo chmod 0440 /etc/sudoers.d/all_users

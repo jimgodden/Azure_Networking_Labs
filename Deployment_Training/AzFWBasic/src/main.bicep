@@ -18,7 +18,7 @@ param vmSize string = 'Standard_D2as_v4' // 'Standard_B2ms' // 'Standard_D2s_v3'
 Not all VM sizes support Accel Net (i.e. Standard_B2ms).  
 I'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net.
 ''')
-param acceleratedNetworking bool = true
+param acceleratedNetworking bool = false
 
 @minLength(6)
 @description('VPN Shared Key used for authenticating VPN connections')
@@ -44,6 +44,14 @@ resource networkSecurityGroup_Generic 'Microsoft.Network/networkSecurityGroups@2
   tags: tagValues
 }
 
+module natGateway_Hub '../../../modules/Microsoft.Network/NATGateway.bicep' = {
+  name: 'natGateway_Hub'
+  params: {
+    location: location
+    natGateway_Name: 'NATGateway_Hub'
+  }
+}
+
 
 resource virtualNetwork_Hub 'Microsoft.Network/virtualNetworks@2021-02-01' = {
   name: 'hub_VNet'
@@ -64,6 +72,9 @@ resource virtualNetwork_Hub 'Microsoft.Network/virtualNetworks@2021-02-01' = {
           }
           networkSecurityGroup: {
             id: networkSecurityGroup_Generic.id
+          }
+          natGateway: {
+            id: natGateway_Hub.outputs.natGateway_Id
           }
         }
       }
@@ -120,6 +131,13 @@ resource routeTable_Hub 'Microsoft.Network/routeTables@2024-05-01' = {
   tags: tagValues
 }
 
+module natGateway_SpokeA '../../../modules/Microsoft.Network/NATGateway.bicep' = {
+  name: 'natGateway_SpokeA'
+  params: {
+    location: location
+    natGateway_Name: 'NATGateway_SpokeA'
+  }
+}
 
 resource virtualNetwork_SpokeA 'Microsoft.Network/virtualNetworks@2021-02-01' = {
   name: 'spokeA_VNet'
@@ -140,6 +158,9 @@ resource virtualNetwork_SpokeA 'Microsoft.Network/virtualNetworks@2021-02-01' = 
           }
           networkSecurityGroup: {
             id: networkSecurityGroup_Generic.id
+          }
+          natGateway: {
+            id: natGateway_SpokeA.outputs.natGateway_Id
           }
         }
       }
@@ -178,9 +199,25 @@ resource routeTable_SpokeA 'Microsoft.Network/routeTables@2024-05-01' = {
           nextHopIpAddress: '10.0.2.4'
         }
       }
+      {
+        name: 'toGoogle'
+        properties: {
+          addressPrefix: '8.8.8.8/32'
+          nextHopType: 'VirtualAppliance'
+          nextHopIpAddress: '10.0.2.4'
+        }
+      }
     ]
   }
   tags: tagValues
+}
+
+module natGateway_SpokeB '../../../modules/Microsoft.Network/NATGateway.bicep' = {
+  name: 'natGateway_SpokeB'
+  params: {
+    location: location
+    natGateway_Name: 'NATGateway_SpokeB'
+  }
 }
 
 resource virtualNetwork_SpokeB 'Microsoft.Network/virtualNetworks@2021-02-01' = {
@@ -202,6 +239,9 @@ resource virtualNetwork_SpokeB 'Microsoft.Network/virtualNetworks@2021-02-01' = 
           }
           networkSecurityGroup: {
             id: networkSecurityGroup_Generic.id
+          }
+          natGateway: {
+            id: natGateway_SpokeB.outputs.natGateway_Id
           }
         }
       }
@@ -379,6 +419,7 @@ resource virtualMachine_Hub_Dns_CustomScriptExtension 'Microsoft.Compute/virtual
     settings: {
       fileUris: [ 
         'https://supportability.visualstudio.com/_git/AzureNetworking?path=/.LabBoxRepo/Hybrid/AzFW_Basic-Training/WinServ2025_ConfigScript.ps1'
+        // 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2025_ConfigScript.ps1'
       ]
     }
     protectedSettings: {
@@ -504,6 +545,7 @@ resource virtualMachine_SpokeA_Client_CustomScriptExtension 'Microsoft.Compute/v
     settings: {
       fileUris: [ 
         'https://supportability.visualstudio.com/_git/AzureNetworking?path=/.LabBoxRepo/Hybrid/AzFW_Basic-Training/WinServ2025_ConfigScript.ps1'
+        // 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2025_ConfigScript.ps1'
       ]
     }
     protectedSettings: {
@@ -628,6 +670,7 @@ resource virtualMachine_SpokeB_Iis_CustomScriptExtension 'Microsoft.Compute/virt
     settings: {
       fileUris: [ 
         'https://supportability.visualstudio.com/_git/AzureNetworking?path=/.LabBoxRepo/Hybrid/AzFW_Basic-Training/WinServ2025_ConfigScript.ps1'
+        // 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2025_ConfigScript.ps1'
       ]
     }
     protectedSettings: {
@@ -710,6 +753,14 @@ module bastion '../../../modules/Microsoft.Network/BastionEverything.bicep' = {
   }
 }
 
+module natGateway_OnPrem '../../../modules/Microsoft.Network/NATGateway.bicep' = {
+  name: 'natGateway_OnPrem'
+  params: {
+    location: location
+    natGateway_Name: 'NATGateway_OnPrem'
+  }
+}
+
 resource virtualNetwork_OnPrem 'Microsoft.Network/virtualNetworks@2021-02-01' = {
   name: 'onprem_VNet'
   location: location
@@ -726,6 +777,9 @@ resource virtualNetwork_OnPrem 'Microsoft.Network/virtualNetworks@2021-02-01' = 
           addressPrefix: '10.100.0.0/24'
           networkSecurityGroup: {
             id: networkSecurityGroup_Generic.id
+          }
+          natGateway: {
+            id: natGateway_OnPrem.outputs.natGateway_Id
           }
         }
       }
@@ -853,6 +907,7 @@ resource virtualMachine_Onprem_Dns_CustomScriptExtension 'Microsoft.Compute/virt
     settings: {
       fileUris: [ 
         'https://supportability.visualstudio.com/_git/AzureNetworking?path=/.LabBoxRepo/Hybrid/AzFW_Basic-Training/WinServ2025_ConfigScript.ps1'
+        // 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2025_ConfigScript.ps1'
       ]
     }
     protectedSettings: {
@@ -977,6 +1032,7 @@ resource virtualMachine_Onprem_Client_CustomScriptExtension 'Microsoft.Compute/v
     settings: {
       fileUris: [ 
         'https://supportability.visualstudio.com/_git/AzureNetworking?path=/.LabBoxRepo/Hybrid/AzFW_Basic-Training/WinServ2025_ConfigScript.ps1'
+        // 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2025_ConfigScript.ps1'
       ]
     }
     protectedSettings: {

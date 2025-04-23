@@ -2,5 +2,4 @@
 *.bicepparam
 build.ps1
 /Tools/OrganizeParamFiles.ps1
-ARM_to_Bicep_conversions
-main.bicepparam.sample
+Deployment_Training/AzFWBasic

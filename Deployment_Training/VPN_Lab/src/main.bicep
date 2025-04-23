@@ -24,21 +24,10 @@ param virtualNetworkGateway_SKU string = 'VpnGw1'
 @secure()
 param vpn_SharedKey string
 
-// @description('Set to true if you want to deploy the Virtual Network Gateway in an Active-Active configuration.')
-// param virtualNetworkGateway_ActiveActive bool = false
-
-var virtualNetworkGateway_ActiveActive = false
-
 ///var virtualMachine_ScriptFile = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2022_ConfigScript_DNS.ps1'
 
 var virtualMachine_ScriptFile = 'https://supportability.visualstudio.com/AzureNetworking/_git/AzureNetworking?path=/.LabBoxRepo/Hybrid/VPN_P2S_TransitiveRouting-Training/WinServ2022_ConfigScript_DNS.ps1'
 
-// var virtualMachine_ScriptFiles = [
-//   'https://supportability.visualstudio.com/AzureNetworking/_git/AzureNetworking?path=/.LabBoxRepo/Hybrid/VPN_P2S_TransitiveRouting-Training/WinServ2022_ConfigScript_DNS.ps1'
-//   'https://supportability.visualstudio.com/AzureNetworking/_git/AzureNetworking?path=/.LabBoxRepo/Hybrid/VPN_P2S_TransitiveRouting-Training/ChocoInstalls.ps1'
-//   'https://supportability.visualstudio.com/AzureNetworking/_git/AzureNetworking?path=/.LabBoxRepo/Hybrid/VPN_P2S_TransitiveRouting-Training/WinServ2022_InitScript.ps1'
-//   'https://supportability.visualstudio.com/AzureNetworking/_git/AzureNetworking?path=/.LabBoxRepo/Hybrid/VPN_P2S_TransitiveRouting-Training/WinServ2022_InstallTools.ps1'
-// ]
 
 // Virtual Networks
 module virtualNetworkA '../../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
@@ -77,27 +66,42 @@ module virtualNetworkHub '../../../modules/Microsoft.Network/VirtualNetwork.bice
   }
 }
 
-module virtualNetworks_to_Bastion_Peerings '../../../modules/Microsoft.Network/BastionVirtualNetworkHubPeerings.bicep' = {
-  name: 'virtualNetworks_to_Bastion_Peerings'
+module bastionForAllVNETs '../../../modules/Microsoft.Network/BastionEverything.bicep' = {
+  name: 'bastionForAllVNETs'
   params: {
-    bastion_VirtualNetwork_Id: virtualNetworkHub.outputs.virtualNetwork_ID
-    other_VirtualNetwork_Ids: [
+    location: location
+    bastion_name: 'Bastion'
+    peered_VirtualNetwork_Ids: [
       virtualNetworkA.outputs.virtualNetwork_ID
       virtualNetworkB.outputs.virtualNetwork_ID
       virtualNetworkC.outputs.virtualNetwork_ID
+      virtualNetworkHub.outputs.virtualNetwork_ID
     ]
+    virtualNetwork_AddressPrefix: '10.200.0.0/16'
   }
 }
 
-module bastion '../../../modules/Microsoft.Network/Bastion.bicep' = {
-  name: 'Bastion'
-  params: {
-    bastion_name: 'Bastion'
-    bastion_SubnetID: virtualNetworkHub.outputs.bastion_SubnetID
-    location: location
-    bastion_SKU: 'Standard'
-  }
-}
+// module virtualNetworks_to_Bastion_Peerings '../../../modules/Microsoft.Network/BastionVirtualNetworkHubPeerings.bicep' = {
+//   name: 'virtualNetworks_to_Bastion_Peerings'
+//   params: {
+//     bastion_VirtualNetwork_Id: virtualNetworkHub.outputs.virtualNetwork_ID
+//     other_VirtualNetwork_Ids: [
+//       virtualNetworkA.outputs.virtualNetwork_ID
+//       virtualNetworkB.outputs.virtualNetwork_ID
+//       virtualNetworkC.outputs.virtualNetwork_ID
+//     ]
+//   }
+// }
+
+// module bastion '../../../modules/Microsoft.Network/Bastion.bicep' = {
+//   name: 'Bastion'
+//   params: {
+//     bastion_name: 'Bastion'
+//     bastion_SubnetID: virtualNetworkHub.outputs.bastion_SubnetID
+//     location: location
+//     bastion_SKU: 'Standard'
+//   }
+// }
 
 module virtualNetworkGatewayA '../../../modules/Microsoft.Network/VirtualNetworkGateway.bicep' = {
   name: 'virtualNetworkGatewayA'
@@ -107,7 +111,7 @@ module virtualNetworkGatewayA '../../../modules/Microsoft.Network/VirtualNetwork
     virtualNetworkGateway_Name: 'virtualNetworkGatewayA'
     virtualNetworkGateway_Subnet_ResourceID: virtualNetworkA.outputs.gateway_SubnetID
     virtualNetworkGateway_SKU: virtualNetworkGateway_SKU
-    activeActive: virtualNetworkGateway_ActiveActive
+    activeActive: false
   }
 }
 
@@ -143,7 +147,7 @@ module virtualNetworkGatewayB '../../../modules/Microsoft.Network/VirtualNetwork
     virtualNetworkGateway_Name: 'virtualNetworkGatewayB'
     virtualNetworkGateway_Subnet_ResourceID: virtualNetworkB.outputs.gateway_SubnetID
     virtualNetworkGateway_SKU: virtualNetworkGateway_SKU
-    activeActive: virtualNetworkGateway_ActiveActive
+    activeActive: false
   }
 }
 
@@ -179,7 +183,7 @@ module virtualNetworkGatewayC '../../../modules/Microsoft.Network/VirtualNetwork
     virtualNetworkGateway_Name: 'virtualNetworkGatewayC'
     virtualNetworkGateway_Subnet_ResourceID: virtualNetworkC.outputs.gateway_SubnetID
     virtualNetworkGateway_SKU: virtualNetworkGateway_SKU
-    activeActive: virtualNetworkGateway_ActiveActive
+    activeActive: false
   }
 }
 
@@ -198,6 +202,16 @@ module virtualMachine_WindowsA '../../../modules/Microsoft.Compute/WindowsServer
   }
 }
 
+
+
+
+
+
+
+
+
+
+
 module virtualMachine_WindowsB '../../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine_ForLabbox.bicep' = {
   name: 'VMWindowsB'
   params: {
@@ -213,6 +227,17 @@ module virtualMachine_WindowsB '../../../modules/Microsoft.Compute/WindowsServer
   }
 }
 
+
+
+
+
+
+
+
+
+
+
+
 module virtualMachine_WindowsC '../../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine_ForLabbox.bicep' = {
   name: 'VMWindowsC'
   params: {
@@ -227,35 +252,3 @@ module virtualMachine_WindowsC '../../../modules/Microsoft.Compute/WindowsServer
     commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username ${virtualMachine_AdminUsername}'
   }
 }
-
-
-
-// module bastionA '../../../modules/Microsoft.Network/Bastion.bicep' = {
-//   name: 'BastionA'
-//   params: {
-//     bastion_name: 'BastionA'
-//     bastion_SubnetID: virtualNetworkA.outputs.bastion_SubnetID
-//     location: location
-//     bastion_SKU: 'Standard'
-//   }
-// }
-
-// module bastionB '../../../modules/Microsoft.Network/Bastion.bicep' = {
-//   name: 'BastionB'
-//   params: {
-//     bastion_name: 'BastionB'
-//     bastion_SubnetID: virtualNetworkB.outputs.bastion_SubnetID
-//     location: location
-//     bastion_SKU: 'Standard'
-//   }
-// }
-
-// module bastionC '../../../modules/Microsoft.Network/Bastion.bicep' = {
-//   name: 'BastionC'
-//   params: {
-//     bastion_name: 'BastionC'
-//     bastion_SubnetID: virtualNetworkC.outputs.bastion_SubnetID
-//     location: location
-//     bastion_SKU: 'Standard'
-//   }
-// }

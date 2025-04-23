@@ -63,34 +63,34 @@ module virtualMachine_DNS '../../../modules/Microsoft.Compute/VirtualMachine/Win
   }
 }
 
-module virtualNetwork_Hub_DNS_Update '../../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
-  name: 'vnet-hub-dns-update'
-  params: {
-    location: location
-    virtualNetwork_AddressPrefix: '10.0.0.0/16'
-    virtualNetwork_Name: 'vnet-hub'
-    dnsServers: [
-      virtualMachine_DNS.outputs.networkInterface_PrivateIPAddress
-    ]
-  }
-}
+// module virtualNetwork_Hub_DNS_Update '../../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
+//   name: 'vnet-hub-dns-update'
+//   params: {
+//     location: location
+//     virtualNetwork_AddressPrefix: '10.0.0.0/16'
+//     virtualNetwork_Name: 'vnet-hub'
+//     dnsServers: [
+//       virtualMachine_DNS.outputs.networkInterface_PrivateIPAddress
+//     ]
+//   }
+// }
 
 module virtualMachine_Client '../../../modules/Microsoft.Compute/VirtualMachine/Windows/Server2025_General.bicep' = {
   name: 'vm-client'
   params: {
     location: location
     acceleratedNetworking: acceleratedNetworking
-    subnet_ID: virtualNetwork_Hub.outputs.general_SubnetID
+    subnet_ID: virtualNetwork_SpokeA.outputs.general_SubnetID
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'vm-client'
     vmSize: virtualMachine_Size
     privateIPAllocationMethod: 'Static'
-    privateIPAddress: cidrHost( virtualNetwork_Hub.outputs.general_Subnet_AddressPrefix, 4 )
+    privateIPAddress: cidrHost( virtualNetwork_SpokeA.outputs.general_Subnet_AddressPrefix, 3 )
   }
-  dependsOn: [
-    virtualNetwork_Hub_DNS_Update
-  ]
+  // dependsOn: [
+  //   virtualNetwork_Hub_DNS_Update
+  // ]
 }
 
 module internalLoadBalancer_WebServers '../../../modules/Microsoft.Network/InternalLoadBalancer.bicep' = {
@@ -98,11 +98,11 @@ module internalLoadBalancer_WebServers '../../../modules/Microsoft.Network/Inter
   params: {
     location: location
     internalLoadBalancer_Name: 'ilb-webservers'
-    internalLoadBalancer_SubnetID: virtualNetwork_SpokeA.outputs.general_SubnetID
+    internalLoadBalancer_SubnetID: virtualNetwork_SpokeB.outputs.general_SubnetID
     tcpPort: 443
     networkInterface_IPConfig_Name: [ for i in range(0, WebServerCount): virtualMachine_WebServers[i].outputs.networkInterface_IPConfig0_Name ]
     networkInterface_Name: [ for i in range(0, WebServerCount): virtualMachine_WebServers[i].outputs.networkInterface_Name ]
-    networkInterface_SubnetID: [ for i in range(0, WebServerCount): virtualNetwork_SpokeA.outputs.general_SubnetID]
+    networkInterface_SubnetID: [ for i in range(0, WebServerCount): virtualNetwork_SpokeB.outputs.general_SubnetID]
   }
 }
 
@@ -111,13 +111,24 @@ module virtualMachine_WebServers '../../../modules/Microsoft.Compute/VirtualMach
   params: {
     location: location
     acceleratedNetworking: acceleratedNetworking
-    subnet_ID: virtualNetwork_SpokeA.outputs.general_SubnetID
+    subnet_ID: virtualNetwork_SpokeB.outputs.general_SubnetID
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'vm-webserver${i}'
     vmSize: virtualMachine_Size
   }
 } ]
+
+module virtualNetworkGateway '../../../modules/Microsoft.Network/VirtualNetworkGateway.bicep' = {
+  name: 'virtualNetworkGateway'
+  params: {
+    location: location
+    virtualNetworkGateway_ASN: 65000
+    virtualNetworkGateway_Name: 'virtualNetworkGateway'
+    virtualNetworkGateway_Subnet_ResourceID: virtualNetwork_Hub.outputs.gateway_SubnetID
+    virtualNetworkGateway_SKU: 'VpnGw1'
+  }
+}
 
 module bastion '../../../modules/Microsoft.Network/Bastion.bicep' = {
   name: 'bastion'

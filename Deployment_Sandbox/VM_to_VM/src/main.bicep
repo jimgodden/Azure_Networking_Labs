@@ -2,7 +2,7 @@
 param srcLocation string = resourceGroup().location
 
 @description('Azure Datacenter location for the destination resources')
-param dstLocation string = srcLocation
+param dstLocation string = 'westus2' // srcLocation
 
 @description('Username for the admin account of the Virtual Machines')
 param virtualMachine_AdminUsername string
@@ -156,7 +156,7 @@ module sourceVM_Windows '../../../modules/Microsoft.Compute/WindowsServer2022/Vi
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'srcVM-Windows${i}'
-    virtualMachine_Size: virtualMachine_Size
+    virtualMachine_Size: 'Standard_M8ds_v2' // virtualMachine_Size
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
     virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_General.ps1'
     commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_General.ps1 -Username ${virtualMachine_AdminUsername}'
@@ -173,7 +173,7 @@ module destinationVM_Windows '../../../modules/Microsoft.Compute/WindowsServer20
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'dstVM-Windows${i}'
-    virtualMachine_Size: virtualMachine_Size
+    virtualMachine_Size:  'Standard_D8as_v5' // virtualMachine_Size
     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
     virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_WebServer.ps1'
     commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_WebServer.ps1 -Username ${virtualMachine_AdminUsername}'

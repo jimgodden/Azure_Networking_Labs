@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.32.4.45862",
-      "templateHash": "15159941065434693479"
+      "templateHash": "13264180328622149259"
     }
   },
   "parameters": {
@@ -30,7 +30,7 @@
     },
     "virtualMachine_Size": {
       "type": "string",
-      "defaultValue": "Standard_D2as_v4",
+      "defaultValue": "Standard_D4as_v4",
       "metadata": {
         "description": "Size of the Virtual Machines"
       }
@@ -529,6 +529,9 @@
           },
           "vmSize": {
             "value": "[parameters('virtualMachine_Size')]"
+          },
+          "addPublicIPAddress": {
+            "value": true
           }
         },
         "template": {

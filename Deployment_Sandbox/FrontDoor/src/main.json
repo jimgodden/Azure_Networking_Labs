@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.32.4.45862",
-      "templateHash": "2553515545952395923"
+      "templateHash": "12995984288145030157"
     }
   },
   "parameters": {
@@ -31,7 +31,7 @@
     },
     "acceleratedNetworking": {
       "type": "bool",
-      "defaultValue": true,
+      "defaultValue": false,
       "metadata": {
         "description": "True enables Accelerated Networking and False disabled it.  \nNot all VM sizes support Accel Net (i.e. Standard_B2ms).  \nI'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net.\n"
       }
@@ -39,73 +39,129 @@
     "tagValues": {
       "type": "object",
       "defaultValue": {
-        "Sandbox": "PrivateResolver"
+        "Sandbox": "FrontDoor"
       }
     }
   },
   "variables": {
-    "location": "[resourceGroup().location]",
+    "locationA": "eastus2",
+    "locationB": "centralus",
     "virtualMachine_ScriptFile": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2025_ConfigScript.ps1",
-    "virtualMachine_Hub_Dns_Name": "hub-dnsVM",
-    "virtualMachine_SpokeA_Client_Name": "spokeA-clientVM"
+    "virtualMachine_spokeA_Iis_Name": "spokeA-iisVM",
+    "virtualMachine_SpokeB_Iis_Name": "spokeB-iisVM"
   },
   "resources": [
     {
       "type": "Microsoft.Network/networkSecurityGroups",
       "apiVersion": "2024-05-01",
-      "name": "genericNSG",
-      "location": "[variables('location')]"
-    },
-    {
-      "type": "Microsoft.Network/virtualNetworks",
-      "apiVersion": "2021-02-01",
-      "name": "hub_VNet",
-      "location": "[variables('location')]",
+      "name": "genericNSGA",
+      "location": "[variables('locationA')]",
       "properties": {
-        "addressSpace": {
-          "addressPrefixes": [
-            "10.0.0.0/16"
-          ]
-        },
-        "subnets": [
+        "securityRules": [
           {
-            "name": "General",
+            "name": "AllowHttp",
             "properties": {
-              "addressPrefix": "10.0.0.0/24",
-              "networkSecurityGroup": {
-                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'genericNSG')]"
-              }
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "80",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "direction": "Inbound",
+              "priority": 110,
+              "description": "Allow HTTP"
             }
           },
           {
-            "name": "GatewaySubnet",
+            "name": "Allow8080",
             "properties": {
-              "addressPrefix": "10.0.1.0/24"
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "8080",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "direction": "Inbound",
+              "priority": 120,
+              "description": "Allow HTTP"
             }
           },
           {
-            "name": "PRInboundEndpointSubnet",
+            "name": "AllowHttps",
             "properties": {
-              "addressPrefix": "10.0.2.0/24"
-            }
-          },
-          {
-            "name": "PROutboundEndpointSubnet",
-            "properties": {
-              "addressPrefix": "10.0.3.0/24"
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "443",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "direction": "Inbound",
+              "priority": 130,
+              "description": "Allow HTTPS"
             }
           }
         ]
       },
-      "dependsOn": [
-        "[resourceId('Microsoft.Network/networkSecurityGroups', 'genericNSG')]"
-      ]
+      "tags": "[parameters('tagValues')]"
+    },
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2024-05-01",
+      "name": "genericNSGB",
+      "location": "[variables('locationB')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "AllowHttp",
+            "properties": {
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "80",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "direction": "Inbound",
+              "priority": 110,
+              "description": "Allow HTTP"
+            }
+          },
+          {
+            "name": "Allow8080",
+            "properties": {
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "8080",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "direction": "Inbound",
+              "priority": 120,
+              "description": "Allow HTTP"
+            }
+          },
+          {
+            "name": "AllowHttps",
+            "properties": {
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "443",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "direction": "Inbound",
+              "priority": 130,
+              "description": "Allow HTTPS"
+            }
+          }
+        ]
+      },
+      "tags": "[parameters('tagValues')]"
     },
     {
       "type": "Microsoft.Network/virtualNetworks",
       "apiVersion": "2021-02-01",
       "name": "spokeA_VNet",
-      "location": "[variables('location')]",
+      "location": "[variables('locationA')]",
       "properties": {
         "addressSpace": {
           "addressPrefixes": [
@@ -118,155 +174,50 @@
             "properties": {
               "addressPrefix": "10.1.0.0/24",
               "networkSecurityGroup": {
-                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'genericNSG')]"
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'genericNSGA')]"
               }
             }
           }
         ]
       },
-      "dependsOn": [
-        "[resourceId('Microsoft.Network/networkSecurityGroups', 'genericNSG')]"
-      ]
-    },
-    {
-      "type": "Microsoft.Compute/virtualMachines",
-      "apiVersion": "2024-07-01",
-      "name": "[variables('virtualMachine_Hub_Dns_Name')]",
-      "location": "[variables('location')]",
-      "identity": {
-        "type": "SystemAssigned"
-      },
-      "properties": {
-        "hardwareProfile": {
-          "vmSize": "[parameters('vmSize')]"
-        },
-        "additionalCapabilities": {
-          "hibernationEnabled": false
-        },
-        "storageProfile": {
-          "imageReference": {
-            "publisher": "MicrosoftWindowsServer",
-            "offer": "WindowsServer",
-            "sku": "2025-datacenter-azure-edition",
-            "version": "latest"
-          },
-          "osDisk": {
-            "osType": "Windows",
-            "name": "[format('{0}_OsDisk_1', variables('virtualMachine_Hub_Dns_Name'))]",
-            "createOption": "FromImage",
-            "caching": "ReadWrite",
-            "managedDisk": {
-              "storageAccountType": "Premium_LRS"
-            },
-            "deleteOption": "Delete",
-            "diskSizeGB": 127
-          },
-          "dataDisks": [],
-          "diskControllerType": "SCSI"
-        },
-        "osProfile": {
-          "computerName": "[variables('virtualMachine_Hub_Dns_Name')]",
-          "adminUsername": "[parameters('virtualMachine_AdminUsername')]",
-          "adminPassword": "[parameters('virtualMachine_AdminPassword')]",
-          "windowsConfiguration": {
-            "provisionVMAgent": true,
-            "enableAutomaticUpdates": true,
-            "patchSettings": {
-              "patchMode": "AutomaticByPlatform",
-              "automaticByPlatformSettings": {
-                "rebootSetting": "IfRequired"
-              },
-              "assessmentMode": "ImageDefault",
-              "enableHotpatching": true
-            }
-          },
-          "secrets": [],
-          "allowExtensionOperations": true
-        },
-        "securityProfile": {
-          "uefiSettings": {
-            "secureBootEnabled": true,
-            "vTpmEnabled": true
-          },
-          "securityType": "TrustedLaunch"
-        },
-        "networkProfile": {
-          "networkInterfaces": [
-            {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', format('{0}-nic', variables('virtualMachine_Hub_Dns_Name')))]",
-              "properties": {
-                "deleteOption": "Delete"
-              }
-            }
-          ]
-        },
-        "diagnosticsProfile": {
-          "bootDiagnostics": {
-            "enabled": true
-          }
-        }
-      },
       "tags": "[parameters('tagValues')]",
       "dependsOn": [
-        "[resourceId('Microsoft.Network/networkInterfaces', format('{0}-nic', variables('virtualMachine_Hub_Dns_Name')))]"
+        "[resourceId('Microsoft.Network/networkSecurityGroups', 'genericNSGA')]"
       ]
     },
     {
-      "type": "Microsoft.Network/networkInterfaces",
-      "apiVersion": "2024-01-01",
-      "name": "[format('{0}-nic', variables('virtualMachine_Hub_Dns_Name'))]",
-      "location": "[variables('location')]",
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2021-02-01",
+      "name": "spokeB_VNet",
+      "location": "[variables('locationB')]",
       "properties": {
-        "ipConfigurations": [
+        "addressSpace": {
+          "addressPrefixes": [
+            "10.2.0.0/16"
+          ]
+        },
+        "subnets": [
           {
-            "name": "ipconfig1",
+            "name": "General",
             "properties": {
-              "privateIPAddress": "10.0.0.4",
-              "privateIPAllocationMethod": "Static",
-              "subnet": {
-                "id": "[reference(resourceId('Microsoft.Network/virtualNetworks', 'hub_VNet'), '2021-02-01').subnets[0].id]"
-              },
-              "primary": true,
-              "privateIPAddressVersion": "IPv4"
+              "addressPrefix": "10.2.0.0/24",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'genericNSGB')]"
+              }
             }
           }
-        ],
-        "enableAcceleratedNetworking": "[parameters('acceleratedNetworking')]"
+        ]
       },
       "tags": "[parameters('tagValues')]",
       "dependsOn": [
-        "[resourceId('Microsoft.Network/virtualNetworks', 'hub_VNet')]"
-      ]
-    },
-    {
-      "type": "Microsoft.Compute/virtualMachines/extensions",
-      "apiVersion": "2021-11-01",
-      "name": "[format('{0}/{1}', variables('virtualMachine_Hub_Dns_Name'), 'installcustomscript')]",
-      "location": "[variables('location')]",
-      "properties": {
-        "publisher": "Microsoft.Compute",
-        "type": "CustomScriptExtension",
-        "typeHandlerVersion": "1.9",
-        "autoUpgradeMinorVersion": true,
-        "settings": {
-          "fileUris": [
-            "[variables('virtualMachine_ScriptFile')]"
-          ]
-        },
-        "protectedSettings": {
-          "commandToExecute": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username {0} -Type DNS', parameters('virtualMachine_AdminUsername'))]"
-        }
-      },
-      "tags": "[parameters('tagValues')]",
-      "dependsOn": [
-        "[resourceId('Microsoft.Compute/virtualMachines', variables('virtualMachine_Hub_Dns_Name'))]"
+        "[resourceId('Microsoft.Network/networkSecurityGroups', 'genericNSGB')]"
       ]
     },
     {
       "type": "Microsoft.Compute/virtualMachines",
       "apiVersion": "2024-07-01",
-      "name": "[variables('virtualMachine_SpokeA_Client_Name')]",
-      "location": "[variables('location')]",
+      "name": "[variables('virtualMachine_spokeA_Iis_Name')]",
+      "location": "[variables('locationA')]",
       "identity": {
         "type": "SystemAssigned"
       },
@@ -286,7 +237,7 @@
           },
           "osDisk": {
             "osType": "Windows",
-            "name": "[format('{0}_OsDisk_1', variables('virtualMachine_SpokeA_Client_Name'))]",
+            "name": "[format('{0}_OsDisk_1', variables('virtualMachine_spokeA_Iis_Name'))]",
             "createOption": "FromImage",
             "caching": "ReadWrite",
             "managedDisk": {
@@ -299,7 +250,7 @@
           "diskControllerType": "SCSI"
         },
         "osProfile": {
-          "computerName": "[variables('virtualMachine_SpokeA_Client_Name')]",
+          "computerName": "[variables('virtualMachine_spokeA_Iis_Name')]",
           "adminUsername": "[parameters('virtualMachine_AdminUsername')]",
           "adminPassword": "[parameters('virtualMachine_AdminPassword')]",
           "windowsConfiguration": {
@@ -327,7 +278,7 @@
         "networkProfile": {
           "networkInterfaces": [
             {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', format('{0}-nic', variables('virtualMachine_SpokeA_Client_Name')))]",
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', format('{0}-nic', variables('virtualMachine_spokeA_Iis_Name')))]",
               "properties": {
                 "deleteOption": "Delete"
               }
@@ -342,14 +293,31 @@
       },
       "tags": "[parameters('tagValues')]",
       "dependsOn": [
-        "[resourceId('Microsoft.Network/networkInterfaces', format('{0}-nic', variables('virtualMachine_SpokeA_Client_Name')))]"
+        "[resourceId('Microsoft.Network/networkInterfaces', format('{0}-nic', variables('virtualMachine_spokeA_Iis_Name')))]"
       ]
+    },
+    {
+      "type": "Microsoft.Network/publicIPAddresses",
+      "apiVersion": "2023-06-01",
+      "name": "[format('{0}_PIP', variables('virtualMachine_spokeA_Iis_Name'))]",
+      "location": "[variables('locationA')]",
+      "sku": {
+        "name": "Standard",
+        "tier": "Regional"
+      },
+      "properties": {
+        "publicIPAddressVersion": "IPv4",
+        "publicIPAllocationMethod": "Static",
+        "idleTimeoutInMinutes": 4,
+        "ipTags": []
+      },
+      "tags": "[parameters('tagValues')]"
     },
     {
       "type": "Microsoft.Network/networkInterfaces",
       "apiVersion": "2024-01-01",
-      "name": "[format('{0}-nic', variables('virtualMachine_SpokeA_Client_Name'))]",
-      "location": "[variables('location')]",
+      "name": "[format('{0}-nic', variables('virtualMachine_spokeA_Iis_Name'))]",
+      "location": "[variables('locationA')]",
       "properties": {
         "ipConfigurations": [
           {
@@ -361,7 +329,10 @@
                 "id": "[reference(resourceId('Microsoft.Network/virtualNetworks', 'spokeA_VNet'), '2021-02-01').subnets[0].id]"
               },
               "primary": true,
-              "privateIPAddressVersion": "IPv4"
+              "privateIPAddressVersion": "IPv4",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP', variables('virtualMachine_spokeA_Iis_Name')))]"
+              }
             }
           }
         ],
@@ -369,14 +340,15 @@
       },
       "tags": "[parameters('tagValues')]",
       "dependsOn": [
+        "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP', variables('virtualMachine_spokeA_Iis_Name')))]",
         "[resourceId('Microsoft.Network/virtualNetworks', 'spokeA_VNet')]"
       ]
     },
     {
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "apiVersion": "2021-11-01",
-      "name": "[format('{0}/{1}', variables('virtualMachine_SpokeA_Client_Name'), 'installcustomscript')]",
-      "location": "[variables('location')]",
+      "name": "[format('{0}/{1}', variables('virtualMachine_spokeA_Iis_Name'), 'installcustomscript')]",
+      "location": "[variables('locationA')]",
       "properties": {
         "publisher": "Microsoft.Compute",
         "type": "CustomScriptExtension",
@@ -388,100 +360,167 @@
           ]
         },
         "protectedSettings": {
-          "commandToExecute": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username {0} -Type General', parameters('virtualMachine_AdminUsername'))]"
+          "commandToExecute": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username {0} -Type WebServer', parameters('virtualMachine_AdminUsername'))]"
         }
       },
       "tags": "[parameters('tagValues')]",
       "dependsOn": [
-        "[resourceId('Microsoft.Compute/virtualMachines', variables('virtualMachine_SpokeA_Client_Name'))]"
+        "[resourceId('Microsoft.Compute/virtualMachines', variables('virtualMachine_spokeA_Iis_Name'))]"
       ]
     },
     {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
-      "name": "peerings_Hub_to_Spokes_NoGateway",
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2024-07-01",
+      "name": "[variables('virtualMachine_SpokeB_Iis_Name')]",
+      "location": "[variables('locationB')]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
       "properties": {
-        "expressionEvaluationOptions": {
-          "scope": "inner"
+        "hardwareProfile": {
+          "vmSize": "[parameters('vmSize')]"
         },
-        "mode": "Incremental",
-        "parameters": {
-          "virtualNetwork_Hub_Id": {
-            "value": "[resourceId('Microsoft.Network/virtualNetworks', 'hub_VNet')]"
+        "additionalCapabilities": {
+          "hibernationEnabled": false
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "MicrosoftWindowsServer",
+            "offer": "WindowsServer",
+            "sku": "2025-datacenter-azure-edition",
+            "version": "latest"
           },
-          "virtualNetwork_Spoke_Ids": {
-            "value": [
-              "[resourceId('Microsoft.Network/virtualNetworks', 'spokeA_VNet')]"
-            ]
-          }
+          "osDisk": {
+            "osType": "Windows",
+            "name": "[format('{0}_OsDisk_1', variables('virtualMachine_SpokeB_Iis_Name'))]",
+            "createOption": "FromImage",
+            "caching": "ReadWrite",
+            "managedDisk": {
+              "storageAccountType": "Premium_LRS"
+            },
+            "deleteOption": "Delete",
+            "diskSizeGB": 127
+          },
+          "dataDisks": [],
+          "diskControllerType": "SCSI"
         },
-        "template": {
-          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0.0",
-          "metadata": {
-            "_generator": {
-              "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "9093547247946164556"
+        "osProfile": {
+          "computerName": "[variables('virtualMachine_SpokeB_Iis_Name')]",
+          "adminUsername": "[parameters('virtualMachine_AdminUsername')]",
+          "adminPassword": "[parameters('virtualMachine_AdminPassword')]",
+          "windowsConfiguration": {
+            "provisionVMAgent": true,
+            "enableAutomaticUpdates": true,
+            "patchSettings": {
+              "patchMode": "AutomaticByPlatform",
+              "automaticByPlatformSettings": {
+                "rebootSetting": "IfRequired"
+              },
+              "assessmentMode": "ImageDefault",
+              "enableHotpatching": true
             }
           },
-          "parameters": {
-            "virtualNetwork_Hub_Id": {
-              "type": "string",
-              "metadata": {
-                "description": "Resource Id of the Hub Virtual Network"
-              }
-            },
-            "virtualNetwork_Spoke_Ids": {
-              "type": "array",
-              "metadata": {
-                "description": "Array of Resource Ids of the Spoke Virtual Networks"
-              }
-            }
+          "secrets": [],
+          "allowExtensionOperations": true
+        },
+        "securityProfile": {
+          "uefiSettings": {
+            "secureBootEnabled": true,
+            "vTpmEnabled": true
           },
-          "resources": [
+          "securityType": "TrustedLaunch"
+        },
+        "networkProfile": {
+          "networkInterfaces": [
             {
-              "copy": {
-                "name": "virtualNetworkPeering_Hub_to_Spoke",
-                "count": "[length(parameters('virtualNetwork_Spoke_Ids'))]"
-              },
-              "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
-              "apiVersion": "2024-05-01",
-              "name": "[format('{0}/to{1}', split(parameters('virtualNetwork_Hub_Id'), '/')[8], split(parameters('virtualNetwork_Spoke_Ids')[copyIndex()], '/')[8])]",
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', format('{0}-nic', variables('virtualMachine_SpokeB_Iis_Name')))]",
               "properties": {
-                "remoteVirtualNetwork": {
-                  "id": "[parameters('virtualNetwork_Spoke_Ids')[copyIndex()]]"
-                },
-                "allowVirtualNetworkAccess": true,
-                "allowForwardedTraffic": true,
-                "useRemoteGateways": false,
-                "allowGatewayTransit": true
-              }
-            },
-            {
-              "copy": {
-                "name": "virtualNetworkPeering_Spokes_to_Hub",
-                "count": "[length(parameters('virtualNetwork_Spoke_Ids'))]"
-              },
-              "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
-              "apiVersion": "2024-05-01",
-              "name": "[format('{0}/to{1}', split(parameters('virtualNetwork_Spoke_Ids')[copyIndex()], '/')[8], split(parameters('virtualNetwork_Hub_Id'), '/')[8])]",
-              "properties": {
-                "remoteVirtualNetwork": {
-                  "id": "[parameters('virtualNetwork_Hub_Id')]"
-                },
-                "allowVirtualNetworkAccess": true,
-                "allowForwardedTraffic": true,
-                "useRemoteGateways": false,
-                "allowGatewayTransit": false
+                "deleteOption": "Delete"
               }
             }
           ]
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": true
+          }
         }
       },
+      "tags": "[parameters('tagValues')]",
       "dependsOn": [
-        "[resourceId('Microsoft.Network/virtualNetworks', 'hub_VNet')]",
-        "[resourceId('Microsoft.Network/virtualNetworks', 'spokeA_VNet')]"
+        "[resourceId('Microsoft.Network/networkInterfaces', format('{0}-nic', variables('virtualMachine_SpokeB_Iis_Name')))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Network/publicIPAddresses",
+      "apiVersion": "2023-06-01",
+      "name": "[format('{0}_PIP', variables('virtualMachine_SpokeB_Iis_Name'))]",
+      "location": "[variables('locationB')]",
+      "sku": {
+        "name": "Standard",
+        "tier": "Regional"
+      },
+      "properties": {
+        "publicIPAddressVersion": "IPv4",
+        "publicIPAllocationMethod": "Static",
+        "idleTimeoutInMinutes": 4,
+        "ipTags": []
+      },
+      "tags": "[parameters('tagValues')]"
+    },
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2024-01-01",
+      "name": "[format('{0}-nic', variables('virtualMachine_SpokeB_Iis_Name'))]",
+      "location": "[variables('locationB')]",
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAddress": "10.2.0.4",
+              "privateIPAllocationMethod": "Static",
+              "subnet": {
+                "id": "[reference(resourceId('Microsoft.Network/virtualNetworks', 'spokeB_VNet'), '2021-02-01').subnets[0].id]"
+              },
+              "primary": true,
+              "privateIPAddressVersion": "IPv4",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP', variables('virtualMachine_SpokeB_Iis_Name')))]"
+              }
+            }
+          }
+        ],
+        "enableAcceleratedNetworking": "[parameters('acceleratedNetworking')]"
+      },
+      "tags": "[parameters('tagValues')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP', variables('virtualMachine_SpokeB_Iis_Name')))]",
+        "[resourceId('Microsoft.Network/virtualNetworks', 'spokeB_VNet')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "apiVersion": "2021-11-01",
+      "name": "[format('{0}/{1}', variables('virtualMachine_SpokeB_Iis_Name'), 'installcustomscript')]",
+      "location": "[variables('locationB')]",
+      "properties": {
+        "publisher": "Microsoft.Compute",
+        "type": "CustomScriptExtension",
+        "typeHandlerVersion": "1.9",
+        "autoUpgradeMinorVersion": true,
+        "settings": {
+          "fileUris": [
+            "[variables('virtualMachine_ScriptFile')]"
+          ]
+        },
+        "protectedSettings": {
+          "commandToExecute": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username {0} -Type WebServer', parameters('virtualMachine_AdminUsername'))]"
+        }
+      },
+      "tags": "[parameters('tagValues')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Compute/virtualMachines', variables('virtualMachine_SpokeB_Iis_Name'))]"
       ]
     },
     {
@@ -495,12 +534,12 @@
         "mode": "Incremental",
         "parameters": {
           "location": {
-            "value": "[variables('location')]"
+            "value": "[variables('locationA')]"
           },
           "peered_VirtualNetwork_Ids": {
             "value": [
-              "[resourceId('Microsoft.Network/virtualNetworks', 'hub_VNet')]",
-              "[resourceId('Microsoft.Network/virtualNetworks', 'spokeA_VNet')]"
+              "[resourceId('Microsoft.Network/virtualNetworks', 'spokeA_VNet')]",
+              "[resourceId('Microsoft.Network/virtualNetworks', 'spokeB_VNet')]"
             ]
           },
           "bastion_name": {
@@ -858,295 +897,8 @@
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Network/virtualNetworks', 'hub_VNet')]",
-        "[resourceId('Microsoft.Network/virtualNetworks', 'spokeA_VNet')]"
-      ]
-    },
-    {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
-      "name": "PrivateResolver_Hub",
-      "properties": {
-        "expressionEvaluationOptions": {
-          "scope": "inner"
-        },
-        "mode": "Incremental",
-        "parameters": {
-          "location": {
-            "value": "[variables('location')]"
-          },
-          "dnsPrivateResolver_Inbound_SubnetID": {
-            "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', 'hub_VNet'), '2021-02-01').subnets[2].id]"
-          },
-          "dnsPrivateResolver_Outbound_SubnetID": {
-            "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', 'hub_VNet'), '2021-02-01').subnets[3].id]"
-          },
-          "virtualNetwork_ID": {
-            "value": "[resourceId('Microsoft.Network/virtualNetworks', 'hub_VNet')]"
-          }
-        },
-        "template": {
-          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0.0",
-          "metadata": {
-            "_generator": {
-              "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "14730579850621794979"
-            }
-          },
-          "parameters": {
-            "location": {
-              "type": "string",
-              "metadata": {
-                "description": "the location for resolver VNET and dns private resolver - Azure DNS Private Resolver available in specific region, refer the documenation to select the supported region for this deployment. For more information https://docs.microsoft.com/azure/dns/dns-private-resolver-overview#regional-availability"
-              }
-            },
-            "virtualNetwork_ID": {
-              "type": "string",
-              "metadata": {
-                "description": "Resource ID of the Virtual Network to which the DNS Private resolver will be added."
-              }
-            },
-            "dnsPrivateResolver_Inbound_SubnetID": {
-              "type": "string",
-              "metadata": {
-                "description": "Resource ID of the Subnet to which the DNS Private resolver Inbound Endpoint will be added."
-              }
-            },
-            "dnsPrivateResolver_Outbound_SubnetID": {
-              "type": "string",
-              "metadata": {
-                "description": "Resource ID of the Subnet to which the DNS Private resolver Outbound Endpoint will be added."
-              }
-            },
-            "dnsPrivateResolver_Name": {
-              "type": "string",
-              "defaultValue": "dnsResolver",
-              "metadata": {
-                "description": "name of the dns private resolver"
-              }
-            },
-            "inboundEndpoint_Name": {
-              "type": "string",
-              "defaultValue": "endpoint-inbound",
-              "metadata": {
-                "description": "name that will be used for the private resolver inbound endpoint"
-              }
-            },
-            "outboundEndpoint_Name": {
-              "type": "string",
-              "defaultValue": "endpoint-outbound",
-              "metadata": {
-                "description": "name that will be used for the private resolver outbound endpoint"
-              }
-            },
-            "tagValues": {
-              "type": "object",
-              "defaultValue": {}
-            }
-          },
-          "resources": [
-            {
-              "type": "Microsoft.Network/dnsResolvers",
-              "apiVersion": "2022-07-01",
-              "name": "[parameters('dnsPrivateResolver_Name')]",
-              "location": "[parameters('location')]",
-              "properties": {
-                "virtualNetwork": {
-                  "id": "[parameters('virtualNetwork_ID')]"
-                }
-              },
-              "tags": "[parameters('tagValues')]"
-            },
-            {
-              "type": "Microsoft.Network/dnsResolvers/inboundEndpoints",
-              "apiVersion": "2022-07-01",
-              "name": "[format('{0}/{1}', parameters('dnsPrivateResolver_Name'), parameters('inboundEndpoint_Name'))]",
-              "location": "[parameters('location')]",
-              "properties": {
-                "ipConfigurations": [
-                  {
-                    "privateIpAllocationMethod": "Dynamic",
-                    "subnet": {
-                      "id": "[parameters('dnsPrivateResolver_Inbound_SubnetID')]"
-                    }
-                  }
-                ]
-              },
-              "tags": "[parameters('tagValues')]",
-              "dependsOn": [
-                "[resourceId('Microsoft.Network/dnsResolvers', parameters('dnsPrivateResolver_Name'))]"
-              ]
-            },
-            {
-              "type": "Microsoft.Network/dnsResolvers/outboundEndpoints",
-              "apiVersion": "2022-07-01",
-              "name": "[format('{0}/{1}', parameters('dnsPrivateResolver_Name'), parameters('outboundEndpoint_Name'))]",
-              "location": "[parameters('location')]",
-              "properties": {
-                "subnet": {
-                  "id": "[parameters('dnsPrivateResolver_Outbound_SubnetID')]"
-                }
-              },
-              "tags": "[parameters('tagValues')]",
-              "dependsOn": [
-                "[resourceId('Microsoft.Network/dnsResolvers', parameters('dnsPrivateResolver_Name'))]"
-              ]
-            }
-          ],
-          "outputs": {
-            "dnsPrivateResolver_Outbound_Endpoint_ID": {
-              "type": "string",
-              "value": "[resourceId('Microsoft.Network/dnsResolvers/outboundEndpoints', parameters('dnsPrivateResolver_Name'), parameters('outboundEndpoint_Name'))]"
-            },
-            "privateDNSResolver_Inbound_Endpoint_IPAddress": {
-              "type": "string",
-              "value": "[reference(resourceId('Microsoft.Network/dnsResolvers/inboundEndpoints', parameters('dnsPrivateResolver_Name'), parameters('inboundEndpoint_Name')), '2022-07-01').ipConfigurations[0].privateIpAddress]"
-            }
-          }
-        }
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Network/virtualNetworks', 'hub_VNet')]"
-      ]
-    },
-    {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
-      "name": "PrivateResolver_ForwardingRuleset_Hub",
-      "properties": {
-        "expressionEvaluationOptions": {
-          "scope": "inner"
-        },
-        "mode": "Incremental",
-        "parameters": {
-          "location": {
-            "value": "[variables('location')]"
-          },
-          "virtualNetwork_IDs": {
-            "value": [
-              "[resourceId('Microsoft.Network/virtualNetworks', 'spokeA_VNet')]"
-            ]
-          },
-          "outboundEndpoint_ID": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'PrivateResolver_Hub'), '2022-09-01').outputs.dnsPrivateResolver_Outbound_Endpoint_ID.value]"
-          },
-          "domainName": {
-            "value": "contoso.com."
-          },
-          "targetDNSServers": {
-            "value": [
-              {
-                "ipaddress": "8.8.8.8",
-                "port": 53
-              }
-            ]
-          }
-        },
-        "template": {
-          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0.0",
-          "metadata": {
-            "_generator": {
-              "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "8206034123101316548"
-            }
-          },
-          "parameters": {
-            "location": {
-              "type": "string",
-              "metadata": {
-                "description": "the location for resolver VNET and dns private resolver"
-              }
-            },
-            "virtualNetwork_IDs": {
-              "type": "array",
-              "metadata": {
-                "description": "Resource ID of the Virtual Network to which the DNS Private resolver's ruleset will be linked."
-              }
-            },
-            "outboundEndpoint_ID": {
-              "type": "string",
-              "metadata": {
-                "description": "Resource ID of the Outbound Endpoint to be associated with the forwarding ruleset"
-              }
-            },
-            "dnsForwardingRuleSet_Name": {
-              "type": "string",
-              "defaultValue": "forwardingRule",
-              "metadata": {
-                "description": "Name of the forwarding ruleset."
-              }
-            },
-            "domainName": {
-              "type": "string",
-              "metadata": {
-                "description": "the target domain name for the forwarding ruleset.  Must end with a dot"
-              }
-            },
-            "targetDNSServers": {
-              "type": "array",
-              "metadata": {
-                "description": "the list of target DNS servers ip address and the port number for conditional forwarding\nFormat to be used:\n{\n  ipaddress: '10.0.0.1'\n  port: 53\n}\n{\n  ipaddress: '10.0.0.2'\n  port: 53\n}\n"
-              }
-            },
-            "tagValues": {
-              "type": "object",
-              "defaultValue": {}
-            }
-          },
-          "resources": [
-            {
-              "type": "Microsoft.Network/dnsForwardingRulesets",
-              "apiVersion": "2022-07-01",
-              "name": "[parameters('dnsForwardingRuleSet_Name')]",
-              "location": "[parameters('location')]",
-              "properties": {
-                "dnsResolverOutboundEndpoints": [
-                  {
-                    "id": "[parameters('outboundEndpoint_ID')]"
-                  }
-                ]
-              },
-              "tags": "[parameters('tagValues')]"
-            },
-            {
-              "copy": {
-                "name": "resolverLink",
-                "count": "[length(parameters('virtualNetwork_IDs'))]"
-              },
-              "type": "Microsoft.Network/dnsForwardingRulesets/virtualNetworkLinks",
-              "apiVersion": "2022-07-01",
-              "name": "[format('{0}/{1}', parameters('dnsForwardingRuleSet_Name'), format('{0}_link', last(split(parameters('virtualNetwork_IDs')[copyIndex()], '/'))))]",
-              "properties": {
-                "virtualNetwork": {
-                  "id": "[parameters('virtualNetwork_IDs')[copyIndex()]]"
-                }
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.Network/dnsForwardingRulesets', parameters('dnsForwardingRuleSet_Name'))]"
-              ]
-            },
-            {
-              "type": "Microsoft.Network/dnsForwardingRulesets/forwardingRules",
-              "apiVersion": "2022-07-01",
-              "name": "[format('{0}/{1}', parameters('dnsForwardingRuleSet_Name'), format('{0}_ForwardingRule', join(split(parameters('domainName'), '.'), '')))]",
-              "properties": {
-                "domainName": "[parameters('domainName')]",
-                "targetDnsServers": "[parameters('targetDNSServers')]"
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.Network/dnsForwardingRulesets', parameters('dnsForwardingRuleSet_Name'))]"
-              ]
-            }
-          ]
-        }
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Resources/deployments', 'PrivateResolver_Hub')]",
-        "[resourceId('Microsoft.Network/virtualNetworks', 'spokeA_VNet')]"
+        "[resourceId('Microsoft.Network/virtualNetworks', 'spokeA_VNet')]",
+        "[resourceId('Microsoft.Network/virtualNetworks', 'spokeB_VNet')]"
       ]
     }
   ]

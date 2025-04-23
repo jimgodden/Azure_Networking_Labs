@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.32.4.45862",
-      "templateHash": "4973910985293270571"
+      "templateHash": "2552681471683242834"
     }
   },
   "parameters": {
@@ -18,7 +18,7 @@
     },
     "dstLocation": {
       "type": "string",
-      "defaultValue": "[parameters('srcLocation')]",
+      "defaultValue": "westus2",
       "metadata": {
         "description": "Azure Datacenter location for the destination resources"
       }
@@ -1932,7 +1932,7 @@
             "value": "[format('srcVM-Windows{0}', range(1, parameters('numberOfSourceSideWindowsVMs'))[copyIndex()])]"
           },
           "virtualMachine_Size": {
-            "value": "[parameters('virtualMachine_Size')]"
+            "value": "Standard_M8ds_v2"
           },
           "virtualMachine_ScriptFileLocation": {
             "value": "[variables('virtualMachine_ScriptFileLocation')]"
@@ -2454,7 +2454,7 @@
             "value": "[format('dstVM-Windows{0}', range(1, parameters('numberOfDestinationSideWindowsVMs'))[copyIndex()])]"
           },
           "virtualMachine_Size": {
-            "value": "[parameters('virtualMachine_Size')]"
+            "value": "Standard_D8as_v5"
           },
           "virtualMachine_ScriptFileLocation": {
             "value": "[variables('virtualMachine_ScriptFileLocation')]"

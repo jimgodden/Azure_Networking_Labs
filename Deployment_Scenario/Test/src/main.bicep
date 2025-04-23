@@ -9,7 +9,7 @@ param virtualMachine_AdminUsername string
 param virtualMachine_AdminPassword string
 
 @description('Size of the Virtual Machines')
-param virtualMachine_Size string = 'Standard_D2as_v4' // 'Standard_B2ms' // 'Standard_D2s_v3' // 'Standard_D16lds_v5'
+param virtualMachine_Size string = 'Standard_D4as_v4' // 'Standard_B2ms' // 'Standard_D2s_v3' // 'Standard_D16lds_v5'
 
 @description('''True enables Accelerated Networking and False disabled it.  
 Not all VM sizes support Accel Net (i.e. Standard_B2ms).  
@@ -26,7 +26,7 @@ module virtualNetwork_Hub '../../../modules/Microsoft.Network/VirtualNetwork.bic
   }
 }
 
-module virtualMachine_Client '../../../modules/Microsoft.Compute/VirtualMachine/Windows/Server2025_General.bicep' = {
+module virtualMachine_Client '../../../modules/Microsoft.Compute/VirtualMachine/Windows/Server2025_General_Test.bicep' = {
   name: 'vm-client'
   params: {
     location: location
@@ -36,6 +36,7 @@ module virtualMachine_Client '../../../modules/Microsoft.Compute/VirtualMachine/
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'vm-client'
     vmSize: virtualMachine_Size
+    addPublicIPAddress: true
   }
 }
 

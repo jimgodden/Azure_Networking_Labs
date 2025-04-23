@@ -23,7 +23,7 @@ param acceleratedNetworking bool = true
 var virtualMachine_ScriptFile = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2025_ConfigScript.ps1'
 
 param tagValues object = {
-  Training: 'PrivateResolver'
+  Sandbox: 'PrivateResolver'
 }
 
 resource networkSecurityGroup_Generic 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {

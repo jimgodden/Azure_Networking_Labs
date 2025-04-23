@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.32.4.45862",
-      "templateHash": "6122503634545893771"
+      "templateHash": "3062001189913211022"
     }
   },
   "parameters": {
@@ -31,7 +31,7 @@
     },
     "acceleratedNetworking": {
       "type": "bool",
-      "defaultValue": true,
+      "defaultValue": false,
       "metadata": {
         "description": "True enables Accelerated Networking and False disabled it.  \nNot all VM sizes support Accel Net (i.e. Standard_B2ms).  \nI'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net.\n"
       }
@@ -95,6 +95,9 @@
               },
               "networkSecurityGroup": {
                 "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'genericNSG')]"
+              },
+              "natGateway": {
+                "id": "[reference(resourceId('Microsoft.Resources/deployments', 'natGateway_Hub'), '2022-09-01').outputs.natGateway_Id.value]"
               }
             }
           },
@@ -123,6 +126,7 @@
       },
       "tags": "[parameters('tagValues')]",
       "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'natGateway_Hub')]",
         "[resourceId('Microsoft.Network/networkSecurityGroups', 'genericNSG')]",
         "[resourceId('Microsoft.Network/routeTables', 'hub_RouteTable')]"
       ]
@@ -176,6 +180,9 @@
               },
               "networkSecurityGroup": {
                 "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'genericNSG')]"
+              },
+              "natGateway": {
+                "id": "[reference(resourceId('Microsoft.Resources/deployments', 'natGateway_SpokeA'), '2022-09-01').outputs.natGateway_Id.value]"
               }
             }
           }
@@ -183,6 +190,7 @@
       },
       "tags": "[parameters('tagValues')]",
       "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'natGateway_SpokeA')]",
         "[resourceId('Microsoft.Network/networkSecurityGroups', 'genericNSG')]",
         "[resourceId('Microsoft.Network/routeTables', 'spokeA_RouteTable')]"
       ]
@@ -218,6 +226,14 @@
               "nextHopType": "VirtualAppliance",
               "nextHopIpAddress": "10.0.2.4"
             }
+          },
+          {
+            "name": "toGoogle",
+            "properties": {
+              "addressPrefix": "8.8.8.8/32",
+              "nextHopType": "VirtualAppliance",
+              "nextHopIpAddress": "10.0.2.4"
+            }
           }
         ]
       },
@@ -244,6 +260,9 @@
               },
               "networkSecurityGroup": {
                 "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'genericNSG')]"
+              },
+              "natGateway": {
+                "id": "[reference(resourceId('Microsoft.Resources/deployments', 'natGateway_SpokeB'), '2022-09-01').outputs.natGateway_Id.value]"
               }
             }
           },
@@ -260,6 +279,7 @@
       },
       "tags": "[parameters('tagValues')]",
       "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'natGateway_SpokeB')]",
         "[resourceId('Microsoft.Network/networkSecurityGroups', 'genericNSG')]",
         "[resourceId('Microsoft.Network/routeTables', 'spokeB_RouteTable')]"
       ]
@@ -762,6 +782,9 @@
               "addressPrefix": "10.100.0.0/24",
               "networkSecurityGroup": {
                 "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'genericNSG')]"
+              },
+              "natGateway": {
+                "id": "[reference(resourceId('Microsoft.Resources/deployments', 'natGateway_OnPrem'), '2022-09-01').outputs.natGateway_Id.value]"
               }
             }
           },
@@ -774,6 +797,7 @@
         ]
       },
       "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'natGateway_OnPrem')]",
         "[resourceId('Microsoft.Network/networkSecurityGroups', 'genericNSG')]"
       ]
     },
@@ -1078,6 +1102,270 @@
         "ipTags": []
       },
       "tags": "[parameters('tagValues')]"
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "natGateway_Hub",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "[variables('location')]"
+          },
+          "natGateway_Name": {
+            "value": "NATGateway_Hub"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.32.4.45862",
+              "templateHash": "3185526592486626394"
+            }
+          },
+          "parameters": {
+            "natGateway_Name": {
+              "type": "string"
+            },
+            "location": {
+              "type": "string"
+            },
+            "tagValues": {
+              "type": "object",
+              "defaultValue": {}
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Network/publicIPAddresses",
+              "apiVersion": "2022-09-01",
+              "name": "[format('{0}_VIP', parameters('natGateway_Name'))]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Standard",
+                "tier": "Regional"
+              },
+              "properties": {
+                "publicIPAddressVersion": "IPv4",
+                "publicIPAllocationMethod": "Static",
+                "idleTimeoutInMinutes": 4,
+                "ipTags": []
+              },
+              "tags": "[parameters('tagValues')]"
+            },
+            {
+              "type": "Microsoft.Network/natGateways",
+              "apiVersion": "2024-05-01",
+              "name": "[parameters('natGateway_Name')]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Standard"
+              },
+              "properties": {
+                "idleTimeoutInMinutes": 4,
+                "publicIpAddresses": [
+                  {
+                    "id": "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_VIP', parameters('natGateway_Name')))]"
+                  }
+                ]
+              },
+              "tags": "[parameters('tagValues')]",
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_VIP', parameters('natGateway_Name')))]"
+              ]
+            }
+          ],
+          "outputs": {
+            "natGateway_Id": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/natGateways', parameters('natGateway_Name'))]"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "natGateway_SpokeA",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "[variables('location')]"
+          },
+          "natGateway_Name": {
+            "value": "NATGateway_SpokeA"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.32.4.45862",
+              "templateHash": "3185526592486626394"
+            }
+          },
+          "parameters": {
+            "natGateway_Name": {
+              "type": "string"
+            },
+            "location": {
+              "type": "string"
+            },
+            "tagValues": {
+              "type": "object",
+              "defaultValue": {}
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Network/publicIPAddresses",
+              "apiVersion": "2022-09-01",
+              "name": "[format('{0}_VIP', parameters('natGateway_Name'))]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Standard",
+                "tier": "Regional"
+              },
+              "properties": {
+                "publicIPAddressVersion": "IPv4",
+                "publicIPAllocationMethod": "Static",
+                "idleTimeoutInMinutes": 4,
+                "ipTags": []
+              },
+              "tags": "[parameters('tagValues')]"
+            },
+            {
+              "type": "Microsoft.Network/natGateways",
+              "apiVersion": "2024-05-01",
+              "name": "[parameters('natGateway_Name')]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Standard"
+              },
+              "properties": {
+                "idleTimeoutInMinutes": 4,
+                "publicIpAddresses": [
+                  {
+                    "id": "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_VIP', parameters('natGateway_Name')))]"
+                  }
+                ]
+              },
+              "tags": "[parameters('tagValues')]",
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_VIP', parameters('natGateway_Name')))]"
+              ]
+            }
+          ],
+          "outputs": {
+            "natGateway_Id": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/natGateways', parameters('natGateway_Name'))]"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "natGateway_SpokeB",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "[variables('location')]"
+          },
+          "natGateway_Name": {
+            "value": "NATGateway_SpokeB"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.32.4.45862",
+              "templateHash": "3185526592486626394"
+            }
+          },
+          "parameters": {
+            "natGateway_Name": {
+              "type": "string"
+            },
+            "location": {
+              "type": "string"
+            },
+            "tagValues": {
+              "type": "object",
+              "defaultValue": {}
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Network/publicIPAddresses",
+              "apiVersion": "2022-09-01",
+              "name": "[format('{0}_VIP', parameters('natGateway_Name'))]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Standard",
+                "tier": "Regional"
+              },
+              "properties": {
+                "publicIPAddressVersion": "IPv4",
+                "publicIPAllocationMethod": "Static",
+                "idleTimeoutInMinutes": 4,
+                "ipTags": []
+              },
+              "tags": "[parameters('tagValues')]"
+            },
+            {
+              "type": "Microsoft.Network/natGateways",
+              "apiVersion": "2024-05-01",
+              "name": "[parameters('natGateway_Name')]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Standard"
+              },
+              "properties": {
+                "idleTimeoutInMinutes": 4,
+                "publicIpAddresses": [
+                  {
+                    "id": "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_VIP', parameters('natGateway_Name')))]"
+                  }
+                ]
+              },
+              "tags": "[parameters('tagValues')]",
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_VIP', parameters('natGateway_Name')))]"
+              ]
+            }
+          ],
+          "outputs": {
+            "natGateway_Id": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/natGateways', parameters('natGateway_Name'))]"
+            }
+          }
+        }
+      }
     },
     {
       "type": "Microsoft.Resources/deployments",
@@ -1731,6 +2019,94 @@
         "[resourceId('Microsoft.Network/virtualNetworks', 'spokeA_VNet')]",
         "[resourceId('Microsoft.Network/virtualNetworks', 'spokeB_VNet')]"
       ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "natGateway_OnPrem",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "[variables('location')]"
+          },
+          "natGateway_Name": {
+            "value": "NATGateway_OnPrem"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.32.4.45862",
+              "templateHash": "3185526592486626394"
+            }
+          },
+          "parameters": {
+            "natGateway_Name": {
+              "type": "string"
+            },
+            "location": {
+              "type": "string"
+            },
+            "tagValues": {
+              "type": "object",
+              "defaultValue": {}
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Network/publicIPAddresses",
+              "apiVersion": "2022-09-01",
+              "name": "[format('{0}_VIP', parameters('natGateway_Name'))]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Standard",
+                "tier": "Regional"
+              },
+              "properties": {
+                "publicIPAddressVersion": "IPv4",
+                "publicIPAllocationMethod": "Static",
+                "idleTimeoutInMinutes": 4,
+                "ipTags": []
+              },
+              "tags": "[parameters('tagValues')]"
+            },
+            {
+              "type": "Microsoft.Network/natGateways",
+              "apiVersion": "2024-05-01",
+              "name": "[parameters('natGateway_Name')]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Standard"
+              },
+              "properties": {
+                "idleTimeoutInMinutes": 4,
+                "publicIpAddresses": [
+                  {
+                    "id": "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_VIP', parameters('natGateway_Name')))]"
+                  }
+                ]
+              },
+              "tags": "[parameters('tagValues')]",
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_VIP', parameters('natGateway_Name')))]"
+              ]
+            }
+          ],
+          "outputs": {
+            "natGateway_Id": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/natGateways', parameters('natGateway_Name'))]"
+            }
+          }
+        }
+      }
     },
     {
       "type": "Microsoft.Resources/deployments",
