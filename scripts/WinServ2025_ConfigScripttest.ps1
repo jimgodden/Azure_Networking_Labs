@@ -67,9 +67,8 @@ Write-Host "Applications installed successfully." -ForegroundColor Green
 # Creates a task that installs the tools when the user logs in
 $initTaskName = "Init"
 $initTaskAction = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-NoProfile -ExecutionPolicy Bypass -File `"C:\WinServ2025_InstallTools.ps1`""
-$initTaskTrigger = New-ScheduledTaskTrigger -AtLogon -User $Username
-Register-ScheduledTask -TaskName $initTaskName -Action $initTaskAction -Trigger $initTaskTrigger -Force
-# Register-ScheduledTask -TaskName $initTaskName -Action $initTaskAction -User "${env:computername}\${Username}" -Trigger $initTaskTrigger -Force
+$initTaskTrigger = New-ScheduledTaskTrigger -AtLogon
+Register-ScheduledTask -TaskName $initTaskName -Action $initTaskAction  -User "${env:computername}\${Username}" -Trigger $initTaskTrigger -Force
 
 $scriptBlock = {
 $chocolateyPackages = Get-Content "C:\ChoclatelyPackages.txt"
