@@ -67,14 +67,14 @@ Write-Host "Applications installed successfully." -ForegroundColor Green
 # Creates a task that installs the tools when the user logs in
 $initTaskName = "Init"
 $initTaskAction = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-NoProfile -ExecutionPolicy Bypass -File `"C:\WinServ2025_InstallTools.ps1`""
-$initTaskTrigger = New-ScheduledTaskTrigger -AtLogon
+$initTaskTrigger = New-ScheduledTaskTrigger -AtLogon -User $Username
 Register-ScheduledTask -TaskName $initTaskName -Action $initTaskAction -Trigger $initTaskTrigger -Force
 # Register-ScheduledTask -TaskName $initTaskName -Action $initTaskAction -User "${env:computername}\${Username}" -Trigger $initTaskTrigger -Force
 
 $scriptBlock = {
-$ChocolatelyPackages = Get-Content "C:\ChoclatelyPackages.txt"
-Write-Host "This Virtual Machine has been the following applications pre-installed via chocolately:"
-Write-Host $ChocolatelyPackages
+$chocolateyPackages = Get-Content "C:\ChoclatelyPackages.txt"
+Write-Host "This Virtual Machine has been the following applications pre-installed via chocolatey:"
+Write-Host $chocolateyPackages
 
 # Creates shortcuts for commonly used tools on the desktop
 $DesktopFilePath = "C:\Users\$env:USERNAME\Desktop"
@@ -102,7 +102,7 @@ Write-Host "Follow the instructions as directed to install npcap on this machine
 c:\npcap-1.80.exe
 
 # Removes the scheduled task so that it doesn't run again on the next logon
-Unregister-ScheduledTask -TaskName "Init" -Confirm:$false
+# Unregister-ScheduledTask -TaskName "Init" -Confirm:$false
 }
 
 # Adds the script block to a file that will be run on the first logon of the user
