@@ -26,15 +26,41 @@ Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\OOBE" -Name "D
 # Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "DisableEnterpriseAuthProxy" -Value 1 -Type DWord
 
 
-$progressPreference = 'silentlyContinue'
-Write-Host "Installing WinGet PowerShell module from PSGallery..."
-Install-PackageProvider -Name NuGet -Force | Out-Null
-Install-Module -Name Microsoft.WinGet.Client -Force -Repository PSGallery -scope AllUsers | Out-Null
-Write-Host "Using Repair-WinGetPackageManager cmdlet to bootstrap WinGet..."
-Repair-WinGetPackageManager
+# The following skips the first time user experience of Microsoft Edge
+$registryPath = "HKLM:\SOFTWARE\Policies\Microsoft\Edge"
+$registryName = "HideFirstRunExperience"
+$registryValue = 1
+if (-not (Test-Path $registryPath)) {
+    New-Item -Path $registryPath -Force
+}
+Set-ItemProperty -Path $registryPath -Name $registryName -Value $registryValue
+
 
 # npcap for using Wireshark for taking packet captures
 Invoke-WebRequest -Uri "https://npcap.com/dist/npcap-1.80.exe" -OutFile "c:\npcap-1.80.exe"
+
+# Install Chocolatey
+Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+
+# List of applications to install
+$packages = @(
+    "pstools",
+    "wireshark",
+    "vscode",
+    "notepadplusplus",
+    "powershell-core",
+    "iperf3"
+)
+
+Set-Content -Value $packages -Path "C:\ChoclatelyPackages.txt"
+
+# Install applications using Chocolatey
+foreach ($package in $packages) {
+    choco install $package -y
+}
+
+Write-Host "Applications installed successfully." -ForegroundColor Green
+
 
 # Creates a task that installs the tools when the user logs in
 $initTaskName = "Init"
@@ -42,64 +68,13 @@ $initTaskAction = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-
 $initTaskTrigger = New-ScheduledTaskTrigger -AtLogon
 Register-ScheduledTask -TaskName $initTaskName -Action $initTaskAction  -User "${env:computername}\${Username}" -Trigger $initTaskTrigger -Force
 
-# Creates a script that will be run on the first logon of the user to install the tools and create shortcuts
 $scriptBlock = {
-$packages = @(
-    "wireshark",
-    "pstools",
-    "vscode",
-    "Notepad++.Notepad++",
-    "Microsoft.PowerShell",
-    "iperf3"
-)
-
-Write-Host "This script runs during the first logon of the user and installs the following tools:"
-foreach ($package in $packages) {
-    Write-Host $package
-}
-Write-Host "Additionally, you will see a pop up momentarily to install npcap.  Please click 'Next' and 'Install' to complete the installation.  This is necessary for Wireshark to capture packets.`n`n`n"
-
-Start-Sleep -Seconds 10
-
-Write-Host "Attempting to install several tools now using winget.  You may see a few errors before it starts to work.  This is normal.`n`n"
-
-
-# Installs npcap for using Wireshark for taking packet captures
-c:\npcap-1.80.exe
-
-# Installs the tools defined in $packages via winget.
-foreach ($package in $packages) {
-    $attempt = 0
-    $maxAttempts = 100
-    $success = $false
-
-    while (-not $success -and $attempt -lt $maxAttempts) {
-        try {
-            winget install --accept-source-agreements --scope machine $package
-            Write-Host "Successfully installed $package"
-            $success = $true
-        } catch {
-            $attempt++
-            Write-Host -ForegroundColor Red "`nFailed to install $package. Attempt $attempt of $maxAttempts."
-            Write-Host "Error: $_`n"
-            if ($attempt -lt $maxAttempts) {
-                Start-Sleep -Seconds 5
-            }
-        }
-    }
-
-    if (-not $success) {
-        Write-Host -ForegroundColor Red "Failed to install $package after $maxAttempts attempts."
-    }
-}
-
-
-
-# powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\CommonToolInstaller.ps1"
-
-$DesktopFilePath = "C:\Users\$ENV:USERNAME\Desktop"
+$chocolateyPackages = Get-Content "C:\ChoclatelyPackages.txt"
+Write-Host "The following applications have been pre-installed via chocolatey:"
+Write-Host $chocolateyPackages
 
 # Creates shortcuts for commonly used tools on the desktop
+$DesktopFilePath = "C:\Users\$env:USERNAME\Desktop"
 function Set-Shortcut {
     param (
         [Parameter(Mandatory)]
@@ -115,17 +90,23 @@ function Set-Shortcut {
 Set-Shortcut -ApplicationFilePath "C:\Program Files\Wireshark\Wireshark.exe"  -DestinationFilePath "${DesktopFilePath}/Wireshark.lnk"
 Set-Shortcut -ApplicationFilePath "C:\Program Files\WindowsApps\Microsoft.WindowsTerminal_1.18.10301.0_x64__8wekyb3d8bbwe\WindowsTerminal.exe" -DestinationFilePath "${DesktopFilePath}/Windows Terminal.lnk"
 Set-Shortcut -ApplicationFilePath "C:\Program Files\Notepad++\notepad++.exe" -DestinationFilePath "${DesktopFilePath}/Notepad++.lnk"
-Set-Shortcut -ApplicationFilePath "C:\Program Files\Microsoft VS Code\Code.exe" -DestinationFilePath "${DesktopFilePath}/Visual Studio Code.lnk"
+# Set-Shortcut -ApplicationFilePath "C:\Program Files\Microsoft VS Code\Code.exe" -DestinationFilePath "${DesktopFilePath}/Visual Studio Code.lnk"
+
+Write-Host "`n`nTo take packet captures with wireshark, npcap needs to be installed."
+Write-Host "A pop up for installing npcap will appear momentarily."
+Write-Host "Follow the instructions as directed to install npcap on this machine."
+# Installs npcap for using Wireshark for taking packet captures
+c:\npcap-1.80.exe
 
 # Removes the scheduled task so that it doesn't run again on the next logon
 Unregister-ScheduledTask -TaskName "Init" -Confirm:$false
 
-Read-Host -Prompt "Press Enter to exit the script"
+Read-Host -Prompt "Press enter or CTRL + C to close this window."
 }
 
 # Adds the script block to a file that will be run on the first logon of the user
 Set-Content -Path "C:\WinServ2025_InstallTools.ps1" -Value $scriptBlock.ToString()
-    
+
 
 # Configures the Virtual Machine as a Web server if the type is WebServer
 if ($Type -eq "WebServer") {
