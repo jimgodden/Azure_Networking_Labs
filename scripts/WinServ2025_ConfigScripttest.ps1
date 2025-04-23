@@ -18,12 +18,12 @@ param (
 )
 
 # Disables the initial bootup request to allow telemetry
-# New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows" -Name "OOBE" -Force
-# Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\OOBE" -Name "DisablePrivacyExperience" -Value 1 -Type DWord
+New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows" -Name "OOBE" -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\OOBE" -Name "DisablePrivacyExperience" -Value 1 -Type DWord
 
 # Skipping the Allow Telemetry popup with the following registry change is bugged right now.  Leaving this commented in case it gets fixed.
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "AllowTelemetry" -Value 1 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "DisableEnterpriseAuthProxy" -Value 1 -Type DWord
+# Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "AllowTelemetry" -Value 1 -Type DWord
+# Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "DisableEnterpriseAuthProxy" -Value 1 -Type DWord
 
 
 # The following skips the first time user experience of Microsoft Edge
@@ -37,62 +37,30 @@ if (-not (Test-Path $registryPath)) {
 Set-ItemProperty -Path $registryPath -Name $registryName -Value $registryValue
 
 
-
-$progressPreference = 'silentlyContinue'
-Write-Host "Installing WinGet PowerShell module from PSGallery..."
-Install-PackageProvider -Name NuGet -Force | Out-Null
-Install-Module -Name Microsoft.WinGet.Client -Force -Repository PSGallery -scope AllUsers | Out-Null
-Write-Host "Using Repair-WinGetPackageManager cmdlet to bootstrap WinGet..."
-Repair-WinGetPackageManager
-
-# Testing the following to get winget to install 
-$WinGetPath = (Get-ChildItem -Path "$env:ProgramFiles\WindowsApps\Microsoft.DesktopAppInstaller*_x64*\winget.exe").DirectoryName
-if (-Not(($Env:Path -split ';') -contains $WinGetPath)) { 
-    if ($env:path -match ";$") {
-        $env:path +=  $WinGetPath + ";"
-    }
-    else {
-        $env:path +=  ";" + $WinGetPath + ";"			
-    }
-}
-
 # npcap for using Wireshark for taking packet captures
 Invoke-WebRequest -Uri "https://npcap.com/dist/npcap-1.80.exe" -OutFile "c:\npcap-1.80.exe"
 
+# Install Chocolatey
+Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+
+# List of applications to install
 $packages = @(
     "pstools",
     "wireshark",
     "vscode",
-    "Notepad++.Notepad++",
-    "Microsoft.PowerShell",
+    "notepadplusplus",
+    "powershell-core",
     "iperf3"
 )
 
-# Installs the tools defined in $packages via winget.
+Set-Content -Value $packages -Path "C:\ChoclatelyPackages.txt"
+
+# Install applications using Chocolatey
 foreach ($package in $packages) {
-    $attempt = 0
-    $maxAttempts = 100
-    $success = $false
-
-    while (-not $success -and $attempt -lt $maxAttempts) {
-        try {
-            winget install --accept-source-agreements --scope machine $package
-            Write-Host "Successfully installed $package"
-            $success = $true
-        } catch {
-            $attempt++
-            Write-Host -ForegroundColor Red "`nFailed to install $package. Attempt $attempt of $maxAttempts."
-            Write-Host "Error: $_`n"
-            if ($attempt -lt $maxAttempts) {
-                Start-Sleep -Seconds 5
-            }
-        }
-    }
-
-    if (-not $success) {
-        Write-Host -ForegroundColor Red "Failed to install $package after $maxAttempts attempts."
-    }
+    choco install $package -y
 }
+
+Write-Host "Applications installed successfully." -ForegroundColor Green
 
 $DesktopFilePath = "C:\Users\$Username\Desktop"
 
@@ -114,12 +82,30 @@ Set-Shortcut -ApplicationFilePath "C:\Program Files\WindowsApps\Microsoft.Window
 Set-Shortcut -ApplicationFilePath "C:\Program Files\Notepad++\notepad++.exe" -DestinationFilePath "${DesktopFilePath}/Notepad++.lnk"
 Set-Shortcut -ApplicationFilePath "C:\Program Files\Microsoft VS Code\Code.exe" -DestinationFilePath "${DesktopFilePath}/Visual Studio Code.lnk"
 
+# Creates a task that installs the tools when the user logs in
+$initTaskName = "Init"
+$initTaskAction = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-NoProfile -ExecutionPolicy Bypass -File `"C:\WinServ2025_InstallTools.ps1`""
+$initTaskTrigger = New-ScheduledTaskTrigger -AtLogon
+Register-ScheduledTask -TaskName $initTaskName -Action $initTaskAction  -User "${env:computername}\${Username}" -Trigger $initTaskTrigger -Force
+
+$scriptBlock = {
+$ChocolatelyPackages = Get-Content "C:\ChoclatelyPackages.txt"
+Write-Host "This Virtual Machine has been the following applications pre-installed via chocolately:"
+Write-Host $ChocolatelyPackages
+
+Write-Host "`n`nTo take packet captures with wireshark, npcap needs to be installed."
+Write-Host "A pop up for installing npcap will appear momentarily."
+Write-Host "Follow the instructions as directed to install npcap on this machine."
+# Installs npcap for using Wireshark for taking packet captures
+c:\npcap-1.80.exe
+}
+
+# Adds the script block to a file that will be run on the first logon of the user
+Set-Content -Path "C:\WinServ2025_InstallTools.ps1" -Value $scriptBlock.ToString()
+
 # Removes the scheduled task so that it doesn't run again on the next logon
 Unregister-ScheduledTask -TaskName "Init" -Confirm:$false
 
-Read-Host -Prompt "Press Enter to exit the script"
-
-    
 
 # Configures the Virtual Machine as a Web server if the type is WebServer
 if ($Type -eq "WebServer") {
