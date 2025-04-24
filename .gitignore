@@ -3,3 +3,4 @@
 build.ps1
 /Tools/OrganizeParamFiles.ps1
 Deployment_Training/AzFWBasic
+VMTemplate.txt

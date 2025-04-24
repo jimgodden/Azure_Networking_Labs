@@ -260,4 +260,3 @@ fi # End of the base configurations file for the VM with hostname VM04
 
 # # Make the script executable
 # chmod +x /etc/profile.d/add_sudo.sh
-

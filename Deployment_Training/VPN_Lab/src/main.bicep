@@ -15,7 +15,8 @@ param virtualMachine_Size string = 'Standard_D2as_v4' // 'Standard_B2ms' // 'Sta
 Not all VM sizes support Accel Net (i.e. Standard_B2ms).  
 I'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net.
 ''')
-param acceleratedNetworking bool = true
+//param acceleratedNetworking bool = true
+var acceleratedNetworking = false
 
 @description('SKU of the Virtual Network Gateway')
 param virtualNetworkGateway_SKU string = 'VpnGw1'
@@ -24,9 +25,8 @@ param virtualNetworkGateway_SKU string = 'VpnGw1'
 @secure()
 param vpn_SharedKey string
 
-///var virtualMachine_ScriptFile = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2022_ConfigScript_DNS.ps1'
-
-var virtualMachine_ScriptFile = 'https://supportability.visualstudio.com/AzureNetworking/_git/AzureNetworking?path=/.LabBoxRepo/Hybrid/VPN_P2S_TransitiveRouting-Training/WinServ2022_ConfigScript_DNS.ps1'
+var virtualMachine_ScriptFile = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2025_ConfigScript.ps1'
+// var virtualMachine_ScriptFile = 'https://supportability.visualstudio.com/AzureNetworking/_git/AzureNetworking?path=/.LabBoxRepo/Hybrid/VPN_P2S_TransitiveRouting-Training/WinServ2022_ConfigScript_DNS.ps1'
 
 
 // Virtual Networks
@@ -80,28 +80,6 @@ module bastionForAllVNETs '../../../modules/Microsoft.Network/BastionEverything.
     virtualNetwork_AddressPrefix: '10.200.0.0/16'
   }
 }
-
-// module virtualNetworks_to_Bastion_Peerings '../../../modules/Microsoft.Network/BastionVirtualNetworkHubPeerings.bicep' = {
-//   name: 'virtualNetworks_to_Bastion_Peerings'
-//   params: {
-//     bastion_VirtualNetwork_Id: virtualNetworkHub.outputs.virtualNetwork_ID
-//     other_VirtualNetwork_Ids: [
-//       virtualNetworkA.outputs.virtualNetwork_ID
-//       virtualNetworkB.outputs.virtualNetwork_ID
-//       virtualNetworkC.outputs.virtualNetwork_ID
-//     ]
-//   }
-// }
-
-// module bastion '../../../modules/Microsoft.Network/Bastion.bicep' = {
-//   name: 'Bastion'
-//   params: {
-//     bastion_name: 'Bastion'
-//     bastion_SubnetID: virtualNetworkHub.outputs.bastion_SubnetID
-//     location: location
-//     bastion_SKU: 'Standard'
-//   }
-// }
 
 module virtualNetworkGatewayA '../../../modules/Microsoft.Network/VirtualNetworkGateway.bicep' = {
   name: 'virtualNetworkGatewayA'
@@ -187,68 +165,363 @@ module virtualNetworkGatewayC '../../../modules/Microsoft.Network/VirtualNetwork
   }
 }
 
-module virtualMachine_WindowsA '../../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine_ForLabbox.bicep' = {
-  name: 'VMWindowsA'
-  params: {
-    acceleratedNetworking: acceleratedNetworking
-    location: location
-    subnet_ID: virtualNetworkA.outputs.general_SubnetID
-    virtualMachine_AdminPassword: virtualMachine_AdminPassword
-    virtualMachine_AdminUsername: virtualMachine_AdminUsername
-    virtualMachine_Name: 'VM-A'
-    virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFiles: [ virtualMachine_ScriptFile ]
-    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username ${virtualMachine_AdminUsername}'
+// Start of VM-A
+var virtualMachine_A_Name = 'VM-A'
+resource virtualMachine_A 'Microsoft.Compute/virtualMachines@2024-07-01' = {
+  name: virtualMachine_A_Name
+  location: location
+  identity: {
+    type: 'SystemAssigned'
+  }
+  properties: {
+    hardwareProfile: {
+      vmSize: virtualMachine_Size
+    }
+    additionalCapabilities: {
+      hibernationEnabled: false
+    }
+    storageProfile: {
+      imageReference: {
+        publisher: 'MicrosoftWindowsServer'
+        offer: 'WindowsServer'
+        sku: '2025-datacenter-azure-edition'
+        version: 'latest'
+      }
+      osDisk: {
+        osType: 'Windows'
+        name: '${virtualMachine_A_Name}_OsDisk_1'
+        createOption: 'FromImage'
+        caching: 'ReadWrite'
+        managedDisk: {
+          storageAccountType: 'Premium_LRS'
+        }
+        deleteOption: 'Delete'
+        diskSizeGB: 127
+      }
+      dataDisks: []
+      diskControllerType: 'SCSI'
+    }
+    osProfile: {
+      computerName: virtualMachine_A_Name
+      adminUsername: virtualMachine_AdminUsername
+      adminPassword: virtualMachine_AdminPassword
+      windowsConfiguration: {
+        provisionVMAgent: true
+        enableAutomaticUpdates: true
+        patchSettings: {
+          patchMode: 'AutomaticByPlatform'
+          automaticByPlatformSettings: {
+            rebootSetting: 'IfRequired'
+          }
+          assessmentMode: 'ImageDefault'
+          enableHotpatching: true
+        }
+      }
+      secrets: []
+      allowExtensionOperations: true
+    }
+    securityProfile: {
+      uefiSettings: {
+        secureBootEnabled: true
+        vTpmEnabled: true
+      }
+      securityType: 'TrustedLaunch'
+    }
+    networkProfile: {
+      networkInterfaces: [
+        {
+          id: virtualMachine_A_NIC.id
+          properties: {
+            deleteOption: 'Delete'
+          }
+        }
+      ]
+    }
+    diagnosticsProfile: {
+      bootDiagnostics: {
+        enabled: true
+      }
+    }
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-module virtualMachine_WindowsB '../../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine_ForLabbox.bicep' = {
-  name: 'VMWindowsB'
-  params: {
-    acceleratedNetworking: acceleratedNetworking
-    location: location
-    subnet_ID: virtualNetworkB.outputs.general_SubnetID
-    virtualMachine_AdminPassword: virtualMachine_AdminPassword
-    virtualMachine_AdminUsername: virtualMachine_AdminUsername
-    virtualMachine_Name: 'VM-B'
-    virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFiles: [ virtualMachine_ScriptFile ]
-    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username ${virtualMachine_AdminUsername}'
+resource virtualMachine_A_NIC 'Microsoft.Network/networkInterfaces@2024-01-01' = {
+  name: '${virtualMachine_A_Name}-nic'
+  location: location
+  properties: {
+    ipConfigurations: [
+      {
+        name: 'ipconfig1'
+        properties: {
+          privateIPAllocationMethod: 'Dynamic'
+          subnet: {
+            id: virtualNetworkA.outputs.general_SubnetID
+          }
+          primary: true
+          privateIPAddressVersion: 'IPv4'
+        }
+      }
+    ]
+    enableAcceleratedNetworking: acceleratedNetworking
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-module virtualMachine_WindowsC '../../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine_ForLabbox.bicep' = {
-  name: 'VMWindowsC'
-  params: {
-    acceleratedNetworking: acceleratedNetworking
-    location: location
-    subnet_ID: virtualNetworkC.outputs.general_SubnetID
-    virtualMachine_AdminPassword: virtualMachine_AdminPassword
-    virtualMachine_AdminUsername: virtualMachine_AdminUsername
-    virtualMachine_Name: 'VM-C'
-    virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFiles: [ virtualMachine_ScriptFile ]
-    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username ${virtualMachine_AdminUsername}'
+resource virtualMachine_A_CustomScriptExtension 'Microsoft.Compute/virtualMachines/extensions@2021-11-01' = {
+  parent: virtualMachine_A
+  name: 'installcustomscript'
+  location: location
+  properties: {
+    publisher: 'Microsoft.Compute'
+    type: 'CustomScriptExtension'
+    typeHandlerVersion: '1.9'
+    autoUpgradeMinorVersion: true
+    settings: {
+      fileUris: [ 
+        virtualMachine_ScriptFile
+      ]
+    }
+    protectedSettings: {
+      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username ${virtualMachine_AdminUsername} -Type General'
+    }
   }
 }
+// End of VM-A
+
+// Start of VM-B
+var virtualMachine_B_Name = 'VM-B'
+resource virtualMachine_B 'Microsoft.Compute/virtualMachines@2024-07-01' = {
+  name: virtualMachine_B_Name
+  location: location
+  identity: {
+    type: 'SystemAssigned'
+  }
+  properties: {
+    hardwareProfile: {
+      vmSize: virtualMachine_Size
+    }
+    additionalCapabilities: {
+      hibernationEnabled: false
+    }
+    storageProfile: {
+      imageReference: {
+        publisher: 'MicrosoftWindowsServer'
+        offer: 'WindowsServer'
+        sku: '2025-datacenter-azure-edition'
+        version: 'latest'
+      }
+      osDisk: {
+        osType: 'Windows'
+        name: '${virtualMachine_B_Name}_OsDisk_1'
+        createOption: 'FromImage'
+        caching: 'ReadWrite'
+        managedDisk: {
+          storageAccountType: 'Premium_LRS'
+        }
+        deleteOption: 'Delete'
+        diskSizeGB: 127
+      }
+      dataDisks: []
+      diskControllerType: 'SCSI'
+    }
+    osProfile: {
+      computerName: virtualMachine_B_Name
+      adminUsername: virtualMachine_AdminUsername
+      adminPassword: virtualMachine_AdminPassword
+      windowsConfiguration: {
+        provisionVMAgent: true
+        enableAutomaticUpdates: true
+        patchSettings: {
+          patchMode: 'AutomaticByPlatform'
+          automaticByPlatformSettings: {
+            rebootSetting: 'IfRequired'
+          }
+          assessmentMode: 'ImageDefault'
+          enableHotpatching: true
+        }
+      }
+      secrets: []
+      allowExtensionOperations: true
+    }
+    securityProfile: {
+      uefiSettings: {
+        secureBootEnabled: true
+        vTpmEnabled: true
+      }
+      securityType: 'TrustedLaunch'
+    }
+    networkProfile: {
+      networkInterfaces: [
+        {
+          id: virtualMachine_B_NIC.id
+          properties: {
+            deleteOption: 'Delete'
+          }
+        }
+      ]
+    }
+    diagnosticsProfile: {
+      bootDiagnostics: {
+        enabled: true
+      }
+    }
+  }
+}
+resource virtualMachine_B_NIC 'Microsoft.Network/networkInterfaces@2024-01-01' = {
+  name: '${virtualMachine_B_Name}-nic'
+  location: location
+  properties: {
+    ipConfigurations: [
+      {
+        name: 'ipconfig1'
+        properties: {
+          privateIPAllocationMethod: 'Dynamic'
+          subnet: {
+            id: virtualNetworkB.outputs.general_SubnetID
+          }
+          primary: true
+          privateIPAddressVersion: 'IPv4'
+        }
+      }
+    ]
+    enableAcceleratedNetworking: acceleratedNetworking
+  }
+}
+resource virtualMachine_B_CustomScriptExtension 'Microsoft.Compute/virtualMachines/extensions@2021-11-01' = {
+  parent: virtualMachine_B
+  name: 'installcustomscript'
+  location: location
+  properties: {
+    publisher: 'Microsoft.Compute'
+    type: 'CustomScriptExtension'
+    typeHandlerVersion: '1.9'
+    autoUpgradeMinorVersion: true
+    settings: {
+      fileUris: [ 
+        'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2025_ConfigScript.ps1'
+      ]
+    }
+    protectedSettings: {
+      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username ${virtualMachine_AdminUsername} -Type DNS'
+    }
+  }
+}
+// End of VM-B
+
+// Start of VM-C
+var virtualMachine_C_Name = 'VM-C'
+resource virtualMachine_C 'Microsoft.Compute/virtualMachines@2024-07-01' = {
+  name: virtualMachine_C_Name
+  location: location
+  identity: {
+    type: 'SystemAssigned'
+  }
+  properties: {
+    hardwareProfile: {
+      vmSize: virtualMachine_Size
+    }
+    additionalCapabilities: {
+      hibernationEnabled: false
+    }
+    storageProfile: {
+      imageReference: {
+        publisher: 'MicrosoftWindowsServer'
+        offer: 'WindowsServer'
+        sku: '2025-datacenter-azure-edition'
+        version: 'latest'
+      }
+      osDisk: {
+        osType: 'Windows'
+        name: '${virtualMachine_C_Name}_OsDisk_1'
+        createOption: 'FromImage'
+        caching: 'ReadWrite'
+        managedDisk: {
+          storageAccountType: 'Premium_LRS'
+        }
+        deleteOption: 'Delete'
+        diskSizeGB: 127
+      }
+      dataDisks: []
+      diskControllerType: 'SCSI'
+    }
+    osProfile: {
+      computerName: virtualMachine_C_Name
+      adminUsername: virtualMachine_AdminUsername
+      adminPassword: virtualMachine_AdminPassword
+      windowsConfiguration: {
+        provisionVMAgent: true
+        enableAutomaticUpdates: true
+        patchSettings: {
+          patchMode: 'AutomaticByPlatform'
+          automaticByPlatformSettings: {
+            rebootSetting: 'IfRequired'
+          }
+          assessmentMode: 'ImageDefault'
+          enableHotpatching: true
+        }
+      }
+      secrets: []
+      allowExtensionOperations: true
+    }
+    securityProfile: {
+      uefiSettings: {
+        secureBootEnabled: true
+        vTpmEnabled: true
+      }
+      securityType: 'TrustedLaunch'
+    }
+    networkProfile: {
+      networkInterfaces: [
+        {
+          id: virtualMachine_C_NIC.id
+          properties: {
+            deleteOption: 'Delete'
+          }
+        }
+      ]
+    }
+    diagnosticsProfile: {
+      bootDiagnostics: {
+        enabled: true
+      }
+    }
+  }
+
+}
+resource virtualMachine_C_NIC 'Microsoft.Network/networkInterfaces@2024-01-01' = {
+  name: '${virtualMachine_C_Name}-nic'
+  location: location
+  properties: {
+    ipConfigurations: [
+      {
+        name: 'ipconfig1'
+        properties: {
+          privateIPAllocationMethod: 'Dynamic'
+          subnet: {
+            id: virtualNetworkC.outputs.general_SubnetID
+          }
+          primary: true
+          privateIPAddressVersion: 'IPv4'
+        }
+      }
+    ]
+    enableAcceleratedNetworking: acceleratedNetworking
+  }
+}
+resource virtualMachine_C_CustomScriptExtension 'Microsoft.Compute/virtualMachines/extensions@2021-11-01' = {
+  parent: virtualMachine_C
+  name: 'installcustomscript'
+  location: location
+  properties: {
+    publisher: 'Microsoft.Compute'
+    type: 'CustomScriptExtension'
+    typeHandlerVersion: '1.9'
+    autoUpgradeMinorVersion: true
+    settings: {
+      fileUris: [ 
+        'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2025_ConfigScript.ps1'
+      ]
+    }
+    protectedSettings: {
+      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username ${virtualMachine_AdminUsername} -Type DNS'
+    }
+  }
+}
+// End of VM-C
