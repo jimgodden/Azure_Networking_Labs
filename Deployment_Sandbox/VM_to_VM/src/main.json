@@ -5,20 +5,20 @@
     "_generator": {
       "name": "bicep",
       "version": "0.32.4.45862",
-      "templateHash": "652782426590356134"
+      "templateHash": "18294335002694332369"
     }
   },
   "parameters": {
-    "srcLocation": {
+    "SourceLocation": {
       "type": "string",
       "defaultValue": "[resourceGroup().location]",
       "metadata": {
         "description": "Azure Datacenter location for the source resources"
       }
     },
-    "dstLocation": {
+    "DestinationLocation": {
       "type": "string",
-      "defaultValue": "westus2",
+      "defaultValue": "[parameters('SourceLocation')]",
       "metadata": {
         "description": "Azure Datacenter location for the destination resources"
       }
@@ -133,12 +133,153 @@
       "metadata": {
         "description": "Number of Linux Virtual Machines to deploy in the destination side.  This number is irrelevant if not deploying Linux Virtual Machines"
       }
+    },
+    "LeaveThisAsFalse": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Leave this as false.  If set to true, it will deploy a VM that is not used in this lab.  It is only here to trick the ARM template into populating the list of VM Sizes available in the region."
+      }
     }
   },
   "variables": {
-    "virtualMachine_ScriptFileLocation": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/"
+    "virtualMachine_ScriptFileLocation": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/",
+    "virtualMachine_Onprem_Client_Name": "onprem-clientVM"
   },
   "resources": [
+    {
+      "condition": "[parameters('LeaveThisAsFalse')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2024-07-01",
+      "name": "[variables('virtualMachine_Onprem_Client_Name')]",
+      "location": "[parameters('SourceLocation')]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('virtualMachine_Size')]"
+        },
+        "additionalCapabilities": {
+          "hibernationEnabled": false
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "MicrosoftWindowsServer",
+            "offer": "WindowsServer",
+            "sku": "2025-datacenter-azure-edition",
+            "version": "latest"
+          },
+          "osDisk": {
+            "osType": "Windows",
+            "name": "[format('{0}_OsDisk_1', variables('virtualMachine_Onprem_Client_Name'))]",
+            "createOption": "FromImage",
+            "caching": "ReadWrite",
+            "managedDisk": {
+              "storageAccountType": "Premium_LRS"
+            },
+            "deleteOption": "Delete",
+            "diskSizeGB": 127
+          },
+          "dataDisks": [],
+          "diskControllerType": "SCSI"
+        },
+        "osProfile": {
+          "computerName": "[variables('virtualMachine_Onprem_Client_Name')]",
+          "adminUsername": "[parameters('virtualMachine_AdminUsername')]",
+          "adminPassword": "[parameters('virtualMachine_AdminPassword')]",
+          "windowsConfiguration": {
+            "provisionVMAgent": true,
+            "enableAutomaticUpdates": true,
+            "patchSettings": {
+              "patchMode": "AutomaticByPlatform",
+              "automaticByPlatformSettings": {
+                "rebootSetting": "IfRequired"
+              },
+              "assessmentMode": "ImageDefault",
+              "enableHotpatching": true
+            }
+          },
+          "secrets": [],
+          "allowExtensionOperations": true
+        },
+        "securityProfile": {
+          "uefiSettings": {
+            "secureBootEnabled": true,
+            "vTpmEnabled": true
+          },
+          "securityType": "TrustedLaunch"
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', format('{0}-nic', variables('virtualMachine_Onprem_Client_Name')))]",
+              "properties": {
+                "deleteOption": "Delete"
+              }
+            }
+          ]
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": true
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkInterfaces', format('{0}-nic', variables('virtualMachine_Onprem_Client_Name')))]"
+      ]
+    },
+    {
+      "condition": "[parameters('LeaveThisAsFalse')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2024-01-01",
+      "name": "[format('{0}-nic', variables('virtualMachine_Onprem_Client_Name'))]",
+      "location": "[parameters('SourceLocation')]",
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[reference(resourceId('Microsoft.Resources/deployments', 'srcVNET'), '2022-09-01').outputs.general_SubnetID.value]"
+              },
+              "primary": true,
+              "privateIPAddressVersion": "IPv4"
+            }
+          }
+        ],
+        "enableAcceleratedNetworking": "[parameters('acceleratedNetworking')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'srcVNET')]"
+      ]
+    },
+    {
+      "condition": "[parameters('LeaveThisAsFalse')]",
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "apiVersion": "2021-11-01",
+      "name": "[format('{0}/{1}', variables('virtualMachine_Onprem_Client_Name'), 'installcustomscript')]",
+      "location": "[parameters('SourceLocation')]",
+      "properties": {
+        "publisher": "Microsoft.Compute",
+        "type": "CustomScriptExtension",
+        "typeHandlerVersion": "1.9",
+        "autoUpgradeMinorVersion": true,
+        "settings": {
+          "fileUris": [
+            "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2025_ConfigScript.ps1"
+          ]
+        },
+        "protectedSettings": {
+          "commandToExecute": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username {0} -Type General', parameters('virtualMachine_AdminUsername'))]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Compute/virtualMachines', variables('virtualMachine_Onprem_Client_Name'))]"
+      ]
+    },
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2022-09-01",
@@ -156,7 +297,7 @@
             "value": "10.0.0.0/16"
           },
           "location": {
-            "value": "[parameters('srcLocation')]"
+            "value": "[parameters('SourceLocation')]"
           },
           "virtualNetwork_Name": {
             "value": "srcVNET"
@@ -614,7 +755,7 @@
             "value": "10.1.0.0/16"
           },
           "location": {
-            "value": "[parameters('dstLocation')]"
+            "value": "[parameters('DestinationLocation')]"
           },
           "virtualNetwork_Name": {
             "value": "dstVNET"
@@ -1067,7 +1208,7 @@
         "mode": "Incremental",
         "parameters": {
           "location": {
-            "value": "[parameters('srcLocation')]"
+            "value": "[parameters('SourceLocation')]"
           },
           "virtualNetworkGateway_ASN": {
             "value": 65530
@@ -1286,7 +1427,7 @@
         "mode": "Incremental",
         "parameters": {
           "location": {
-            "value": "[parameters('dstLocation')]"
+            "value": "[parameters('DestinationLocation')]"
           },
           "virtualNetworkGateway_ASN": {
             "value": 65531
@@ -1514,7 +1655,7 @@
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'srcVNG'), '2022-09-01').outputs.virtualNetworkGateway_ResourceID.value]"
           },
           "location": {
-            "value": "[parameters('srcLocation')]"
+            "value": "[parameters('SourceLocation')]"
           },
           "vpn_Destination_Name": {
             "value": "dst"
@@ -1676,7 +1817,7 @@
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'dstVNG'), '2022-09-01').outputs.virtualNetworkGateway_ResourceID.value]"
           },
           "location": {
-            "value": "[parameters('dstLocation')]"
+            "value": "[parameters('DestinationLocation')]"
           },
           "vpn_Destination_Name": {
             "value": "src"
@@ -1818,6 +1959,7 @@
       ]
     },
     {
+      "condition": "[not(parameters('isUsingVPN'))]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2022-09-01",
       "name": "Source_to_Destination_Peering",
@@ -1891,6 +2033,7 @@
         }
       },
       "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'bastion')]",
         "[resourceId('Microsoft.Resources/deployments', 'dstVNET')]",
         "[resourceId('Microsoft.Resources/deployments', 'srcVNET')]"
       ]
@@ -1914,7 +2057,7 @@
             "value": "[parameters('acceleratedNetworking')]"
           },
           "location": {
-            "value": "[parameters('srcLocation')]"
+            "value": "[parameters('SourceLocation')]"
           },
           "networkInterface_Name": {
             "value": "[format('srcVM-Windows_NIC{0}', range(1, parameters('numberOfSourceSideWindowsVMs'))[copyIndex()])]"
@@ -2436,7 +2579,7 @@
             "value": "[parameters('acceleratedNetworking')]"
           },
           "location": {
-            "value": "[parameters('dstLocation')]"
+            "value": "[parameters('DestinationLocation')]"
           },
           "networkInterface_Name": {
             "value": "[format('dstVM-Windows_NIC{0}', range(1, parameters('numberOfDestinationSideWindowsVMs'))[copyIndex()])]"
@@ -2958,7 +3101,7 @@
             "value": "[parameters('acceleratedNetworking')]"
           },
           "location": {
-            "value": "[parameters('srcLocation')]"
+            "value": "[parameters('SourceLocation')]"
           },
           "networkInterface_Name": {
             "value": "[format('srcVM-Linux_NIC{0}', range(1, parameters('numberOfSourceSideLinuxVMs'))[copyIndex()])]"
@@ -3464,7 +3607,7 @@
             "value": "[parameters('acceleratedNetworking')]"
           },
           "location": {
-            "value": "[parameters('dstLocation')]"
+            "value": "[parameters('DestinationLocation')]"
           },
           "networkInterface_Name": {
             "value": "[format('dstVM-Linux_NIC{0}', range(1, parameters('numberOfDestinationSideLinuxVMs'))[copyIndex()])]"
@@ -3978,7 +4121,7 @@
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'srcVNET'), '2022-09-01').outputs.azureFirewall_SubnetID.value]"
           },
           "location": {
-            "value": "[parameters('srcLocation')]"
+            "value": "[parameters('SourceLocation')]"
           }
         },
         "template": {
@@ -4210,7 +4353,7 @@
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'dstVNET'), '2022-09-01').outputs.azureFirewall_SubnetID.value]"
           },
           "location": {
-            "value": "[parameters('dstLocation')]"
+            "value": "[parameters('DestinationLocation')]"
           }
         },
         "template": {
@@ -4419,7 +4562,7 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2022-09-01",
-      "name": "bastionspokevnet",
+      "name": "bastion",
       "properties": {
         "expressionEvaluationOptions": {
           "scope": "inner"
@@ -4427,13 +4570,19 @@
         "mode": "Incremental",
         "parameters": {
           "location": {
-            "value": "[parameters('srcLocation')]"
+            "value": "[parameters('SourceLocation')]"
+          },
+          "bastion_name": {
+            "value": "bastion"
+          },
+          "peered_VirtualNetwork_Ids": {
+            "value": [
+              "[reference(resourceId('Microsoft.Resources/deployments', 'srcVNET'), '2022-09-01').outputs.general_SubnetID.value]",
+              "[reference(resourceId('Microsoft.Resources/deployments', 'dstVNET'), '2022-09-01').outputs.general_SubnetID.value]"
+            ]
           },
           "virtualNetwork_AddressPrefix": {
             "value": "10.200.0.0/16"
-          },
-          "virtualNetwork_Name": {
-            "value": "bastionspokevnet"
           }
         },
         "template": {
@@ -4443,465 +4592,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.32.4.45862",
-              "templateHash": "13797875414295410429"
-            }
-          },
-          "parameters": {
-            "location": {
-              "type": "string",
-              "metadata": {
-                "description": "Azure Datacenter that the resource is deployed to"
-              }
-            },
-            "virtualNetwork_Name": {
-              "type": "string",
-              "metadata": {
-                "description": "Name of the Virtual Network"
-              }
-            },
-            "dnsServers": {
-              "type": "array",
-              "defaultValue": [],
-              "metadata": {
-                "description": "An Array of Custom DNS Server IP Addresses.  Azure Wireserver will be used if left as an empty array [].\nExample:\n[10.0.0.4, 10.0.0.5]\n"
-              }
-            },
-            "networkSecurityGroup_Default_Name": {
-              "type": "string",
-              "defaultValue": "[format('{0}_NSG_General', parameters('virtualNetwork_Name'))]",
-              "metadata": {
-                "description": "Name of the General Network Security Group"
-              }
-            },
-            "routeTable_Name": {
-              "type": "string",
-              "defaultValue": "[format('{0}_RT_General', parameters('virtualNetwork_Name'))]",
-              "metadata": {
-                "description": "Name of the General Route Table"
-              }
-            },
-            "routeTable_disableBgpRoutePropagation": {
-              "type": "bool",
-              "defaultValue": false
-            },
-            "virtualNetwork_AddressPrefix": {
-              "type": "string"
-            },
-            "tagValues": {
-              "type": "object",
-              "defaultValue": {}
-            }
-          },
-          "variables": {
-            "copy": [
-              {
-                "name": "subnet_AddressRangeCIDRs",
-                "count": "[length(range(0, 255))]",
-                "input": "[cidrSubnet(parameters('virtualNetwork_AddressPrefix'), 24, range(0, 255)[copyIndex('subnet_AddressRangeCIDRs')])]"
-              }
-            ],
-            "subnet_Names": [
-              "General",
-              "PrivateEndpoints",
-              "PrivateLinkService",
-              "ApplicationGatewaySubnet",
-              "AppServiceSubnet",
-              "GatewaySubnet",
-              "AzureFirewallSubnet",
-              "AzureFirewallManagementSubnet",
-              "AzureBastionSubnet",
-              "PrivateResolver_Inbound",
-              "PrivateResolver_Outbound"
-            ]
-          },
-          "resources": [
-            {
-              "type": "Microsoft.Network/virtualNetworks",
-              "apiVersion": "2022-09-01",
-              "name": "[parameters('virtualNetwork_Name')]",
-              "location": "[parameters('location')]",
-              "properties": {
-                "dhcpOptions": {
-                  "dnsServers": "[parameters('dnsServers')]"
-                },
-                "addressSpace": {
-                  "addressPrefixes": [
-                    "[parameters('virtualNetwork_AddressPrefix')]"
-                  ]
-                },
-                "subnets": [
-                  {
-                    "name": "[variables('subnet_Names')[0]]",
-                    "properties": {
-                      "addressPrefix": "[variables('subnet_AddressRangeCIDRs')[0]]",
-                      "networkSecurityGroup": {
-                        "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroup_Default_Name'))]"
-                      },
-                      "routeTable": {
-                        "id": "[resourceId('Microsoft.Network/routeTables', parameters('routeTable_Name'))]"
-                      },
-                      "delegations": [],
-                      "privateEndpointNetworkPolicies": "Disabled",
-                      "privateLinkServiceNetworkPolicies": "Enabled"
-                    }
-                  },
-                  {
-                    "name": "[variables('subnet_Names')[1]]",
-                    "properties": {
-                      "addressPrefix": "[variables('subnet_AddressRangeCIDRs')[1]]",
-                      "networkSecurityGroup": {
-                        "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroup_Default_Name'))]"
-                      },
-                      "routeTable": {
-                        "id": "[resourceId('Microsoft.Network/routeTables', parameters('routeTable_Name'))]"
-                      },
-                      "delegations": [],
-                      "privateEndpointNetworkPolicies": "Disabled",
-                      "privateLinkServiceNetworkPolicies": "Enabled"
-                    }
-                  },
-                  {
-                    "name": "[variables('subnet_Names')[2]]",
-                    "properties": {
-                      "addressPrefix": "[variables('subnet_AddressRangeCIDRs')[2]]",
-                      "networkSecurityGroup": {
-                        "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroup_Default_Name'))]"
-                      },
-                      "routeTable": {
-                        "id": "[resourceId('Microsoft.Network/routeTables', parameters('routeTable_Name'))]"
-                      },
-                      "delegations": [],
-                      "privateEndpointNetworkPolicies": "Disabled",
-                      "privateLinkServiceNetworkPolicies": "Disabled"
-                    }
-                  },
-                  {
-                    "name": "[variables('subnet_Names')[3]]",
-                    "properties": {
-                      "addressPrefix": "[variables('subnet_AddressRangeCIDRs')[3]]",
-                      "networkSecurityGroup": {
-                        "id": "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}_NSG_ApplicationGateway', parameters('virtualNetwork_Name')))]"
-                      },
-                      "delegations": [],
-                      "privateEndpointNetworkPolicies": "Disabled",
-                      "privateLinkServiceNetworkPolicies": "Enabled"
-                    }
-                  },
-                  {
-                    "name": "[variables('subnet_Names')[4]]",
-                    "properties": {
-                      "addressPrefix": "[variables('subnet_AddressRangeCIDRs')[4]]",
-                      "networkSecurityGroup": {
-                        "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroup_Default_Name'))]"
-                      },
-                      "delegations": [
-                        {
-                          "name": "delegation",
-                          "properties": {
-                            "serviceName": "Microsoft.Web/serverfarms"
-                          },
-                          "type": "Microsoft.Network/virtualNetworks/subnets/delegations"
-                        }
-                      ],
-                      "privateEndpointNetworkPolicies": "Disabled",
-                      "privateLinkServiceNetworkPolicies": "Enabled"
-                    }
-                  },
-                  {
-                    "name": "[variables('subnet_Names')[5]]",
-                    "properties": {
-                      "addressPrefix": "[variables('subnet_AddressRangeCIDRs')[5]]",
-                      "routeTable": {
-                        "id": "[resourceId('Microsoft.Network/routeTables', parameters('routeTable_Name'))]"
-                      },
-                      "delegations": [],
-                      "privateEndpointNetworkPolicies": "Disabled",
-                      "privateLinkServiceNetworkPolicies": "Enabled"
-                    }
-                  },
-                  {
-                    "name": "[variables('subnet_Names')[6]]",
-                    "properties": {
-                      "addressPrefix": "[variables('subnet_AddressRangeCIDRs')[6]]",
-                      "delegations": [],
-                      "privateEndpointNetworkPolicies": "Disabled",
-                      "privateLinkServiceNetworkPolicies": "Enabled"
-                    }
-                  },
-                  {
-                    "name": "[variables('subnet_Names')[7]]",
-                    "properties": {
-                      "addressPrefix": "[variables('subnet_AddressRangeCIDRs')[7]]",
-                      "delegations": [],
-                      "privateEndpointNetworkPolicies": "Disabled",
-                      "privateLinkServiceNetworkPolicies": "Enabled"
-                    }
-                  },
-                  {
-                    "name": "[variables('subnet_Names')[8]]",
-                    "properties": {
-                      "addressPrefix": "[variables('subnet_AddressRangeCIDRs')[8]]",
-                      "delegations": [],
-                      "privateEndpointNetworkPolicies": "Disabled",
-                      "privateLinkServiceNetworkPolicies": "Enabled"
-                    }
-                  },
-                  {
-                    "name": "[variables('subnet_Names')[9]]",
-                    "properties": {
-                      "addressPrefix": "[variables('subnet_AddressRangeCIDRs')[9]]",
-                      "delegations": [
-                        {
-                          "name": "Microsoft.Network.dnsResolvers",
-                          "properties": {
-                            "serviceName": "Microsoft.Network/dnsResolvers"
-                          }
-                        }
-                      ]
-                    }
-                  },
-                  {
-                    "name": "[variables('subnet_Names')[10]]",
-                    "properties": {
-                      "addressPrefix": "[variables('subnet_AddressRangeCIDRs')[10]]",
-                      "delegations": [
-                        {
-                          "name": "Microsoft.Network.dnsResolvers",
-                          "properties": {
-                            "serviceName": "Microsoft.Network/dnsResolvers"
-                          }
-                        }
-                      ]
-                    }
-                  }
-                ],
-                "enableDdosProtection": false
-              },
-              "tags": "[parameters('tagValues')]",
-              "dependsOn": [
-                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroup_Default_Name'))]",
-                "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}_NSG_ApplicationGateway', parameters('virtualNetwork_Name')))]",
-                "[resourceId('Microsoft.Network/routeTables', parameters('routeTable_Name'))]"
-              ]
-            },
-            {
-              "type": "Microsoft.Network/routeTables",
-              "apiVersion": "2023-02-01",
-              "name": "[parameters('routeTable_Name')]",
-              "location": "[parameters('location')]",
-              "properties": {
-                "disableBgpRoutePropagation": "[parameters('routeTable_disableBgpRoutePropagation')]"
-              },
-              "tags": "[parameters('tagValues')]"
-            },
-            {
-              "type": "Microsoft.Network/networkSecurityGroups",
-              "apiVersion": "2022-09-01",
-              "name": "[parameters('networkSecurityGroup_Default_Name')]",
-              "location": "[parameters('location')]",
-              "properties": {},
-              "tags": "[parameters('tagValues')]"
-            },
-            {
-              "type": "Microsoft.Network/networkSecurityGroups",
-              "apiVersion": "2022-11-01",
-              "name": "[format('{0}_NSG_ApplicationGateway', parameters('virtualNetwork_Name'))]",
-              "location": "[parameters('location')]",
-              "properties": {
-                "securityRules": [
-                  {
-                    "name": "AllowGatewayManager",
-                    "properties": {
-                      "description": "Allow GatewayManager",
-                      "protocol": "*",
-                      "sourcePortRange": "*",
-                      "destinationPortRange": "65200-65535",
-                      "sourceAddressPrefix": "GatewayManager",
-                      "destinationAddressPrefix": "*",
-                      "access": "Allow",
-                      "priority": 1000,
-                      "direction": "Inbound",
-                      "sourcePortRanges": [],
-                      "destinationPortRanges": [],
-                      "sourceAddressPrefixes": [],
-                      "destinationAddressPrefixes": []
-                    }
-                  },
-                  {
-                    "name": "AllowHTTPS",
-                    "properties": {
-                      "description": "Allow HTTPS",
-                      "protocol": "Tcp",
-                      "sourcePortRange": "*",
-                      "destinationPortRange": "443",
-                      "sourceAddressPrefix": "*",
-                      "destinationAddressPrefix": "*",
-                      "access": "Allow",
-                      "priority": 1001,
-                      "direction": "Inbound",
-                      "sourcePortRanges": [],
-                      "destinationPortRanges": [],
-                      "sourceAddressPrefixes": [],
-                      "destinationAddressPrefixes": []
-                    }
-                  }
-                ]
-              },
-              "tags": "[parameters('tagValues')]"
-            }
-          ],
-          "outputs": {
-            "general_SubnetID": {
-              "type": "string",
-              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name')), '2022-09-01').subnets[0].id]"
-            },
-            "privateEndpoint_SubnetID": {
-              "type": "string",
-              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name')), '2022-09-01').subnets[1].id]"
-            },
-            "privateLinkService_SubnetID": {
-              "type": "string",
-              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name')), '2022-09-01').subnets[2].id]"
-            },
-            "applicationGateway_SubnetID": {
-              "type": "string",
-              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name')), '2022-09-01').subnets[3].id]"
-            },
-            "appService_SubnetID": {
-              "type": "string",
-              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name')), '2022-09-01').subnets[4].id]"
-            },
-            "gateway_SubnetID": {
-              "type": "string",
-              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name')), '2022-09-01').subnets[5].id]"
-            },
-            "azureFirewall_SubnetID": {
-              "type": "string",
-              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name')), '2022-09-01').subnets[6].id]"
-            },
-            "azureFirewallManagement_SubnetID": {
-              "type": "string",
-              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name')), '2022-09-01').subnets[7].id]"
-            },
-            "bastion_SubnetID": {
-              "type": "string",
-              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name')), '2022-09-01').subnets[8].id]"
-            },
-            "privateResolver_Inbound_SubnetID": {
-              "type": "string",
-              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name')), '2022-09-01').subnets[9].id]"
-            },
-            "privateResolver_Outbound_SubnetID": {
-              "type": "string",
-              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name')), '2022-09-01').subnets[10].id]"
-            },
-            "general_Subnet_AddressPrefix": {
-              "type": "string",
-              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name')), '2022-09-01').subnets[0].properties.addressPrefix]"
-            },
-            "privateEndpoint_Subnet_AddressPrefix": {
-              "type": "string",
-              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name')), '2022-09-01').subnets[1].properties.addressPrefix]"
-            },
-            "privateLinkService_Subnet_AddressPrefix": {
-              "type": "string",
-              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name')), '2022-09-01').subnets[2].properties.addressPrefix]"
-            },
-            "applicationGateway_Subnet_AddressPrefix": {
-              "type": "string",
-              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name')), '2022-09-01').subnets[3].properties.addressPrefix]"
-            },
-            "appService_Subnet_AddressPrefix": {
-              "type": "string",
-              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name')), '2022-09-01').subnets[4].properties.addressPrefix]"
-            },
-            "gateway_Subnet_AddressPrefix": {
-              "type": "string",
-              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name')), '2022-09-01').subnets[5].properties.addressPrefix]"
-            },
-            "azureFirewall_Subnet_AddressPrefix": {
-              "type": "string",
-              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name')), '2022-09-01').subnets[6].properties.addressPrefix]"
-            },
-            "azureFirewallManagement_Subnet_AddressPrefix": {
-              "type": "string",
-              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name')), '2022-09-01').subnets[7].properties.addressPrefix]"
-            },
-            "bastion_Subnet_AddressPrefix": {
-              "type": "string",
-              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name')), '2022-09-01').subnets[8].properties.addressPrefix]"
-            },
-            "privateResolver_Inbound_Subnet_AddressPrefix": {
-              "type": "string",
-              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name')), '2022-09-01').subnets[9].properties.addressPrefix]"
-            },
-            "privateResolver_Outbound_Subnet_AddressPrefix": {
-              "type": "string",
-              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name')), '2022-09-01').subnets[10].properties.addressPrefix]"
-            },
-            "virtualNetwork_Name": {
-              "type": "string",
-              "value": "[parameters('virtualNetwork_Name')]"
-            },
-            "virtualNetwork_ID": {
-              "type": "string",
-              "value": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name'))]"
-            },
-            "virtualNetwork_AddressPrefix": {
-              "type": "string",
-              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Name')), '2022-09-01').addressSpace.addressPrefixes[0]]"
-            },
-            "routeTable_Name": {
-              "type": "string",
-              "value": "[parameters('routeTable_Name')]"
-            },
-            "routeTable_ID": {
-              "type": "string",
-              "value": "[resourceId('Microsoft.Network/routeTables', parameters('routeTable_Name'))]"
-            },
-            "networkSecurityGroup_Name": {
-              "type": "string",
-              "value": "[parameters('networkSecurityGroup_Default_Name')]"
-            },
-            "networkSecurityGroup_ID": {
-              "type": "string",
-              "value": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroup_Default_Name'))]"
-            }
-          }
-        }
-      }
-    },
-    {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
-      "name": "spokeBastion",
-      "properties": {
-        "expressionEvaluationOptions": {
-          "scope": "inner"
-        },
-        "mode": "Incremental",
-        "parameters": {
-          "bastion_name": {
-            "value": "spokeBastion"
-          },
-          "bastion_SubnetID": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'bastionspokevnet'), '2022-09-01').outputs.bastion_SubnetID.value]"
-          },
-          "location": {
-            "value": "[parameters('srcLocation')]"
-          },
-          "bastion_SKU": {
-            "value": "Standard"
-          }
-        },
-        "template": {
-          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0.0",
-          "metadata": {
-            "_generator": {
-              "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "8940753681302617038"
+              "templateHash": "14054073123741368988"
             }
           },
           "parameters": {
@@ -4917,194 +4608,332 @@
                 "description": "Name of the Azure Bastion"
               }
             },
-            "bastion_SubnetID": {
-              "type": "string",
-              "metadata": {
-                "description": "Resource ID of the subnet the Azure Bastion will be placed in.  The name of the subnet must be \"AzureBastionSubnet\""
-              }
-            },
-            "enableTunneling": {
-              "type": "bool",
-              "defaultValue": false
-            },
-            "enableIpConnect": {
-              "type": "bool",
-              "defaultValue": false
-            },
-            "disableCopyPaste": {
-              "type": "bool",
-              "defaultValue": false
-            },
-            "enableShareableLink": {
-              "type": "bool",
-              "defaultValue": false
-            },
-            "enableFileCopy": {
-              "type": "bool",
-              "defaultValue": false
-            },
-            "enableKerberos": {
-              "type": "bool",
-              "defaultValue": false
-            },
-            "enablePrivateOnlyBastion": {
-              "type": "bool",
-              "defaultValue": false
-            },
             "bastion_SKU": {
               "type": "string",
-              "defaultValue": "Basic",
-              "allowedValues": [
-                "Basic",
-                "Standard",
-                "Premium"
-              ],
-              "metadata": {
-                "description": "SKU of the Azure Bastion"
-              }
+              "defaultValue": "Standard"
             },
-            "tagValues": {
-              "type": "object",
-              "defaultValue": {}
+            "peered_VirtualNetwork_Ids": {
+              "type": "array"
+            },
+            "virtualNetwork_AddressPrefix": {
+              "type": "string"
             }
           },
           "resources": [
             {
-              "type": "Microsoft.Network/bastionHosts",
+              "type": "Microsoft.Network/virtualNetworks",
               "apiVersion": "2024-05-01",
-              "name": "[parameters('bastion_name')]",
+              "name": "[format('{0}_vnet', parameters('bastion_name'))]",
               "location": "[parameters('location')]",
-              "sku": {
-                "name": "[parameters('bastion_SKU')]"
-              },
               "properties": {
-                "scaleUnits": 2,
-                "enableTunneling": "[parameters('enableTunneling')]",
-                "enableIpConnect": "[parameters('enableIpConnect')]",
-                "disableCopyPaste": "[parameters('disableCopyPaste')]",
-                "enableShareableLink": "[parameters('enableShareableLink')]",
-                "enableFileCopy": "[parameters('enableFileCopy')]",
-                "enableKerberos": "[parameters('enableKerberos')]",
-                "enablePrivateOnlyBastion": "[parameters('enablePrivateOnlyBastion')]",
-                "ipConfigurations": [
+                "addressSpace": {
+                  "addressPrefixes": [
+                    "[parameters('virtualNetwork_AddressPrefix')]"
+                  ]
+                },
+                "subnets": [
                   {
-                    "name": "IpConf",
+                    "name": "AzureBastionSubnet",
                     "properties": {
-                      "privateIPAllocationMethod": "Dynamic",
-                      "publicIPAddress": {
-                        "id": "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_VIP', parameters('bastion_name')))]"
-                      },
-                      "subnet": {
-                        "id": "[parameters('bastion_SubnetID')]"
-                      }
+                      "addressPrefix": "[parameters('virtualNetwork_AddressPrefix')]",
+                      "delegations": [],
+                      "privateEndpointNetworkPolicies": "Disabled",
+                      "privateLinkServiceNetworkPolicies": "Enabled"
                     }
                   }
-                ]
+                ],
+                "enableDdosProtection": false
+              }
+            },
+            {
+              "type": "Microsoft.Resources/deployments",
+              "apiVersion": "2022-09-01",
+              "name": "[parameters('bastion_name')]",
+              "properties": {
+                "expressionEvaluationOptions": {
+                  "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                  "location": {
+                    "value": "[parameters('location')]"
+                  },
+                  "bastion_SubnetID": {
+                    "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', format('{0}_vnet', parameters('bastion_name'))), '2024-05-01').subnets[0].id]"
+                  },
+                  "bastion_name": {
+                    "value": "[parameters('bastion_name')]"
+                  },
+                  "bastion_SKU": {
+                    "value": "[parameters('bastion_SKU')]"
+                  }
+                },
+                "template": {
+                  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "metadata": {
+                    "_generator": {
+                      "name": "bicep",
+                      "version": "0.32.4.45862",
+                      "templateHash": "8940753681302617038"
+                    }
+                  },
+                  "parameters": {
+                    "location": {
+                      "type": "string",
+                      "metadata": {
+                        "description": "Azure Datacenter location that the main resouces will be deployed to."
+                      }
+                    },
+                    "bastion_name": {
+                      "type": "string",
+                      "metadata": {
+                        "description": "Name of the Azure Bastion"
+                      }
+                    },
+                    "bastion_SubnetID": {
+                      "type": "string",
+                      "metadata": {
+                        "description": "Resource ID of the subnet the Azure Bastion will be placed in.  The name of the subnet must be \"AzureBastionSubnet\""
+                      }
+                    },
+                    "enableTunneling": {
+                      "type": "bool",
+                      "defaultValue": false
+                    },
+                    "enableIpConnect": {
+                      "type": "bool",
+                      "defaultValue": false
+                    },
+                    "disableCopyPaste": {
+                      "type": "bool",
+                      "defaultValue": false
+                    },
+                    "enableShareableLink": {
+                      "type": "bool",
+                      "defaultValue": false
+                    },
+                    "enableFileCopy": {
+                      "type": "bool",
+                      "defaultValue": false
+                    },
+                    "enableKerberos": {
+                      "type": "bool",
+                      "defaultValue": false
+                    },
+                    "enablePrivateOnlyBastion": {
+                      "type": "bool",
+                      "defaultValue": false
+                    },
+                    "bastion_SKU": {
+                      "type": "string",
+                      "defaultValue": "Basic",
+                      "allowedValues": [
+                        "Basic",
+                        "Standard",
+                        "Premium"
+                      ],
+                      "metadata": {
+                        "description": "SKU of the Azure Bastion"
+                      }
+                    },
+                    "tagValues": {
+                      "type": "object",
+                      "defaultValue": {}
+                    }
+                  },
+                  "resources": [
+                    {
+                      "type": "Microsoft.Network/bastionHosts",
+                      "apiVersion": "2024-05-01",
+                      "name": "[parameters('bastion_name')]",
+                      "location": "[parameters('location')]",
+                      "sku": {
+                        "name": "[parameters('bastion_SKU')]"
+                      },
+                      "properties": {
+                        "scaleUnits": 2,
+                        "enableTunneling": "[parameters('enableTunneling')]",
+                        "enableIpConnect": "[parameters('enableIpConnect')]",
+                        "disableCopyPaste": "[parameters('disableCopyPaste')]",
+                        "enableShareableLink": "[parameters('enableShareableLink')]",
+                        "enableFileCopy": "[parameters('enableFileCopy')]",
+                        "enableKerberos": "[parameters('enableKerberos')]",
+                        "enablePrivateOnlyBastion": "[parameters('enablePrivateOnlyBastion')]",
+                        "ipConfigurations": [
+                          {
+                            "name": "IpConf",
+                            "properties": {
+                              "privateIPAllocationMethod": "Dynamic",
+                              "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_VIP', parameters('bastion_name')))]"
+                              },
+                              "subnet": {
+                                "id": "[parameters('bastion_SubnetID')]"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "tags": "[parameters('tagValues')]",
+                      "dependsOn": [
+                        "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_VIP', parameters('bastion_name')))]"
+                      ]
+                    },
+                    {
+                      "type": "Microsoft.Network/publicIPAddresses",
+                      "apiVersion": "2022-09-01",
+                      "name": "[format('{0}_VIP', parameters('bastion_name'))]",
+                      "location": "[parameters('location')]",
+                      "sku": {
+                        "name": "Standard",
+                        "tier": "Regional"
+                      },
+                      "properties": {
+                        "publicIPAddressVersion": "IPv4",
+                        "publicIPAllocationMethod": "Static",
+                        "idleTimeoutInMinutes": 4,
+                        "ipTags": []
+                      },
+                      "tags": "[parameters('tagValues')]"
+                    }
+                  ]
+                }
               },
-              "tags": "[parameters('tagValues')]",
               "dependsOn": [
-                "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_VIP', parameters('bastion_name')))]"
+                "[resourceId('Microsoft.Network/virtualNetworks', format('{0}_vnet', parameters('bastion_name')))]"
               ]
             },
             {
-              "type": "Microsoft.Network/publicIPAddresses",
+              "type": "Microsoft.Resources/deployments",
               "apiVersion": "2022-09-01",
-              "name": "[format('{0}_VIP', parameters('bastion_name'))]",
-              "location": "[parameters('location')]",
-              "sku": {
-                "name": "Standard",
-                "tier": "Regional"
-              },
+              "name": "bastionVNETPeering",
               "properties": {
-                "publicIPAddressVersion": "IPv4",
-                "publicIPAllocationMethod": "Static",
-                "idleTimeoutInMinutes": 4,
-                "ipTags": []
+                "expressionEvaluationOptions": {
+                  "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                  "bastion_VirtualNetwork_Id": {
+                    "value": "[resourceId('Microsoft.Network/virtualNetworks', format('{0}_vnet', parameters('bastion_name')))]"
+                  },
+                  "other_VirtualNetwork_Ids": {
+                    "value": "[parameters('peered_VirtualNetwork_Ids')]"
+                  }
+                },
+                "template": {
+                  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "metadata": {
+                    "_generator": {
+                      "name": "bicep",
+                      "version": "0.32.4.45862",
+                      "templateHash": "17047602974184826442"
+                    }
+                  },
+                  "parameters": {
+                    "bastion_VirtualNetwork_Id": {
+                      "type": "string"
+                    },
+                    "other_VirtualNetwork_Ids": {
+                      "type": "array"
+                    }
+                  },
+                  "resources": [
+                    {
+                      "copy": {
+                        "name": "bastion_to_other_VirtualNetwork_Peerings",
+                        "count": "[length(parameters('other_VirtualNetwork_Ids'))]"
+                      },
+                      "type": "Microsoft.Resources/deployments",
+                      "apiVersion": "2022-09-01",
+                      "name": "[format('bastion_to_{0}', split(parameters('other_VirtualNetwork_Ids')[copyIndex()], '/')[8])]",
+                      "properties": {
+                        "expressionEvaluationOptions": {
+                          "scope": "inner"
+                        },
+                        "mode": "Incremental",
+                        "parameters": {
+                          "virtualNetwork1_Id": {
+                            "value": "[parameters('bastion_VirtualNetwork_Id')]"
+                          },
+                          "virtualNetwork2_Id": {
+                            "value": "[parameters('other_VirtualNetwork_Ids')[copyIndex()]]"
+                          }
+                        },
+                        "template": {
+                          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                          "contentVersion": "1.0.0.0",
+                          "metadata": {
+                            "_generator": {
+                              "name": "bicep",
+                              "version": "0.32.4.45862",
+                              "templateHash": "14118566146782858923"
+                            }
+                          },
+                          "parameters": {
+                            "virtualNetwork1_Id": {
+                              "type": "string",
+                              "metadata": {
+                                "description": "Name of the First Virtual Network"
+                              }
+                            },
+                            "virtualNetwork2_Id": {
+                              "type": "string",
+                              "metadata": {
+                                "description": "Name of the Second Virtual Network"
+                              }
+                            }
+                          },
+                          "variables": {
+                            "virtualNetwork1_Name": "[split(parameters('virtualNetwork1_Id'), '/')[8]]",
+                            "virtualNetwork2_Name": "[split(parameters('virtualNetwork2_Id'), '/')[8]]"
+                          },
+                          "resources": [
+                            {
+                              "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+                              "apiVersion": "2022-09-01",
+                              "name": "[format('{0}/to{1}', variables('virtualNetwork1_Name'), variables('virtualNetwork2_Name'))]",
+                              "properties": {
+                                "remoteVirtualNetwork": {
+                                  "id": "[parameters('virtualNetwork2_Id')]"
+                                },
+                                "allowVirtualNetworkAccess": true,
+                                "allowForwardedTraffic": true,
+                                "useRemoteGateways": false,
+                                "allowGatewayTransit": false
+                              }
+                            },
+                            {
+                              "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+                              "apiVersion": "2022-09-01",
+                              "name": "[format('{0}/to{1}', variables('virtualNetwork2_Name'), variables('virtualNetwork1_Name'))]",
+                              "properties": {
+                                "remoteVirtualNetwork": {
+                                  "id": "[parameters('virtualNetwork1_Id')]"
+                                },
+                                "allowVirtualNetworkAccess": true,
+                                "allowForwardedTraffic": true,
+                                "useRemoteGateways": false,
+                                "allowGatewayTransit": false
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
               },
-              "tags": "[parameters('tagValues')]"
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', format('{0}_vnet', parameters('bastion_name')))]"
+              ]
             }
           ]
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Resources/deployments', 'bastionspokevnet')]"
-      ]
-    },
-    {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
-      "name": "Source_to_bastionspoke_Peering",
-      "properties": {
-        "expressionEvaluationOptions": {
-          "scope": "inner"
-        },
-        "mode": "Incremental",
-        "parameters": {
-          "virtualNetwork_Destination_Name": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'srcVNET'), '2022-09-01').outputs.virtualNetwork_Name.value]"
-          },
-          "virtualNetwork_Source_Name": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'bastionspokevnet'), '2022-09-01').outputs.virtualNetwork_Name.value]"
-          }
-        },
-        "template": {
-          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0.0",
-          "metadata": {
-            "_generator": {
-              "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "11846290876241024120"
-            }
-          },
-          "parameters": {
-            "virtualNetwork_Source_Name": {
-              "type": "string",
-              "metadata": {
-                "description": "Name of the Source Virtual Network"
-              }
-            },
-            "virtualNetwork_Destination_Name": {
-              "type": "string",
-              "metadata": {
-                "description": "Name of the Destination Virtual Network"
-              }
-            }
-          },
-          "resources": [
-            {
-              "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
-              "apiVersion": "2022-09-01",
-              "name": "[format('{0}/{1}', parameters('virtualNetwork_Source_Name'), format('{0}to{1}', parameters('virtualNetwork_Source_Name'), parameters('virtualNetwork_Destination_Name')))]",
-              "properties": {
-                "remoteVirtualNetwork": {
-                  "id": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Destination_Name'))]"
-                },
-                "allowVirtualNetworkAccess": true,
-                "allowForwardedTraffic": true,
-                "useRemoteGateways": false,
-                "allowGatewayTransit": false
-              }
-            },
-            {
-              "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
-              "apiVersion": "2022-09-01",
-              "name": "[format('{0}/{1}', parameters('virtualNetwork_Destination_Name'), format('{0}to{1}', parameters('virtualNetwork_Destination_Name'), parameters('virtualNetwork_Source_Name')))]",
-              "properties": {
-                "remoteVirtualNetwork": {
-                  "id": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetwork_Source_Name'))]"
-                },
-                "allowVirtualNetworkAccess": true,
-                "allowForwardedTraffic": true,
-                "useRemoteGateways": false,
-                "allowGatewayTransit": false
-              }
-            }
-          ]
-        }
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Resources/deployments', 'bastionspokevnet')]",
+        "[resourceId('Microsoft.Resources/deployments', 'dstVNET')]",
         "[resourceId('Microsoft.Resources/deployments', 'srcVNET')]"
       ]
     }
