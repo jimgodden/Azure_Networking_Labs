@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.32.4.45862",
-      "templateHash": "13456558268314415408"
+      "templateHash": "6617418986160148125"
     }
   },
   "parameters": {
@@ -37,13 +37,163 @@
     },
     "acceleratedNetworking": {
       "type": "bool",
-      "defaultValue": true,
+      "defaultValue": false,
       "metadata": {
         "description": "True enables Accelerated Networking and False disabled it.  \nNot all VM sizes support Accel Net (i.e. Standard_B2ms).  \nI'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net.\n"
       }
     }
   },
+  "variables": {
+    "virtualMachine_WebVM_Name": "webVM"
+  },
   "resources": [
+    {
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2024-07-01",
+      "name": "[variables('virtualMachine_WebVM_Name')]",
+      "location": "[parameters('location')]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('virtualMachine_Size')]"
+        },
+        "additionalCapabilities": {
+          "hibernationEnabled": false
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "MicrosoftWindowsServer",
+            "offer": "WindowsServer",
+            "sku": "2025-datacenter-azure-edition",
+            "version": "latest"
+          },
+          "osDisk": {
+            "osType": "Windows",
+            "name": "[format('{0}_OsDisk_1', variables('virtualMachine_WebVM_Name'))]",
+            "createOption": "FromImage",
+            "caching": "ReadWrite",
+            "managedDisk": {
+              "storageAccountType": "Premium_LRS"
+            },
+            "deleteOption": "Delete",
+            "diskSizeGB": 127
+          },
+          "dataDisks": [],
+          "diskControllerType": "SCSI"
+        },
+        "osProfile": {
+          "computerName": "[variables('virtualMachine_WebVM_Name')]",
+          "adminUsername": "[parameters('virtualMachine_AdminUsername')]",
+          "adminPassword": "[parameters('virtualMachine_AdminPassword')]",
+          "windowsConfiguration": {
+            "provisionVMAgent": true,
+            "enableAutomaticUpdates": true,
+            "patchSettings": {
+              "patchMode": "AutomaticByPlatform",
+              "automaticByPlatformSettings": {
+                "rebootSetting": "IfRequired"
+              },
+              "assessmentMode": "ImageDefault",
+              "enableHotpatching": true
+            }
+          },
+          "secrets": [],
+          "allowExtensionOperations": true
+        },
+        "securityProfile": {
+          "uefiSettings": {
+            "secureBootEnabled": true,
+            "vTpmEnabled": true
+          },
+          "securityType": "TrustedLaunch"
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', format('{0}-nic', variables('virtualMachine_WebVM_Name')))]",
+              "properties": {
+                "deleteOption": "Delete"
+              }
+            }
+          ]
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": true
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkInterfaces', format('{0}-nic', variables('virtualMachine_WebVM_Name')))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Network/publicIPAddresses",
+      "apiVersion": "2024-01-01",
+      "name": "[format('{0}-publicip', variables('virtualMachine_WebVM_Name'))]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "Standard",
+        "tier": "Regional"
+      },
+      "properties": {
+        "publicIPAllocationMethod": "Static"
+      }
+    },
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2024-01-01",
+      "name": "[format('{0}-nic', variables('virtualMachine_WebVM_Name'))]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}-publicip', variables('virtualMachine_WebVM_Name')))]"
+              },
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[reference(resourceId('Microsoft.Resources/deployments', 'vnet-hub'), '2022-09-01').outputs.general_SubnetID.value]"
+              },
+              "primary": true,
+              "privateIPAddressVersion": "IPv4"
+            }
+          }
+        ],
+        "enableAcceleratedNetworking": "[parameters('acceleratedNetworking')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}-publicip', variables('virtualMachine_WebVM_Name')))]",
+        "[resourceId('Microsoft.Resources/deployments', 'vnet-hub')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "apiVersion": "2021-11-01",
+      "name": "[format('{0}/{1}', variables('virtualMachine_WebVM_Name'), 'installcustomscript')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "publisher": "Microsoft.Compute",
+        "type": "CustomScriptExtension",
+        "typeHandlerVersion": "1.9",
+        "autoUpgradeMinorVersion": true,
+        "settings": {
+          "fileUris": [
+            "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2025_ConfigScript.ps1"
+          ]
+        },
+        "protectedSettings": {
+          "commandToExecute": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username {0} -Type WebServer', parameters('virtualMachine_AdminUsername'))]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Compute/virtualMachines', variables('virtualMachine_WebVM_Name'))]"
+      ]
+    },
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2022-09-01",
@@ -498,369 +648,6 @@
           }
         }
       }
-    },
-    {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
-      "name": "vm-client",
-      "properties": {
-        "expressionEvaluationOptions": {
-          "scope": "inner"
-        },
-        "mode": "Incremental",
-        "parameters": {
-          "location": {
-            "value": "[parameters('location')]"
-          },
-          "acceleratedNetworking": {
-            "value": "[parameters('acceleratedNetworking')]"
-          },
-          "subnet_ID": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'vnet-hub'), '2022-09-01').outputs.general_SubnetID.value]"
-          },
-          "virtualMachine_AdminPassword": {
-            "value": "[parameters('virtualMachine_AdminPassword')]"
-          },
-          "virtualMachine_AdminUsername": {
-            "value": "[parameters('virtualMachine_AdminUsername')]"
-          },
-          "virtualMachine_Name": {
-            "value": "vm-client"
-          },
-          "vmSize": {
-            "value": "[parameters('virtualMachine_Size')]"
-          },
-          "addPublicIPAddress": {
-            "value": true
-          }
-        },
-        "template": {
-          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0.0",
-          "metadata": {
-            "_generator": {
-              "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "2810809217873574572"
-            }
-          },
-          "parameters": {
-            "location": {
-              "type": "string"
-            },
-            "virtualMachine_Name": {
-              "type": "string",
-              "maxLength": 15,
-              "metadata": {
-                "description": "Name of the Virtual Machine"
-              }
-            },
-            "vmSize": {
-              "type": "string",
-              "metadata": {
-                "description": "Size of the Virtual Machine\nExamples:\nB2ms - 2 Core 8GB Ram - Cannot use Accelerated Networking\nD2as_v5 2 Core 8GB Ram - Uses Accelerated Networking"
-              }
-            },
-            "virtualMachine_AdminUsername": {
-              "type": "string",
-              "metadata": {
-                "description": "Admin Username for the Virtual Machine"
-              }
-            },
-            "virtualMachine_AdminPassword": {
-              "type": "securestring",
-              "metadata": {
-                "description": "Password for the Virtual Machine Admin User"
-              }
-            },
-            "networkInterface_Name": {
-              "type": "string",
-              "defaultValue": "[format('{0}_NetworkInterface', parameters('virtualMachine_Name'))]",
-              "metadata": {
-                "description": "Name of the Virtual Machines Network Interface"
-              }
-            },
-            "acceleratedNetworking": {
-              "type": "bool",
-              "metadata": {
-                "description": "True enables Accelerated Networking and False disabled it.  Not all sizes support Accel Net"
-              }
-            },
-            "subnet_ID": {
-              "type": "string",
-              "metadata": {
-                "description": "The Resource ID of the subnet to which the Network Interface will be assigned."
-              }
-            },
-            "entraConnect": {
-              "type": "bool",
-              "defaultValue": false,
-              "metadata": {
-                "description": "Enables the Virtual Machine to be joined to an Entra Domain"
-              }
-            },
-            "addPublicIPAddress": {
-              "type": "bool",
-              "defaultValue": false,
-              "metadata": {
-                "description": "Adds a Public IP to the Network Interface of the Virtual Machine"
-              }
-            },
-            "privateIPAllocationMethod": {
-              "type": "string",
-              "defaultValue": "Dynamic",
-              "allowedValues": [
-                "Dynamic",
-                "Static"
-              ],
-              "metadata": {
-                "description": "Sets the allocation mode of the IP Address of the Network Interface to either Dynamic or Static."
-              }
-            },
-            "privateIPAddress": {
-              "type": "string",
-              "defaultValue": "",
-              "metadata": {
-                "description": "Enter the Static IP Address here if privateIPAllocationMethod is set to Static."
-              }
-            },
-            "enableIPForwarding": {
-              "type": "bool",
-              "defaultValue": true
-            },
-            "tagValues": {
-              "type": "object",
-              "defaultValue": {}
-            }
-          },
-          "resources": [
-            {
-              "type": "Microsoft.Compute/virtualMachines/extensions",
-              "apiVersion": "2021-11-01",
-              "name": "[format('{0}/{1}', parameters('virtualMachine_Name'), 'installcustomscript')]",
-              "location": "[parameters('location')]",
-              "properties": {
-                "publisher": "Microsoft.Compute",
-                "type": "CustomScriptExtension",
-                "typeHandlerVersion": "1.9",
-                "autoUpgradeMinorVersion": true,
-                "settings": {
-                  "fileUris": [
-                    "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2025_ConfigScripttest.ps1"
-                  ]
-                },
-                "protectedSettings": {
-                  "commandToExecute": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScripttest.ps1 -Username {0} -Type General', parameters('virtualMachine_AdminUsername'))]"
-                }
-              },
-              "tags": "[parameters('tagValues')]",
-              "dependsOn": [
-                "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachine_Name'))]"
-              ]
-            },
-            {
-              "type": "Microsoft.Compute/virtualMachines",
-              "apiVersion": "2024-07-01",
-              "name": "[parameters('virtualMachine_Name')]",
-              "location": "[parameters('location')]",
-              "identity": {
-                "type": "SystemAssigned"
-              },
-              "properties": {
-                "hardwareProfile": {
-                  "vmSize": "[parameters('vmSize')]"
-                },
-                "additionalCapabilities": {
-                  "hibernationEnabled": false
-                },
-                "storageProfile": {
-                  "imageReference": {
-                    "publisher": "MicrosoftWindowsServer",
-                    "offer": "WindowsServer",
-                    "sku": "2025-datacenter-azure-edition",
-                    "version": "latest"
-                  },
-                  "osDisk": {
-                    "osType": "Windows",
-                    "name": "[format('{0}_OsDisk_1', parameters('virtualMachine_Name'))]",
-                    "createOption": "FromImage",
-                    "caching": "ReadWrite",
-                    "managedDisk": {
-                      "storageAccountType": "Premium_LRS"
-                    },
-                    "deleteOption": "Delete",
-                    "diskSizeGB": 127
-                  },
-                  "dataDisks": [],
-                  "diskControllerType": "SCSI"
-                },
-                "osProfile": {
-                  "computerName": "[parameters('virtualMachine_Name')]",
-                  "adminUsername": "[parameters('virtualMachine_AdminUsername')]",
-                  "adminPassword": "[parameters('virtualMachine_AdminPassword')]",
-                  "windowsConfiguration": {
-                    "provisionVMAgent": true,
-                    "enableAutomaticUpdates": true,
-                    "patchSettings": {
-                      "patchMode": "AutomaticByPlatform",
-                      "automaticByPlatformSettings": {
-                        "rebootSetting": "IfRequired"
-                      },
-                      "assessmentMode": "ImageDefault",
-                      "enableHotpatching": true
-                    }
-                  },
-                  "secrets": [],
-                  "allowExtensionOperations": true
-                },
-                "securityProfile": {
-                  "uefiSettings": {
-                    "secureBootEnabled": true,
-                    "vTpmEnabled": true
-                  },
-                  "securityType": "TrustedLaunch"
-                },
-                "networkProfile": {
-                  "networkInterfaces": [
-                    {
-                      "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name'))]",
-                      "properties": {
-                        "deleteOption": "Delete"
-                      }
-                    }
-                  ]
-                },
-                "diagnosticsProfile": {
-                  "bootDiagnostics": {
-                    "enabled": true
-                  }
-                }
-              },
-              "tags": "[parameters('tagValues')]",
-              "dependsOn": [
-                "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name'))]"
-              ]
-            },
-            {
-              "type": "Microsoft.Compute/virtualMachines/extensions",
-              "apiVersion": "2022-11-01",
-              "name": "[format('{0}/{1}', parameters('virtualMachine_Name'), 'AzureNetworkWatcherExtension')]",
-              "location": "[parameters('location')]",
-              "properties": {
-                "autoUpgradeMinorVersion": true,
-                "publisher": "Microsoft.Azure.NetworkWatcher",
-                "type": "NetworkWatcherAgentWindows",
-                "typeHandlerVersion": "1.4"
-              },
-              "tags": "[parameters('tagValues')]",
-              "dependsOn": [
-                "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachine_Name'))]"
-              ]
-            },
-            {
-              "condition": "[parameters('entraConnect')]",
-              "type": "Microsoft.Compute/virtualMachines/extensions",
-              "apiVersion": "2024-07-01",
-              "name": "[format('{0}/{1}', parameters('virtualMachine_Name'), 'AADLoginForWindows')]",
-              "location": "[parameters('location')]",
-              "properties": {
-                "autoUpgradeMinorVersion": true,
-                "publisher": "Microsoft.Azure.ActiveDirectory",
-                "type": "AADLoginForWindows",
-                "typeHandlerVersion": "1.0",
-                "settings": {
-                  "mdmId": ""
-                }
-              },
-              "tags": "[parameters('tagValues')]",
-              "dependsOn": [
-                "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachine_Name'))]"
-              ]
-            },
-            {
-              "condition": "[parameters('addPublicIPAddress')]",
-              "type": "Microsoft.Network/publicIPAddresses",
-              "apiVersion": "2024-01-01",
-              "name": "[format('{0}_pip', parameters('virtualMachine_Name'))]",
-              "location": "[parameters('location')]",
-              "sku": {
-                "name": "Standard"
-              },
-              "properties": {
-                "publicIPAllocationMethod": "Static",
-                "publicIPAddressVersion": "IPv4"
-              },
-              "tags": "[parameters('tagValues')]"
-            },
-            {
-              "type": "Microsoft.Network/networkInterfaces",
-              "apiVersion": "2024-01-01",
-              "name": "[parameters('networkInterface_Name')]",
-              "location": "[parameters('location')]",
-              "properties": {
-                "ipConfigurations": [
-                  {
-                    "name": "ipconfig1",
-                    "properties": {
-                      "privateIPAddress": "[parameters('privateIPAddress')]",
-                      "privateIPAllocationMethod": "[parameters('privateIPAllocationMethod')]",
-                      "publicIPAddress": "[if(parameters('addPublicIPAddress'), createObject('id', resourceId('Microsoft.Network/publicIPAddresses', format('{0}_pip', parameters('virtualMachine_Name')))), null())]",
-                      "subnet": {
-                        "id": "[parameters('subnet_ID')]"
-                      },
-                      "primary": true,
-                      "privateIPAddressVersion": "IPv4"
-                    }
-                  }
-                ],
-                "enableAcceleratedNetworking": "[parameters('acceleratedNetworking')]",
-                "enableIPForwarding": "[parameters('enableIPForwarding')]"
-              },
-              "tags": "[parameters('tagValues')]",
-              "dependsOn": [
-                "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_pip', parameters('virtualMachine_Name')))]"
-              ]
-            }
-          ],
-          "outputs": {
-            "virtualMachine_Name": {
-              "type": "string",
-              "value": "[parameters('virtualMachine_Name')]"
-            },
-            "virtualMachine_Id": {
-              "type": "string",
-              "value": "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachine_Name'))]"
-            },
-            "networkInterface_Name": {
-              "type": "string",
-              "value": "[parameters('networkInterface_Name')]"
-            },
-            "networkInterface_ID": {
-              "type": "string",
-              "value": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name'))]"
-            },
-            "networkInterface_IPConfig0_Name": {
-              "type": "string",
-              "value": "[reference(resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name')), '2024-01-01').ipConfigurations[0].name]"
-            },
-            "networkInterface_IPConfig0_ID": {
-              "type": "string",
-              "value": "[reference(resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name')), '2024-01-01').ipConfigurations[0].id]"
-            },
-            "networkInterface_PrivateIPAddress": {
-              "type": "string",
-              "value": "[reference(resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterface_Name')), '2024-01-01').ipConfigurations[0].properties.privateIPAddress]"
-            },
-            "networkInterface_PublicIPAddress": {
-              "type": "string",
-              "value": "[if(parameters('addPublicIPAddress'), reference(resourceId('Microsoft.Network/publicIPAddresses', format('{0}_pip', parameters('virtualMachine_Name'))), '2024-01-01').ipAddress, '')]"
-            }
-          }
-        }
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Resources/deployments', 'vnet-hub')]"
-      ]
     },
     {
       "type": "Microsoft.Resources/deployments",

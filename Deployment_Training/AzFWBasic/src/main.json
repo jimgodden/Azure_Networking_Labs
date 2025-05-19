@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.32.4.45862",
-      "templateHash": "3062001189913211022"
+      "templateHash": "391230143740952849"
     }
   },
   "parameters": {
@@ -1452,6 +1452,7 @@
         }
       },
       "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'AllBastionResources')]",
         "[resourceId('Microsoft.Network/virtualNetworks', 'hub_VNet')]",
         "[resourceId('Microsoft.Network/virtualNetworks', 'spokeA_VNet')]",
         "[resourceId('Microsoft.Network/virtualNetworks', 'spokeB_VNet')]"
@@ -2153,7 +2154,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.32.4.45862",
-              "templateHash": "17715357030864752259"
+              "templateHash": "4674184926665198887"
             }
           },
           "parameters": {
@@ -2181,6 +2182,10 @@
             "subnetId_VirtualNetworkGateway2": {
               "type": "string"
             },
+            "virtualNetworkGateway_SKU": {
+              "type": "string",
+              "defaultValue": "vpnGw1"
+            },
             "vpn_SharedKey": {
               "type": "string"
             }
@@ -2207,6 +2212,9 @@
                   },
                   "virtualNetworkGateway_Subnet_ResourceID": {
                     "value": "[parameters('subnetId_VirtualNetworkGateway1')]"
+                  },
+                  "virtualNetworkGateway_SKU": {
+                    "value": "[parameters('virtualNetworkGateway_SKU')]"
                   }
                 },
                 "template": {
@@ -2419,6 +2427,9 @@
                   },
                   "virtualNetworkGateway_Subnet_ResourceID": {
                     "value": "[parameters('subnetId_VirtualNetworkGateway2')]"
+                  },
+                  "virtualNetworkGateway_SKU": {
+                    "value": "[parameters('virtualNetworkGateway_SKU')]"
                   }
                 },
                 "template": {
@@ -2936,6 +2947,7 @@
         }
       },
       "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'peerings_Hub_to_Spokes_NoGateway')]",
         "[resourceId('Microsoft.Network/virtualNetworks', 'hub_VNet')]",
         "[resourceId('Microsoft.Network/virtualNetworks', 'onprem_VNet')]"
       ]

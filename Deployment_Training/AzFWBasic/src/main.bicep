@@ -52,7 +52,6 @@ module natGateway_Hub '../../../modules/Microsoft.Network/NATGateway.bicep' = {
   }
 }
 
-
 resource virtualNetwork_Hub 'Microsoft.Network/virtualNetworks@2021-02-01' = {
   name: 'hub_VNet'
   location: location
@@ -303,6 +302,9 @@ module peerings_Hub_to_Spokes_NoGateway '../../../modules/Microsoft.Network/Virt
       virtualNetwork_SpokeB.id
     ]
   }
+  dependsOn: [
+    bastion
+  ]
 }
 
 // Start of hub-DnsVM
@@ -1041,6 +1043,7 @@ resource virtualMachine_Onprem_Client_CustomScriptExtension 'Microsoft.Compute/v
   }
   tags: tagValues
 }
+// End of onprem_clientVM
 
 module onprem_to_Hub_VirtualNetworkGateways_and_Connections '../../../modules/Microsoft.Network/VirtualNetworkGatewaysAndConnections.bicep' = {
   name: 'onprem_to_Hub_VirtualNetworkGateways_and_Connections'
@@ -1055,6 +1058,9 @@ module onprem_to_Hub_VirtualNetworkGateways_and_Connections '../../../modules/Mi
     subnetId_VirtualNetworkGateway2: virtualNetwork_Hub.properties.subnets[1].id
     vpn_SharedKey: vpn_SharedKey
   }
+  dependsOn: [
+    peerings_Hub_to_Spokes_NoGateway
+  ]
 }
 
 module peerings_Hub_to_Spokes '../../../modules/Microsoft.Network/VirtualNetworkPeeringsHub2Spokes.bicep' = {
@@ -1070,7 +1076,6 @@ module peerings_Hub_to_Spokes '../../../modules/Microsoft.Network/VirtualNetwork
     onprem_to_Hub_VirtualNetworkGateways_and_Connections
   ]
 }
-
 
 resource azureFirewall_PIP 'Microsoft.Network/publicIPAddresses@2022-11-01' = {
   name: 'AzFW_PIP'

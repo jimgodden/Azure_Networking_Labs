@@ -5,17 +5,10 @@
     "_generator": {
       "name": "bicep",
       "version": "0.32.4.45862",
-      "templateHash": "7578794317019769909"
+      "templateHash": "5990097644330759481"
     }
   },
   "parameters": {
-    "location": {
-      "type": "string",
-      "defaultValue": "[resourceGroup().location]",
-      "metadata": {
-        "description": "Azure Datacenter location for the source resources"
-      }
-    },
     "virtualMachine_AdminUsername": {
       "type": "string",
       "metadata": {
@@ -50,8 +43,9 @@
     }
   },
   "variables": {
+    "location": "[resourceGroup().location]",
     "acceleratedNetworking": false,
-    "virtualMachine_ScriptFile": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2025_ConfigScript.ps1",
+    "virtualMachine_ScriptFile": "https://supportability.visualstudio.com/AzureNetworking/_git/AzureNetworking?path=/.LabBoxRepo/Hybrid/VPN_P2S_TransitiveRouting-Training/WinServ2022_ConfigScript_DNS.ps1",
     "virtualMachine_A_Name": "VM-A",
     "virtualMachine_B_Name": "VM-B",
     "virtualMachine_C_Name": "VM-C"
@@ -61,7 +55,7 @@
       "type": "Microsoft.Compute/virtualMachines",
       "apiVersion": "2024-07-01",
       "name": "[variables('virtualMachine_A_Name')]",
-      "location": "[parameters('location')]",
+      "location": "[variables('location')]",
       "identity": {
         "type": "SystemAssigned"
       },
@@ -143,7 +137,7 @@
       "type": "Microsoft.Network/networkInterfaces",
       "apiVersion": "2024-01-01",
       "name": "[format('{0}-nic', variables('virtualMachine_A_Name'))]",
-      "location": "[parameters('location')]",
+      "location": "[variables('location')]",
       "properties": {
         "ipConfigurations": [
           {
@@ -168,7 +162,7 @@
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "apiVersion": "2021-11-01",
       "name": "[format('{0}/{1}', variables('virtualMachine_A_Name'), 'installcustomscript')]",
-      "location": "[parameters('location')]",
+      "location": "[variables('location')]",
       "properties": {
         "publisher": "Microsoft.Compute",
         "type": "CustomScriptExtension",
@@ -191,7 +185,7 @@
       "type": "Microsoft.Compute/virtualMachines",
       "apiVersion": "2024-07-01",
       "name": "[variables('virtualMachine_B_Name')]",
-      "location": "[parameters('location')]",
+      "location": "[variables('location')]",
       "identity": {
         "type": "SystemAssigned"
       },
@@ -273,7 +267,7 @@
       "type": "Microsoft.Network/networkInterfaces",
       "apiVersion": "2024-01-01",
       "name": "[format('{0}-nic', variables('virtualMachine_B_Name'))]",
-      "location": "[parameters('location')]",
+      "location": "[variables('location')]",
       "properties": {
         "ipConfigurations": [
           {
@@ -298,7 +292,7 @@
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "apiVersion": "2021-11-01",
       "name": "[format('{0}/{1}', variables('virtualMachine_B_Name'), 'installcustomscript')]",
-      "location": "[parameters('location')]",
+      "location": "[variables('location')]",
       "properties": {
         "publisher": "Microsoft.Compute",
         "type": "CustomScriptExtension",
@@ -321,7 +315,7 @@
       "type": "Microsoft.Compute/virtualMachines",
       "apiVersion": "2024-07-01",
       "name": "[variables('virtualMachine_C_Name')]",
-      "location": "[parameters('location')]",
+      "location": "[variables('location')]",
       "identity": {
         "type": "SystemAssigned"
       },
@@ -403,7 +397,7 @@
       "type": "Microsoft.Network/networkInterfaces",
       "apiVersion": "2024-01-01",
       "name": "[format('{0}-nic', variables('virtualMachine_C_Name'))]",
-      "location": "[parameters('location')]",
+      "location": "[variables('location')]",
       "properties": {
         "ipConfigurations": [
           {
@@ -428,7 +422,7 @@
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "apiVersion": "2021-11-01",
       "name": "[format('{0}/{1}', variables('virtualMachine_C_Name'), 'installcustomscript')]",
-      "location": "[parameters('location')]",
+      "location": "[variables('location')]",
       "properties": {
         "publisher": "Microsoft.Compute",
         "type": "CustomScriptExtension",
@@ -461,7 +455,7 @@
             "value": "10.1.0.0/16"
           },
           "location": {
-            "value": "[parameters('location')]"
+            "value": "[variables('location')]"
           },
           "virtualNetwork_Name": {
             "value": "vnetA"
@@ -916,7 +910,7 @@
             "value": "10.2.0.0/16"
           },
           "location": {
-            "value": "[parameters('location')]"
+            "value": "[variables('location')]"
           },
           "virtualNetwork_Name": {
             "value": "vnetB"
@@ -1371,7 +1365,7 @@
             "value": "10.3.0.0/16"
           },
           "location": {
-            "value": "[parameters('location')]"
+            "value": "[variables('location')]"
           },
           "virtualNetwork_Name": {
             "value": "vnetC"
@@ -1826,7 +1820,7 @@
             "value": "10.100.0.0/16"
           },
           "location": {
-            "value": "[parameters('location')]"
+            "value": "[variables('location')]"
           },
           "virtualNetwork_Name": {
             "value": "vnetHub"
@@ -2278,7 +2272,7 @@
         "mode": "Incremental",
         "parameters": {
           "location": {
-            "value": "[parameters('location')]"
+            "value": "[variables('location')]"
           },
           "bastion_name": {
             "value": "Bastion"
@@ -2660,7 +2654,7 @@
         "mode": "Incremental",
         "parameters": {
           "location": {
-            "value": "[parameters('location')]"
+            "value": "[variables('location')]"
           },
           "virtualNetworkGateway_ASN": {
             "value": 65530
@@ -2881,7 +2875,7 @@
         "mode": "Incremental",
         "parameters": {
           "location": {
-            "value": "[parameters('location')]"
+            "value": "[variables('location')]"
           },
           "virtualNetworkGateway_ID": {
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtualNetworkGatewayA'), '2022-09-01').outputs.virtualNetworkGateway_ResourceID.value]"
@@ -3035,7 +3029,7 @@
         "mode": "Incremental",
         "parameters": {
           "location": {
-            "value": "[parameters('location')]"
+            "value": "[variables('location')]"
           },
           "virtualNetworkGateway_ID": {
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtualNetworkGatewayB'), '2022-09-01').outputs.virtualNetworkGateway_ResourceID.value]"
@@ -3189,7 +3183,7 @@
         "mode": "Incremental",
         "parameters": {
           "location": {
-            "value": "[parameters('location')]"
+            "value": "[variables('location')]"
           },
           "virtualNetworkGateway_ASN": {
             "value": 65531
@@ -3410,7 +3404,7 @@
         "mode": "Incremental",
         "parameters": {
           "location": {
-            "value": "[parameters('location')]"
+            "value": "[variables('location')]"
           },
           "virtualNetworkGateway_ID": {
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtualNetworkGatewayC'), '2022-09-01').outputs.virtualNetworkGateway_ResourceID.value]"
@@ -3564,7 +3558,7 @@
         "mode": "Incremental",
         "parameters": {
           "location": {
-            "value": "[parameters('location')]"
+            "value": "[variables('location')]"
           },
           "virtualNetworkGateway_ID": {
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'virtualNetworkGatewayB'), '2022-09-01').outputs.virtualNetworkGateway_ResourceID.value]"
@@ -3718,7 +3712,7 @@
         "mode": "Incremental",
         "parameters": {
           "location": {
-            "value": "[parameters('location')]"
+            "value": "[variables('location')]"
           },
           "virtualNetworkGateway_ASN": {
             "value": 65532

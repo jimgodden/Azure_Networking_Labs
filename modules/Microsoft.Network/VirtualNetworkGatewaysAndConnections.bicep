@@ -16,6 +16,7 @@ param name_VirtualNetworkGateway2 string
 param subnetId_VirtualNetworkGateway2 string
 
 
+param virtualNetworkGateway_SKU string = 'vpnGw1'
 
 param vpn_SharedKey string
 
@@ -29,6 +30,7 @@ module virtualNetworkGateway1 'VirtualNetworkGateway.bicep' = {
     virtualNetworkGateway_ASN: asn_VirtualNetworkGateway1
     virtualNetworkGateway_Name: name_VirtualNetworkGateway1
     virtualNetworkGateway_Subnet_ResourceID: subnetId_VirtualNetworkGateway1
+    virtualNetworkGateway_SKU: virtualNetworkGateway_SKU
   }
 }
 
@@ -39,6 +41,7 @@ module virtualNetworkGateway2 'VirtualNetworkGateway.bicep' = {
     virtualNetworkGateway_ASN: asn_VirtualNetworkGateway2
     virtualNetworkGateway_Name: name_VirtualNetworkGateway2
     virtualNetworkGateway_Subnet_ResourceID: subnetId_VirtualNetworkGateway2
+    virtualNetworkGateway_SKU: virtualNetworkGateway_SKU
   }
 }
 

@@ -1,0 +1,292 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.32.4.45862",
+      "templateHash": "9461119082179852026"
+    }
+  },
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Azure Datacenter location for the source resources"
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2024-05-01",
+      "name": "vnet",
+      "location": "[parameters('location')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "10.0.0.0/16"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "subnet1",
+            "properties": {
+              "addressPrefix": "10.0.0.0/24"
+            }
+          },
+          {
+            "name": "DatabricksSubnet",
+            "properties": {
+              "addressPrefix": "10.0.1.0/24",
+              "delegations": [
+                {
+                  "name": "databricksDelegation",
+                  "properties": {
+                    "serviceName": "Microsoft.Databricks/workspaces"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "PrivateEndpointSubnet",
+            "properties": {
+              "addressPrefix": "10.0.2.0/24",
+              "privateEndpointNetworkPolicies": "Enabled"
+            }
+          },
+          {
+            "name": "GatewaySubnet",
+            "properties": {
+              "addressPrefix": "10.0.3.0/24"
+            }
+          }
+        ],
+        "enableDdosProtection": false
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "vpn1",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "virtualNetworkGateway_Name": {
+            "value": "vpn"
+          },
+          "virtualNetworkGateway_Subnet_ResourceID": {
+            "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', 'vnet'), '2024-05-01').subnets[3].id]"
+          },
+          "virtualNetworkGateway_SKU": {
+            "value": "VpnGw1"
+          },
+          "vpnGatewayGeneration": {
+            "value": "Generation1"
+          },
+          "virtualNetworkGateway_ASN": {
+            "value": 65515
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.32.4.45862",
+              "templateHash": "15330167770294849167"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string",
+              "metadata": {
+                "description": "Azure Datacenter that the resources are deployed to"
+              }
+            },
+            "virtualNetworkGateway_Name": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the Azure Virtual Network Gateway"
+              }
+            },
+            "virtualNetworkGateway_SKU": {
+              "type": "string",
+              "defaultValue": "VpnGw1",
+              "allowedValues": [
+                "Basic",
+                "VpnGw1",
+                "VpnGw2",
+                "VpnGw3",
+                "VpnGw4",
+                "VpnGw5",
+                "VpnGw1AZ",
+                "VpnGw2AZ",
+                "VpnGw3AZ",
+                "VpnGw4AZ",
+                "VpnGw5AZ"
+              ],
+              "metadata": {
+                "description": "SKU of the Virtual Network Gateway"
+              }
+            },
+            "vpnGatewayGeneration": {
+              "type": "string",
+              "defaultValue": "Generation1",
+              "allowedValues": [
+                "Generation1",
+                "Generation2"
+              ],
+              "metadata": {
+                "description": "Generation of the Virtual Network Gateway SKU\nGeneration1: Basic, VpnGw1-3, VpnGw1-3AZ\nGeneration2: VpnGw2-5, VpnGw2-5Az"
+              }
+            },
+            "virtualNetworkGateway_ASN": {
+              "type": "int",
+              "metadata": {
+                "description": "Virtul Network Gateway ASN for BGP"
+              }
+            },
+            "virtualNetworkGateway_Subnet_ResourceID": {
+              "type": "string",
+              "metadata": {
+                "description": "Virtual Network Resource ID"
+              }
+            },
+            "activeActive": {
+              "type": "bool",
+              "defaultValue": false,
+              "metadata": {
+                "description": "Configures the Virtual Network Gateway as Active Active with two Public IP Addresses if True.  Default is False."
+              }
+            },
+            "tagValues": {
+              "type": "object",
+              "defaultValue": {}
+            }
+          },
+          "variables": {
+            "ipConfiguration": "[if(parameters('activeActive'), createArray(createObject('name', 'vNetGatewayConfig1', 'properties', createObject('privateIPAllocationMethod', 'Dynamic', 'subnet', createObject('id', parameters('virtualNetworkGateway_Subnet_ResourceID')), 'publicIPAddress', createObject('id', resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP_01', parameters('virtualNetworkGateway_Name')))))), createObject('properties', createObject('name', 'vNetGatewayConfig2', 'privateIPAllocationMethod', 'Dynamic', 'subnet', createObject('id', parameters('virtualNetworkGateway_Subnet_ResourceID')), 'publicIPAddress', createObject('id', resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP_02', parameters('virtualNetworkGateway_Name'))))))), createArray(createObject('name', 'vNetGatewayConfig1', 'properties', createObject('privateIPAllocationMethod', 'Dynamic', 'subnet', createObject('id', parameters('virtualNetworkGateway_Subnet_ResourceID')), 'publicIPAddress', createObject('id', resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP_01', parameters('virtualNetworkGateway_Name'))))))))]"
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Network/publicIPAddresses",
+              "apiVersion": "2022-11-01",
+              "name": "[format('{0}_PIP_01', parameters('virtualNetworkGateway_Name'))]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Standard",
+                "tier": "Regional"
+              },
+              "properties": {
+                "publicIPAddressVersion": "IPv4",
+                "publicIPAllocationMethod": "Static",
+                "idleTimeoutInMinutes": 4,
+                "ipTags": []
+              },
+              "tags": "[parameters('tagValues')]"
+            },
+            {
+              "condition": "[parameters('activeActive')]",
+              "type": "Microsoft.Network/publicIPAddresses",
+              "apiVersion": "2022-11-01",
+              "name": "[format('{0}_PIP_02', parameters('virtualNetworkGateway_Name'))]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Standard",
+                "tier": "Regional"
+              },
+              "properties": {
+                "publicIPAddressVersion": "IPv4",
+                "publicIPAllocationMethod": "Static",
+                "idleTimeoutInMinutes": 4,
+                "ipTags": []
+              },
+              "tags": "[parameters('tagValues')]"
+            },
+            {
+              "type": "Microsoft.Network/virtualNetworkGateways",
+              "apiVersion": "2023-02-01",
+              "name": "[parameters('virtualNetworkGateway_Name')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "enablePrivateIpAddress": false,
+                "ipConfigurations": "[variables('ipConfiguration')]",
+                "natRules": [],
+                "virtualNetworkGatewayPolicyGroups": [],
+                "enableBgpRouteTranslationForNat": false,
+                "disableIPSecReplayProtection": false,
+                "sku": {
+                  "name": "[parameters('virtualNetworkGateway_SKU')]",
+                  "tier": "[parameters('virtualNetworkGateway_SKU')]"
+                },
+                "gatewayType": "Vpn",
+                "vpnType": "RouteBased",
+                "enableBgp": true,
+                "activeActive": "[parameters('activeActive')]",
+                "bgpSettings": {
+                  "asn": "[parameters('virtualNetworkGateway_ASN')]",
+                  "peerWeight": 0
+                },
+                "vpnGatewayGeneration": "[parameters('vpnGatewayGeneration')]",
+                "allowRemoteVnetTraffic": false,
+                "allowVirtualWanTraffic": false
+              },
+              "tags": "[parameters('tagValues')]",
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP_01', parameters('virtualNetworkGateway_Name')))]",
+                "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP_02', parameters('virtualNetworkGateway_Name')))]"
+              ]
+            }
+          ],
+          "outputs": {
+            "virtualNetworkGateway_ResourceID": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/virtualNetworkGateways', parameters('virtualNetworkGateway_Name'))]"
+            },
+            "virtualNetworkGateway_Name": {
+              "type": "string",
+              "value": "[parameters('virtualNetworkGateway_Name')]"
+            },
+            "virtualNetworkGateway_BGPAddress": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Network/virtualNetworkGateways', parameters('virtualNetworkGateway_Name')), '2023-02-01').bgpSettings.bgpPeeringAddress]"
+            },
+            "virtualNetworkGateway_ActiveActive_BGPAddress1": {
+              "type": "string",
+              "value": "[if(parameters('activeActive'), reference(resourceId('Microsoft.Network/virtualNetworkGateways', parameters('virtualNetworkGateway_Name')), '2023-02-01').bgpSettings.bgpPeeringAddresses[0].defaultBgpIpAddresses[0], '')]"
+            },
+            "virtualNetworkGateway_ActiveActive_BGPAddress2": {
+              "type": "string",
+              "value": "[if(parameters('activeActive'), reference(resourceId('Microsoft.Network/virtualNetworkGateways', parameters('virtualNetworkGateway_Name')), '2023-02-01').bgpSettings.bgpPeeringAddresses[1].defaultBgpIpAddresses[0], '')]"
+            },
+            "virtualNetworkGateway_ASN": {
+              "type": "int",
+              "value": "[reference(resourceId('Microsoft.Network/virtualNetworkGateways', parameters('virtualNetworkGateway_Name')), '2023-02-01').bgpSettings.asn]"
+            },
+            "virtualNetworkGateway_PublicIPAddress": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP_01', parameters('virtualNetworkGateway_Name'))), '2022-11-01').ipAddress]"
+            },
+            "virtualNetworkGateway_ActiveActive_PublicIPAddress02": {
+              "type": "string",
+              "value": "[if(parameters('activeActive'), reference(resourceId('Microsoft.Network/publicIPAddresses', format('{0}_PIP_02', parameters('virtualNetworkGateway_Name'))), '2022-11-01').ipAddress, '')]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', 'vnet')]"
+      ]
+    }
+  ]
+}

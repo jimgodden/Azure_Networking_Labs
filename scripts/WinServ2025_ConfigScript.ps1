@@ -1,6 +1,5 @@
 param (
-    [Parameter(Mandatory)]
-    [string]$Username,
+    [string]$Username, # Deprecated, but kept for backwards compatibility
 
     [Parameter(Mandatory)]
     [ValidateSet("General", "WebServer", "DNS")]
@@ -52,7 +51,7 @@ $packages = @(
     "iperf3"
 )
 
-Set-Content -Value $packages -Path "C:\ChoclatelyPackages.txt"
+Set-Content -Value $packages -Path "C:\ChocolateyPackages.txt"
 
 # Install applications using Chocolatey
 foreach ($package in $packages) {
@@ -69,7 +68,7 @@ $initTaskTrigger = New-ScheduledTaskTrigger -AtLogon
 Register-ScheduledTask -TaskName $initTaskName -Action $initTaskAction  -User "${env:computername}\${Username}" -Trigger $initTaskTrigger -Force
 
 $scriptBlock = {
-$chocolateyPackages = Get-Content "C:\ChoclatelyPackages.txt"
+$chocolateyPackages = Get-Content "C:\ChocolateyPackages.txt"
 Write-Host "The following applications have been pre-installed via chocolatey:"
 Write-Host $chocolateyPackages
 

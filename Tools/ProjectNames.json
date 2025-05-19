@@ -3,6 +3,9 @@
     "Name": "Sandbox-VirtualWAN"
   },
   {
+    "Name": "Sandbox-FrontDoor"
+  },
+  {
     "Name": "Training-AzFWBasic"
   },
   {
@@ -37,9 +40,6 @@
   },
   {
     "Name": "Sandbox-TrafficManager"
-  },
-  {
-    "Name": "Scenario-BastionNativeClient"
   },
   {
     "Name": "Sandbox-NetworkWatcher"
@@ -78,6 +78,9 @@
     "Name": "Sandbox-PrivateResolver_Simple"
   },
   {
-    "Name": "Sandbox-FrontDoor"
+    "Name": "Scenario-BastionNativeClient"
+  },
+  {
+    "Name": "Sandbox-Databricks_With_PrivateEndpoints"
   }
 ]

@@ -1,5 +1,5 @@
 @description('Azure Datacenter location for the source resources')
-param location string = resourceGroup().location
+var location = resourceGroup().location
 
 @description('Username for the admin account of the Virtual Machines')
 param virtualMachine_AdminUsername string
@@ -25,8 +25,8 @@ param virtualNetworkGateway_SKU string = 'VpnGw1'
 @secure()
 param vpn_SharedKey string
 
-var virtualMachine_ScriptFile = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2025_ConfigScript.ps1'
-// var virtualMachine_ScriptFile = 'https://supportability.visualstudio.com/AzureNetworking/_git/AzureNetworking?path=/.LabBoxRepo/Hybrid/VPN_P2S_TransitiveRouting-Training/WinServ2022_ConfigScript_DNS.ps1'
+// var virtualMachine_ScriptFile = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2025_ConfigScript.ps1'
+var virtualMachine_ScriptFile = 'https://supportability.visualstudio.com/AzureNetworking/_git/AzureNetworking?path=/.LabBoxRepo/Hybrid/VPN_P2S_TransitiveRouting-Training/WinServ2022_ConfigScript_DNS.ps1'
 
 
 // Virtual Networks
