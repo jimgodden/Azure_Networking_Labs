@@ -36,7 +36,7 @@ Set-ItemProperty -Path $registryPath -Name $registryName -Value $registryValue
 
 
 # npcap for using Wireshark for taking packet captures
-Invoke-WebRequest -Uri "https://www.win10pcap.org/download/Win10Pcap-v10.2-5002.msi" -OutFile "c:\Win10Pcap-v10.2-5002.msi"
+Invoke-WebRequest -Uri "https://www.winpcap.org/install/bin/WinPcap_4_1_3.exe" -OutFile "c:\WinPcap_4_1_3.exe"
 # Invoke-WebRequest -Uri "https://npcap.com/dist/npcap-1.80.exe" -OutFile "c:\npcap-1.80.exe"
 
 # Install Chocolatey
@@ -92,11 +92,12 @@ Set-Shortcut -ApplicationFilePath "C:\Program Files\WindowsApps\Microsoft.Window
 Set-Shortcut -ApplicationFilePath "C:\Program Files\Notepad++\notepad++.exe" -DestinationFilePath "${DesktopFilePath}/Notepad++.lnk"
 # Set-Shortcut -ApplicationFilePath "C:\Program Files\Microsoft VS Code\Code.exe" -DestinationFilePath "${DesktopFilePath}/Visual Studio Code.lnk"
 
-# Write-Host "`n`nTo take packet captures with wireshark, npcap needs to be installed."
-# Write-Host "A pop up for installing npcap will appear momentarily."
-# Write-Host "Follow the instructions as directed to install npcap on this machine."
-# Installs npcap for using Wireshark for taking packet captures
-Start-Process msiexec.exe -ArgumentList "/i `"c:\Win10Pcap-v10.2-5002.msi`" /quiet /norestart" -Wait
+Write-Host "`n`nTo take packet captures with wireshark, winpcap needs to be installed."
+Write-Host "A pop up for installing winpcap will appear momentarily."
+Write-Host "Follow the instructions as directed to install winpcap on this machine."
+# Installs winpcap for using Wireshark for taking packet captures
+c:\WinPcap_4_1_3.exe
+
 
 # Removes the scheduled task so that it doesn't run again on the next logon
 Unregister-ScheduledTask -TaskName "Init" -Confirm:$false
