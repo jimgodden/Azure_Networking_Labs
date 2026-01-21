@@ -100,7 +100,7 @@ resource vmss 'Microsoft.Compute/virtualMachineScaleSets@2024-03-01' = {
           createOption: 'FromImage'
           caching: 'ReadWrite'
           managedDisk: {
-            storageAccountType: 'Premium_LRS'
+            storageAccountType: 'Standard_LRS'
           }
           deleteOption: 'Delete'
           diskSizeGB: 30

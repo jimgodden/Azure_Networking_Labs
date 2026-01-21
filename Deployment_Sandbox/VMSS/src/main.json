@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.39.26.7824",
-      "templateHash": "7425235257955950651"
+      "templateHash": "7558274070080802208"
     }
   },
   "parameters": {
@@ -634,7 +634,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.39.26.7824",
-              "templateHash": "18228648690095866376"
+              "templateHash": "7270552129058981019"
             }
           },
           "parameters": {
@@ -761,7 +761,7 @@
                       "createOption": "FromImage",
                       "caching": "ReadWrite",
                       "managedDisk": {
-                        "storageAccountType": "Premium_LRS"
+                        "storageAccountType": "Standard_LRS"
                       },
                       "deleteOption": "Delete",
                       "diskSizeGB": 30
