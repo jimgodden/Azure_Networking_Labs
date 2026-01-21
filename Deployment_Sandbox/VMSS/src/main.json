@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.39.26.7824",
-      "templateHash": "7456464398706903135"
+      "templateHash": "4699877407278859654"
     }
   },
   "parameters": {
@@ -622,6 +622,9 @@
           },
           "commandToExecute": {
             "value": "nohup python3 ./tcp-handshake-loop.py 10.1.0.4 22 10 > /dev/null 2>&1 &"
+          },
+          "allocatedOutboundPorts": {
+            "value": 100
           }
         },
         "template": {
@@ -631,7 +634,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.39.26.7824",
-              "templateHash": "7270552129058981019"
+              "templateHash": "8370967492180120144"
             }
           },
           "parameters": {
@@ -711,6 +714,13 @@
             "tagValues": {
               "type": "object",
               "defaultValue": {}
+            },
+            "allocatedOutboundPorts": {
+              "type": "int",
+              "defaultValue": 0,
+              "metadata": {
+                "description": "Number of SNAT ports per instance. 0 = auto-allocate. For large pools (300+ VMs), consider setting explicitly or adding more frontend IPs."
+              }
             }
           },
           "variables": {
@@ -860,6 +870,9 @@
                   },
                   "publicLoadBalancer_Name": {
                     "value": "[format('{0}_publicLoadBalancer', parameters('virtualMachineScaleSet_Name'))]"
+                  },
+                  "allocatedOutboundPorts": {
+                    "value": "[parameters('allocatedOutboundPorts')]"
                   }
                 },
                 "template": {
@@ -869,7 +882,7 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.39.26.7824",
-                      "templateHash": "2237825417066812815"
+                      "templateHash": "884161210443207227"
                     }
                   },
                   "parameters": {
@@ -901,6 +914,32 @@
                     "enableFloatingIP": {
                       "type": "bool",
                       "defaultValue": false
+                    },
+                    "allocatedOutboundPorts": {
+                      "type": "int",
+                      "defaultValue": 0,
+                      "metadata": {
+                        "description": "Number of SNAT ports per instance. 0 = auto-allocate. For large pools (300+ VMs), consider setting explicitly or adding more frontend IPs."
+                      }
+                    },
+                    "healthProbePort": {
+                      "type": "int",
+                      "defaultValue": 80,
+                      "metadata": {
+                        "description": "Health probe port"
+                      }
+                    },
+                    "healthProbeProtocol": {
+                      "type": "string",
+                      "defaultValue": "Tcp",
+                      "allowedValues": [
+                        "Http",
+                        "Https",
+                        "Tcp"
+                      ],
+                      "metadata": {
+                        "description": "Health probe protocol"
+                      }
                     }
                   },
                   "resources": [
@@ -940,6 +979,17 @@
                             "name": "bep"
                           }
                         ],
+                        "probes": [
+                          {
+                            "name": "healthProbe",
+                            "properties": {
+                              "protocol": "[parameters('healthProbeProtocol')]",
+                              "port": "[parameters('healthProbePort')]",
+                              "intervalInSeconds": 5,
+                              "numberOfProbes": 2
+                            }
+                          }
+                        ],
                         "loadBalancingRules": [
                           {
                             "name": "inboundRule",
@@ -949,6 +999,9 @@
                               },
                               "backendAddressPool": {
                                 "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('publicLoadBalancer_Name'), 'bep')]"
+                              },
+                              "probe": {
+                                "id": "[resourceId('Microsoft.Network/loadBalancers/probes', parameters('publicLoadBalancer_Name'), 'healthProbe')]"
                               },
                               "disableOutboundSnat": true,
                               "protocol": "[parameters('protocol')]",
@@ -972,7 +1025,7 @@
                               "backendAddressPool": {
                                 "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('publicLoadBalancer_Name'), 'bep')]"
                               },
-                              "allocatedOutboundPorts": 0,
+                              "allocatedOutboundPorts": "[parameters('allocatedOutboundPorts')]",
                               "protocol": "All",
                               "idleTimeoutInMinutes": 4,
                               "enableTcpReset": "[parameters('enableTcpReset')]"

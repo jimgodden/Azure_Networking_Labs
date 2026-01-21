@@ -44,6 +44,9 @@ param commandToExecute string
 
 param tagValues object = {}
 
+@description('Number of SNAT ports per instance. 0 = auto-allocate. For large pools (300+ VMs), consider setting explicitly or adding more frontend IPs.')
+param allocatedOutboundPorts int = 0
+
 @description('Joins the file path and the file name together')
 var virtualMachineScaleSet_ScriptFileUri = '${virtualMachineScaleSet_ScriptFileLocation}${virtualMachineScaleSet_ScriptFileName}'
 
@@ -52,6 +55,7 @@ module publicLoadBalancer '../../Microsoft.Network/PublicLoadBalancer.bicep' = {
   params: {
     location: location
     publicLoadBalancer_Name: '${virtualMachineScaleSet_Name}_publicLoadBalancer'
+    allocatedOutboundPorts: allocatedOutboundPorts
   }
 }
 

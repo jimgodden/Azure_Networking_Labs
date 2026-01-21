@@ -14,6 +14,16 @@ param enableTcpReset bool = false
 
 param enableFloatingIP bool = false
 
+@description('Number of SNAT ports per instance. 0 = auto-allocate. For large pools (300+ VMs), consider setting explicitly or adding more frontend IPs.')
+param allocatedOutboundPorts int = 0
+
+@description('Health probe port')
+param healthProbePort int = 80
+
+@description('Health probe protocol')
+@allowed(['Http', 'Https', 'Tcp'])
+param healthProbeProtocol string = 'Tcp'
+
 resource publicIpAddress 'Microsoft.Network/publicIPAddresses@2024-01-01' = {
   name: '${publicLoadBalancer_Name}_PIP'
   location: location
@@ -47,6 +57,17 @@ resource loadBalancer 'Microsoft.Network/loadBalancers@2024-01-01' = {
         name: 'bep'
       }
     ]
+    probes: [
+      {
+        name: 'healthProbe'
+        properties: {
+          protocol: healthProbeProtocol
+          port: healthProbePort
+          intervalInSeconds: 5
+          numberOfProbes: 2
+        }
+      }
+    ]
     loadBalancingRules: [
       {
         name: 'inboundRule'
@@ -56,6 +77,9 @@ resource loadBalancer 'Microsoft.Network/loadBalancers@2024-01-01' = {
           }
           backendAddressPool: {
             id: resourceId('Microsoft.Network/loadBalancers/backendAddressPools', publicLoadBalancer_Name, 'bep')
+          }
+          probe: {
+            id: resourceId('Microsoft.Network/loadBalancers/probes', publicLoadBalancer_Name, 'healthProbe')
           }
           disableOutboundSnat: true // must be set to true when using the same fip for outbound and inbound rules
           protocol: protocol
@@ -79,6 +103,7 @@ resource loadBalancer 'Microsoft.Network/loadBalancers@2024-01-01' = {
           backendAddressPool: {
             id: resourceId('Microsoft.Network/loadBalancers/backendAddressPools', publicLoadBalancer_Name, 'bep')
           }
+          allocatedOutboundPorts: allocatedOutboundPorts
           protocol: 'All'
           idleTimeoutInMinutes: 4
           enableTcpReset: enableTcpReset
