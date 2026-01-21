@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.39.26.7824",
-      "templateHash": "16808860435847846690"
+      "templateHash": "7425235257955950651"
     }
   },
   "parameters": {
@@ -634,7 +634,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.39.26.7824",
-              "templateHash": "4710071376443538616"
+              "templateHash": "18228648690095866376"
             }
           },
           "parameters": {
@@ -872,7 +872,7 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.39.26.7824",
-                      "templateHash": "8233144392785480605"
+                      "templateHash": "2237825417066812815"
                     }
                   },
                   "parameters": {
@@ -975,6 +975,7 @@
                               "backendAddressPool": {
                                 "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('publicLoadBalancer_Name'), 'bep')]"
                               },
+                              "allocatedOutboundPorts": 0,
                               "protocol": "All",
                               "idleTimeoutInMinutes": 4,
                               "enableTcpReset": "[parameters('enableTcpReset')]"
