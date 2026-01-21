@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.39.26.7824",
-      "templateHash": "12727291336263653113"
+      "templateHash": "16808860435847846690"
     }
   },
   "parameters": {
@@ -30,7 +30,7 @@
     },
     "virtualMachineScaleSet_Size": {
       "type": "string",
-      "defaultValue": "Standard_D2as_v4",
+      "defaultValue": "Standard_D2_v5",
       "metadata": {
         "description": "Size of the Virtual Machine Scale Set instances"
       }

@@ -9,7 +9,7 @@ param virtualMachineScaleSet_AdminUsername string
 param virtualMachineScaleSet_AdminPassword string
 
 @description('Size of the Virtual Machine Scale Set instances')
-param virtualMachineScaleSet_Size string = 'Standard_D2as_v4'
+param virtualMachineScaleSet_Size string = 'Standard_D2_v5'
 
 @description('Number of instances in the Virtual Machine Scale Set')
 @minValue(1)
