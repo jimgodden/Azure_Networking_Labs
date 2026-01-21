@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.39.26.7824",
-      "templateHash": "9651953114149132478"
+      "templateHash": "12727291336263653113"
     }
   },
   "parameters": {
@@ -624,7 +624,7 @@
             "value": "tcp-handshake-loop.py"
           },
           "commandToExecute": {
-            "value": "python3 ./tcp-handshake-loop.py 10.1.0.4 22 10"
+            "value": "nohup python3 ./tcp-handshake-loop.py 10.1.0.4 22 10 > /dev/null 2>&1 &"
           }
         },
         "template": {

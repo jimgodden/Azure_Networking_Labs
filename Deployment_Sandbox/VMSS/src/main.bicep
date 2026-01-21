@@ -124,7 +124,7 @@ module srcVMSS '../../../modules/Microsoft.Compute/VirtualMachineScaleSets/Ubunt
     subnet_ID: srcVNET.properties.subnets[0].id
     virtualMachineScaleSet_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/refs/heads/main/scripts/'
     virtualMachineScaleSet_ScriptFileName: 'tcp-handshake-loop.py'
-    commandToExecute: 'python3 ./tcp-handshake-loop.py 10.1.0.4 22 10'
+    commandToExecute: 'nohup python3 ./tcp-handshake-loop.py 10.1.0.4 22 10 > /dev/null 2>&1 &'
   }
 }
 
