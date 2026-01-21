@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.39.26.7824",
-      "templateHash": "1256307592832300522"
+      "templateHash": "9651953114149132478"
     }
   },
   "parameters": {
@@ -618,7 +618,7 @@
             "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', 'srcVNET'), '2024-01-01').subnets[0].id]"
           },
           "virtualMachineScaleSet_ScriptFileLocation": {
-            "value": "https://raw.githubusercontent.com/jamesgodden/Azure_Networking_Labs/main/scripts/"
+            "value": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/refs/heads/main/scripts/"
           },
           "virtualMachineScaleSet_ScriptFileName": {
             "value": "tcp-handshake-loop.py"
@@ -1024,7 +1024,7 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2025-04-01",
-      "name": "bastion",
+      "name": "bastionAllResources",
       "properties": {
         "expressionEvaluationOptions": {
           "scope": "inner"

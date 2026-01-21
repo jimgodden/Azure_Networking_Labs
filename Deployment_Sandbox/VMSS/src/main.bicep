@@ -122,7 +122,7 @@ module srcVMSS '../../../modules/Microsoft.Compute/VirtualMachineScaleSets/Ubunt
     capacity: instanceCount
     acceleratedNetworking: acceleratedNetworking
     subnet_ID: srcVNET.properties.subnets[0].id
-    virtualMachineScaleSet_ScriptFileLocation: 'https://raw.githubusercontent.com/jamesgodden/Azure_Networking_Labs/main/scripts/'
+    virtualMachineScaleSet_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/refs/heads/main/scripts/'
     virtualMachineScaleSet_ScriptFileName: 'tcp-handshake-loop.py'
     commandToExecute: 'python3 ./tcp-handshake-loop.py 10.1.0.4 22 10'
   }
@@ -130,7 +130,7 @@ module srcVMSS '../../../modules/Microsoft.Compute/VirtualMachineScaleSets/Ubunt
 
 // Bastion for connectivity to both VNets
 module bastion '../../../modules/Microsoft.Network/BastionEverything.bicep' = {
-  name: 'bastion'
+  name: 'bastionAllResources'
   params: {
     location: location
     bastion_name: 'bastion'
