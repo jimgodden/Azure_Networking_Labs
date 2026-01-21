@@ -20,7 +20,7 @@ param instanceCount int = 2
 Not all VM sizes support Accel Net (i.e. Standard_B2ms).  
 I'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net.
 ''')
-param acceleratedNetworking bool = true
+var acceleratedNetworking bool = true
 
 // Source Virtual Network for the VMSS
 resource srcVNET 'Microsoft.Network/virtualNetworks@2024-01-01' = {
