@@ -2,6 +2,7 @@
 #
 # iperf3-server.sh
 # Runs iperf3 in server mode to receive traffic from clients
+# Server runs infinitely until stopped with Ctrl+C
 #
 # Usage: ./iperf3-server.sh [port]
 #
