@@ -5,13 +5,13 @@
     "_generator": {
       "name": "bicep",
       "version": "0.39.26.7824",
-      "templateHash": "3110736330515969872"
+      "templateHash": "5015119143459274329"
     }
   },
   "parameters": {
     "location": {
       "type": "string",
-      "defaultValue": "eastus2",
+      "defaultValue": "[resourceGroup().location]",
       "metadata": {
         "description": "Azure Datacenter location for all resources"
       }
@@ -28,11 +28,18 @@
         "description": "Password for the admin account of the Virtual Machines"
       }
     },
-    "virtualMachine_Size": {
+    "sourceVM_Size": {
       "type": "string",
       "defaultValue": "Standard_D2_v5",
       "metadata": {
-        "description": "Size of the Virtual Machines"
+        "description": "Size of the Source Virtual Machines (uses Dv5 quota)"
+      }
+    },
+    "destinationVM_Size": {
+      "type": "string",
+      "defaultValue": "Standard_D2as_v5",
+      "metadata": {
+        "description": "Size of the Destination Virtual Machines (uses Dasv5 quota - different quota pool)"
       }
     },
     "azureFirewall_SKU": {
@@ -872,7 +879,7 @@
             "value": "[format('srcVM-Win{0}', range(1, parameters('numberOfSourceWindowsVMs'))[copyIndex()])]"
           },
           "vmSize": {
-            "value": "[parameters('virtualMachine_Size')]"
+            "value": "[parameters('sourceVM_Size')]"
           },
           "addPublicIPAddress": {
             "value": false
@@ -1278,7 +1285,7 @@
             "value": "[format('dstVM-Win{0}', range(1, parameters('numberOfDestinationWindowsVMs'))[copyIndex()])]"
           },
           "vmSize": {
-            "value": "[parameters('virtualMachine_Size')]"
+            "value": "[parameters('destinationVM_Size')]"
           },
           "addPublicIPAddress": {
             "value": false
@@ -1687,7 +1694,7 @@
             "value": "[format('srcVM-Linux{0}', range(1, parameters('numberOfSourceLinuxVMs'))[copyIndex()])]"
           },
           "virtualMachine_Size": {
-            "value": "[parameters('virtualMachine_Size')]"
+            "value": "[parameters('sourceVM_Size')]"
           },
           "scriptFileUri": {
             "value": "[parameters('sourceLinuxVMScriptFile')]"
@@ -2185,7 +2192,7 @@
             "value": "[format('dstVM-Linux{0}', range(1, parameters('numberOfDestinationLinuxVMs'))[copyIndex()])]"
           },
           "virtualMachine_Size": {
-            "value": "[parameters('virtualMachine_Size')]"
+            "value": "[parameters('destinationVM_Size')]"
           },
           "scriptFileUri": {
             "value": "[parameters('destinationLinuxVMScriptFile')]"

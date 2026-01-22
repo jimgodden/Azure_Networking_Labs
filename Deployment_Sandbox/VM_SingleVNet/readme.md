@@ -58,13 +58,13 @@ Traffic between subnets within the same VNet is **FREE** - no peering charges ap
 ### Basic Usage (60 second test)
 
 ```bicep
+// Source VM runs iperf3 client (waits 5 min for server, then runs 60 sec test)
+param sourceLinuxVMScriptFile = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/iperf3-client.sh'
+param sourceLinuxVMScriptCommand = 'nohup bash iperf3-client.sh 10.0.1.4 0 16 > /dev/null 2>&1 &'
+
 // Destination VM runs iperf3 server (runs indefinitely)
 param destinationLinuxVMScriptFile = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/iperf3-server.sh'
 param destinationLinuxVMScriptCommand = 'nohup bash iperf3-server.sh > /dev/null 2>&1 &'
-
-// Source VM runs iperf3 client (waits 5 min for server, then runs 60 sec test)
-param sourceLinuxVMScriptFile = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/iperf3-client.sh'
-param sourceLinuxVMScriptCommand = 'nohup bash iperf3-client.sh 10.0.1.4 > /dev/null 2>&1 &'
 ```
 
 ### Script Parameters

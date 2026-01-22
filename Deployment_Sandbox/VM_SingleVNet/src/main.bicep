@@ -38,7 +38,7 @@
 // ============================================================================
 
 @description('Azure Datacenter location for all resources')
-param location string = 'eastus2'
+param location string = resourceGroup().location
 
 @description('Username for the admin account of the Virtual Machines')
 param virtualMachine_AdminUsername string
@@ -47,8 +47,11 @@ param virtualMachine_AdminUsername string
 @secure()
 param virtualMachine_AdminPassword string
 
-@description('Size of the Virtual Machines')
-param virtualMachine_Size string = 'Standard_D2_v5'
+@description('Size of the Source Virtual Machines (uses Dv5 quota)')
+param sourceVM_Size string = 'Standard_D2_v5'
+
+@description('Size of the Destination Virtual Machines (uses Dasv5 quota - different quota pool)')
+param destinationVM_Size string = 'Standard_D2as_v5'
 
 @description('''True enables Accelerated Networking and False disabled it.  
 Not all VM sizes support Accel Net (i.e. Standard_B2ms).  
@@ -258,7 +261,7 @@ module sourceVM_Windows '../../../modules/Microsoft.Compute/virtualMachine/Windo
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'srcVM-Win${i}'
-    vmSize: virtualMachine_Size
+    vmSize: sourceVM_Size
     addPublicIPAddress: false // Using NAT Gateway
     scriptFileUri: sourceWindowsVMScriptFile
     commandToExecute: sourceWindowsVMScriptCommand
@@ -275,7 +278,7 @@ module destinationVM_Windows '../../../modules/Microsoft.Compute/virtualMachine/
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'dstVM-Win${i}'
-    vmSize: virtualMachine_Size
+    vmSize: destinationVM_Size
     addPublicIPAddress: false // Using NAT Gateway
     scriptFileUri: destinationWindowsVMScriptFile
     commandToExecute: destinationWindowsVMScriptCommand
@@ -293,7 +296,7 @@ module sourceVM_Linux '../../../modules/Microsoft.Compute/VirtualMachine/Linux/U
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'srcVM-Linux${i}'
-    virtualMachine_Size: virtualMachine_Size
+    virtualMachine_Size: sourceVM_Size
     scriptFileUri: sourceLinuxVMScriptFile
     commandToExecute: sourceLinuxVMScriptCommand
   }
@@ -310,7 +313,7 @@ module destinationVM_Linux '../../../modules/Microsoft.Compute/VirtualMachine/Li
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'dstVM-Linux${i}'
-    virtualMachine_Size: virtualMachine_Size
+    virtualMachine_Size: destinationVM_Size
     scriptFileUri: destinationLinuxVMScriptFile
     commandToExecute: destinationLinuxVMScriptCommand
   }
