@@ -33,6 +33,10 @@ if ! command -v iperf3 &> /dev/null; then
     sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y iperf3
 fi
 
+# Wait 5 minutes to ensure server is ready
+echo "Waiting 5 minutes for server to be ready..."
+sleep 300
+
 echo "=============================================="
 echo "iperf3 TCP Throughput Test"
 echo "=============================================="
