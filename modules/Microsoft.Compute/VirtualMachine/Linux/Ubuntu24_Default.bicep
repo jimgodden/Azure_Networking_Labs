@@ -41,6 +41,12 @@ param addPublicIPAddress bool = false
 
 param tagValues object = {}
 
+@description('URL to the script file to execute. Leave empty to skip custom script extension.')
+param scriptFileUri string = ''
+
+@description('Command to execute for the custom script. Leave empty to skip custom script extension.')
+param commandToExecute string = ''
+
 module networkInterface '../../../Microsoft.Network/NetworkInterface.bicep' = {
   name: networkInterface_Name
   params: {
@@ -121,6 +127,27 @@ resource virtualMachine_NetworkWatcherExtension 'Microsoft.Compute/virtualMachin
     publisher: 'Microsoft.Azure.NetworkWatcher'
     type: 'NetworkWatcherAgentLinux'
     typeHandlerVersion: '1.4'
+  }
+  tags: tagValues
+}
+
+resource virtualMachine_CustomScriptExtension 'Microsoft.Compute/virtualMachines/extensions@2021-11-01' = if (!empty(scriptFileUri) && !empty(commandToExecute)) {
+  parent: virtualMachine_Linux
+  name: 'customscript'
+  location: location
+  properties: {
+    publisher: 'Microsoft.Azure.Extensions'
+    type: 'CustomScript'
+    typeHandlerVersion: '2.1'
+    autoUpgradeMinorVersion: true
+    settings: {
+      fileUris: [
+        scriptFileUri
+      ]
+    }
+    protectedSettings: {
+      commandToExecute: commandToExecute
+    }
   }
   tags: tagValues
 }
