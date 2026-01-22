@@ -52,15 +52,70 @@ Traffic between subnets within the same VNet is **FREE** - no peering charges ap
 ## Example: iperf3 Testing on Linux VMs
 
 > [!NOTE]
-> Only use this if you are deploying 1 source and 1 destination Linux VM
+> The example below assumes you are deploying 1 source and 1 destination Linux VM.
+> The first VM in dstSubnet will get IP `10.0.1.4`.
+
+### Basic Usage (60 second test)
 
 ```bicep
-// Destination VM runs iperf3 server
-// Source VM runs iperf3 client (with delay to wait for server)
-param sourceLinuxVMScriptFile = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/refs/heads/main/scripts/iperf3-client.sh'
-param sourceLinuxVMScriptCommand = 'nohup bash iperf3-client.sh 10.0.1.4 > /dev/null 2>&1 &'
-
-param destinationLinuxVMScriptFile = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/refs/heads/main/scripts/iperf3-server.sh'
+// Destination VM runs iperf3 server (runs indefinitely)
+param destinationLinuxVMScriptFile = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/iperf3-server.sh'
 param destinationLinuxVMScriptCommand = 'nohup bash iperf3-server.sh > /dev/null 2>&1 &'
+
+// Source VM runs iperf3 client (waits 5 min for server, then runs 60 sec test)
+param sourceLinuxVMScriptFile = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/iperf3-client.sh'
+param sourceLinuxVMScriptCommand = 'nohup bash iperf3-client.sh 10.0.1.4 > /dev/null 2>&1 &'
+```
+
+### Script Parameters
+
+**iperf3-client.sh**: `<server-ip> [duration] [parallel-streams] [port]`
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| server-ip | (required) | IP address of the iperf3 server |
+| duration | 60 | Test duration in seconds. Use `0` for infinite |
+| parallel-streams | 8 | Number of parallel TCP streams |
+| port | 5201 | Server port |
+
+**iperf3-server.sh**: `[port]`
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| port | 5201 | Port to listen on |
+
+### Examples
+
+**2 minute test:**
+```bash
+bash iperf3-client.sh 10.0.1.4 120
+```
+
+**Infinite test (Ctrl+C to stop):**
+```bash
+bash iperf3-client.sh 10.0.1.4 0
+```
+
+**16 parallel streams for higher throughput:**
+```bash
+bash iperf3-client.sh 10.0.1.4 60 16
+```
+
+**Custom port:**
+```bash
+bash iperf3-server.sh 5555
+bash iperf3-client.sh 10.0.1.4 60 8 5555
+```
+
+### Manual Testing via Bastion
+
+After deployment, connect to the VMs via Bastion and run manually:
+
+```bash
+# On destination VM (10.0.1.4)
+bash iperf3-server.sh
+
+# On source VM (10.0.0.4)
+bash iperf3-client.sh 10.0.1.4 60
 ```
 
