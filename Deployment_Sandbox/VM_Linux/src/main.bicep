@@ -29,7 +29,7 @@ module virtualNetwork '../../../modules/Microsoft.Network/VirtualNetwork.bicep' 
   }
 }
 
-module virtualMachine_Linux '../../../modules/Microsoft.Compute/Ubuntu20/VirtualMachine.bicep' = {
+module virtualMachine_Linux '../../../modules/Microsoft.Compute/VirtualMachine/Linux/Ubuntu24_Default.bicep' = {
   name: 'linuxVM'
   params: {
     acceleratedNetworking: acceleratedNetworking
@@ -39,9 +39,8 @@ module virtualMachine_Linux '../../../modules/Microsoft.Compute/Ubuntu20/Virtual
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'linuxVM'
     virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    virtualMachine_ScriptFileName: 'Ubuntu20_DNS_Config.sh'
-    commandToExecute: './Ubuntu20_DNS_Config.sh'
+    scriptFileUri: '${virtualMachine_ScriptFileLocation}Ubuntu20_DNS_Config.sh'
+    commandToExecute: 'bash Ubuntu20_DNS_Config.sh'
   }
 }
 

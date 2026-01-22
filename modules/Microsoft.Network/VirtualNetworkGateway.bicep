@@ -6,11 +6,11 @@ param virtualNetworkGateway_Name string
 
 @allowed([
   'Basic'
-  'VpnGw1'
-  'VpnGw2'
-  'VpnGw3'
-  'VpnGw4'
-  'VpnGw5'
+  // 'VpnGw1'
+  // 'VpnGw2'
+  // 'VpnGw3'
+  // 'VpnGw4'
+  // 'VpnGw5'
   'VpnGw1AZ'
   'VpnGw2AZ'
   'VpnGw3AZ'
@@ -18,7 +18,7 @@ param virtualNetworkGateway_Name string
   'VpnGw5AZ'
 ])
 @description('SKU of the Virtual Network Gateway')
-param virtualNetworkGateway_SKU string = 'VpnGw1'
+param virtualNetworkGateway_SKU string = 'VpnGw1AZ'
 
 @allowed([
   'Generation1'
@@ -88,6 +88,11 @@ resource virtualNetworkGateway_PublicIPAddress01 'Microsoft.Network/publicIPAddr
     name: 'Standard'
     tier: 'Regional'
   }
+    zones: [
+    '1'
+    '2'
+    '3'
+  ]
   properties: {
     publicIPAddressVersion: 'IPv4'
     publicIPAllocationMethod: 'Static'
@@ -104,6 +109,11 @@ resource virtualNetworkGateway_PublicIPAddress02 'Microsoft.Network/publicIPAddr
     name: 'Standard'
     tier: 'Regional'
   }
+  zones: [
+    '1'
+    '2'
+    '3'
+  ]
   properties: {
     publicIPAddressVersion: 'IPv4'
     publicIPAllocationMethod: 'Static'
@@ -151,4 +161,5 @@ output virtualNetworkGateway_ActiveActive_BGPAddress2 string = activeActive ? vi
 output virtualNetworkGateway_ASN int = virtualNetworkGateway.properties.bgpSettings.asn
 
 output virtualNetworkGateway_PublicIPAddress string = virtualNetworkGateway_PublicIPAddress01.properties.ipAddress
+#disable-next-line BCP318
 output virtualNetworkGateway_ActiveActive_PublicIPAddress02 string = activeActive ? virtualNetworkGateway_PublicIPAddress02.properties.ipAddress : '' 

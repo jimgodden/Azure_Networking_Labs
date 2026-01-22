@@ -1,6 +1,6 @@
 This project was created to automate a VWAN deployment that can be easily created for testing purposes. You may either use the .\deployment.ps1 file or the button below to deploy the infrastructure.
 
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjimgodden%2FAzure_Networking_Labs%2Fmain%2FAzure_VirtualWAN_Sandbox%2Fsrc%2Fmain.json)
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjimgodden%2FAzure_Networking_Labs%2Fmain%2FDeployment_Sandbox%2FVirtualWAN%2Fsrc%2Fmain.json)
 
 
 Diagram of the infrastructure

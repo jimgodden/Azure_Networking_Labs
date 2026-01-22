@@ -243,4 +243,5 @@ output networkInterface_IPConfig0_Name string = nic.properties.ipConfigurations[
 output networkInterface_IPConfig0_ID string = nic.properties.ipConfigurations[0].id
 output networkInterface_PrivateIPAddress string = nic.properties.ipConfigurations[0].properties.privateIPAddress
 
+#disable-next-line BCP318
 output networkInterface_PublicIPAddress string = addPublicIPAddress ? publicIPAddress.properties.ipAddress : ''

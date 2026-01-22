@@ -36,7 +36,7 @@ module virtualNetwork '../../../modules/Microsoft.Network/VirtualNetwork.bicep' 
   params: {
     virtualNetwork_AddressPrefix: '10.0.0.0/16'
     location: location
-    virtualNetwork_Name: 'VirutalNetwork'
+    virtualNetwork_Name: 'VirtualNetwork'
   }
 }
 

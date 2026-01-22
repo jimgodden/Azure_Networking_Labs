@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.32.4.45862",
-      "templateHash": "13198068724273048509"
+      "version": "0.39.26.7824",
+      "templateHash": "14187061587862429458"
     }
   },
   "parameters": {
@@ -49,7 +49,7 @@
   "resources": [
     {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "vnet",
       "properties": {
         "expressionEvaluationOptions": {
@@ -73,8 +73,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "13797875414295410429"
+              "version": "0.39.26.7824",
+              "templateHash": "2180958851352607099"
             }
           },
           "parameters": {
@@ -171,6 +171,9 @@
                       "routeTable": {
                         "id": "[resourceId('Microsoft.Network/routeTables', parameters('routeTable_Name'))]"
                       },
+                      "natGateway": {
+                        "id": "[resourceId('Microsoft.Network/natGateways', format('{0}_NATGateway', parameters('virtualNetwork_Name')))]"
+                      },
                       "delegations": [],
                       "privateEndpointNetworkPolicies": "Disabled",
                       "privateLinkServiceNetworkPolicies": "Enabled"
@@ -185,6 +188,9 @@
                       },
                       "routeTable": {
                         "id": "[resourceId('Microsoft.Network/routeTables', parameters('routeTable_Name'))]"
+                      },
+                      "natGateway": {
+                        "id": "[resourceId('Microsoft.Network/natGateways', format('{0}_NATGateway', parameters('virtualNetwork_Name')))]"
                       },
                       "delegations": [],
                       "privateEndpointNetworkPolicies": "Disabled",
@@ -212,6 +218,9 @@
                       "addressPrefix": "[variables('subnet_AddressRangeCIDRs')[3]]",
                       "networkSecurityGroup": {
                         "id": "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}_NSG_ApplicationGateway', parameters('virtualNetwork_Name')))]"
+                      },
+                      "natGateway": {
+                        "id": "[resourceId('Microsoft.Network/natGateways', format('{0}_NATGateway', parameters('virtualNetwork_Name')))]"
                       },
                       "delegations": [],
                       "privateEndpointNetworkPolicies": "Disabled",
@@ -310,9 +319,44 @@
               },
               "tags": "[parameters('tagValues')]",
               "dependsOn": [
+                "[resourceId('Microsoft.Network/natGateways', format('{0}_NATGateway', parameters('virtualNetwork_Name')))]",
                 "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroup_Default_Name'))]",
                 "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}_NSG_ApplicationGateway', parameters('virtualNetwork_Name')))]",
                 "[resourceId('Microsoft.Network/routeTables', parameters('routeTable_Name'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Network/publicIPAddresses",
+              "apiVersion": "2024-07-01",
+              "name": "[format('{0}_NATGateway_PIP', parameters('virtualNetwork_Name'))]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Standard"
+              },
+              "properties": {
+                "publicIPAllocationMethod": "Static",
+                "publicIPAddressVersion": "IPv4"
+              },
+              "tags": "[parameters('tagValues')]"
+            },
+            {
+              "type": "Microsoft.Network/natGateways",
+              "apiVersion": "2024-07-01",
+              "name": "[format('{0}_NATGateway', parameters('virtualNetwork_Name'))]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Standard"
+              },
+              "properties": {
+                "publicIpAddresses": [
+                  {
+                    "id": "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_NATGateway_PIP', parameters('virtualNetwork_Name')))]"
+                  }
+                ],
+                "idleTimeoutInMinutes": 4
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_NATGateway_PIP', parameters('virtualNetwork_Name')))]"
               ]
             },
             {
@@ -504,7 +548,7 @@
     },
     {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "linuxVM",
       "properties": {
         "expressionEvaluationOptions": {
@@ -519,7 +563,7 @@
             "value": "[parameters('location')]"
           },
           "subnet_ID": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'vnet'), '2022-09-01').outputs.general_SubnetID.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'vnet'), '2025-04-01').outputs.general_SubnetID.value]"
           },
           "virtualMachine_AdminPassword": {
             "value": "[parameters('virtualMachine_AdminPassword')]"
@@ -533,14 +577,11 @@
           "virtualMachine_Size": {
             "value": "[parameters('virtualMachine_Size')]"
           },
-          "virtualMachine_ScriptFileLocation": {
-            "value": "[variables('virtualMachine_ScriptFileLocation')]"
-          },
-          "virtualMachine_ScriptFileName": {
-            "value": "Ubuntu20_DNS_Config.sh"
+          "scriptFileUri": {
+            "value": "[format('{0}Ubuntu20_DNS_Config.sh', variables('virtualMachine_ScriptFileLocation'))]"
           },
           "commandToExecute": {
-            "value": "./Ubuntu20_DNS_Config.sh"
+            "value": "bash Ubuntu20_DNS_Config.sh"
           }
         },
         "template": {
@@ -549,8 +590,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "14470086615027683818"
+              "version": "0.39.26.7824",
+              "templateHash": "3690264271800108318"
             }
           },
           "parameters": {
@@ -626,29 +667,24 @@
                 "description": "Adds a Public IP to the Network Interface of the Virtual Machine"
               }
             },
-            "virtualMachine_ScriptFileLocation": {
-              "type": "string",
-              "defaultValue": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/",
-              "metadata": {
-                "description": "Location of the file to be ran while the Virtual Machine is being created.  Ensure that the path ends with a /\nExample: https://example.com/scripts/"
-              }
-            },
-            "virtualMachine_ScriptFileName": {
-              "type": "string",
-              "metadata": {
-                "description": "Name of the file to be ran while the Virtual Machine is being created\nExample: Ubuntu20_DNS_Config.sh"
-              }
-            },
-            "commandToExecute": {
-              "type": "string"
-            },
             "tagValues": {
               "type": "object",
               "defaultValue": {}
+            },
+            "scriptFileUri": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "URL to the script file to execute. Leave empty to skip custom script extension."
+              }
+            },
+            "commandToExecute": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "Command to execute for the custom script. Leave empty to skip custom script extension."
+              }
             }
-          },
-          "variables": {
-            "virtualMachine_ScriptFileUri": "[format('{0}{1}', parameters('virtualMachine_ScriptFileLocation'), parameters('virtualMachine_ScriptFileName'))]"
           },
           "resources": [
             {
@@ -663,8 +699,8 @@
                 "storageProfile": {
                   "imageReference": {
                     "publisher": "canonical",
-                    "offer": "0001-com-ubuntu-server-focal",
-                    "sku": "20_04-lts-gen2",
+                    "offer": "ubuntu-24_04-lts",
+                    "sku": "server",
                     "version": "latest"
                   },
                   "osDisk": {
@@ -694,7 +730,7 @@
                 "networkProfile": {
                   "networkInterfaces": [
                     {
-                      "id": "[reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2022-09-01').outputs.networkInterface_ID.value]",
+                      "id": "[reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2025-04-01').outputs.networkInterface_ID.value]",
                       "properties": {
                         "deleteOption": "Delete"
                       }
@@ -729,9 +765,10 @@
               ]
             },
             {
+              "condition": "[and(not(empty(parameters('scriptFileUri'))), not(empty(parameters('commandToExecute'))))]",
               "type": "Microsoft.Compute/virtualMachines/extensions",
               "apiVersion": "2021-11-01",
-              "name": "[format('{0}/{1}', parameters('virtualMachine_Name'), 'installcustomscript')]",
+              "name": "[format('{0}/{1}', parameters('virtualMachine_Name'), 'customscript')]",
               "location": "[parameters('location')]",
               "properties": {
                 "publisher": "Microsoft.Azure.Extensions",
@@ -740,7 +777,7 @@
                 "autoUpgradeMinorVersion": true,
                 "settings": {
                   "fileUris": [
-                    "[variables('virtualMachine_ScriptFileUri')]"
+                    "[parameters('scriptFileUri')]"
                   ]
                 },
                 "protectedSettings": {
@@ -754,7 +791,7 @@
             },
             {
               "type": "Microsoft.Resources/deployments",
-              "apiVersion": "2022-09-01",
+              "apiVersion": "2025-04-01",
               "name": "[parameters('networkInterface_Name')]",
               "properties": {
                 "expressionEvaluationOptions": {
@@ -793,8 +830,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.32.4.45862",
-                      "templateHash": "11358289721704706086"
+                      "version": "0.39.26.7824",
+                      "templateHash": "14624587014618538460"
                     }
                   },
                   "parameters": {
@@ -971,27 +1008,27 @@
             },
             "networkInterface_Name": {
               "type": "string",
-              "value": "[reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2022-09-01').outputs.networkInterface_Name.value]"
+              "value": "[reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2025-04-01').outputs.networkInterface_Name.value]"
             },
             "networkInterface_ID": {
               "type": "string",
-              "value": "[reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2022-09-01').outputs.networkInterface_ID.value]"
+              "value": "[reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2025-04-01').outputs.networkInterface_ID.value]"
             },
             "networkInterface_IPConfig0_Name": {
               "type": "string",
-              "value": "[reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2022-09-01').outputs.networkInterface_IPConfig0_Name.value]"
+              "value": "[reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2025-04-01').outputs.networkInterface_IPConfig0_Name.value]"
             },
             "networkInterface_IPConfig0_ID": {
               "type": "string",
-              "value": "[reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2022-09-01').outputs.networkInterface_IPConfig0_ID.value]"
+              "value": "[reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2025-04-01').outputs.networkInterface_IPConfig0_ID.value]"
             },
             "networkInterface_PrivateIPAddress": {
               "type": "string",
-              "value": "[reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2022-09-01').outputs.networkInterface_PrivateIPAddress.value]"
+              "value": "[reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2025-04-01').outputs.networkInterface_PrivateIPAddress.value]"
             },
             "networkInterface_PublicIPAddress": {
               "type": "string",
-              "value": "[if(parameters('addPublicIPAddress'), reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2022-09-01').outputs.networkInterface_PublicIPAddress.value, '')]"
+              "value": "[if(parameters('addPublicIPAddress'), reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2025-04-01').outputs.networkInterface_PublicIPAddress.value, '')]"
             }
           }
         }
@@ -1002,7 +1039,7 @@
     },
     {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "bastion",
       "properties": {
         "expressionEvaluationOptions": {
@@ -1014,7 +1051,7 @@
             "value": "Hub_Bastion"
           },
           "bastion_SubnetID": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'vnet'), '2022-09-01').outputs.bastion_SubnetID.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'vnet'), '2025-04-01').outputs.bastion_SubnetID.value]"
           },
           "location": {
             "value": "[parameters('location')]"
@@ -1026,8 +1063,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "8940753681302617038"
+              "version": "0.39.26.7824",
+              "templateHash": "10032347255385532616"
             }
           },
           "parameters": {

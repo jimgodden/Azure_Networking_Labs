@@ -96,11 +96,17 @@ resource publicIPAddress 'Microsoft.Network/publicIPAddresses@2023-06-01' = if (
   tags: tagValues
 }
 
-output networkInterface_Name string = addPublicIPAddress ? networkInterfaceWithoutPubIP.name : networkInterfaceWithPubIP.name
-output networkInterface_ID string = addPublicIPAddress ? networkInterfaceWithoutPubIP.id : networkInterfaceWithPubIP.id
+#disable-next-line BCP318
+output networkInterface_Name string = addPublicIPAddress ? networkInterfaceWithPubIP.name : networkInterfaceWithoutPubIP.name
+#disable-next-line BCP318
+output networkInterface_ID string = addPublicIPAddress ? networkInterfaceWithPubIP.id : networkInterfaceWithoutPubIP.id
 
-output networkInterface_IPConfig0_Name string = addPublicIPAddress ? networkInterfaceWithoutPubIP.properties.ipConfigurations[0].name : networkInterfaceWithPubIP.properties.ipConfigurations[0].name
-output networkInterface_IPConfig0_ID string = addPublicIPAddress ? networkInterfaceWithoutPubIP.properties.ipConfigurations[0].id : networkInterfaceWithPubIP.properties.ipConfigurations[0].id
-output networkInterface_PrivateIPAddress string = addPublicIPAddress ? networkInterfaceWithoutPubIP.properties.ipConfigurations[0].properties.privateIPAddress : networkInterfaceWithPubIP.properties.ipConfigurations[0].properties.privateIPAddress
+#disable-next-line BCP318
+output networkInterface_IPConfig0_Name string = addPublicIPAddress ? networkInterfaceWithPubIP.properties.ipConfigurations[0].name : networkInterfaceWithoutPubIP.properties.ipConfigurations[0].name
+#disable-next-line BCP318
+output networkInterface_IPConfig0_ID string = addPublicIPAddress ? networkInterfaceWithPubIP.properties.ipConfigurations[0].id : networkInterfaceWithoutPubIP.properties.ipConfigurations[0].id
+#disable-next-line BCP318
+output networkInterface_PrivateIPAddress string = addPublicIPAddress ? networkInterfaceWithPubIP.properties.ipConfigurations[0].properties.privateIPAddress : networkInterfaceWithoutPubIP.properties.ipConfigurations[0].properties.privateIPAddress
 
+#disable-next-line BCP318
 output networkInterface_PublicIPAddress string = addPublicIPAddress ? publicIPAddress.properties.ipAddress : ''

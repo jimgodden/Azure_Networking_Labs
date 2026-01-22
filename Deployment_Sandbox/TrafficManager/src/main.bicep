@@ -1,13 +1,13 @@
-@description('Azure Datacenter location for the hub')
+@description('Azure Datacenter location for the hub resources')
 param location string = resourceGroup().location
 
-@description('Azure Datacenter location for the hub')
+@description('Azure Datacenter location for Region A')
 param locationA string = 'eastus2'
 
-@description('Azure Datacenter location for the hub')
+@description('Azure Datacenter location for Region B')
 param locationB string = 'westus2'
 
-@description('Azure Datacenter location for the hub')
+@description('Azure Datacenter location for Region C')
 param locationC string = 'westeurope'
 
 @description('Username for the admin account of the Virtual Machines')

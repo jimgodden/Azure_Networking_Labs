@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.32.4.45862",
-      "templateHash": "13679469363307102957"
+      "version": "0.39.26.7824",
+      "templateHash": "2426432218836263956"
     }
   },
   "parameters": {
@@ -46,7 +46,7 @@
       "type": "string",
       "defaultValue": "Standard_D2as_v4",
       "metadata": {
-        "description": "Password for the Virtual Machine Admin User"
+        "description": "Size of the Virtual Machines"
       }
     },
     "acceleratedNetworking": {
@@ -76,7 +76,7 @@
   "resources": [
     {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "transit_VNet_primary",
       "properties": {
         "expressionEvaluationOptions": {
@@ -100,8 +100,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "13797875414295410429"
+              "version": "0.39.26.7824",
+              "templateHash": "2180958851352607099"
             }
           },
           "parameters": {
@@ -198,6 +198,9 @@
                       "routeTable": {
                         "id": "[resourceId('Microsoft.Network/routeTables', parameters('routeTable_Name'))]"
                       },
+                      "natGateway": {
+                        "id": "[resourceId('Microsoft.Network/natGateways', format('{0}_NATGateway', parameters('virtualNetwork_Name')))]"
+                      },
                       "delegations": [],
                       "privateEndpointNetworkPolicies": "Disabled",
                       "privateLinkServiceNetworkPolicies": "Enabled"
@@ -212,6 +215,9 @@
                       },
                       "routeTable": {
                         "id": "[resourceId('Microsoft.Network/routeTables', parameters('routeTable_Name'))]"
+                      },
+                      "natGateway": {
+                        "id": "[resourceId('Microsoft.Network/natGateways', format('{0}_NATGateway', parameters('virtualNetwork_Name')))]"
                       },
                       "delegations": [],
                       "privateEndpointNetworkPolicies": "Disabled",
@@ -239,6 +245,9 @@
                       "addressPrefix": "[variables('subnet_AddressRangeCIDRs')[3]]",
                       "networkSecurityGroup": {
                         "id": "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}_NSG_ApplicationGateway', parameters('virtualNetwork_Name')))]"
+                      },
+                      "natGateway": {
+                        "id": "[resourceId('Microsoft.Network/natGateways', format('{0}_NATGateway', parameters('virtualNetwork_Name')))]"
                       },
                       "delegations": [],
                       "privateEndpointNetworkPolicies": "Disabled",
@@ -337,9 +346,44 @@
               },
               "tags": "[parameters('tagValues')]",
               "dependsOn": [
+                "[resourceId('Microsoft.Network/natGateways', format('{0}_NATGateway', parameters('virtualNetwork_Name')))]",
                 "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroup_Default_Name'))]",
                 "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}_NSG_ApplicationGateway', parameters('virtualNetwork_Name')))]",
                 "[resourceId('Microsoft.Network/routeTables', parameters('routeTable_Name'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Network/publicIPAddresses",
+              "apiVersion": "2024-07-01",
+              "name": "[format('{0}_NATGateway_PIP', parameters('virtualNetwork_Name'))]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Standard"
+              },
+              "properties": {
+                "publicIPAllocationMethod": "Static",
+                "publicIPAddressVersion": "IPv4"
+              },
+              "tags": "[parameters('tagValues')]"
+            },
+            {
+              "type": "Microsoft.Network/natGateways",
+              "apiVersion": "2024-07-01",
+              "name": "[format('{0}_NATGateway', parameters('virtualNetwork_Name'))]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Standard"
+              },
+              "properties": {
+                "publicIpAddresses": [
+                  {
+                    "id": "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_NATGateway_PIP', parameters('virtualNetwork_Name')))]"
+                  }
+                ],
+                "idleTimeoutInMinutes": 4
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_NATGateway_PIP', parameters('virtualNetwork_Name')))]"
               ]
             },
             {
@@ -531,7 +575,7 @@
     },
     {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "transit_VNet_secondary",
       "properties": {
         "expressionEvaluationOptions": {
@@ -555,8 +599,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "13797875414295410429"
+              "version": "0.39.26.7824",
+              "templateHash": "2180958851352607099"
             }
           },
           "parameters": {
@@ -653,6 +697,9 @@
                       "routeTable": {
                         "id": "[resourceId('Microsoft.Network/routeTables', parameters('routeTable_Name'))]"
                       },
+                      "natGateway": {
+                        "id": "[resourceId('Microsoft.Network/natGateways', format('{0}_NATGateway', parameters('virtualNetwork_Name')))]"
+                      },
                       "delegations": [],
                       "privateEndpointNetworkPolicies": "Disabled",
                       "privateLinkServiceNetworkPolicies": "Enabled"
@@ -667,6 +714,9 @@
                       },
                       "routeTable": {
                         "id": "[resourceId('Microsoft.Network/routeTables', parameters('routeTable_Name'))]"
+                      },
+                      "natGateway": {
+                        "id": "[resourceId('Microsoft.Network/natGateways', format('{0}_NATGateway', parameters('virtualNetwork_Name')))]"
                       },
                       "delegations": [],
                       "privateEndpointNetworkPolicies": "Disabled",
@@ -694,6 +744,9 @@
                       "addressPrefix": "[variables('subnet_AddressRangeCIDRs')[3]]",
                       "networkSecurityGroup": {
                         "id": "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}_NSG_ApplicationGateway', parameters('virtualNetwork_Name')))]"
+                      },
+                      "natGateway": {
+                        "id": "[resourceId('Microsoft.Network/natGateways', format('{0}_NATGateway', parameters('virtualNetwork_Name')))]"
                       },
                       "delegations": [],
                       "privateEndpointNetworkPolicies": "Disabled",
@@ -792,9 +845,44 @@
               },
               "tags": "[parameters('tagValues')]",
               "dependsOn": [
+                "[resourceId('Microsoft.Network/natGateways', format('{0}_NATGateway', parameters('virtualNetwork_Name')))]",
                 "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroup_Default_Name'))]",
                 "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}_NSG_ApplicationGateway', parameters('virtualNetwork_Name')))]",
                 "[resourceId('Microsoft.Network/routeTables', parameters('routeTable_Name'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Network/publicIPAddresses",
+              "apiVersion": "2024-07-01",
+              "name": "[format('{0}_NATGateway_PIP', parameters('virtualNetwork_Name'))]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Standard"
+              },
+              "properties": {
+                "publicIPAllocationMethod": "Static",
+                "publicIPAddressVersion": "IPv4"
+              },
+              "tags": "[parameters('tagValues')]"
+            },
+            {
+              "type": "Microsoft.Network/natGateways",
+              "apiVersion": "2024-07-01",
+              "name": "[format('{0}_NATGateway', parameters('virtualNetwork_Name'))]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Standard"
+              },
+              "properties": {
+                "publicIpAddresses": [
+                  {
+                    "id": "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_NATGateway_PIP', parameters('virtualNetwork_Name')))]"
+                  }
+                ],
+                "idleTimeoutInMinutes": 4
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_NATGateway_PIP', parameters('virtualNetwork_Name')))]"
               ]
             },
             {
@@ -986,7 +1074,7 @@
     },
     {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "hub_VNet",
       "properties": {
         "expressionEvaluationOptions": {
@@ -1010,8 +1098,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "13797875414295410429"
+              "version": "0.39.26.7824",
+              "templateHash": "2180958851352607099"
             }
           },
           "parameters": {
@@ -1108,6 +1196,9 @@
                       "routeTable": {
                         "id": "[resourceId('Microsoft.Network/routeTables', parameters('routeTable_Name'))]"
                       },
+                      "natGateway": {
+                        "id": "[resourceId('Microsoft.Network/natGateways', format('{0}_NATGateway', parameters('virtualNetwork_Name')))]"
+                      },
                       "delegations": [],
                       "privateEndpointNetworkPolicies": "Disabled",
                       "privateLinkServiceNetworkPolicies": "Enabled"
@@ -1122,6 +1213,9 @@
                       },
                       "routeTable": {
                         "id": "[resourceId('Microsoft.Network/routeTables', parameters('routeTable_Name'))]"
+                      },
+                      "natGateway": {
+                        "id": "[resourceId('Microsoft.Network/natGateways', format('{0}_NATGateway', parameters('virtualNetwork_Name')))]"
                       },
                       "delegations": [],
                       "privateEndpointNetworkPolicies": "Disabled",
@@ -1149,6 +1243,9 @@
                       "addressPrefix": "[variables('subnet_AddressRangeCIDRs')[3]]",
                       "networkSecurityGroup": {
                         "id": "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}_NSG_ApplicationGateway', parameters('virtualNetwork_Name')))]"
+                      },
+                      "natGateway": {
+                        "id": "[resourceId('Microsoft.Network/natGateways', format('{0}_NATGateway', parameters('virtualNetwork_Name')))]"
                       },
                       "delegations": [],
                       "privateEndpointNetworkPolicies": "Disabled",
@@ -1247,9 +1344,44 @@
               },
               "tags": "[parameters('tagValues')]",
               "dependsOn": [
+                "[resourceId('Microsoft.Network/natGateways', format('{0}_NATGateway', parameters('virtualNetwork_Name')))]",
                 "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroup_Default_Name'))]",
                 "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}_NSG_ApplicationGateway', parameters('virtualNetwork_Name')))]",
                 "[resourceId('Microsoft.Network/routeTables', parameters('routeTable_Name'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Network/publicIPAddresses",
+              "apiVersion": "2024-07-01",
+              "name": "[format('{0}_NATGateway_PIP', parameters('virtualNetwork_Name'))]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Standard"
+              },
+              "properties": {
+                "publicIPAllocationMethod": "Static",
+                "publicIPAddressVersion": "IPv4"
+              },
+              "tags": "[parameters('tagValues')]"
+            },
+            {
+              "type": "Microsoft.Network/natGateways",
+              "apiVersion": "2024-07-01",
+              "name": "[format('{0}_NATGateway', parameters('virtualNetwork_Name'))]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Standard"
+              },
+              "properties": {
+                "publicIpAddresses": [
+                  {
+                    "id": "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_NATGateway_PIP', parameters('virtualNetwork_Name')))]"
+                  }
+                ],
+                "idleTimeoutInMinutes": 4
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_NATGateway_PIP', parameters('virtualNetwork_Name')))]"
               ]
             },
             {
@@ -1441,7 +1573,7 @@
     },
     {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "spoke_VNet",
       "properties": {
         "expressionEvaluationOptions": {
@@ -1465,8 +1597,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "13797875414295410429"
+              "version": "0.39.26.7824",
+              "templateHash": "2180958851352607099"
             }
           },
           "parameters": {
@@ -1563,6 +1695,9 @@
                       "routeTable": {
                         "id": "[resourceId('Microsoft.Network/routeTables', parameters('routeTable_Name'))]"
                       },
+                      "natGateway": {
+                        "id": "[resourceId('Microsoft.Network/natGateways', format('{0}_NATGateway', parameters('virtualNetwork_Name')))]"
+                      },
                       "delegations": [],
                       "privateEndpointNetworkPolicies": "Disabled",
                       "privateLinkServiceNetworkPolicies": "Enabled"
@@ -1577,6 +1712,9 @@
                       },
                       "routeTable": {
                         "id": "[resourceId('Microsoft.Network/routeTables', parameters('routeTable_Name'))]"
+                      },
+                      "natGateway": {
+                        "id": "[resourceId('Microsoft.Network/natGateways', format('{0}_NATGateway', parameters('virtualNetwork_Name')))]"
                       },
                       "delegations": [],
                       "privateEndpointNetworkPolicies": "Disabled",
@@ -1604,6 +1742,9 @@
                       "addressPrefix": "[variables('subnet_AddressRangeCIDRs')[3]]",
                       "networkSecurityGroup": {
                         "id": "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}_NSG_ApplicationGateway', parameters('virtualNetwork_Name')))]"
+                      },
+                      "natGateway": {
+                        "id": "[resourceId('Microsoft.Network/natGateways', format('{0}_NATGateway', parameters('virtualNetwork_Name')))]"
                       },
                       "delegations": [],
                       "privateEndpointNetworkPolicies": "Disabled",
@@ -1702,9 +1843,44 @@
               },
               "tags": "[parameters('tagValues')]",
               "dependsOn": [
+                "[resourceId('Microsoft.Network/natGateways', format('{0}_NATGateway', parameters('virtualNetwork_Name')))]",
                 "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroup_Default_Name'))]",
                 "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}_NSG_ApplicationGateway', parameters('virtualNetwork_Name')))]",
                 "[resourceId('Microsoft.Network/routeTables', parameters('routeTable_Name'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Network/publicIPAddresses",
+              "apiVersion": "2024-07-01",
+              "name": "[format('{0}_NATGateway_PIP', parameters('virtualNetwork_Name'))]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Standard"
+              },
+              "properties": {
+                "publicIPAllocationMethod": "Static",
+                "publicIPAddressVersion": "IPv4"
+              },
+              "tags": "[parameters('tagValues')]"
+            },
+            {
+              "type": "Microsoft.Network/natGateways",
+              "apiVersion": "2024-07-01",
+              "name": "[format('{0}_NATGateway', parameters('virtualNetwork_Name'))]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Standard"
+              },
+              "properties": {
+                "publicIpAddresses": [
+                  {
+                    "id": "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_NATGateway_PIP', parameters('virtualNetwork_Name')))]"
+                  }
+                ],
+                "idleTimeoutInMinutes": 4
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_NATGateway_PIP', parameters('virtualNetwork_Name')))]"
               ]
             },
             {
@@ -1896,7 +2072,7 @@
     },
     {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "transitPrimaryToHubPeering",
       "properties": {
         "expressionEvaluationOptions": {
@@ -1905,10 +2081,10 @@
         "mode": "Incremental",
         "parameters": {
           "virtualNetwork_Hub_Name": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'transit_VNet_primary'), '2022-09-01').outputs.virtualNetwork_Name.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'transit_VNet_primary'), '2025-04-01').outputs.virtualNetwork_Name.value]"
           },
           "virtualNetwork_Spoke_Name": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'hub_VNet'), '2022-09-01').outputs.virtualNetwork_Name.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'hub_VNet'), '2025-04-01').outputs.virtualNetwork_Name.value]"
           }
         },
         "template": {
@@ -1917,8 +2093,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "17865971218722439423"
+              "version": "0.39.26.7824",
+              "templateHash": "5576474866412288110"
             }
           },
           "parameters": {
@@ -1976,7 +2152,7 @@
     },
     {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "hubPrimaryTospokePeering",
       "properties": {
         "expressionEvaluationOptions": {
@@ -1985,10 +2161,10 @@
         "mode": "Incremental",
         "parameters": {
           "virtualNetwork1_Name": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'hub_VNet'), '2022-09-01').outputs.virtualNetwork_Name.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'hub_VNet'), '2025-04-01').outputs.virtualNetwork_Name.value]"
           },
           "virtualNetwork2_Name": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'spoke_VNet'), '2022-09-01').outputs.virtualNetwork_Name.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'spoke_VNet'), '2025-04-01').outputs.virtualNetwork_Name.value]"
           }
         },
         "template": {
@@ -1997,8 +2173,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "11605936954403370846"
+              "version": "0.39.26.7824",
+              "templateHash": "17698631923447529243"
             }
           },
           "parameters": {
@@ -2050,7 +2226,7 @@
     },
     {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "hubAzFW",
       "properties": {
         "expressionEvaluationOptions": {
@@ -2065,13 +2241,13 @@
             "value": "Basic"
           },
           "azureFirewall_ManagementSubnet_ID": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'hub_VNet'), '2022-09-01').outputs.azureFirewallManagement_SubnetID.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'hub_VNet'), '2025-04-01').outputs.azureFirewallManagement_SubnetID.value]"
           },
           "azureFirewallPolicy_Name": {
             "value": "hubAzFW_Policy"
           },
           "azureFirewall_Subnet_ID": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'hub_VNet'), '2022-09-01').outputs.azureFirewall_SubnetID.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'hub_VNet'), '2025-04-01').outputs.azureFirewall_SubnetID.value]"
           },
           "location": {
             "value": "[parameters('locationPrimary')]"
@@ -2083,8 +2259,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "3831283260328725977"
+              "version": "0.39.26.7824",
+              "templateHash": "9524441584603715517"
             }
           },
           "parameters": {
@@ -2282,7 +2458,7 @@
     },
     {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "udrToAzFW_TransitPrimary",
       "properties": {
         "expressionEvaluationOptions": {
@@ -2299,13 +2475,13 @@
             "value": "VirtualAppliance"
           },
           "routeTable_Name": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'transit_VNet_primary'), '2022-09-01').outputs.routeTable_Name.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'transit_VNet_primary'), '2025-04-01').outputs.routeTable_Name.value]"
           },
           "routeTableRoute_Name": {
             "value": "toAzFW"
           },
           "nextHopIpAddress": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'hubAzFW'), '2022-09-01').outputs.azureFirewall_PrivateIPAddress.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'hubAzFW'), '2025-04-01').outputs.azureFirewall_PrivateIPAddress.value]"
           }
         },
         "template": {
@@ -2314,8 +2490,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "2832723045023485587"
+              "version": "0.39.26.7824",
+              "templateHash": "11532769146824708258"
             }
           },
           "parameters": {
@@ -2383,7 +2559,7 @@
     },
     {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "udrToAzFW_TransitSecondary",
       "properties": {
         "expressionEvaluationOptions": {
@@ -2400,13 +2576,13 @@
             "value": "VirtualAppliance"
           },
           "routeTable_Name": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'transit_VNet_primary'), '2022-09-01').outputs.routeTable_Name.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'transit_VNet_primary'), '2025-04-01').outputs.routeTable_Name.value]"
           },
           "routeTableRoute_Name": {
             "value": "toAzFW"
           },
           "nextHopIpAddress": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'hubAzFW'), '2022-09-01').outputs.azureFirewall_PrivateIPAddress.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'hubAzFW'), '2025-04-01').outputs.azureFirewall_PrivateIPAddress.value]"
           }
         },
         "template": {
@@ -2415,8 +2591,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "2832723045023485587"
+              "version": "0.39.26.7824",
+              "templateHash": "11532769146824708258"
             }
           },
           "parameters": {
@@ -2484,7 +2660,7 @@
     },
     {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "udrToAzFW_Hub",
       "properties": {
         "expressionEvaluationOptions": {
@@ -2501,13 +2677,13 @@
             "value": "VirtualAppliance"
           },
           "routeTable_Name": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'hub_VNet'), '2022-09-01').outputs.routeTable_Name.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'hub_VNet'), '2025-04-01').outputs.routeTable_Name.value]"
           },
           "routeTableRoute_Name": {
             "value": "toAzFW"
           },
           "nextHopIpAddress": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'hubAzFW'), '2022-09-01').outputs.azureFirewall_PrivateIPAddress.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'hubAzFW'), '2025-04-01').outputs.azureFirewall_PrivateIPAddress.value]"
           }
         },
         "template": {
@@ -2516,8 +2692,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "2832723045023485587"
+              "version": "0.39.26.7824",
+              "templateHash": "11532769146824708258"
             }
           },
           "parameters": {
@@ -2585,7 +2761,7 @@
     },
     {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "udrToAzFW_Spoke",
       "properties": {
         "expressionEvaluationOptions": {
@@ -2602,13 +2778,13 @@
             "value": "VirtualAppliance"
           },
           "routeTable_Name": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'spoke_VNet'), '2022-09-01').outputs.routeTable_Name.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'spoke_VNet'), '2025-04-01').outputs.routeTable_Name.value]"
           },
           "routeTableRoute_Name": {
             "value": "toAzFW"
           },
           "nextHopIpAddress": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'hubAzFW'), '2022-09-01').outputs.azureFirewall_PrivateIPAddress.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'hubAzFW'), '2025-04-01').outputs.azureFirewall_PrivateIPAddress.value]"
           }
         },
         "template": {
@@ -2617,8 +2793,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "2832723045023485587"
+              "version": "0.39.26.7824",
+              "templateHash": "11532769146824708258"
             }
           },
           "parameters": {
@@ -2686,7 +2862,7 @@
     },
     {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "spoke-WinVM-client",
       "properties": {
         "expressionEvaluationOptions": {
@@ -2701,7 +2877,7 @@
             "value": "[parameters('locationPrimary')]"
           },
           "subnet_ID": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'spoke_VNet'), '2022-09-01').outputs.general_SubnetID.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'spoke_VNet'), '2025-04-01').outputs.general_SubnetID.value]"
           },
           "virtualMachine_AdminPassword": {
             "value": "[parameters('virtualMachine_AdminPassword')]"
@@ -2731,8 +2907,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "427334920654472171"
+              "version": "0.39.26.7824",
+              "templateHash": "368819196490511954"
             }
           },
           "parameters": {
@@ -2888,7 +3064,7 @@
                 "networkProfile": {
                   "networkInterfaces": [
                     {
-                      "id": "[reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2022-09-01').outputs.networkInterface_ID.value]",
+                      "id": "[reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2025-04-01').outputs.networkInterface_ID.value]",
                       "properties": {
                         "deleteOption": "Delete"
                       }
@@ -2948,7 +3124,7 @@
             },
             {
               "type": "Microsoft.Resources/deployments",
-              "apiVersion": "2022-09-01",
+              "apiVersion": "2025-04-01",
               "name": "[parameters('networkInterface_Name')]",
               "properties": {
                 "expressionEvaluationOptions": {
@@ -2987,8 +3163,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.32.4.45862",
-                      "templateHash": "11358289721704706086"
+                      "version": "0.39.26.7824",
+                      "templateHash": "14624587014618538460"
                     }
                   },
                   "parameters": {
@@ -3169,27 +3345,27 @@
             },
             "networkInterface_Name": {
               "type": "string",
-              "value": "[reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2022-09-01').outputs.networkInterface_Name.value]"
+              "value": "[reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2025-04-01').outputs.networkInterface_Name.value]"
             },
             "networkInterface_ID": {
               "type": "string",
-              "value": "[reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2022-09-01').outputs.networkInterface_ID.value]"
+              "value": "[reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2025-04-01').outputs.networkInterface_ID.value]"
             },
             "networkInterface_IPConfig0_Name": {
               "type": "string",
-              "value": "[reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2022-09-01').outputs.networkInterface_IPConfig0_Name.value]"
+              "value": "[reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2025-04-01').outputs.networkInterface_IPConfig0_Name.value]"
             },
             "networkInterface_IPConfig0_ID": {
               "type": "string",
-              "value": "[reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2022-09-01').outputs.networkInterface_IPConfig0_ID.value]"
+              "value": "[reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2025-04-01').outputs.networkInterface_IPConfig0_ID.value]"
             },
             "networkInterface_PrivateIPAddress": {
               "type": "string",
-              "value": "[reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2022-09-01').outputs.networkInterface_PrivateIPAddress.value]"
+              "value": "[reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2025-04-01').outputs.networkInterface_PrivateIPAddress.value]"
             },
             "networkInterface_PublicIPAddress": {
               "type": "string",
-              "value": "[if(parameters('addPublicIPAddress'), reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2022-09-01').outputs.networkInterface_PublicIPAddress.value, '')]"
+              "value": "[if(parameters('addPublicIPAddress'), reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2025-04-01').outputs.networkInterface_PublicIPAddress.value, '')]"
             }
           }
         }
@@ -3200,7 +3376,7 @@
     },
     {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "hubBastion",
       "properties": {
         "expressionEvaluationOptions": {
@@ -3209,7 +3385,7 @@
         "mode": "Incremental",
         "parameters": {
           "bastion_SubnetID": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'hub_VNet'), '2022-09-01').outputs.bastion_SubnetID.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'hub_VNet'), '2025-04-01').outputs.bastion_SubnetID.value]"
           },
           "location": {
             "value": "[parameters('locationPrimary')]"
@@ -3224,8 +3400,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "8940753681302617038"
+              "version": "0.39.26.7824",
+              "templateHash": "10032347255385532616"
             }
           },
           "parameters": {
@@ -3356,7 +3532,7 @@
     },
     {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "onpremBastion",
       "properties": {
         "expressionEvaluationOptions": {
@@ -3365,7 +3541,7 @@
         "mode": "Incremental",
         "parameters": {
           "bastion_SubnetID": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'onprem_VNet'), '2022-09-01').outputs.bastion_SubnetID.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'onprem_VNet'), '2025-04-01').outputs.bastion_SubnetID.value]"
           },
           "location": {
             "value": "[parameters('locationOnPrem')]"
@@ -3380,8 +3556,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "8940753681302617038"
+              "version": "0.39.26.7824",
+              "templateHash": "10032347255385532616"
             }
           },
           "parameters": {
@@ -3512,7 +3688,7 @@
     },
     {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "dnsPrivateResolver",
       "properties": {
         "expressionEvaluationOptions": {
@@ -3524,16 +3700,16 @@
             "value": "hub_DNSPrivateResolver"
           },
           "dnsPrivateResolver_Inbound_SubnetID": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'hub_VNet'), '2022-09-01').outputs.privateResolver_Inbound_SubnetID.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'hub_VNet'), '2025-04-01').outputs.privateResolver_Inbound_SubnetID.value]"
           },
           "dnsPrivateResolver_Outbound_SubnetID": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'hub_VNet'), '2022-09-01').outputs.privateResolver_Outbound_SubnetID.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'hub_VNet'), '2025-04-01').outputs.privateResolver_Outbound_SubnetID.value]"
           },
           "location": {
             "value": "[parameters('locationPrimary')]"
           },
           "virtualNetwork_ID": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'hub_VNet'), '2022-09-01').outputs.virtualNetwork_ID.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'hub_VNet'), '2025-04-01').outputs.virtualNetwork_ID.value]"
           }
         },
         "template": {
@@ -3542,8 +3718,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "14730579850621794979"
+              "version": "0.39.26.7824",
+              "templateHash": "12423090568152153932"
             }
           },
           "parameters": {
@@ -3664,7 +3840,7 @@
     },
     {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "dnsPrivateResolverForwardingRuleSet",
       "properties": {
         "expressionEvaluationOptions": {
@@ -3673,7 +3849,7 @@
         "mode": "Incremental",
         "parameters": {
           "outboundEndpoint_ID": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'dnsPrivateResolver'), '2022-09-01').outputs.dnsPrivateResolver_Outbound_Endpoint_ID.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'dnsPrivateResolver'), '2025-04-01').outputs.dnsPrivateResolver_Outbound_Endpoint_ID.value]"
           },
           "domainName": {
             "value": "[parameters('onpremResolvableDomainName')]"
@@ -3685,13 +3861,13 @@
             "value": [
               {
                 "port": 53,
-                "ipaddress": "[reference(resourceId('Microsoft.Resources/deployments', 'OnPremWinDNS'), '2022-09-01').outputs.networkInterface_PrivateIPAddress.value]"
+                "ipaddress": "[reference(resourceId('Microsoft.Resources/deployments', 'OnPremWinDNS'), '2025-04-01').outputs.networkInterface_PrivateIPAddress.value]"
               }
             ]
           },
           "virtualNetwork_IDs": {
             "value": [
-              "[reference(resourceId('Microsoft.Resources/deployments', 'spoke_VNet'), '2022-09-01').outputs.virtualNetwork_ID.value]"
+              "[reference(resourceId('Microsoft.Resources/deployments', 'spoke_VNet'), '2025-04-01').outputs.virtualNetwork_ID.value]"
             ]
           }
         },
@@ -3701,8 +3877,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "8206034123101316548"
+              "version": "0.39.26.7824",
+              "templateHash": "3356244593999414462"
             }
           },
           "parameters": {
@@ -3803,7 +3979,7 @@
     },
     {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "onprem_VNet",
       "properties": {
         "expressionEvaluationOptions": {
@@ -3827,8 +4003,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "13797875414295410429"
+              "version": "0.39.26.7824",
+              "templateHash": "2180958851352607099"
             }
           },
           "parameters": {
@@ -3925,6 +4101,9 @@
                       "routeTable": {
                         "id": "[resourceId('Microsoft.Network/routeTables', parameters('routeTable_Name'))]"
                       },
+                      "natGateway": {
+                        "id": "[resourceId('Microsoft.Network/natGateways', format('{0}_NATGateway', parameters('virtualNetwork_Name')))]"
+                      },
                       "delegations": [],
                       "privateEndpointNetworkPolicies": "Disabled",
                       "privateLinkServiceNetworkPolicies": "Enabled"
@@ -3939,6 +4118,9 @@
                       },
                       "routeTable": {
                         "id": "[resourceId('Microsoft.Network/routeTables', parameters('routeTable_Name'))]"
+                      },
+                      "natGateway": {
+                        "id": "[resourceId('Microsoft.Network/natGateways', format('{0}_NATGateway', parameters('virtualNetwork_Name')))]"
                       },
                       "delegations": [],
                       "privateEndpointNetworkPolicies": "Disabled",
@@ -3966,6 +4148,9 @@
                       "addressPrefix": "[variables('subnet_AddressRangeCIDRs')[3]]",
                       "networkSecurityGroup": {
                         "id": "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}_NSG_ApplicationGateway', parameters('virtualNetwork_Name')))]"
+                      },
+                      "natGateway": {
+                        "id": "[resourceId('Microsoft.Network/natGateways', format('{0}_NATGateway', parameters('virtualNetwork_Name')))]"
                       },
                       "delegations": [],
                       "privateEndpointNetworkPolicies": "Disabled",
@@ -4064,9 +4249,44 @@
               },
               "tags": "[parameters('tagValues')]",
               "dependsOn": [
+                "[resourceId('Microsoft.Network/natGateways', format('{0}_NATGateway', parameters('virtualNetwork_Name')))]",
                 "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroup_Default_Name'))]",
                 "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}_NSG_ApplicationGateway', parameters('virtualNetwork_Name')))]",
                 "[resourceId('Microsoft.Network/routeTables', parameters('routeTable_Name'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Network/publicIPAddresses",
+              "apiVersion": "2024-07-01",
+              "name": "[format('{0}_NATGateway_PIP', parameters('virtualNetwork_Name'))]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Standard"
+              },
+              "properties": {
+                "publicIPAllocationMethod": "Static",
+                "publicIPAddressVersion": "IPv4"
+              },
+              "tags": "[parameters('tagValues')]"
+            },
+            {
+              "type": "Microsoft.Network/natGateways",
+              "apiVersion": "2024-07-01",
+              "name": "[format('{0}_NATGateway', parameters('virtualNetwork_Name'))]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Standard"
+              },
+              "properties": {
+                "publicIpAddresses": [
+                  {
+                    "id": "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_NATGateway_PIP', parameters('virtualNetwork_Name')))]"
+                  }
+                ],
+                "idleTimeoutInMinutes": 4
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_NATGateway_PIP', parameters('virtualNetwork_Name')))]"
               ]
             },
             {
@@ -4258,7 +4478,7 @@
     },
     {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "OnPremWinDNS",
       "properties": {
         "expressionEvaluationOptions": {
@@ -4273,7 +4493,7 @@
             "value": "[parameters('locationOnPrem')]"
           },
           "subnet_ID": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'onprem_VNet'), '2022-09-01').outputs.general_SubnetID.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'onprem_VNet'), '2025-04-01').outputs.general_SubnetID.value]"
           },
           "virtualMachine_AdminPassword": {
             "value": "[parameters('virtualMachine_AdminPassword')]"
@@ -4294,7 +4514,7 @@
             "value": "WinServ2022_ConfigScript_DNS.ps1"
           },
           "commandToExecute": {
-            "value": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username {0} -SampleDNSZoneName {1} -SampleHostName \"a\" -SampleARecord \"172.16.0.1\" -PrivateDNSZone \"privatelink.blob.core.windows.net\" -ConditionalForwarderIPAddress {2}', parameters('virtualMachine_AdminUsername'), parameters('onpremResolvableDomainName'), reference(resourceId('Microsoft.Resources/deployments', 'dnsPrivateResolver'), '2022-09-01').outputs.privateDNSResolver_Inbound_Endpoint_IPAddress.value)]"
+            "value": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username {0} -SampleDNSZoneName {1} -SampleHostName \"a\" -SampleARecord \"172.16.0.1\" -PrivateDNSZone \"privatelink.blob.core.windows.net\" -ConditionalForwarderIPAddress {2}', parameters('virtualMachine_AdminUsername'), parameters('onpremResolvableDomainName'), reference(resourceId('Microsoft.Resources/deployments', 'dnsPrivateResolver'), '2025-04-01').outputs.privateDNSResolver_Inbound_Endpoint_IPAddress.value)]"
           }
         },
         "template": {
@@ -4303,8 +4523,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "427334920654472171"
+              "version": "0.39.26.7824",
+              "templateHash": "368819196490511954"
             }
           },
           "parameters": {
@@ -4460,7 +4680,7 @@
                 "networkProfile": {
                   "networkInterfaces": [
                     {
-                      "id": "[reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2022-09-01').outputs.networkInterface_ID.value]",
+                      "id": "[reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2025-04-01').outputs.networkInterface_ID.value]",
                       "properties": {
                         "deleteOption": "Delete"
                       }
@@ -4520,7 +4740,7 @@
             },
             {
               "type": "Microsoft.Resources/deployments",
-              "apiVersion": "2022-09-01",
+              "apiVersion": "2025-04-01",
               "name": "[parameters('networkInterface_Name')]",
               "properties": {
                 "expressionEvaluationOptions": {
@@ -4559,8 +4779,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.32.4.45862",
-                      "templateHash": "11358289721704706086"
+                      "version": "0.39.26.7824",
+                      "templateHash": "14624587014618538460"
                     }
                   },
                   "parameters": {
@@ -4741,27 +4961,27 @@
             },
             "networkInterface_Name": {
               "type": "string",
-              "value": "[reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2022-09-01').outputs.networkInterface_Name.value]"
+              "value": "[reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2025-04-01').outputs.networkInterface_Name.value]"
             },
             "networkInterface_ID": {
               "type": "string",
-              "value": "[reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2022-09-01').outputs.networkInterface_ID.value]"
+              "value": "[reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2025-04-01').outputs.networkInterface_ID.value]"
             },
             "networkInterface_IPConfig0_Name": {
               "type": "string",
-              "value": "[reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2022-09-01').outputs.networkInterface_IPConfig0_Name.value]"
+              "value": "[reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2025-04-01').outputs.networkInterface_IPConfig0_Name.value]"
             },
             "networkInterface_IPConfig0_ID": {
               "type": "string",
-              "value": "[reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2022-09-01').outputs.networkInterface_IPConfig0_ID.value]"
+              "value": "[reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2025-04-01').outputs.networkInterface_IPConfig0_ID.value]"
             },
             "networkInterface_PrivateIPAddress": {
               "type": "string",
-              "value": "[reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2022-09-01').outputs.networkInterface_PrivateIPAddress.value]"
+              "value": "[reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2025-04-01').outputs.networkInterface_PrivateIPAddress.value]"
             },
             "networkInterface_PublicIPAddress": {
               "type": "string",
-              "value": "[if(parameters('addPublicIPAddress'), reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2022-09-01').outputs.networkInterface_PublicIPAddress.value, '')]"
+              "value": "[if(parameters('addPublicIPAddress'), reference(resourceId('Microsoft.Resources/deployments', parameters('networkInterface_Name')), '2025-04-01').outputs.networkInterface_PublicIPAddress.value, '')]"
             }
           }
         }
@@ -4773,7 +4993,7 @@
     },
     {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "OnPremVirtualNetworkGateway",
       "properties": {
         "expressionEvaluationOptions": {
@@ -4791,7 +5011,7 @@
             "value": "OnPrem_VNG"
           },
           "virtualNetworkGateway_Subnet_ResourceID": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'onprem_VNet'), '2022-09-01').outputs.gateway_SubnetID.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'onprem_VNet'), '2025-04-01').outputs.gateway_SubnetID.value]"
           }
         },
         "template": {
@@ -4800,8 +5020,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "15330167770294849167"
+              "version": "0.39.26.7824",
+              "templateHash": "160053513591352657"
             }
           },
           "parameters": {
@@ -4819,14 +5039,9 @@
             },
             "virtualNetworkGateway_SKU": {
               "type": "string",
-              "defaultValue": "VpnGw1",
+              "defaultValue": "VpnGw1AZ",
               "allowedValues": [
                 "Basic",
-                "VpnGw1",
-                "VpnGw2",
-                "VpnGw3",
-                "VpnGw4",
-                "VpnGw5",
                 "VpnGw1AZ",
                 "VpnGw2AZ",
                 "VpnGw3AZ",
@@ -4885,6 +5100,11 @@
                 "name": "Standard",
                 "tier": "Regional"
               },
+              "zones": [
+                "1",
+                "2",
+                "3"
+              ],
               "properties": {
                 "publicIPAddressVersion": "IPv4",
                 "publicIPAllocationMethod": "Static",
@@ -4903,6 +5123,11 @@
                 "name": "Standard",
                 "tier": "Regional"
               },
+              "zones": [
+                "1",
+                "2",
+                "3"
+              ],
               "properties": {
                 "publicIPAddressVersion": "IPv4",
                 "publicIPAllocationMethod": "Static",
@@ -4988,7 +5213,7 @@
     },
     {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "TransitPrimaryVirtualNetworkGateway",
       "properties": {
         "expressionEvaluationOptions": {
@@ -5006,7 +5231,7 @@
             "value": "Transit_Primary_VNG"
           },
           "virtualNetworkGateway_Subnet_ResourceID": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'transit_VNet_primary'), '2022-09-01').outputs.gateway_SubnetID.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'transit_VNet_primary'), '2025-04-01').outputs.gateway_SubnetID.value]"
           }
         },
         "template": {
@@ -5015,8 +5240,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "15330167770294849167"
+              "version": "0.39.26.7824",
+              "templateHash": "160053513591352657"
             }
           },
           "parameters": {
@@ -5034,14 +5259,9 @@
             },
             "virtualNetworkGateway_SKU": {
               "type": "string",
-              "defaultValue": "VpnGw1",
+              "defaultValue": "VpnGw1AZ",
               "allowedValues": [
                 "Basic",
-                "VpnGw1",
-                "VpnGw2",
-                "VpnGw3",
-                "VpnGw4",
-                "VpnGw5",
                 "VpnGw1AZ",
                 "VpnGw2AZ",
                 "VpnGw3AZ",
@@ -5100,6 +5320,11 @@
                 "name": "Standard",
                 "tier": "Regional"
               },
+              "zones": [
+                "1",
+                "2",
+                "3"
+              ],
               "properties": {
                 "publicIPAddressVersion": "IPv4",
                 "publicIPAllocationMethod": "Static",
@@ -5118,6 +5343,11 @@
                 "name": "Standard",
                 "tier": "Regional"
               },
+              "zones": [
+                "1",
+                "2",
+                "3"
+              ],
               "properties": {
                 "publicIPAddressVersion": "IPv4",
                 "publicIPAllocationMethod": "Static",
@@ -5203,7 +5433,7 @@
     },
     {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "TransitSecondaryVirtualNetworkGateway",
       "properties": {
         "expressionEvaluationOptions": {
@@ -5221,7 +5451,7 @@
             "value": "Transit_Secondary_VNG"
           },
           "virtualNetworkGateway_Subnet_ResourceID": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'transit_VNet_secondary'), '2022-09-01').outputs.gateway_SubnetID.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'transit_VNet_secondary'), '2025-04-01').outputs.gateway_SubnetID.value]"
           }
         },
         "template": {
@@ -5230,8 +5460,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "15330167770294849167"
+              "version": "0.39.26.7824",
+              "templateHash": "160053513591352657"
             }
           },
           "parameters": {
@@ -5249,14 +5479,9 @@
             },
             "virtualNetworkGateway_SKU": {
               "type": "string",
-              "defaultValue": "VpnGw1",
+              "defaultValue": "VpnGw1AZ",
               "allowedValues": [
                 "Basic",
-                "VpnGw1",
-                "VpnGw2",
-                "VpnGw3",
-                "VpnGw4",
-                "VpnGw5",
                 "VpnGw1AZ",
                 "VpnGw2AZ",
                 "VpnGw3AZ",
@@ -5315,6 +5540,11 @@
                 "name": "Standard",
                 "tier": "Regional"
               },
+              "zones": [
+                "1",
+                "2",
+                "3"
+              ],
               "properties": {
                 "publicIPAddressVersion": "IPv4",
                 "publicIPAllocationMethod": "Static",
@@ -5333,6 +5563,11 @@
                 "name": "Standard",
                 "tier": "Regional"
               },
+              "zones": [
+                "1",
+                "2",
+                "3"
+              ],
               "properties": {
                 "publicIPAddressVersion": "IPv4",
                 "publicIPAllocationMethod": "Static",
@@ -5418,7 +5653,7 @@
     },
     {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "OnPrem_to_TransitPrimary_conn",
       "properties": {
         "expressionEvaluationOptions": {
@@ -5430,19 +5665,19 @@
             "value": "[parameters('locationOnPrem')]"
           },
           "virtualNetworkGateway_ID": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'OnPremVirtualNetworkGateway'), '2022-09-01').outputs.virtualNetworkGateway_ResourceID.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'OnPremVirtualNetworkGateway'), '2025-04-01').outputs.virtualNetworkGateway_ResourceID.value]"
           },
           "vpn_Destination_ASN": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'TransitPrimaryVirtualNetworkGateway'), '2022-09-01').outputs.virtualNetworkGateway_ASN.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'TransitPrimaryVirtualNetworkGateway'), '2025-04-01').outputs.virtualNetworkGateway_ASN.value]"
           },
           "vpn_Destination_BGPIPAddress": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'TransitPrimaryVirtualNetworkGateway'), '2022-09-01').outputs.virtualNetworkGateway_BGPAddress.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'TransitPrimaryVirtualNetworkGateway'), '2025-04-01').outputs.virtualNetworkGateway_BGPAddress.value]"
           },
           "vpn_Destination_Name": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'TransitPrimaryVirtualNetworkGateway'), '2022-09-01').outputs.virtualNetworkGateway_Name.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'TransitPrimaryVirtualNetworkGateway'), '2025-04-01').outputs.virtualNetworkGateway_Name.value]"
           },
           "vpn_Destination_PublicIPAddress": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'TransitPrimaryVirtualNetworkGateway'), '2022-09-01').outputs.virtualNetworkGateway_PublicIPAddress.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'TransitPrimaryVirtualNetworkGateway'), '2025-04-01').outputs.virtualNetworkGateway_PublicIPAddress.value]"
           },
           "vpn_SharedKey": {
             "value": "[parameters('vpn_SharedKey')]"
@@ -5454,8 +5689,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "11860563558121779052"
+              "version": "0.39.26.7824",
+              "templateHash": "14186321372484882411"
             }
           },
           "parameters": {
@@ -5579,7 +5814,7 @@
     },
     {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "TransitPrimary_to_OnPrem_conn",
       "properties": {
         "expressionEvaluationOptions": {
@@ -5591,19 +5826,19 @@
             "value": "[parameters('locationPrimary')]"
           },
           "virtualNetworkGateway_ID": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'TransitPrimaryVirtualNetworkGateway'), '2022-09-01').outputs.virtualNetworkGateway_ResourceID.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'TransitPrimaryVirtualNetworkGateway'), '2025-04-01').outputs.virtualNetworkGateway_ResourceID.value]"
           },
           "vpn_Destination_ASN": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'OnPremVirtualNetworkGateway'), '2022-09-01').outputs.virtualNetworkGateway_ASN.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'OnPremVirtualNetworkGateway'), '2025-04-01').outputs.virtualNetworkGateway_ASN.value]"
           },
           "vpn_Destination_BGPIPAddress": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'OnPremVirtualNetworkGateway'), '2022-09-01').outputs.virtualNetworkGateway_BGPAddress.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'OnPremVirtualNetworkGateway'), '2025-04-01').outputs.virtualNetworkGateway_BGPAddress.value]"
           },
           "vpn_Destination_Name": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'OnPremVirtualNetworkGateway'), '2022-09-01').outputs.virtualNetworkGateway_Name.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'OnPremVirtualNetworkGateway'), '2025-04-01').outputs.virtualNetworkGateway_Name.value]"
           },
           "vpn_Destination_PublicIPAddress": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'OnPremVirtualNetworkGateway'), '2022-09-01').outputs.virtualNetworkGateway_PublicIPAddress.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'OnPremVirtualNetworkGateway'), '2025-04-01').outputs.virtualNetworkGateway_PublicIPAddress.value]"
           },
           "vpn_SharedKey": {
             "value": "[parameters('vpn_SharedKey')]"
@@ -5618,8 +5853,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "11860563558121779052"
+              "version": "0.39.26.7824",
+              "templateHash": "14186321372484882411"
             }
           },
           "parameters": {
@@ -5743,7 +5978,7 @@
     },
     {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "OnPrem_to_TransitSecondary_conn",
       "properties": {
         "expressionEvaluationOptions": {
@@ -5755,19 +5990,19 @@
             "value": "[parameters('locationOnPrem')]"
           },
           "virtualNetworkGateway_ID": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'OnPremVirtualNetworkGateway'), '2022-09-01').outputs.virtualNetworkGateway_ResourceID.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'OnPremVirtualNetworkGateway'), '2025-04-01').outputs.virtualNetworkGateway_ResourceID.value]"
           },
           "vpn_Destination_ASN": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'TransitSecondaryVirtualNetworkGateway'), '2022-09-01').outputs.virtualNetworkGateway_ASN.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'TransitSecondaryVirtualNetworkGateway'), '2025-04-01').outputs.virtualNetworkGateway_ASN.value]"
           },
           "vpn_Destination_BGPIPAddress": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'TransitSecondaryVirtualNetworkGateway'), '2022-09-01').outputs.virtualNetworkGateway_BGPAddress.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'TransitSecondaryVirtualNetworkGateway'), '2025-04-01').outputs.virtualNetworkGateway_BGPAddress.value]"
           },
           "vpn_Destination_Name": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'TransitSecondaryVirtualNetworkGateway'), '2022-09-01').outputs.virtualNetworkGateway_Name.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'TransitSecondaryVirtualNetworkGateway'), '2025-04-01').outputs.virtualNetworkGateway_Name.value]"
           },
           "vpn_Destination_PublicIPAddress": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'TransitSecondaryVirtualNetworkGateway'), '2022-09-01').outputs.virtualNetworkGateway_PublicIPAddress.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'TransitSecondaryVirtualNetworkGateway'), '2025-04-01').outputs.virtualNetworkGateway_PublicIPAddress.value]"
           },
           "vpn_SharedKey": {
             "value": "[parameters('vpn_SharedKey')]"
@@ -5779,8 +6014,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "11860563558121779052"
+              "version": "0.39.26.7824",
+              "templateHash": "14186321372484882411"
             }
           },
           "parameters": {
@@ -5904,7 +6139,7 @@
     },
     {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2025-04-01",
       "name": "TransitSecondary_to_OnPrem_conn",
       "properties": {
         "expressionEvaluationOptions": {
@@ -5916,19 +6151,19 @@
             "value": "[parameters('locationSecondary')]"
           },
           "virtualNetworkGateway_ID": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'TransitSecondaryVirtualNetworkGateway'), '2022-09-01').outputs.virtualNetworkGateway_ResourceID.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'TransitSecondaryVirtualNetworkGateway'), '2025-04-01').outputs.virtualNetworkGateway_ResourceID.value]"
           },
           "vpn_Destination_ASN": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'OnPremVirtualNetworkGateway'), '2022-09-01').outputs.virtualNetworkGateway_ASN.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'OnPremVirtualNetworkGateway'), '2025-04-01').outputs.virtualNetworkGateway_ASN.value]"
           },
           "vpn_Destination_BGPIPAddress": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'OnPremVirtualNetworkGateway'), '2022-09-01').outputs.virtualNetworkGateway_BGPAddress.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'OnPremVirtualNetworkGateway'), '2025-04-01').outputs.virtualNetworkGateway_BGPAddress.value]"
           },
           "vpn_Destination_Name": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'OnPremVirtualNetworkGateway'), '2022-09-01').outputs.virtualNetworkGateway_Name.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'OnPremVirtualNetworkGateway'), '2025-04-01').outputs.virtualNetworkGateway_Name.value]"
           },
           "vpn_Destination_PublicIPAddress": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'OnPremVirtualNetworkGateway'), '2022-09-01').outputs.virtualNetworkGateway_PublicIPAddress.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'OnPremVirtualNetworkGateway'), '2025-04-01').outputs.virtualNetworkGateway_PublicIPAddress.value]"
           },
           "vpn_SharedKey": {
             "value": "[parameters('vpn_SharedKey')]"
@@ -5943,8 +6178,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.32.4.45862",
-              "templateHash": "11860563558121779052"
+              "version": "0.39.26.7824",
+              "templateHash": "14186321372484882411"
             }
           },
           "parameters": {
