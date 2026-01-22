@@ -70,7 +70,7 @@ module bastion '../../../../../modules/Microsoft.Network/Bastion.bicep' = {
   }
 }
 
-module virtualMachine_Windows '../../../../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
+module virtualMachine_Windows '../../../../../modules/Microsoft.Compute/VirtualMachine/Windows/Server20XX_Default.bicep' = {
   name: 'OnPrem_WinVM'
   params: {
     acceleratedNetworking: false
@@ -79,9 +79,9 @@ module virtualMachine_Windows '../../../../../modules/Microsoft.Compute/WindowsS
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'OnPremWinVM'
-    virtualMachine_Size: 'Standard_B2ms'
-    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
-    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_General.ps1'
+    vmSize: 'Standard_B2ms'
+    windowsServerVersion: '2022-datacenter-g2'
+    scriptFileUri: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2022_ConfigScript_General.ps1'
     commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_General.ps1 -Username ${virtualMachine_AdminUsername}'
   }
 }

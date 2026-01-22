@@ -169,7 +169,7 @@ module udrToAzFW_Spoke '../../../modules/Microsoft.Network/RouteTable.bicep' = {
 }
 
 
-module spoke_WinVM_client '../../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
+module spoke_WinVM_client '../../../modules/Microsoft.Compute/VirtualMachine/Windows/Server20XX_Default.bicep' = {
   name: 'spoke-WinVM-client'
   params: {
     acceleratedNetworking: acceleratedNetworking
@@ -178,9 +178,9 @@ module spoke_WinVM_client '../../../modules/Microsoft.Compute/WindowsServer2022/
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'spoke-client-VM'
-    virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_General.ps1'
+    vmSize: virtualMachine_Size
+    windowsServerVersion: '2022-datacenter-g2'
+    scriptFileUri: '${virtualMachine_ScriptFileLocation}WinServ2022_ConfigScript_General.ps1'
     commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_General.ps1 -Username ${virtualMachine_AdminUsername}'
   }
 }
@@ -259,7 +259,7 @@ module virtualNetwork_OnPremHub '../../../modules/Microsoft.Network/VirtualNetwo
 }
 
 // DNS Servers for "On Prem"
-module OnPremVM_WinDNS '../../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
+module OnPremVM_WinDNS '../../../modules/Microsoft.Compute/VirtualMachine/Windows/Server20XX_Default.bicep' = {
   name: 'OnPremWinDNS'
   params: {
     acceleratedNetworking: acceleratedNetworking
@@ -268,14 +268,14 @@ module OnPremVM_WinDNS '../../../modules/Microsoft.Compute/WindowsServer2022/Vir
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'OnPrem-WinDNS'
-    virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_DNS.ps1'
+    vmSize: virtualMachine_Size
+    windowsServerVersion: '2022-datacenter-g2'
+    scriptFileUri: '${virtualMachine_ScriptFileLocation}WinServ2022_ConfigScript_DNS.ps1'
     commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username ${virtualMachine_AdminUsername} -SampleDNSZoneName ${onpremResolvableDomainName} -SampleHostName "a" -SampleARecord "172.16.0.1" -PrivateDNSZone "privatelink.blob.core.windows.net" -ConditionalForwarderIPAddress ${dnsPrivateResolver.outputs.privateDNSResolver_Inbound_Endpoint_IPAddress}'
   }
 }
 
-// module OnPremVM_WinDNS '../../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = [for i in range(0, 2) : {
+// module OnPremVM_WinDNS '../../../modules/Microsoft.Compute/VirtualMachine/Windows/Server20XX_Default.bicep' = [for i in range(0, 2) : {
 //   name: 'OnPremWinDNS${i}'
 //   params: {
 //     acceleratedNetworking: acceleratedNetworking
@@ -284,9 +284,9 @@ module OnPremVM_WinDNS '../../../modules/Microsoft.Compute/WindowsServer2022/Vir
 //     virtualMachine_AdminPassword: virtualMachine_AdminPassword
 //     virtualMachine_AdminUsername: virtualMachine_AdminUsername
 //     virtualMachine_Name: 'OnPrem-WinDNS${i}'
-//     virtualMachine_Size: virtualMachine_Size
-//     virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-//     virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_DNS.ps1'
+//     vmSize: virtualMachine_Size
+//     windowsServerVersion: '2022-datacenter-g2'
+//     scriptFileUri: '${virtualMachine_ScriptFileLocation}WinServ2022_ConfigScript_DNS.ps1'
 //     commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username ${virtualMachine_AdminUsername} -SampleDNSZoneName ${onpremResolvableDomainName} -SampleHostName "a" -SampleARecord "172.16.0.1" -PrivateDNSZone "privatelink.blob.core.windows.net" -ConditionalForwarderIPAddress ${dnsPrivateResolver.outputs.privateDNSResolver_Inbound_Endpoint_IPAddress}'
 //   }
 // } ]

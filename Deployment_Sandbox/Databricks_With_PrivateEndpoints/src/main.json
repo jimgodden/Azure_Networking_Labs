@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.32.4.45862",
-      "templateHash": "9461119082179852026"
+      "templateHash": "1565352900034431921"
     }
   },
   "parameters": {
@@ -87,7 +87,7 @@
             "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', 'vnet'), '2024-05-01').subnets[3].id]"
           },
           "virtualNetworkGateway_SKU": {
-            "value": "VpnGw1"
+            "value": "VpnGw1AZ"
           },
           "vpnGatewayGeneration": {
             "value": "Generation1"
@@ -103,7 +103,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.32.4.45862",
-              "templateHash": "15330167770294849167"
+              "templateHash": "4980533458126721544"
             }
           },
           "parameters": {
@@ -121,14 +121,9 @@
             },
             "virtualNetworkGateway_SKU": {
               "type": "string",
-              "defaultValue": "VpnGw1",
+              "defaultValue": "VpnGw1AZ",
               "allowedValues": [
                 "Basic",
-                "VpnGw1",
-                "VpnGw2",
-                "VpnGw3",
-                "VpnGw4",
-                "VpnGw5",
                 "VpnGw1AZ",
                 "VpnGw2AZ",
                 "VpnGw3AZ",
@@ -187,6 +182,11 @@
                 "name": "Standard",
                 "tier": "Regional"
               },
+              "zones": [
+                "1",
+                "2",
+                "3"
+              ],
               "properties": {
                 "publicIPAddressVersion": "IPv4",
                 "publicIPAllocationMethod": "Static",
@@ -205,6 +205,11 @@
                 "name": "Standard",
                 "tier": "Regional"
               },
+              "zones": [
+                "1",
+                "2",
+                "3"
+              ],
               "properties": {
                 "publicIPAddressVersion": "IPv4",
                 "publicIPAllocationMethod": "Static",

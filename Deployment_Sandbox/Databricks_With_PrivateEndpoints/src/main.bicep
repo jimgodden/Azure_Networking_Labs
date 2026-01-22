@@ -219,7 +219,7 @@ module vpn '../../../modules/Microsoft.Network/VirtualNetworkGateway.bicep' = {
     location: location
     virtualNetworkGateway_Name: 'vpn'
     virtualNetworkGateway_Subnet_ResourceID: virtualNetwork.properties.subnets[3].id
-    virtualNetworkGateway_SKU: 'VpnGw1'
+    virtualNetworkGateway_SKU: 'VpnGw1AZ'
     vpnGatewayGeneration: 'Generation1'
     virtualNetworkGateway_ASN: 65515
   }

@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.32.4.45862",
-      "templateHash": "18214022576044070350"
+      "templateHash": "12075764198068819769"
     }
   },
   "parameters": {
@@ -65,7 +65,7 @@
     }
   },
   "variables": {
-    "virtualNetworkGateway_SKU": "VpnGw1",
+    "virtualNetworkGateway_SKU": "VpnGw1AZ",
     "virtualMachine_ScriptFile": "https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2025_ConfigScript.ps1",
     "Hub_VirtualMachine_Client_Name": "Hub-clientVM",
     "Spoke_VirtualMachine_Client_Name": "Spoke-ClientVM",
@@ -738,7 +738,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.32.4.45862",
-              "templateHash": "13797875414295410429"
+              "templateHash": "232593559311749366"
             }
           },
           "parameters": {
@@ -835,6 +835,9 @@
                       "routeTable": {
                         "id": "[resourceId('Microsoft.Network/routeTables', parameters('routeTable_Name'))]"
                       },
+                      "natGateway": {
+                        "id": "[resourceId('Microsoft.Network/natGateways', format('{0}_NATGateway', parameters('virtualNetwork_Name')))]"
+                      },
                       "delegations": [],
                       "privateEndpointNetworkPolicies": "Disabled",
                       "privateLinkServiceNetworkPolicies": "Enabled"
@@ -849,6 +852,9 @@
                       },
                       "routeTable": {
                         "id": "[resourceId('Microsoft.Network/routeTables', parameters('routeTable_Name'))]"
+                      },
+                      "natGateway": {
+                        "id": "[resourceId('Microsoft.Network/natGateways', format('{0}_NATGateway', parameters('virtualNetwork_Name')))]"
                       },
                       "delegations": [],
                       "privateEndpointNetworkPolicies": "Disabled",
@@ -876,6 +882,9 @@
                       "addressPrefix": "[variables('subnet_AddressRangeCIDRs')[3]]",
                       "networkSecurityGroup": {
                         "id": "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}_NSG_ApplicationGateway', parameters('virtualNetwork_Name')))]"
+                      },
+                      "natGateway": {
+                        "id": "[resourceId('Microsoft.Network/natGateways', format('{0}_NATGateway', parameters('virtualNetwork_Name')))]"
                       },
                       "delegations": [],
                       "privateEndpointNetworkPolicies": "Disabled",
@@ -974,9 +983,44 @@
               },
               "tags": "[parameters('tagValues')]",
               "dependsOn": [
+                "[resourceId('Microsoft.Network/natGateways', format('{0}_NATGateway', parameters('virtualNetwork_Name')))]",
                 "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroup_Default_Name'))]",
                 "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}_NSG_ApplicationGateway', parameters('virtualNetwork_Name')))]",
                 "[resourceId('Microsoft.Network/routeTables', parameters('routeTable_Name'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Network/publicIPAddresses",
+              "apiVersion": "2024-07-01",
+              "name": "[format('{0}_NATGateway_PIP', parameters('virtualNetwork_Name'))]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Standard"
+              },
+              "properties": {
+                "publicIPAllocationMethod": "Static",
+                "publicIPAddressVersion": "IPv4"
+              },
+              "tags": "[parameters('tagValues')]"
+            },
+            {
+              "type": "Microsoft.Network/natGateways",
+              "apiVersion": "2024-07-01",
+              "name": "[format('{0}_NATGateway', parameters('virtualNetwork_Name'))]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Standard"
+              },
+              "properties": {
+                "publicIpAddresses": [
+                  {
+                    "id": "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_NATGateway_PIP', parameters('virtualNetwork_Name')))]"
+                  }
+                ],
+                "idleTimeoutInMinutes": 4
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_NATGateway_PIP', parameters('virtualNetwork_Name')))]"
               ]
             },
             {
@@ -1196,7 +1240,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.32.4.45862",
-              "templateHash": "13797875414295410429"
+              "templateHash": "232593559311749366"
             }
           },
           "parameters": {
@@ -1293,6 +1337,9 @@
                       "routeTable": {
                         "id": "[resourceId('Microsoft.Network/routeTables', parameters('routeTable_Name'))]"
                       },
+                      "natGateway": {
+                        "id": "[resourceId('Microsoft.Network/natGateways', format('{0}_NATGateway', parameters('virtualNetwork_Name')))]"
+                      },
                       "delegations": [],
                       "privateEndpointNetworkPolicies": "Disabled",
                       "privateLinkServiceNetworkPolicies": "Enabled"
@@ -1307,6 +1354,9 @@
                       },
                       "routeTable": {
                         "id": "[resourceId('Microsoft.Network/routeTables', parameters('routeTable_Name'))]"
+                      },
+                      "natGateway": {
+                        "id": "[resourceId('Microsoft.Network/natGateways', format('{0}_NATGateway', parameters('virtualNetwork_Name')))]"
                       },
                       "delegations": [],
                       "privateEndpointNetworkPolicies": "Disabled",
@@ -1334,6 +1384,9 @@
                       "addressPrefix": "[variables('subnet_AddressRangeCIDRs')[3]]",
                       "networkSecurityGroup": {
                         "id": "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}_NSG_ApplicationGateway', parameters('virtualNetwork_Name')))]"
+                      },
+                      "natGateway": {
+                        "id": "[resourceId('Microsoft.Network/natGateways', format('{0}_NATGateway', parameters('virtualNetwork_Name')))]"
                       },
                       "delegations": [],
                       "privateEndpointNetworkPolicies": "Disabled",
@@ -1432,9 +1485,44 @@
               },
               "tags": "[parameters('tagValues')]",
               "dependsOn": [
+                "[resourceId('Microsoft.Network/natGateways', format('{0}_NATGateway', parameters('virtualNetwork_Name')))]",
                 "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroup_Default_Name'))]",
                 "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}_NSG_ApplicationGateway', parameters('virtualNetwork_Name')))]",
                 "[resourceId('Microsoft.Network/routeTables', parameters('routeTable_Name'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Network/publicIPAddresses",
+              "apiVersion": "2024-07-01",
+              "name": "[format('{0}_NATGateway_PIP', parameters('virtualNetwork_Name'))]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Standard"
+              },
+              "properties": {
+                "publicIPAllocationMethod": "Static",
+                "publicIPAddressVersion": "IPv4"
+              },
+              "tags": "[parameters('tagValues')]"
+            },
+            {
+              "type": "Microsoft.Network/natGateways",
+              "apiVersion": "2024-07-01",
+              "name": "[format('{0}_NATGateway', parameters('virtualNetwork_Name'))]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Standard"
+              },
+              "properties": {
+                "publicIpAddresses": [
+                  {
+                    "id": "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_NATGateway_PIP', parameters('virtualNetwork_Name')))]"
+                  }
+                ],
+                "idleTimeoutInMinutes": 4
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_NATGateway_PIP', parameters('virtualNetwork_Name')))]"
               ]
             },
             {
@@ -2113,7 +2201,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.32.4.45862",
-              "templateHash": "13797875414295410429"
+              "templateHash": "232593559311749366"
             }
           },
           "parameters": {
@@ -2210,6 +2298,9 @@
                       "routeTable": {
                         "id": "[resourceId('Microsoft.Network/routeTables', parameters('routeTable_Name'))]"
                       },
+                      "natGateway": {
+                        "id": "[resourceId('Microsoft.Network/natGateways', format('{0}_NATGateway', parameters('virtualNetwork_Name')))]"
+                      },
                       "delegations": [],
                       "privateEndpointNetworkPolicies": "Disabled",
                       "privateLinkServiceNetworkPolicies": "Enabled"
@@ -2224,6 +2315,9 @@
                       },
                       "routeTable": {
                         "id": "[resourceId('Microsoft.Network/routeTables', parameters('routeTable_Name'))]"
+                      },
+                      "natGateway": {
+                        "id": "[resourceId('Microsoft.Network/natGateways', format('{0}_NATGateway', parameters('virtualNetwork_Name')))]"
                       },
                       "delegations": [],
                       "privateEndpointNetworkPolicies": "Disabled",
@@ -2251,6 +2345,9 @@
                       "addressPrefix": "[variables('subnet_AddressRangeCIDRs')[3]]",
                       "networkSecurityGroup": {
                         "id": "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}_NSG_ApplicationGateway', parameters('virtualNetwork_Name')))]"
+                      },
+                      "natGateway": {
+                        "id": "[resourceId('Microsoft.Network/natGateways', format('{0}_NATGateway', parameters('virtualNetwork_Name')))]"
                       },
                       "delegations": [],
                       "privateEndpointNetworkPolicies": "Disabled",
@@ -2349,9 +2446,44 @@
               },
               "tags": "[parameters('tagValues')]",
               "dependsOn": [
+                "[resourceId('Microsoft.Network/natGateways', format('{0}_NATGateway', parameters('virtualNetwork_Name')))]",
                 "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroup_Default_Name'))]",
                 "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}_NSG_ApplicationGateway', parameters('virtualNetwork_Name')))]",
                 "[resourceId('Microsoft.Network/routeTables', parameters('routeTable_Name'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Network/publicIPAddresses",
+              "apiVersion": "2024-07-01",
+              "name": "[format('{0}_NATGateway_PIP', parameters('virtualNetwork_Name'))]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Standard"
+              },
+              "properties": {
+                "publicIPAllocationMethod": "Static",
+                "publicIPAddressVersion": "IPv4"
+              },
+              "tags": "[parameters('tagValues')]"
+            },
+            {
+              "type": "Microsoft.Network/natGateways",
+              "apiVersion": "2024-07-01",
+              "name": "[format('{0}_NATGateway', parameters('virtualNetwork_Name'))]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Standard"
+              },
+              "properties": {
+                "publicIpAddresses": [
+                  {
+                    "id": "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_NATGateway_PIP', parameters('virtualNetwork_Name')))]"
+                  }
+                ],
+                "idleTimeoutInMinutes": 4
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}_NATGateway_PIP', parameters('virtualNetwork_Name')))]"
               ]
             },
             {
@@ -2577,7 +2709,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.32.4.45862",
-              "templateHash": "15330167770294849167"
+              "templateHash": "4980533458126721544"
             }
           },
           "parameters": {
@@ -2595,14 +2727,9 @@
             },
             "virtualNetworkGateway_SKU": {
               "type": "string",
-              "defaultValue": "VpnGw1",
+              "defaultValue": "VpnGw1AZ",
               "allowedValues": [
                 "Basic",
-                "VpnGw1",
-                "VpnGw2",
-                "VpnGw3",
-                "VpnGw4",
-                "VpnGw5",
                 "VpnGw1AZ",
                 "VpnGw2AZ",
                 "VpnGw3AZ",
@@ -2661,6 +2788,11 @@
                 "name": "Standard",
                 "tier": "Regional"
               },
+              "zones": [
+                "1",
+                "2",
+                "3"
+              ],
               "properties": {
                 "publicIPAddressVersion": "IPv4",
                 "publicIPAllocationMethod": "Static",
@@ -2679,6 +2811,11 @@
                 "name": "Standard",
                 "tier": "Regional"
               },
+              "zones": [
+                "1",
+                "2",
+                "3"
+              ],
               "properties": {
                 "publicIPAddressVersion": "IPv4",
                 "publicIPAllocationMethod": "Static",
@@ -2798,7 +2935,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.32.4.45862",
-              "templateHash": "15330167770294849167"
+              "templateHash": "4980533458126721544"
             }
           },
           "parameters": {
@@ -2816,14 +2953,9 @@
             },
             "virtualNetworkGateway_SKU": {
               "type": "string",
-              "defaultValue": "VpnGw1",
+              "defaultValue": "VpnGw1AZ",
               "allowedValues": [
                 "Basic",
-                "VpnGw1",
-                "VpnGw2",
-                "VpnGw3",
-                "VpnGw4",
-                "VpnGw5",
                 "VpnGw1AZ",
                 "VpnGw2AZ",
                 "VpnGw3AZ",
@@ -2882,6 +3014,11 @@
                 "name": "Standard",
                 "tier": "Regional"
               },
+              "zones": [
+                "1",
+                "2",
+                "3"
+              ],
               "properties": {
                 "publicIPAddressVersion": "IPv4",
                 "publicIPAllocationMethod": "Static",
@@ -2900,6 +3037,11 @@
                 "name": "Standard",
                 "tier": "Regional"
               },
+              "zones": [
+                "1",
+                "2",
+                "3"
+              ],
               "properties": {
                 "publicIPAddressVersion": "IPv4",
                 "publicIPAllocationMethod": "Static",

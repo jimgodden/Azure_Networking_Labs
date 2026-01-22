@@ -39,7 +39,7 @@ module addNSGRules 'AddNSGRuleForAtmHttpsDns.bicep' = {
   }
 }
 
-module virtualMachine_WebServ '../../../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
+module virtualMachine_WebServ '../../../../modules/Microsoft.Compute/VirtualMachine/Windows/Server20XX_Default.bicep' = {
   name: 'WebServVm${uniqueNamePrefix}'
   params: {
     acceleratedNetworking: acceleratedNetworking
@@ -48,15 +48,15 @@ module virtualMachine_WebServ '../../../../modules/Microsoft.Compute/WindowsServ
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'WebServVM${uniqueNamePrefix}'
-    virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
-    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_WebServer.ps1'
+    vmSize: virtualMachine_Size
+    windowsServerVersion: '2022-datacenter-g2'
+    scriptFileUri: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2022_ConfigScript_WebServer.ps1'
     commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_WebServer.ps1 -Username ${virtualMachine_AdminUsername} -Location ${location}'
     addPublicIPAddress: true
   }
 }
 
-module virtualMachine_DNS '../../../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
+module virtualMachine_DNS '../../../../modules/Microsoft.Compute/VirtualMachine/Windows/Server20XX_Default.bicep' = {
   name: 'DnsVm${uniqueNamePrefix}'
   params: {
     acceleratedNetworking: acceleratedNetworking
@@ -65,9 +65,9 @@ module virtualMachine_DNS '../../../../modules/Microsoft.Compute/WindowsServer20
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'DnsVm${uniqueNamePrefix}'
-    virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
-    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_DNS.ps1'
+    vmSize: virtualMachine_Size
+    windowsServerVersion: '2022-datacenter-g2'
+    scriptFileUri: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2022_ConfigScript_DNS.ps1'
     commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username ${virtualMachine_AdminUsername}'
     addPublicIPAddress: true
   }

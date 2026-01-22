@@ -16,7 +16,7 @@ param name_VirtualNetworkGateway2 string
 param subnetId_VirtualNetworkGateway2 string
 
 
-param virtualNetworkGateway_SKU string = 'vpnGw1'
+param virtualNetworkGateway_SKU string = 'VpnGw1AZ'
 
 param vpn_SharedKey string
 

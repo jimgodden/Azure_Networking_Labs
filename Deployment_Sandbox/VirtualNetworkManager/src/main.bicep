@@ -47,7 +47,7 @@ module virtualNetworkManager '../../../modules/Microsoft.Network/VirtualNetworkM
   }
 }
 
-module virtualMachine_Windows_Hub '../../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
+module virtualMachine_Windows_Hub '../../../modules/Microsoft.Compute/VirtualMachine/Windows/Server20XX_Default.bicep' = {
   name: 'winVM-hub'
   params: {
     acceleratedNetworking: acceleratedNetworking
@@ -56,14 +56,14 @@ module virtualMachine_Windows_Hub '../../../modules/Microsoft.Compute/WindowsSer
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'winVM-hub'
-    virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_General.ps1'
+    vmSize: virtualMachine_Size
+    windowsServerVersion: '2022-datacenter-g2'
+    scriptFileUri: '${virtualMachine_ScriptFileLocation}WinServ2022_ConfigScript_General.ps1'
     commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_General.ps1 -Username ${virtualMachine_AdminUsername}'
   }
 }
 
-module virtualMachine_Windows_Spoke1 '../../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
+module virtualMachine_Windows_Spoke1 '../../../modules/Microsoft.Compute/VirtualMachine/Windows/Server20XX_Default.bicep' = {
   name: 'winVM-Spoke1'
   params: {
     acceleratedNetworking: acceleratedNetworking
@@ -72,9 +72,9 @@ module virtualMachine_Windows_Spoke1 '../../../modules/Microsoft.Compute/Windows
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'winVM-Spoke1'
-    virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_General.ps1'
+    vmSize: virtualMachine_Size
+    windowsServerVersion: '2022-datacenter-g2'
+    scriptFileUri: '${virtualMachine_ScriptFileLocation}WinServ2022_ConfigScript_General.ps1'
     commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_General.ps1 -Username ${virtualMachine_AdminUsername}'
   }
 }

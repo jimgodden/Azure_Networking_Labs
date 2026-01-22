@@ -126,7 +126,7 @@ module virtualNetworkGateway '../../../modules/Microsoft.Network/VirtualNetworkG
     virtualNetworkGateway_ASN: 65000
     virtualNetworkGateway_Name: 'virtualNetworkGateway'
     virtualNetworkGateway_Subnet_ResourceID: virtualNetwork_Hub.outputs.gateway_SubnetID
-    virtualNetworkGateway_SKU: 'VpnGw1'
+    virtualNetworkGateway_SKU: 'VpnGw1AZ'
   }
 }
 

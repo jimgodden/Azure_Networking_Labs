@@ -19,7 +19,7 @@ I'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net.
 var acceleratedNetworking = false
 
 @description('SKU of the Virtual Network Gateway')
-param virtualNetworkGateway_SKU string = 'VpnGw1'
+param virtualNetworkGateway_SKU string = 'VpnGw1AZ'
 
 @description('VPN Shared Key used for authenticating VPN connections')
 @secure()

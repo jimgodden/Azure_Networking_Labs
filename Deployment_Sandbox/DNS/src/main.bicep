@@ -78,7 +78,7 @@ module Hub_to_OnPrem_Peering '../../../modules/Microsoft.Network/VirtualNetworkP
   ]
 }
 
-module Hub_WinDnsVm '../../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
+module Hub_WinDnsVm '../../../modules/Microsoft.Compute/VirtualMachine/Windows/Server20XX_Default.bicep' = {
   name: 'Hub-WinDnsVm'
   params: {
     acceleratedNetworking: acceleratedNetworking
@@ -87,9 +87,9 @@ module Hub_WinDnsVm '../../../modules/Microsoft.Compute/WindowsServer2022/Virtua
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'Hub-WinDns'
-    virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_DNS.ps1'
+    vmSize: virtualMachine_Size
+    windowsServerVersion: '2022-datacenter-g2'
+    scriptFileUri: '${virtualMachine_ScriptFileLocation}WinServ2022_ConfigScript_DNS.ps1'
     commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username ${virtualMachine_AdminUsername}'
     privateIPAddress: cidrHost( Hub_VirtualNetwork.outputs.general_Subnet_AddressPrefix, 3 )
     privateIPAllocationMethod: 'Static'
@@ -97,7 +97,7 @@ module Hub_WinDnsVm '../../../modules/Microsoft.Compute/WindowsServer2022/Virtua
 }
 
 
-module Hub_WinClientVM '../../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
+module Hub_WinClientVM '../../../modules/Microsoft.Compute/VirtualMachine/Windows/Server20XX_Default.bicep' = {
   name: 'Hub-WinClientVM'
   params: {
     acceleratedNetworking: acceleratedNetworking
@@ -106,9 +106,9 @@ module Hub_WinClientVM '../../../modules/Microsoft.Compute/WindowsServer2022/Vir
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'Hub-WinClient'
-    virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_General.ps1'
+    vmSize: virtualMachine_Size
+    windowsServerVersion: '2022-datacenter-g2'
+    scriptFileUri: '${virtualMachine_ScriptFileLocation}WinServ2022_ConfigScript_General.ps1'
     commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_General.ps1 -Username ${virtualMachine_AdminUsername}'
     privateIPAddress: cidrHost( Hub_VirtualNetwork.outputs.general_Subnet_AddressPrefix, 4 )
     privateIPAllocationMethod: 'Static'
@@ -118,7 +118,7 @@ module Hub_WinClientVM '../../../modules/Microsoft.Compute/WindowsServer2022/Vir
   ]
 }
 
-module Spoke_WinIisVm '../../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
+module Spoke_WinIisVm '../../../modules/Microsoft.Compute/VirtualMachine/Windows/Server20XX_Default.bicep' = {
   name: 'spoke-WinIis'
   params: {
     acceleratedNetworking: acceleratedNetworking
@@ -127,9 +127,9 @@ module Spoke_WinIisVm '../../../modules/Microsoft.Compute/WindowsServer2022/Virt
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'Spoke-WinIis'
-    virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_WebServer.ps1'
+    vmSize: virtualMachine_Size
+    windowsServerVersion: '2022-datacenter-g2'
+    scriptFileUri: '${virtualMachine_ScriptFileLocation}WinServ2022_ConfigScript_WebServer.ps1'
     commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_WebServer.ps1 -Username ${virtualMachine_AdminUsername} -FQDN Spoke-WinIis.${privateDNSZone_Name}'
     privateIPAddress: cidrHost( Spoke_VirtualNetwork.outputs.general_Subnet_AddressPrefix, 3 )
     privateIPAllocationMethod: 'Static'
@@ -139,7 +139,7 @@ module Spoke_WinIisVm '../../../modules/Microsoft.Compute/WindowsServer2022/Virt
   ]
 }
 
-module Spoke_WinClientVM '../../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
+module Spoke_WinClientVM '../../../modules/Microsoft.Compute/VirtualMachine/Windows/Server20XX_Default.bicep' = {
   name: 'spoke-WinClientVM'
   params: {
     acceleratedNetworking: acceleratedNetworking
@@ -148,9 +148,9 @@ module Spoke_WinClientVM '../../../modules/Microsoft.Compute/WindowsServer2022/V
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'Spoke-WinClient'
-    virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_General.ps1'
+    vmSize: virtualMachine_Size
+    windowsServerVersion: '2022-datacenter-g2'
+    scriptFileUri: '${virtualMachine_ScriptFileLocation}WinServ2022_ConfigScript_General.ps1'
     commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_General.ps1 -Username ${virtualMachine_AdminUsername}'
     privateIPAddress: cidrHost( Spoke_VirtualNetwork.outputs.general_Subnet_AddressPrefix, 4 )
     privateIPAllocationMethod: 'Static'
@@ -256,7 +256,7 @@ module OnPrem_VirtualNetwork_DnsUpdate '../../../modules/Microsoft.Network/Virtu
   }
 }
 
-module OnPrem_WinDnsVm '../../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
+module OnPrem_WinDnsVm '../../../modules/Microsoft.Compute/VirtualMachine/Windows/Server20XX_Default.bicep' = {
   name: 'OnPremWinDNS'
   params: {
     acceleratedNetworking: acceleratedNetworking
@@ -265,16 +265,16 @@ module OnPrem_WinDnsVm '../../../modules/Microsoft.Compute/WindowsServer2022/Vir
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'OnPrem-WinDns'
-    virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_DNS.ps1'
+    vmSize: virtualMachine_Size
+    windowsServerVersion: '2022-datacenter-g2'
+    scriptFileUri: '${virtualMachine_ScriptFileLocation}WinServ2022_ConfigScript_DNS.ps1'
     commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_DNS.ps1 -Username ${virtualMachine_AdminUsername} -SampleDNSZoneName ${onpremResolvableDomainName} -SampleARecord ${cidrHost( OnPrem_VirtualNetwork.outputs.general_Subnet_AddressPrefix, 4 )} -PrivateDNSZone "privatelink.blob.core.windows.net" -ConditionalForwarderIPAddress ${Hub_DnsPrivateResolver.outputs.privateDNSResolver_Inbound_Endpoint_IPAddress}'
     privateIPAddress: cidrHost( OnPrem_VirtualNetwork.outputs.general_Subnet_AddressPrefix, 3 )
     privateIPAllocationMethod: 'Static'
   }
 }
 
-module OnPrem_WinClientVM '../../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
+module OnPrem_WinClientVM '../../../modules/Microsoft.Compute/VirtualMachine/Windows/Server20XX_Default.bicep' = {
   name: 'OnPrem-WinClientVM'
   params: {
     acceleratedNetworking: acceleratedNetworking
@@ -283,9 +283,9 @@ module OnPrem_WinClientVM '../../../modules/Microsoft.Compute/WindowsServer2022/
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'OnPrem-WinClien'
-    virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_General.ps1'
+    vmSize: virtualMachine_Size
+    windowsServerVersion: '2022-datacenter-g2'
+    scriptFileUri: '${virtualMachine_ScriptFileLocation}WinServ2022_ConfigScript_General.ps1'
     commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_General.ps1 -Username ${virtualMachine_AdminUsername}'
     privateIPAddress: cidrHost( OnPrem_VirtualNetwork.outputs.general_Subnet_AddressPrefix, 4 )
     privateIPAllocationMethod: 'Static'

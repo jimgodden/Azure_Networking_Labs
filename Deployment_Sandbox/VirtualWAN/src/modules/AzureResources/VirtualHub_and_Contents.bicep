@@ -53,7 +53,7 @@ module virtualHubToVirtualNetworkSpokeAConn '../../../../../modules/Microsoft.Ne
   }
 } ]
 
-module virtualMachine_Windows '../../../../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = [ for i in range(0, length(virtualNetwork_AddressPrefixs)): {
+module virtualMachine_Windows '../../../../../modules/Microsoft.Compute/VirtualMachine/Windows/Server20XX_Default.bicep' = [ for i in range(0, length(virtualNetwork_AddressPrefixs)): {
   name: 'windowsVM${i}'
   params: {
     acceleratedNetworking: false
@@ -62,9 +62,9 @@ module virtualMachine_Windows '../../../../../modules/Microsoft.Compute/WindowsS
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'winVM${virtualHub.outputs.virtualHub_Name}${i}'
-    virtualMachine_Size: 'Standard_B2ms'
-    virtualMachine_ScriptFileLocation: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
-    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_General.ps1'
+    vmSize: 'Standard_B2ms'
+    windowsServerVersion: '2022-datacenter-g2'
+    scriptFileUri: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2022_ConfigScript_General.ps1'
     commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_General.ps1 -Username ${virtualMachine_AdminUsername}'
 
   }

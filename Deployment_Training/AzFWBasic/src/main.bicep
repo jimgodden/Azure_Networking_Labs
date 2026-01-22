@@ -14,11 +14,11 @@ param virtualMachine_AdminPassword string
 @description('Size of the Virtual Machines')
 param vmSize string = 'Standard_D2as_v4' // 'Standard_B2ms' // 'Standard_D2s_v3' // 'Standard_D16lds_v5'
 
-@description('''True enables Accelerated Networking and False disabled it.  
+@description('''True enables Accelerated Networking and False disables it.  
 Not all VM sizes support Accel Net (i.e. Standard_B2ms).  
 I'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net.
 ''')
-param acceleratedNetworking bool = false
+var acceleratedNetworking = false
 
 @minLength(6)
 @description('VPN Shared Key used for authenticating VPN connections')
@@ -33,6 +33,17 @@ Storage account name restrictions:
 @minLength(3)
 @maxLength(24)
 param storageAccount_Name string
+
+@description('''
+Key Vault name restrictions:
+ - A vault's name must be between 3-24 alphanumeric characters.
+ - The name must begin with a letter, end with a letter or digit, and not contain consecutive hyphens.
+ - Your Key Vault name must be unique within Azure. No two Key Vaults can have the same name.
+ - Follow this link for more information: https://go.microsoft.com/fwlink/?linkid=2147742
+''')
+@minLength(3)
+@maxLength(24)
+param keyVault_Name string
 
 param tagValues object = {
   Training: 'AzureFirewall'
@@ -123,6 +134,38 @@ resource routeTable_Hub 'Microsoft.Network/routeTables@2024-05-01' = {
           addressPrefix: '10.2.0.0/16'
           nextHopType: 'VirtualAppliance'
           nextHopIpAddress: '10.0.2.4'
+        }
+      }
+    ]
+  }
+  tags: tagValues
+}
+
+resource routeTable_Firewall 'Microsoft.Network/routeTables@2024-05-01' = {
+  name: 'firewall_RouteTable'
+  location: location
+  properties: {
+    disableBgpRoutePropagation: false
+    routes: [
+      {
+        name: 'toInternetFull'
+        properties: {
+          addressPrefix: '0.0.0.0/0'
+          nextHopType: 'Internet'
+        }
+      }
+      {
+        name: 'toInternetA'
+        properties: {
+          addressPrefix: '0.0.0.0/1'
+          nextHopType: 'VirtualNetworkGateway'
+        }
+      }
+      {
+        name: 'toInternetB'
+        properties: {
+          addressPrefix: '128.0.0.0/1'
+          nextHopType: 'VirtualNetworkGateway'
         }
       }
     ]
@@ -421,7 +464,6 @@ resource virtualMachine_Hub_Dns_CustomScriptExtension 'Microsoft.Compute/virtual
     settings: {
       fileUris: [ 
         'https://supportability.visualstudio.com/_git/AzureNetworking?path=/.LabBoxRepo/Hybrid/AzFW_Basic-Training/WinServ2025_ConfigScript.ps1'
-        // 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2025_ConfigScript.ps1'
       ]
     }
     protectedSettings: {
@@ -547,11 +589,10 @@ resource virtualMachine_SpokeA_Client_CustomScriptExtension 'Microsoft.Compute/v
     settings: {
       fileUris: [ 
         'https://supportability.visualstudio.com/_git/AzureNetworking?path=/.LabBoxRepo/Hybrid/AzFW_Basic-Training/WinServ2025_ConfigScript.ps1'
-        // 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2025_ConfigScript.ps1'
       ]
     }
     protectedSettings: {
-      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username ${virtualMachine_AdminUsername} -Type General'
+      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username ${virtualMachine_AdminUsername} -Type DNS'
     }
   }
   tags: tagValues
@@ -672,7 +713,6 @@ resource virtualMachine_SpokeB_Iis_CustomScriptExtension 'Microsoft.Compute/virt
     settings: {
       fileUris: [ 
         'https://supportability.visualstudio.com/_git/AzureNetworking?path=/.LabBoxRepo/Hybrid/AzFW_Basic-Training/WinServ2025_ConfigScript.ps1'
-        // 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2025_ConfigScript.ps1'
       ]
     }
     protectedSettings: {
@@ -740,6 +780,36 @@ module storageAccount_Blob_PrivateEndpoint '../../../modules/Microsoft.Network/P
   }
 }
 
+resource keyVault 'Microsoft.KeyVault/vaults@2024-11-01' = {
+  name: keyVault_Name
+  location: location
+  properties: {
+    sku: {
+      name: 'standard'
+      family: 'A'
+    }
+    tenantId: subscription().tenantId
+    accessPolicies: []
+  }
+}
+
+module keyVault_PrivateEndpoint '../../../modules/Microsoft.Network/PrivateEndpoint.bicep' = {
+  name: 'keyVault_PrivateEndpoint'
+  params: {
+    location: location
+    groupID: 'vault'
+    privateDNSZone_Name: 'privatelink.vault.${environment().suffixes.storage}'
+    privateEndpoint_Name: 'spokeB_${keyVault_Name}_vault_PrivateEndpoint'
+    privateEndpoint_SubnetID: virtualNetwork_SpokeB.properties.subnets[1].id
+    privateLinkServiceId: keyVault.id
+    virtualNetwork_IDs: [
+      virtualNetwork_Hub.id
+      virtualNetwork_SpokeA.id
+      virtualNetwork_SpokeB.id
+    ]
+  }
+}
+
 module bastion '../../../modules/Microsoft.Network/BastionEverything.bicep' = {
   name: 'AllBastionResources'
   params: {
@@ -748,10 +818,64 @@ module bastion '../../../modules/Microsoft.Network/BastionEverything.bicep' = {
       virtualNetwork_Hub.id
       virtualNetwork_SpokeA.id
       virtualNetwork_SpokeB.id
-      virtualNetwork_OnPrem.id
+      //virtualNetwork_OnPrem.id
     ] 
     bastion_name: 'Bastion'
     virtualNetwork_AddressPrefix: '10.200.0.0/24'
+  }
+}
+
+resource azureFirewall_PIP 'Microsoft.Network/publicIPAddresses@2022-11-01' = {
+  name: 'AzFW_PIP'
+  location: location
+  sku: {
+    name: 'Standard'
+    tier: 'Regional'
+  }
+  zones: [
+    '1'
+    '2'
+    '3'
+  ]
+  properties: {
+    publicIPAddressVersion: 'IPv4'
+    publicIPAllocationMethod: 'Static'
+    idleTimeoutInMinutes: 4
+    ipTags: []
+  }
+  tags: tagValues
+}
+
+resource azureFirewall_Management_PIP 'Microsoft.Network/publicIPAddresses@2022-11-01' = {
+  name: 'AzFW_Management_PIP'
+  location: location
+  sku: {
+    name: 'Standard'
+    tier: 'Regional'
+  }
+  zones: [
+    '1'
+    '2'
+    '3'
+  ]
+  properties: {
+    publicIPAddressVersion: 'IPv4'
+    publicIPAllocationMethod: 'Static'
+    idleTimeoutInMinutes: 4
+    ipTags: []
+  }
+  tags: tagValues
+}
+
+module azureFirewall '../../../modules/Microsoft.Network/AzureFirewall.bicep' = {
+  name: 'hubAzureFirewall'
+  params: {
+    azureFirewall_ManagementSubnet_ID: virtualNetwork_Hub.properties.subnets[3].id
+    azureFirewall_Name: 'hub_AzFW'
+    azureFirewall_SKU: 'Basic'
+    azureFirewall_Subnet_ID: virtualNetwork_Hub.properties.subnets[2].id
+    azureFirewallPolicy_Name: 'hub_AzFWPolicy'
+    location: location
   }
 }
 
@@ -909,7 +1033,6 @@ resource virtualMachine_Onprem_Dns_CustomScriptExtension 'Microsoft.Compute/virt
     settings: {
       fileUris: [ 
         'https://supportability.visualstudio.com/_git/AzureNetworking?path=/.LabBoxRepo/Hybrid/AzFW_Basic-Training/WinServ2025_ConfigScript.ps1'
-        // 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2025_ConfigScript.ps1'
       ]
     }
     protectedSettings: {
@@ -1034,7 +1157,6 @@ resource virtualMachine_Onprem_Client_CustomScriptExtension 'Microsoft.Compute/v
     settings: {
       fileUris: [ 
         'https://supportability.visualstudio.com/_git/AzureNetworking?path=/.LabBoxRepo/Hybrid/AzFW_Basic-Training/WinServ2025_ConfigScript.ps1'
-        // 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2025_ConfigScript.ps1'
       ]
     }
     protectedSettings: {
@@ -1049,6 +1171,7 @@ module onprem_to_Hub_VirtualNetworkGateways_and_Connections '../../../modules/Mi
   name: 'onprem_to_Hub_VirtualNetworkGateways_and_Connections'
   params: {
     location_VirtualNetworkGateway1: location
+    virtualNetworkGateway_SKU: 'VpnGw1AZ'
     asn_VirtualNetworkGateway1: 65000
     name_VirtualNetworkGateway1: 'onprem_VNG'
     subnetId_VirtualNetworkGateway1: virtualNetwork_OnPrem.properties.subnets[1].id
@@ -1075,36 +1198,4 @@ module peerings_Hub_to_Spokes '../../../modules/Microsoft.Network/VirtualNetwork
   dependsOn: [
     onprem_to_Hub_VirtualNetworkGateways_and_Connections
   ]
-}
-
-resource azureFirewall_PIP 'Microsoft.Network/publicIPAddresses@2022-11-01' = {
-  name: 'AzFW_PIP'
-  location: location
-  sku: {
-    name: 'Standard'
-    tier: 'Regional'
-  }
-  properties: {
-    publicIPAddressVersion: 'IPv4'
-    publicIPAllocationMethod: 'Static'
-    idleTimeoutInMinutes: 4
-    ipTags: []
-  }
-  tags: tagValues
-}
-
-resource azureFirewall_Management_PIP 'Microsoft.Network/publicIPAddresses@2022-11-01' = {
-  name: 'AzFW_Management_PIP'
-  location: location
-  sku: {
-    name: 'Standard'
-    tier: 'Regional'
-  }
-  properties: {
-    publicIPAddressVersion: 'IPv4'
-    publicIPAllocationMethod: 'Static'
-    idleTimeoutInMinutes: 4
-    ipTags: []
-  }
-  tags: tagValues
 }

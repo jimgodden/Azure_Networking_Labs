@@ -17,6 +17,7 @@ param enablePrivateOnlyBastion bool = false
 
 @description('SKU of the Azure Bastion')
 @allowed([
+  //'Developer'
   'Basic'
   'Standard'
   'Premium'

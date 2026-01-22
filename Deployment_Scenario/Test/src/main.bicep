@@ -1,211 +1,360 @@
-@description('Azure Datacenter location for the source resources')
-param location string = resourceGroup().location
+@description('Azure Datacenter location for the Hub and Spoke A resources')
+var location = resourceGroup().location
 
-@description('Username for the admin account of the Virtual Machines')
-param virtualMachine_AdminUsername string
-
-@description('Password for the admin account of the Virtual Machines')
-@secure()
-param virtualMachine_AdminPassword string
-
-@description('Size of the Virtual Machines')
-param virtualMachine_Size string = 'Standard_D4as_v4' // 'Standard_B2ms' // 'Standard_D2s_v3' // 'Standard_D16lds_v5'
-
-@description('''True enables Accelerated Networking and False disabled it.  
-Not all VM sizes support Accel Net (i.e. Standard_B2ms).  
-I'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net.
+@description('''
+Storage account name restrictions:
+- Storage account names must be between 3 and 24 characters in length and may contain numbers and lowercase letters only.
+- Your storage account name must be unique within Azure. No two storage accounts can have the same name.
 ''')
-param acceleratedNetworking bool = false
+@minLength(3)
+@maxLength(24)
+param storageAccount_Name string
 
-module virtualNetwork_Hub '../../../modules/Microsoft.Network/VirtualNetwork.bicep' = {
-  name: 'vnet-hub'
-  params: {
-    location: location
-    virtualNetwork_AddressPrefix: '10.0.0.0/16'
-    virtualNetwork_Name: 'vnet-hub'
-  }
+@description('Name of the Key Vault')
+param keyVault_Name string
+
+param tagValues object = {
+  Training: 'AzureFirewall'
 }
 
-// Start of webVM
-var virtualMachine_WebVM_Name = 'webVM'
-resource virtualMachine_WebVM 'Microsoft.Compute/virtualMachines@2024-07-01' = {
-  name: virtualMachine_WebVM_Name
+resource networkSecurityGroup_Generic 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
+  name: 'genericNSG'
   location: location
-  identity: {
-    type: 'SystemAssigned'
-  }
+  tags: tagValues
+}
+
+resource virtualNetwork_Hub 'Microsoft.Network/virtualNetworks@2021-02-01' = {
+  name: 'hub_VNet'
+  location: location
   properties: {
-    hardwareProfile: {
-      vmSize: virtualMachine_Size
-    }
-    additionalCapabilities: {
-      hibernationEnabled: false
-    }
-    storageProfile: {
-      imageReference: {
-        publisher: 'MicrosoftWindowsServer'
-        offer: 'WindowsServer'
-        sku: '2025-datacenter-azure-edition'
-        version: 'latest'
-      }
-      osDisk: {
-        osType: 'Windows'
-        name: '${virtualMachine_WebVM_Name}_OsDisk_1'
-        createOption: 'FromImage'
-        caching: 'ReadWrite'
-        managedDisk: {
-          storageAccountType: 'Premium_LRS'
-        }
-        deleteOption: 'Delete'
-        diskSizeGB: 127
-      }
-      dataDisks: []
-      diskControllerType: 'SCSI'
-    }
-    osProfile: {
-      computerName: virtualMachine_WebVM_Name
-      adminUsername: virtualMachine_AdminUsername
-      adminPassword: virtualMachine_AdminPassword
-      windowsConfiguration: {
-        provisionVMAgent: true
-        enableAutomaticUpdates: true
-        patchSettings: {
-          patchMode: 'AutomaticByPlatform'
-          automaticByPlatformSettings: {
-            rebootSetting: 'IfRequired'
-          }
-          assessmentMode: 'ImageDefault'
-          enableHotpatching: true
-        }
-      }
-      secrets: []
-      allowExtensionOperations: true
-    }
-    securityProfile: {
-      uefiSettings: {
-        secureBootEnabled: true
-        vTpmEnabled: true
-      }
-      securityType: 'TrustedLaunch'
-    }
-    networkProfile: {
-      networkInterfaces: [
-        {
-          id: virtualMachine_WebVM_NIC.id
-          properties: {
-            deleteOption: 'Delete'
-          }
-        }
+    addressSpace: {
+      addressPrefixes: [
+        '10.0.0.0/16'
       ]
     }
-    diagnosticsProfile: {
-      bootDiagnostics: {
-        enabled: true
-      }
-    }
-  }
-}
-resource virtualMachine_WebVM_PublicIP 'Microsoft.Network/publicIPAddresses@2024-01-01' = {
-  name: '${virtualMachine_WebVM_Name}-publicip'
-  location: location
-  sku: {
-    name: 'Standard'
-    tier: 'Regional'
-  }
-  properties: {
-    publicIPAllocationMethod: 'Static'
-    
-  }
-}
-resource virtualMachine_WebVM_NIC 'Microsoft.Network/networkInterfaces@2024-01-01' = {
-  name: '${virtualMachine_WebVM_Name}-nic'
-  location: location
-  properties: {
-    ipConfigurations: [
+    subnets: [
       {
-        name: 'ipconfig1'
+        name: 'General'
         properties: {
-          publicIPAddress: {
-            id: virtualMachine_WebVM_PublicIP.id
+          addressPrefix: '10.0.0.0/24'
+          routeTable: {
+            id: routeTable_Hub.id
           }
-          privateIPAllocationMethod: 'Dynamic'
-          subnet: {
-            id: virtualNetwork_Hub.outputs.general_SubnetID
+          networkSecurityGroup: {
+            id: networkSecurityGroup_Generic.id
           }
-          primary: true
-          privateIPAddressVersion: 'IPv4'
+        }
+      }
+      {
+        name: 'GatewaySubnet'
+        properties: {
+          addressPrefix: '10.0.1.0/24'
+          routeTable: {
+            id: routeTable_Hub.id
+          }
+        }
+      }
+      {
+        name: 'AzureFirewallSubnet'
+        properties: {
+          addressPrefix: '10.0.2.0/24'
+        }
+      }
+      {
+        name: 'AzureFirewallManagementSubnet'
+        properties: {
+          addressPrefix: '10.0.3.0/24'
         }
       }
     ]
-    enableAcceleratedNetworking: acceleratedNetworking
   }
+  tags: tagValues
 }
-resource virtualMachine_WebVM_CustomScriptExtension 'Microsoft.Compute/virtualMachines/extensions@2021-11-01' = {
-  parent: virtualMachine_WebVM
-  name: 'installcustomscript'
+
+resource routeTable_Hub 'Microsoft.Network/routeTables@2024-05-01' = {
+  name: 'hub_RouteTable'
   location: location
   properties: {
-    publisher: 'Microsoft.Compute'
-    type: 'CustomScriptExtension'
-    typeHandlerVersion: '1.9'
-    autoUpgradeMinorVersion: true
-    settings: {
-      fileUris: [ 
-        'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2025_ConfigScript.ps1'
+    disableBgpRoutePropagation: false
+    routes: [
+      {
+        name: 'toSpokeA'
+        properties: {
+          addressPrefix: '10.1.0.0/16'
+          nextHopType: 'VirtualAppliance'
+          nextHopIpAddress: '10.0.2.4'
+        }
+      }
+      {
+        name: 'toSpokeB'
+        properties: {
+          addressPrefix: '10.2.0.0/16'
+          nextHopType: 'VirtualAppliance'
+          nextHopIpAddress: '10.0.2.4'
+        }
+      }
+    ]
+  }
+  tags: tagValues
+}
+
+resource routeTable_Firewall 'Microsoft.Network/routeTables@2024-05-01' = {
+  name: 'firewall_RouteTable'
+  location: location
+  properties: {
+    disableBgpRoutePropagation: false
+    routes: [
+      {
+        name: 'toInternetFull'
+        properties: {
+          addressPrefix: '0.0.0.0/0'
+          nextHopType: 'Internet'
+        }
+      }
+      {
+        name: 'toInternetA'
+        properties: {
+          addressPrefix: '0.0.0.0/1'
+          nextHopType: 'VirtualNetworkGateway'
+        }
+      }
+      {
+        name: 'toInternetB'
+        properties: {
+          addressPrefix: '128.0.0.0/1'
+          nextHopType: 'VirtualNetworkGateway'
+        }
+      }
+    ]
+  }
+  tags: tagValues
+}
+
+resource virtualNetwork_SpokeA 'Microsoft.Network/virtualNetworks@2021-02-01' = {
+  name: 'spokeA_VNet'
+  location: location
+  properties: {
+    addressSpace: {
+      addressPrefixes: [
+        '10.1.0.0/16'
       ]
     }
-    protectedSettings: {
-      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username ${virtualMachine_AdminUsername} -Type WebServer'
-    }
+    subnets: [
+      {
+        name: 'General'
+        properties: {
+          addressPrefix: '10.1.0.0/24'
+          routeTable: {
+            id: routeTable_SpokeA.id
+          }
+          networkSecurityGroup: {
+            id: networkSecurityGroup_Generic.id
+          }
+        }
+      }
+    ]
   }
+  tags: tagValues
 }
-// End of webVM
+
+resource routeTable_SpokeA 'Microsoft.Network/routeTables@2024-05-01' = {
+  name: 'spokeA_RouteTable'
+  location: location
+  properties: {
+    disableBgpRoutePropagation: false
+    routes: [
+      {
+        name: 'toHub'
+        properties: {
+          addressPrefix: '10.0.0.0/16'
+          nextHopType: 'VirtualAppliance'
+          nextHopIpAddress: '10.0.2.4'
+        }
+      }
+      {
+        name: 'toSpokeB'
+        properties: {
+          addressPrefix: '10.2.0.0/16'
+          nextHopType: 'VirtualAppliance'
+          nextHopIpAddress: '10.0.2.4'
+        }
+      }
+      {
+        name: 'toOnPrem'
+        properties: {
+          addressPrefix: '10.100.0.0/16'
+          nextHopType: 'VirtualAppliance'
+          nextHopIpAddress: '10.0.2.4'
+        }
+      }
+      {
+        name: 'toGoogle'
+        properties: {
+          addressPrefix: '8.8.8.8/32'
+          nextHopType: 'VirtualAppliance'
+          nextHopIpAddress: '10.0.2.4'
+        }
+      }
+    ]
+  }
+  tags: tagValues
+}
+
+resource virtualNetwork_SpokeB 'Microsoft.Network/virtualNetworks@2021-02-01' = {
+  name: 'spokeB_VNet'
+  location: location
+  properties: {
+    addressSpace: {
+      addressPrefixes: [
+        '10.2.0.0/16'
+      ]
+    }
+    subnets: [
+      {
+        name: 'General'
+        properties: {
+          addressPrefix: '10.2.0.0/24'
+          routeTable: {
+            id: routeTable_SpokeB.id
+          }
+          networkSecurityGroup: {
+            id: networkSecurityGroup_Generic.id
+          }
+        }
+      }
+      {
+        name: 'PrivateEndpoint'
+        properties: {
+          addressPrefix: '10.2.1.0/24'
+          networkSecurityGroup: {
+            id: networkSecurityGroup_Generic.id
+          }
+        }
+      }
+    ]
+  }
+  tags: tagValues
+}
+
+resource routeTable_SpokeB 'Microsoft.Network/routeTables@2024-05-01' = {
+  name: 'spokeB_RouteTable'
+  location: location
+  properties: {
+    disableBgpRoutePropagation: false
+    routes: [
+      {
+        name: 'toHub'
+        properties: {
+          addressPrefix: '10.0.0.0/16'
+          nextHopType: 'VirtualAppliance'
+          nextHopIpAddress: '10.0.2.4'
+        }
+      }
+      {
+        name: 'toSpokeA'
+        properties: {
+          addressPrefix: '10.1.0.0/16'
+          nextHopType: 'VirtualAppliance'
+          nextHopIpAddress: '10.0.2.4'
+        }
+      }
+      {
+        name: 'toOnPrem'
+        properties: {
+          addressPrefix: '10.100.0.0/16'
+          nextHopType: 'VirtualAppliance'
+          nextHopIpAddress: '10.0.2.4'
+        }
+      }
+    ]
+  }
+  tags: tagValues
+}
 
 
-// module virtualMachine_Client1 '../../../modules/Microsoft.Compute/VirtualMachine/Windows/Server2025_General.bicep' = {
-//   name: 'vm-client1'
-//   params: {
-//     location: location
-//     acceleratedNetworking: acceleratedNetworking
-//     subnet_ID: virtualNetwork_Hub.outputs.general_SubnetID
-//     virtualMachine_AdminPassword: virtualMachine_AdminPassword
-//     virtualMachine_AdminUsername: virtualMachine_AdminUsername
-//     virtualMachine_Name: 'vm-client1'
-//     vmSize: 'Standard_E2ds_v5'
-//   }
-// }
-
-// module virtualMachine_Client2 '../../../modules/Microsoft.Compute/VirtualMachine/Windows/Server2025_General.bicep' = {
-//   name: 'vm-client2'
-//   params: {
-//     location: location
-//     acceleratedNetworking: acceleratedNetworking
-//     subnet_ID: virtualNetwork_Hub.outputs.general_SubnetID
-//     virtualMachine_AdminPassword: virtualMachine_AdminPassword
-//     virtualMachine_AdminUsername: virtualMachine_AdminUsername
-//     virtualMachine_Name: 'E4'
-//     vmSize: 'Standard_E2ds_v4'
-//   }
-// }
-
-// module virtualMachine_Client3 '../../../modules/Microsoft.Compute/VirtualMachine/Windows/Server2025_General.bicep' = {
-//   name: 'vm-client3'
-//   params: {
-//     location: location
-//     acceleratedNetworking: acceleratedNetworking
-//     subnet_ID: virtualNetwork_Hub.outputs.general_SubnetID
-//     virtualMachine_AdminPassword: virtualMachine_AdminPassword
-//     virtualMachine_AdminUsername: virtualMachine_AdminUsername
-//     virtualMachine_Name: 'D5'
-//     vmSize: 'Standard_D2s_v5'
-//   }
-// }
-
-module bastion '../../../modules/Microsoft.Network/Bastion.bicep' = {
-  name: 'bastion'
+resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
+  name: storageAccount_Name
+  location: location
+  sku: {
+    name: 'Standard_LRS'
+  }
+  kind: 'StorageV2'
+  properties: {
+    dnsEndpointType: 'Standard'
+    defaultToOAuthAuthentication: true
+    publicNetworkAccess: 'Enabled'
+    allowCrossTenantReplication: true
+    minimumTlsVersion: 'TLS1_2'
+    allowBlobPublicAccess: false
+    allowSharedKeyAccess: false
+    networkAcls: {
+      bypass: 'AzureServices'
+      virtualNetworkRules: []
+      ipRules: []
+      defaultAction: 'Deny'
+    }
+    supportsHttpsTrafficOnly: true
+    encryption: {
+      requireInfrastructureEncryption: false
+      services: {
+        file: {
+          keyType: 'Account'
+          enabled: true
+        }
+        blob: {
+          keyType: 'Account'
+          enabled: true
+        }
+      }
+      keySource: 'Microsoft.Storage'
+    }
+    accessTier: 'Hot'
+  }
+  tags: tagValues
+}
+module storageAccount_Blob_PrivateEndpoint '../../../modules/Microsoft.Network/PrivateEndpoint.bicep' = {
+  name: 'storageAccount_Blob_PrivateEndpoint'
   params: {
     location: location
-    bastion_SubnetID: virtualNetwork_Hub.outputs.bastion_SubnetID
-    bastion_name: 'bastion'
+    groupID: 'blob'
+    privateDNSZone_Name: 'privatelink.blob.${environment().suffixes.storage}'
+    privateEndpoint_Name: 'spokeB_${storageAccount_Name}_blob_PrivateEndpoint'
+    privateEndpoint_SubnetID: virtualNetwork_SpokeB.properties.subnets[1].id
+    privateLinkServiceId: storageAccount.id
+    virtualNetwork_IDs: [
+      virtualNetwork_Hub.id
+      virtualNetwork_SpokeA.id
+      virtualNetwork_SpokeB.id
+    ]
+  }
+}
+
+resource keyVault 'Microsoft.KeyVault/vaults@2024-11-01' = {
+  name: keyVault_Name
+  location: location
+  properties: {
+    sku: {
+      name: 'standard'
+      family: 'A'
+    }
+    tenantId: subscription().tenantId
+    accessPolicies: []
+  }
+}
+
+module keyVault_PrivateEndpoint '../../../modules/Microsoft.Network/PrivateEndpoint.bicep' = {
+  name: 'keyVault_PrivateEndpoint'
+  params: {
+    location: location
+    groupID: 'vault'
+    privateDNSZone_Name: 'privatelink.vault.${environment().suffixes.storage}'
+    privateEndpoint_Name: 'spokeB_${keyVault_Name}_vault_PrivateEndpoint'
+    privateEndpoint_SubnetID: virtualNetwork_SpokeB.properties.subnets[1].id
+    privateLinkServiceId: keyVault.id
+    virtualNetwork_IDs: [
+      virtualNetwork_Hub.id
+      virtualNetwork_SpokeA.id
+      virtualNetwork_SpokeB.id
+    ]
   }
 }

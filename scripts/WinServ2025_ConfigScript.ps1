@@ -35,9 +35,8 @@ if (-not (Test-Path $registryPath)) {
 Set-ItemProperty -Path $registryPath -Name $registryName -Value $registryValue
 
 
-# npcap for using Wireshark for taking packet captures
+# winpcap for using Wireshark for taking packet captures
 Invoke-WebRequest -Uri "https://www.winpcap.org/install/bin/WinPcap_4_1_3.exe" -OutFile "c:\WinPcap_4_1_3.exe"
-# Invoke-WebRequest -Uri "https://npcap.com/dist/npcap-1.80.exe" -OutFile "c:\npcap-1.80.exe"
 
 # Install Chocolatey
 Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
@@ -137,8 +136,8 @@ if ($Type -eq "WebServer") {
             New-NetFirewallRule -DisplayName "Allow inbound TCP port ${port}" -Direction Inbound -LocalPort $port -Protocol TCP -Action Allow
         }
     }
-    New-NetFirewallRule -DisplayName "Allow inbound TCP port ${portHTTP}" -Direction Inbound -LocalPort $portHTTP -Protocol TCP -Action Allow
-    New-NetFirewallRule -DisplayName "Allow inbound TCP port ${portHTTPS}" -Direction Inbound -LocalPort $portHTTPS -Protocol TCP -Action Allow
+    # New-NetFirewallRule -DisplayName "Allow inbound TCP port ${portHTTP}" -Direction Inbound -LocalPort $portHTTP -Protocol TCP -Action Allow
+    # New-NetFirewallRule -DisplayName "Allow inbound TCP port ${portHTTPS}" -Direction Inbound -LocalPort $portHTTPS -Protocol TCP -Action Allow
 
     # Install the IIS server feature
     Install-WindowsFeature -Name Web-Server -includeManagementTools
@@ -151,6 +150,10 @@ if ($Type -eq "WebServer") {
 
     New-Item -ItemType File -Name "index.html" -Path "C:\$siteName"
     Set-Content -Path "C:\$siteName\index.html" -Value "Welcome to $env:COMPUTERNAME in $location"
+
+    if ($FQDN -eq "ignore") {
+        $hostHeader = ""; # Needs testing
+    }
 
     New-WebSite -Name $siteName -Port $portHTTP -HostHeader $hostHeader -PhysicalPath "C:\$siteName"
     New-WebBinding -Name $siteName -Port $portHTTPS -Protocol "https" -HostHeader $hostHeader

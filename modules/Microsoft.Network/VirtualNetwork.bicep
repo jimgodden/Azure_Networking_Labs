@@ -61,6 +61,9 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2022-09-01' = {
           routeTable: {
             id: routeTable.id
           }
+          natGateway: {
+            id: NATGateway.id
+          }
           delegations: []
           privateEndpointNetworkPolicies: 'Disabled'
           privateLinkServiceNetworkPolicies: 'Enabled'
@@ -75,6 +78,9 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2022-09-01' = {
           }
           routeTable: {
             id: routeTable.id
+          }
+          natGateway: {
+            id: NATGateway.id
           }
           delegations: []
           privateEndpointNetworkPolicies: 'Disabled'
@@ -103,6 +109,9 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2022-09-01' = {
           networkSecurityGroup: {
             id: networkSecurityGroup_ApplicationGateway.id
           }
+          natGateway: {
+            id: NATGateway.id
+          }          
           delegations: []
           privateEndpointNetworkPolicies: 'Disabled'
           privateLinkServiceNetworkPolicies: 'Enabled' 
@@ -199,6 +208,35 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2022-09-01' = {
     enableDdosProtection: false
   }
   tags: tagValues
+}
+
+resource NATGateway_PIP 'Microsoft.Network/publicIPAddresses@2024-07-01' = {
+  name: '${virtualNetwork_Name}_NATGateway_PIP'
+  location: location
+  sku: {
+    name: 'Standard'
+  }
+  properties: {
+    publicIPAllocationMethod: 'Static'
+    publicIPAddressVersion: 'IPv4'  
+  }
+  tags: tagValues
+}
+
+resource NATGateway 'Microsoft.Network/natGateways@2024-07-01' = {
+  name: '${virtualNetwork_Name}_NATGateway'
+  location: location
+  sku: {
+    name: 'Standard'
+  }
+  properties: {
+    publicIpAddresses: [
+      {
+        id: NATGateway_PIP.id
+      }
+    ]
+    idleTimeoutInMinutes: 4
+  }
 }
 
 resource routeTable 'Microsoft.Network/routeTables@2023-02-01' = {

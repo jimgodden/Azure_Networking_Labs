@@ -19,6 +19,14 @@ var acceleratedNetworking = false
 
 var tagValues = { Training: 'BGPLab' }
 
+module natGateway '../../../modules/Microsoft.Network/NATGateway.bicep' = {
+  name: 'natGateway'
+  params: {
+    location: location
+    natGateway_Name: 'NATGateway'
+  }
+}
+
 resource virtualNetwork 'Microsoft.Network/virtualNetworks@2022-09-01' = {
   name: 'virtualNetwork'
   location: location
@@ -48,6 +56,9 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2022-09-01' = {
           networkSecurityGroup: {
             id: genericNSG.id
           }
+          natGateway: {
+            id: natGateway.outputs.natGateway_Id
+          }
         }
       }
       {
@@ -59,6 +70,9 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2022-09-01' = {
           privateLinkServiceNetworkPolicies: 'Enabled' 
           networkSecurityGroup: {
             id: genericNSG.id
+          }
+          natGateway: {
+            id: natGateway.outputs.natGateway_Id
           }
         }
       }
@@ -72,6 +86,9 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2022-09-01' = {
           networkSecurityGroup: {
             id: genericNSG.id
           }
+          natGateway: {
+            id: natGateway.outputs.natGateway_Id
+          }
         }
       }
       {
@@ -82,6 +99,9 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2022-09-01' = {
           privateLinkServiceNetworkPolicies: 'Enabled'
           networkSecurityGroup: {
             id: genericNSG.id
+          }
+          natGateway: {
+            id: natGateway.outputs.natGateway_Id
           }
         }
       }

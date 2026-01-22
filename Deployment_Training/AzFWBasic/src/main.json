@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.32.4.45862",
-      "templateHash": "391230143740952849"
+      "templateHash": "745481420032876487"
     }
   },
   "parameters": {
@@ -29,13 +29,6 @@
         "description": "Size of the Virtual Machines"
       }
     },
-    "acceleratedNetworking": {
-      "type": "bool",
-      "defaultValue": false,
-      "metadata": {
-        "description": "True enables Accelerated Networking and False disabled it.  \nNot all VM sizes support Accel Net (i.e. Standard_B2ms).  \nI'd recommend Standard_D2s_v3 for a cheap VM that supports Accel Net.\n"
-      }
-    },
     "vpn_SharedKey": {
       "type": "securestring",
       "minLength": 6,
@@ -51,6 +44,14 @@
         "description": "Storage account name restrictions:\n- Storage account names must be between 3 and 24 characters in length and may contain numbers and lowercase letters only.\n- Your storage account name must be unique within Azure. No two storage accounts can have the same name.\n"
       }
     },
+    "keyVault_Name": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 24,
+      "metadata": {
+        "description": "Key Vault name restrictions:\n- A vault's name must be between 3-24 alphanumeric characters.\n- The name must begin with a letter, end with a letter or digit, and not contain consecutive hyphens.\n- Your Key Vault name must be unique within Azure. No two Key Vaults can have the same name.\n- Follow this link for more information: https://go.microsoft.com/fwlink/?linkid=2147742\n"
+      }
+    },
     "tagValues": {
       "type": "object",
       "defaultValue": {
@@ -60,6 +61,7 @@
   },
   "variables": {
     "location": "[resourceGroup().location]",
+    "acceleratedNetworking": false,
     "virtualMachine_Hub_Dns_Name": "hub-dnsVM",
     "virtualMachine_SpokeA_Client_Name": "spokeA-clientVM",
     "virtualMachine_SpokeB_Iis_Name": "spokeB-iisVM",
@@ -153,6 +155,39 @@
               "addressPrefix": "10.2.0.0/16",
               "nextHopType": "VirtualAppliance",
               "nextHopIpAddress": "10.0.2.4"
+            }
+          }
+        ]
+      },
+      "tags": "[parameters('tagValues')]"
+    },
+    {
+      "type": "Microsoft.Network/routeTables",
+      "apiVersion": "2024-05-01",
+      "name": "firewall_RouteTable",
+      "location": "[variables('location')]",
+      "properties": {
+        "disableBgpRoutePropagation": false,
+        "routes": [
+          {
+            "name": "toInternetFull",
+            "properties": {
+              "addressPrefix": "0.0.0.0/0",
+              "nextHopType": "Internet"
+            }
+          },
+          {
+            "name": "toInternetA",
+            "properties": {
+              "addressPrefix": "0.0.0.0/1",
+              "nextHopType": "VirtualNetworkGateway"
+            }
+          },
+          {
+            "name": "toInternetB",
+            "properties": {
+              "addressPrefix": "128.0.0.0/1",
+              "nextHopType": "VirtualNetworkGateway"
             }
           }
         ]
@@ -423,7 +458,7 @@
             }
           }
         ],
-        "enableAcceleratedNetworking": "[parameters('acceleratedNetworking')]"
+        "enableAcceleratedNetworking": "[variables('acceleratedNetworking')]"
       },
       "tags": "[parameters('tagValues')]",
       "dependsOn": [
@@ -557,7 +592,7 @@
             }
           }
         ],
-        "enableAcceleratedNetworking": "[parameters('acceleratedNetworking')]"
+        "enableAcceleratedNetworking": "[variables('acceleratedNetworking')]"
       },
       "tags": "[parameters('tagValues')]",
       "dependsOn": [
@@ -580,7 +615,7 @@
           ]
         },
         "protectedSettings": {
-          "commandToExecute": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username {0} -Type General', parameters('virtualMachine_AdminUsername'))]"
+          "commandToExecute": "[format('powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Username {0} -Type DNS', parameters('virtualMachine_AdminUsername'))]"
         }
       },
       "tags": "[parameters('tagValues')]",
@@ -691,7 +726,7 @@
             }
           }
         ],
-        "enableAcceleratedNetworking": "[parameters('acceleratedNetworking')]"
+        "enableAcceleratedNetworking": "[variables('acceleratedNetworking')]"
       },
       "tags": "[parameters('tagValues')]",
       "dependsOn": [
@@ -763,6 +798,20 @@
         "accessTier": "Hot"
       },
       "tags": "[parameters('tagValues')]"
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults",
+      "apiVersion": "2024-11-01",
+      "name": "[parameters('keyVault_Name')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "sku": {
+          "name": "standard",
+          "family": "A"
+        },
+        "tenantId": "[subscription().tenantId]",
+        "accessPolicies": []
+      }
     },
     {
       "type": "Microsoft.Network/virtualNetworks",
@@ -904,7 +953,7 @@
             }
           }
         ],
-        "enableAcceleratedNetworking": "[parameters('acceleratedNetworking')]"
+        "enableAcceleratedNetworking": "[variables('acceleratedNetworking')]"
       },
       "tags": "[parameters('tagValues')]",
       "dependsOn": [
@@ -1038,7 +1087,7 @@
             }
           }
         ],
-        "enableAcceleratedNetworking": "[parameters('acceleratedNetworking')]"
+        "enableAcceleratedNetworking": "[variables('acceleratedNetworking')]"
       },
       "tags": "[parameters('tagValues')]",
       "dependsOn": [
@@ -1078,6 +1127,11 @@
         "name": "Standard",
         "tier": "Regional"
       },
+      "zones": [
+        "1",
+        "2",
+        "3"
+      ],
       "properties": {
         "publicIPAddressVersion": "IPv4",
         "publicIPAllocationMethod": "Static",
@@ -1095,6 +1149,11 @@
         "name": "Standard",
         "tier": "Regional"
       },
+      "zones": [
+        "1",
+        "2",
+        "3"
+      ],
       "properties": {
         "publicIPAddressVersion": "IPv4",
         "publicIPAllocationMethod": "Static",
@@ -1642,6 +1701,187 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2022-09-01",
+      "name": "keyVault_PrivateEndpoint",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "[variables('location')]"
+          },
+          "groupID": {
+            "value": "vault"
+          },
+          "privateDNSZone_Name": {
+            "value": "[format('privatelink.vault.{0}', environment().suffixes.storage)]"
+          },
+          "privateEndpoint_Name": {
+            "value": "[format('spokeB_{0}_vault_PrivateEndpoint', parameters('keyVault_Name'))]"
+          },
+          "privateEndpoint_SubnetID": {
+            "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', 'spokeB_VNet'), '2021-02-01').subnets[1].id]"
+          },
+          "privateLinkServiceId": {
+            "value": "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVault_Name'))]"
+          },
+          "virtualNetwork_IDs": {
+            "value": [
+              "[resourceId('Microsoft.Network/virtualNetworks', 'hub_VNet')]",
+              "[resourceId('Microsoft.Network/virtualNetworks', 'spokeA_VNet')]",
+              "[resourceId('Microsoft.Network/virtualNetworks', 'spokeB_VNet')]"
+            ]
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.32.4.45862",
+              "templateHash": "339027376688421692"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string",
+              "metadata": {
+                "description": "Azure Datacenter that the resource is deployed to"
+              }
+            },
+            "privateEndpoint_Name": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the Private Endpoint"
+              }
+            },
+            "privateLinkServiceId": {
+              "type": "string"
+            },
+            "privateEndpoint_SubnetID": {
+              "type": "string",
+              "metadata": {
+                "description": "Subnet ID that the Private Endpoint will be deployed to"
+              }
+            },
+            "virtualNetwork_IDs": {
+              "type": "array",
+              "metadata": {
+                "description": "Resource ID of the Virtual Networks to be linked to the Private DNS Zone"
+              }
+            },
+            "groupID": {
+              "type": "string",
+              "metadata": {
+                "description": "The ID of a group obtained from the remote resource that this private endpoint should connect to."
+              }
+            },
+            "privateDNSZone_Name": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the Private DNS Zone\nExample: privatelink.blob.${environment().suffixes.storage}"
+              }
+            },
+            "tagValues": {
+              "type": "object",
+              "defaultValue": {}
+            }
+          },
+          "variables": {
+            "resource_Name": "[last(split(parameters('privateLinkServiceId'), '/'))]"
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Network/privateEndpoints",
+              "apiVersion": "2023-05-01",
+              "name": "[parameters('privateEndpoint_Name')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "privateLinkServiceConnections": [
+                  {
+                    "name": "[format('{0}_to_{1}', parameters('privateEndpoint_Name'), variables('resource_Name'))]",
+                    "properties": {
+                      "privateLinkServiceId": "[parameters('privateLinkServiceId')]",
+                      "groupIds": [
+                        "[parameters('groupID')]"
+                      ]
+                    }
+                  }
+                ],
+                "subnet": {
+                  "id": "[parameters('privateEndpoint_SubnetID')]"
+                }
+              },
+              "tags": "[parameters('tagValues')]"
+            },
+            {
+              "type": "Microsoft.Network/privateDnsZones",
+              "apiVersion": "2020-06-01",
+              "name": "[parameters('privateDNSZone_Name')]",
+              "location": "global",
+              "tags": "[parameters('tagValues')]"
+            },
+            {
+              "type": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups",
+              "apiVersion": "2023-04-01",
+              "name": "[format('{0}/{1}', parameters('privateEndpoint_Name'), format('{0}ZoneGroup', parameters('groupID')))]",
+              "properties": {
+                "privateDnsZoneConfigs": [
+                  {
+                    "name": "default",
+                    "properties": {
+                      "privateDnsZoneId": "[resourceId('Microsoft.Network/privateDnsZones', parameters('privateDNSZone_Name'))]"
+                    }
+                  }
+                ]
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/privateDnsZones', parameters('privateDNSZone_Name'))]",
+                "[resourceId('Microsoft.Network/privateEndpoints', parameters('privateEndpoint_Name'))]"
+              ]
+            },
+            {
+              "copy": {
+                "name": "virtualNetworkLink_File",
+                "count": "[length(parameters('virtualNetwork_IDs'))]"
+              },
+              "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+              "apiVersion": "2018-09-01",
+              "name": "[format('{0}/{1}', parameters('privateDNSZone_Name'), format('{0}_to_{1}', parameters('privateEndpoint_Name'), last(split(parameters('virtualNetwork_IDs')[copyIndex()], '/'))))]",
+              "location": "global",
+              "properties": {
+                "registrationEnabled": false,
+                "virtualNetwork": {
+                  "id": "[parameters('virtualNetwork_IDs')[copyIndex()]]"
+                }
+              },
+              "tags": "[parameters('tagValues')]",
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/privateDnsZones', parameters('privateDNSZone_Name'))]",
+                "[resourceId('Microsoft.Network/privateEndpoints', parameters('privateEndpoint_Name'))]"
+              ]
+            }
+          ],
+          "outputs": {
+            "privateEndpoint_NetworkInterface_Name": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Network/privateEndpoints', parameters('privateEndpoint_Name')), '2023-05-01').customNetworkInterfaceName]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVault_Name'))]",
+        "[resourceId('Microsoft.Network/virtualNetworks', 'hub_VNet')]",
+        "[resourceId('Microsoft.Network/virtualNetworks', 'spokeA_VNet')]",
+        "[resourceId('Microsoft.Network/virtualNetworks', 'spokeB_VNet')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
       "name": "AllBastionResources",
       "properties": {
         "expressionEvaluationOptions": {
@@ -2122,6 +2362,9 @@
           "location_VirtualNetworkGateway1": {
             "value": "[variables('location')]"
           },
+          "virtualNetworkGateway_SKU": {
+            "value": "VpnGw1AZ"
+          },
           "asn_VirtualNetworkGateway1": {
             "value": 65000
           },
@@ -2154,7 +2397,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.32.4.45862",
-              "templateHash": "4674184926665198887"
+              "templateHash": "3937658012656024288"
             }
           },
           "parameters": {
@@ -2184,7 +2427,7 @@
             },
             "virtualNetworkGateway_SKU": {
               "type": "string",
-              "defaultValue": "vpnGw1"
+              "defaultValue": "VpnGw1AZ"
             },
             "vpn_SharedKey": {
               "type": "string"
@@ -2224,7 +2467,7 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.32.4.45862",
-                      "templateHash": "15330167770294849167"
+                      "templateHash": "4980533458126721544"
                     }
                   },
                   "parameters": {
@@ -2242,14 +2485,9 @@
                     },
                     "virtualNetworkGateway_SKU": {
                       "type": "string",
-                      "defaultValue": "VpnGw1",
+                      "defaultValue": "VpnGw1AZ",
                       "allowedValues": [
                         "Basic",
-                        "VpnGw1",
-                        "VpnGw2",
-                        "VpnGw3",
-                        "VpnGw4",
-                        "VpnGw5",
                         "VpnGw1AZ",
                         "VpnGw2AZ",
                         "VpnGw3AZ",
@@ -2308,6 +2546,11 @@
                         "name": "Standard",
                         "tier": "Regional"
                       },
+                      "zones": [
+                        "1",
+                        "2",
+                        "3"
+                      ],
                       "properties": {
                         "publicIPAddressVersion": "IPv4",
                         "publicIPAllocationMethod": "Static",
@@ -2326,6 +2569,11 @@
                         "name": "Standard",
                         "tier": "Regional"
                       },
+                      "zones": [
+                        "1",
+                        "2",
+                        "3"
+                      ],
                       "properties": {
                         "publicIPAddressVersion": "IPv4",
                         "publicIPAllocationMethod": "Static",
@@ -2439,7 +2687,7 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.32.4.45862",
-                      "templateHash": "15330167770294849167"
+                      "templateHash": "4980533458126721544"
                     }
                   },
                   "parameters": {
@@ -2457,14 +2705,9 @@
                     },
                     "virtualNetworkGateway_SKU": {
                       "type": "string",
-                      "defaultValue": "VpnGw1",
+                      "defaultValue": "VpnGw1AZ",
                       "allowedValues": [
                         "Basic",
-                        "VpnGw1",
-                        "VpnGw2",
-                        "VpnGw3",
-                        "VpnGw4",
-                        "VpnGw5",
                         "VpnGw1AZ",
                         "VpnGw2AZ",
                         "VpnGw3AZ",
@@ -2523,6 +2766,11 @@
                         "name": "Standard",
                         "tier": "Regional"
                       },
+                      "zones": [
+                        "1",
+                        "2",
+                        "3"
+                      ],
                       "properties": {
                         "publicIPAddressVersion": "IPv4",
                         "publicIPAllocationMethod": "Static",
@@ -2541,6 +2789,11 @@
                         "name": "Standard",
                         "tier": "Regional"
                       },
+                      "zones": [
+                        "1",
+                        "2",
+                        "3"
+                      ],
                       "properties": {
                         "publicIPAddressVersion": "IPv4",
                         "publicIPAllocationMethod": "Static",

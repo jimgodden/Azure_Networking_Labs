@@ -35,7 +35,7 @@ param tagValues object = {
 }
 
 @description('SKU of the Virtual Network Gateway')
-var virtualNetworkGateway_SKU = 'VpnGw1'
+var virtualNetworkGateway_SKU = 'VpnGw1AZ'
 
 var virtualMachine_ScriptFile = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2025_ConfigScript.ps1'
 

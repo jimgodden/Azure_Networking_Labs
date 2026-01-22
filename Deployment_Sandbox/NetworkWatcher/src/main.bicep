@@ -49,7 +49,7 @@ module networkWatcher '../../../modules/Microsoft.Network/NetworkWatcher.bicep' 
   }
 }
 
-module virtualMachine_Windows '../../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
+module virtualMachine_Windows '../../../modules/Microsoft.Compute/VirtualMachine/Windows/Server20XX_Default.bicep' = {
   name: 'winVM'
   params: {
     acceleratedNetworking: acceleratedNetworking
@@ -58,9 +58,9 @@ module virtualMachine_Windows '../../../modules/Microsoft.Compute/WindowsServer2
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'winVM'
-    virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    virtualMachine_ScriptFileName: 'WinServ2022_ConfigScript_General.ps1'
+    vmSize: virtualMachine_Size
+    windowsServerVersion: '2022-datacenter-g2'
+    scriptFileUri: '${virtualMachine_ScriptFileLocation}WinServ2022_ConfigScript_General.ps1'
     commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_General.ps1 -Username ${virtualMachine_AdminUsername}'
   }
 }

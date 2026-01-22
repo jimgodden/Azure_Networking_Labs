@@ -54,7 +54,7 @@ module src_to_dst_vnetPeering '../../../modules/Microsoft.Network/VirtualNetwork
   }
 }
 
-module virtualMachine_Windows_SRC '../../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
+module virtualMachine_Windows_SRC '../../../modules/Microsoft.Compute/VirtualMachine/Windows/Server20XX_Default.bicep' = {
   name: 'winVM-src'
   params: {
     acceleratedNetworking: acceleratedNetworking
@@ -63,14 +63,14 @@ module virtualMachine_Windows_SRC '../../../modules/Microsoft.Compute/WindowsSer
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'winVM-src'
-    virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    virtualMachine_ScriptFileName: 'WinServ2022_LongRunningConnections_Client.ps1'
+    vmSize: virtualMachine_Size
+    windowsServerVersion: '2022-datacenter-g2'
+    scriptFileUri: '${virtualMachine_ScriptFileLocation}WinServ2022_LongRunningConnections_Client.ps1'
     commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_LongRunningConnections_Client.ps1 -DestinationIP "10.1.0.4" -DestinationPort 5500'
   }
 }
 
-module virtualMachine_Windows_dst '../../../modules/Microsoft.Compute/WindowsServer2022/VirtualMachine.bicep' = {
+module virtualMachine_Windows_dst '../../../modules/Microsoft.Compute/VirtualMachine/Windows/Server20XX_Default.bicep' = {
   name: 'winVM-dst'
   params: {
     acceleratedNetworking: acceleratedNetworking
@@ -79,9 +79,9 @@ module virtualMachine_Windows_dst '../../../modules/Microsoft.Compute/WindowsSer
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'winVM-dst'
-    virtualMachine_Size: virtualMachine_Size
-    virtualMachine_ScriptFileLocation: virtualMachine_ScriptFileLocation
-    virtualMachine_ScriptFileName: 'WinServ2022_LongRunningConnections_Server.ps1'
+    vmSize: virtualMachine_Size
+    windowsServerVersion: '2022-datacenter-g2'
+    scriptFileUri: '${virtualMachine_ScriptFileLocation}WinServ2022_LongRunningConnections_Server.ps1'
     commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_LongRunningConnections_Server.ps1 -LocalPort 5500'
   }
 }

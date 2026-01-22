@@ -16,7 +16,9 @@ param(
     [Parameter(Mandatory)]
     [string]$Location,
     
-    [bool]$DeployWithParamFile = $true
+    [bool]$DeployWithParamFile = $true,
+
+    [bool]$MaintenanceMode = $false
 )
 
 # Verifies that AzContext is set and displays the subscription information to where this deployment will be completed.
@@ -109,21 +111,26 @@ else {
 
 $stopwatch.Stop()
 
-Write-Host "Process finished at: $(Get-Date -Format "HH:mm K")"
-Write-Host "Total time taken in minutes: $($stopwatch.Elapsed.TotalMinutes)"
+if ($MaintenanceMode) {
+    # $deployment.outputs.
+}
+else {
+    Write-Host "Process finished at: $(Get-Date -Format "HH:mm K")"
+    Write-Host "Total time taken in minutes: $($stopwatch.Elapsed.TotalMinutes)"
 
-Write-Host "Below is a link to the newly created/modified Resource Group: "
-Write-Host -ForegroundColor Blue "https://portal.azure.com/#@/resource/subscriptions/$($context.Subscription.Id)/resourceGroups/${rgName}`n"
+    Write-Host "Below is a link to the newly created/modified Resource Group: "
+    Write-Host -ForegroundColor Blue "https://portal.azure.com/#@/resource/subscriptions/$($context.Subscription.Id)/resourceGroups/${rgName}`n"
 
-# Define the message and title
-$message = "ProvisioningState: $($deployment.ProvisioningState)`nTimestamp: $(Get-Date -Format "HH:mm K")"
-$title = "Bicep Deployment: ${DeploymentName}"
+    # Define the message and title
+    $message = "ProvisioningState: $($deployment.ProvisioningState)`nTimestamp: $(Get-Date -Format "HH:mm K")"
+    $title = "Bicep Deployment: ${DeploymentName}"
 
-# Play the alert sound
-[System.Media.SystemSounds]::Exclamation.Play()
+    # Play the alert sound
+    [System.Media.SystemSounds]::Exclamation.Play()
 
-# Show the message box
-Add-Type -AssemblyName System.Windows.Forms
-[System.Windows.Forms.MessageBox]::Show($message, $title, [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Exclamation)
+    # Show the message box
+    Add-Type -AssemblyName System.Windows.Forms
+    [System.Windows.Forms.MessageBox]::Show($message, $title, [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Exclamation)
 
-$deployment.Outputs
+    $deployment.Outputs
+}

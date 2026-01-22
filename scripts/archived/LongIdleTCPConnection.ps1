@@ -3,10 +3,8 @@ param (
     [int]$DestinationPort
 )
 
-Start-Sleep -seconds 600
-
-$DestinationIP = "208."
-$DestinationPort = 433
+$DestinationIP = "20.49.32.238"
+$DestinationPort = 8443
 
 # Create a TCP client socket
 $tcpClient = New-Object System.Net.Sockets.TcpClient
@@ -18,6 +16,8 @@ $counter = 1
 
 # Send a sequence of numbers to the server
 while ($true) {
+    Start-sleep -Seconds 335
+
     $stream = $tcpClient.GetStream()
     $buffer = [System.Text.Encoding]::ASCII.GetBytes($counter.ToString())
     $stream.Write($buffer, 0, $buffer.Length)
