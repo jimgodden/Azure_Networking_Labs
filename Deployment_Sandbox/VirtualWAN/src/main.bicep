@@ -8,7 +8,7 @@ param mainLocation string = 'eastus2'
 param branchLocation string = 'westus2'
 
 @description('Azure Datacenter location that the "OnPrem" resouces will be deployed to.')
-param onPremLocation string = 'eastus'
+param onPremLocation string = 'centralus'
 
 @description('Admin Username for the Virtual Machines that gets placed in each Virtual Network')
 param virtualMachine_AdminUsername string
@@ -20,6 +20,9 @@ param virtualMachine_AdminPassword string
 @description('VPN Shared Key used for authenticating VPN connections.  This Shared Key must be the same key that is used on the Virtual Network Gateway that is being connected to the vWAN\'s S2S VPNs.')
 @secure()
 param vpn_SharedKey string
+
+@description('Size of the Virtual Machines')
+param virtualMachine_Size string = 'Standard_D2_v4'
 
 // var virtualMachine_ScriptFileLocation = 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/'
 
@@ -47,6 +50,7 @@ module virtualHubA_and_Contents 'modules/AzureResources/VirtualHub_and_Contents.
     virtualHub_UniquePrefix: 'A'
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
+    virtualMachine_Size: virtualMachine_Size
     virtualWAN_ID: virtualWAN.outputs.virtualWAN_ID
   }
 }
@@ -62,7 +66,7 @@ module vHubA_to_OnPrem 'modules/AzureResources/VWANToVNGConnection.bicep' = {
     virtualHub_Name: virtualHubA_and_Contents.outputs.virtualHub_Name
     virtualHub_RouteTable_Default_ResourceID: virtualHubA_and_Contents.outputs.virtualHub_RouteTable_Default_ResourceID
     virtualWAN_ID: virtualHubA_and_Contents.outputs.virtualWAN_ID
-    virtualWAN_VPNGateway_Name: virtualHubA_and_Contents.outputs.virtualWAN_ID
+    virtualWAN_VPNGateway_Name: virtualHubA_and_Contents.outputs.virtualWAN_VPNGateway_Name
     vpn_SharedKey: vpn_SharedKey
   }
 }
@@ -78,11 +82,12 @@ module virtualHubB_and_Contents 'modules/AzureResources/VirtualHub_and_Contents.
     virtualHub_UniquePrefix: 'B'
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
+    virtualMachine_Size: virtualMachine_Size
     virtualWAN_ID: virtualWAN.outputs.virtualWAN_ID
   }
 }
 
-module vHubB_to_OnPrem 'modules/AzureResources/VWANToVNGConnection.bicep' = {
+module vHubB_to_OnPrem 'modules/AzureResources/VWANToVNGConnection.bicep' = if (multiRegion) {
   name: 'vhubB_to_OnPrem'
   params: {
     destinationVPN_ASN: OnPremResources.outputs.virtualNetworkGateway_ASN
@@ -90,10 +95,14 @@ module vHubB_to_OnPrem 'modules/AzureResources/VWANToVNGConnection.bicep' = {
     destinationVPN_Name: OnPremResources.outputs.virtualNetworkGateway_Name
     destinationVPN_PublicAddress: OnPremResources.outputs.virtualNetworkGateway_PublicIPAddress
     location: branchLocation
+    #disable-next-line BCP318
     virtualHub_Name: virtualHubB_and_Contents.outputs.virtualHub_Name
+    #disable-next-line BCP318
     virtualHub_RouteTable_Default_ResourceID: virtualHubB_and_Contents.outputs.virtualHub_RouteTable_Default_ResourceID
+    #disable-next-line BCP318
     virtualWAN_ID: virtualHubB_and_Contents.outputs.virtualWAN_ID
-    virtualWAN_VPNGateway_Name: virtualHubB_and_Contents.outputs.virtualWAN_ID
+    #disable-next-line BCP318
+    virtualWAN_VPNGateway_Name: virtualHubB_and_Contents.outputs.virtualWAN_VPNGateway_Name
     vpn_SharedKey: vpn_SharedKey
   }
 }
@@ -126,9 +135,13 @@ module OnPrem_to_VHubA 'modules/OnPremResources/VNGToVWANConnection.bicep' = {
 module OnPrem_to_VHubB 'modules/OnPremResources/VNGToVWANConnection.bicep' = if (multiRegion) {
   name: 'OnPrem_to_VHubB'
   params: {
+    #disable-next-line BCP318
     destinationVPN_ASN: virtualHubB_and_Contents.outputs.virtualHub_VPNGateway_ASN
+    #disable-next-line BCP318
     destinationVPN_BGPAddress: virtualHubB_and_Contents.outputs.virtualHub_VPNGateway_BGPAddresses
+    #disable-next-line BCP318
     destinationVPN_Name: virtualHubB_and_Contents.outputs.virtualHub_VPNGateway_Name_Array
+    #disable-next-line BCP318
     destinationVPN_PublicAddress: virtualHubB_and_Contents.outputs.virtualHub_VPNGateway_PublicIPAddresses
     location: onPremLocation
     source_VirtualNetworkGateway_ResourceID: OnPremResources.outputs.virtualNetworkGateway_ResourceID

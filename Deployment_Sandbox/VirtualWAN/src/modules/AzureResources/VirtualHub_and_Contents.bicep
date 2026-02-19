@@ -17,12 +17,15 @@ param virtualMachine_AdminPassword string
 
 param virtualMachine_AdminUsername string
 
+@description('Size of the Virtual Machines')
+param virtualMachine_Size string = 'Standard_B2ms'
+
 param usingAzureFirewall bool
 
 param usingVPN bool
 
 module virtualHub '../../../../../modules/Microsoft.Network/VirtualHub.bicep' = {
-  name: 'vhub'
+  name: 'vhub${virtualHub_UniquePrefix}'
   params: {
     location: location
     virtualHub_AddressPrefix: virtualNetwork_VirtualHub_AddressPrefix
@@ -35,7 +38,7 @@ module virtualHub '../../../../../modules/Microsoft.Network/VirtualHub.bicep' = 
 }
 
 module virtualNetwork_Spoke '../../../../../modules/Microsoft.Network/VirtualNetwork.bicep' = [ for i in range(0, length(virtualNetwork_AddressPrefixs)): {
-  name: 'spokeVNet${i}'
+  name: 'vhub${virtualHub_UniquePrefix}_spokeVNet${i}'
   params: {
     virtualNetwork_AddressPrefix: virtualNetwork_AddressPrefixs[i]
     location: location
@@ -44,7 +47,7 @@ module virtualNetwork_Spoke '../../../../../modules/Microsoft.Network/VirtualNet
 } ]
 
 module virtualHubToVirtualNetworkSpokeAConn '../../../../../modules/Microsoft.Network/hubVirtualNetworkConnections.bicep' = [ for i in range(0, length(virtualNetwork_AddressPrefixs)): {
-  name: 'vhubA_to_spoke${i}_Conn'
+  name: 'vhub${virtualHub_UniquePrefix}_to_spoke${i}_Conn'
   params: {
     virtualHub_Name: virtualHub.outputs.virtualHub_Name
     virtualHub_RouteTable_Default_ID: virtualHub.outputs.virtualHub_RouteTable_Default_ID
@@ -54,7 +57,7 @@ module virtualHubToVirtualNetworkSpokeAConn '../../../../../modules/Microsoft.Ne
 } ]
 
 module virtualMachine_Windows '../../../../../modules/Microsoft.Compute/VirtualMachine/Windows/Server20XX_Default.bicep' = [ for i in range(0, length(virtualNetwork_AddressPrefixs)): {
-  name: 'windowsVM${i}'
+  name: 'vhub${virtualHub_UniquePrefix}_windowsVM${i}'
   params: {
     acceleratedNetworking: false
     location: location
@@ -62,12 +65,14 @@ module virtualMachine_Windows '../../../../../modules/Microsoft.Compute/VirtualM
     virtualMachine_AdminPassword: virtualMachine_AdminPassword
     virtualMachine_AdminUsername: virtualMachine_AdminUsername
     virtualMachine_Name: 'winVM${virtualHub.outputs.virtualHub_Name}${i}'
-    vmSize: 'Standard_B2ms'
-    windowsServerVersion: '2022-datacenter-g2'
-    scriptFileUri: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2022_ConfigScript_General.ps1'
-    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2022_ConfigScript_General.ps1 -Username ${virtualMachine_AdminUsername}'
-
+    vmSize: virtualMachine_Size
+    windowsServerVersion: '2025-datacenter-azure-edition'
+    scriptFileUri: 'https://raw.githubusercontent.com/jimgodden/Azure_Networking_Labs/main/scripts/WinServ2025_ConfigScript.ps1'
+    commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File WinServ2025_ConfigScript.ps1 -Type WebServer -location ${location}'
   }
+  dependsOn: [
+    virtualNetwork_Spoke
+  ]
 } ]
 
 output virtualWAN_ID string = virtualWAN_ID

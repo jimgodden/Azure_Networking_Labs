@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.39.26.7824",
-      "templateHash": "13301681148141225607"
+      "version": "0.40.2.10011",
+      "templateHash": "11978340808508076813"
     }
   },
   "parameters": {
@@ -80,8 +80,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.39.26.7824",
-              "templateHash": "8111356163640813777"
+              "version": "0.40.2.10011",
+              "templateHash": "4127313071105157986"
             }
           },
           "parameters": {
@@ -172,8 +172,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.39.26.7824",
-              "templateHash": "10160553923818554165"
+              "version": "0.40.2.10011",
+              "templateHash": "3368002976268390972"
             }
           },
           "parameters": {
@@ -244,8 +244,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.39.26.7824",
-                      "templateHash": "2129125839659971736"
+                      "version": "0.40.2.10011",
+                      "templateHash": "10335996375386286686"
                     }
                   },
                   "parameters": {
@@ -480,8 +480,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.39.26.7824",
-                      "templateHash": "2180958851352607099"
+                      "version": "0.40.2.10011",
+                      "templateHash": "9214245335486836939"
                     }
                   },
                   "parameters": {
@@ -986,8 +986,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.39.26.7824",
-                      "templateHash": "3783031193083253503"
+                      "version": "0.40.2.10011",
+                      "templateHash": "4733825366710054063"
                     }
                   },
                   "parameters": {
@@ -1111,8 +1111,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.39.26.7824",
-                      "templateHash": "2471291354129898077"
+                      "version": "0.40.2.10011",
+                      "templateHash": "17031891063459356783"
                     }
                   },
                   "parameters": {
@@ -1543,7 +1543,7 @@
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'vHubA'), '2025-04-01').outputs.virtualWAN_ID.value]"
           },
           "virtualWAN_VPNGateway_Name": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'vHubA'), '2025-04-01').outputs.virtualWAN_ID.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'vHubA'), '2025-04-01').outputs.virtualWAN_VPNGateway_Name.value]"
           },
           "vpn_SharedKey": {
             "value": "[parameters('vpn_SharedKey')]"
@@ -1555,8 +1555,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.39.26.7824",
-              "templateHash": "11128075496486052165"
+              "version": "0.40.2.10011",
+              "templateHash": "16119632328510883188"
             }
           },
           "parameters": {
@@ -1778,8 +1778,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.39.26.7824",
-              "templateHash": "10160553923818554165"
+              "version": "0.40.2.10011",
+              "templateHash": "3368002976268390972"
             }
           },
           "parameters": {
@@ -1850,8 +1850,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.39.26.7824",
-                      "templateHash": "2129125839659971736"
+                      "version": "0.40.2.10011",
+                      "templateHash": "10335996375386286686"
                     }
                   },
                   "parameters": {
@@ -2086,8 +2086,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.39.26.7824",
-                      "templateHash": "2180958851352607099"
+                      "version": "0.40.2.10011",
+                      "templateHash": "9214245335486836939"
                     }
                   },
                   "parameters": {
@@ -2592,8 +2592,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.39.26.7824",
-                      "templateHash": "3783031193083253503"
+                      "version": "0.40.2.10011",
+                      "templateHash": "4733825366710054063"
                     }
                   },
                   "parameters": {
@@ -2717,8 +2717,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.39.26.7824",
-                      "templateHash": "2471291354129898077"
+                      "version": "0.40.2.10011",
+                      "templateHash": "17031891063459356783"
                     }
                   },
                   "parameters": {
@@ -3115,6 +3115,7 @@
       ]
     },
     {
+      "condition": "[parameters('multiRegion')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2025-04-01",
       "name": "vhubB_to_OnPrem",
@@ -3149,7 +3150,7 @@
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'vHubB'), '2025-04-01').outputs.virtualWAN_ID.value]"
           },
           "virtualWAN_VPNGateway_Name": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'vHubB'), '2025-04-01').outputs.virtualWAN_ID.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'vHubB'), '2025-04-01').outputs.virtualWAN_VPNGateway_Name.value]"
           },
           "vpn_SharedKey": {
             "value": "[parameters('vpn_SharedKey')]"
@@ -3161,8 +3162,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.39.26.7824",
-              "templateHash": "11128075496486052165"
+              "version": "0.40.2.10011",
+              "templateHash": "16119632328510883188"
             }
           },
           "parameters": {
@@ -3371,8 +3372,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.39.26.7824",
-              "templateHash": "5989843799624341465"
+              "version": "0.40.2.10011",
+              "templateHash": "779931707682847432"
             }
           },
           "parameters": {
@@ -3446,8 +3447,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.39.26.7824",
-                      "templateHash": "2180958851352607099"
+                      "version": "0.40.2.10011",
+                      "templateHash": "9214245335486836939"
                     }
                   },
                   "parameters": {
@@ -3955,8 +3956,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.39.26.7824",
-                      "templateHash": "9524441584603715517"
+                      "version": "0.40.2.10011",
+                      "templateHash": "3865001816348011580"
                     }
                   },
                   "parameters": {
@@ -4181,8 +4182,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.39.26.7824",
-                      "templateHash": "160053513591352657"
+                      "version": "0.40.2.10011",
+                      "templateHash": "1888988948992093219"
                     }
                   },
                   "parameters": {
@@ -4398,8 +4399,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.39.26.7824",
-                      "templateHash": "10032347255385532616"
+                      "version": "0.40.2.10011",
+                      "templateHash": "6672605482915069765"
                     }
                   },
                   "parameters": {
@@ -4575,8 +4576,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.39.26.7824",
-                      "templateHash": "2471291354129898077"
+                      "version": "0.40.2.10011",
+                      "templateHash": "17031891063459356783"
                     }
                   },
                   "parameters": {
@@ -4994,8 +4995,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.39.26.7824",
-              "templateHash": "16879859163471377950"
+              "version": "0.40.2.10011",
+              "templateHash": "12924759655307406784"
             }
           },
           "parameters": {
@@ -5151,8 +5152,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.39.26.7824",
-              "templateHash": "16879859163471377950"
+              "version": "0.40.2.10011",
+              "templateHash": "12924759655307406784"
             }
           },
           "parameters": {

@@ -35,7 +35,7 @@ resource bastionVNET 'Microsoft.Network/virtualNetworks@2024-05-01' = {
 }
 
 module bastion 'Bastion.bicep' = {
-  name: bastion_name
+  name: 'bastionInstance'
   params: {
     location: location
     bastion_SubnetID: bastionVNET.properties.subnets[0].id

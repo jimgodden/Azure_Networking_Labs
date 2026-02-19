@@ -34,10 +34,9 @@ Set-Content -Path "$ProjectDirectory\deployment.ps1" -Value ".\Tools\deployment.
 # Creates a placeholder file for a diagram made with the drawio VS Code extension
 New-Item -ItemType File -Path $ProjectDirectory -Name "diagram.drawio.png"
 
-# Creates a file that holds an integer that increments each time the project is deployed.  
-# This ensures that the RG name is unique on each deployment
-New-Item -ItemType File -Path $ProjectDirectory -Name "iteration.txt"
-Set-Content -Path "$ProjectDirectory\iteration.txt" -Value "1"
+# Creates a JSON file that tracks iteration count and last deployment time
+$deploymentInfo = @{ iteration = 1; lastDeploymentTimeMinutes = $null }
+$deploymentInfo | ConvertTo-Json | Set-Content -Path "$ProjectDirectory\deployment.json"
 
 # Adds a JSON object to a file that maintains a list of all projects
 .\Tools\Update-BicepProjectList.ps1 -ProjectName "${ProjectType}-${ProjectName}" -Operation "Add"

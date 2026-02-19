@@ -121,9 +121,13 @@ output vpnGateway_Name string = vpnGateway.name
 
 // values for destination Local Network Gateway stored as Arrays.  
 // Each member of an array corresponds to one of the VPN Gateway instances.
+#disable-next-line BCP318
 var vpnGateway_Name_Array = [vpnGateway.name, vpnGateway.name]
+#disable-next-line BCP318 BCP318
 var vpnGateway_PublicIPAddresses = [vpnGateway.properties.bgpSettings.bgpPeeringAddresses[0].tunnelIpAddresses[0],vpnGateway.properties.bgpSettings.bgpPeeringAddresses[1].tunnelIpAddresses[0]]
+#disable-next-line BCP318 BCP318
 var vpnGateway_BGPAddresses = [vpnGateway.properties.bgpSettings.bgpPeeringAddresses[0].defaultBgpIpAddresses[0],vpnGateway.properties.bgpSettings.bgpPeeringAddresses[1].defaultBgpIpAddresses[0]]
+#disable-next-line BCP318 BCP318
 var vpnGateway_ASN = [vpnGateway.properties.bgpSettings.asn, vpnGateway.properties.bgpSettings.asn]
 
 output vpnGateway_Name_Array array = usingVPN ? vpnGateway_Name_Array : []

@@ -1,4 +1,4 @@
-**/iteration.txt
+**/deployment.json
 *.bicepparam
 build.ps1
 /Tools/OrganizeParamFiles.ps1
