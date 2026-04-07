@@ -85,5 +85,8 @@
   },
   {
     "Name": "Sandbox-ExpressRoute-GlobalReach"
+  },
+  {
+    "Name": "Sandbox-AzFW_ConnectionMonitor"
   }
 ]
