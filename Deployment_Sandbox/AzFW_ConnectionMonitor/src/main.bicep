@@ -127,6 +127,9 @@ resource azureFirewall 'Microsoft.Network/azureFirewalls@2024-05-01' = {
 resource azureFirewallPolicy_NetworkRules 'Microsoft.Network/firewallPolicies/ruleCollectionGroups@2024-05-01' = {
   parent: azureFirewallPolicy
   name: 'DefaultNetworkRuleCollectionGroup'
+  dependsOn: [
+    azureFirewall
+  ]
   properties: {
     priority: 200
     ruleCollections: [

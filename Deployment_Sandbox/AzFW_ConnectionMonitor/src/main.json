@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.39.26.7824",
-      "templateHash": "11029916772905911682"
+      "templateHash": "15707913608745272473"
     }
   },
   "parameters": {
@@ -164,6 +164,7 @@
         ]
       },
       "dependsOn": [
+        "[resourceId('Microsoft.Network/azureFirewalls', 'AzFW')]",
         "[resourceId('Microsoft.Network/firewallPolicies', 'AzFW_Policy')]"
       ]
     },
